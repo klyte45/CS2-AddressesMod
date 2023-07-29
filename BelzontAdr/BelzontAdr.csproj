@@ -6,7 +6,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{38911405-6695-4DE5-9B63-857718EC55C0}</ProjectGuid>
+    <ProjectGuid>{38911405-6695-0000-9B63-857718EC55C0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BelzontAdr</RootNamespace>
