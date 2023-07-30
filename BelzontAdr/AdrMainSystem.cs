@@ -3,6 +3,7 @@ using Belzont.Serialization;
 using Belzont.Utils;
 using Colossal;
 using Colossal.Serialization.Entities;
+using Game.Rendering;
 using System;
 using System.Linq;
 using Unity.Entities;
@@ -32,6 +33,12 @@ namespace BelzontAdr
             eventCaller("main.setCitizenFemaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenFemaleNameOverridesStr = x; NotifyChanges(); });
             eventCaller("main.setCitizenSurnameOverridesStr", (string x) => { CurrentCitySettings.CitizenSurnameOverridesStr = x; NotifyChanges(); });
             eventCaller("main.setCitizenDogOverridesStr", (string x) => { CurrentCitySettings.CitizenDogOverridesStr = x; NotifyChanges(); });
+            eventCaller("main.setDefaultRoadNameOverridesStr", (string x) =>
+            {
+                CurrentCitySettings.DefaultRoadNameOverridesStr = x;
+                typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
+                NotifyChanges();
+            });
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -67,6 +74,10 @@ namespace BelzontAdr
 
         internal string DoNameFormat(string name, string surname) => CurrentCitySettings.SurnameAtFirst ? $"{surname} {name}" : $"{name} {surname}";
         internal bool TryGetDogsList(out AdrNameFile listForDogs) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.CitizenDogOverrides, out listForDogs);
+        internal bool TryGetRoadNamesList(Entity district, out AdrNameFile roadsNamesList)
+        {
+            return AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.DefaultRoadNameOverrides, out roadsNamesList);
+        }
         #endregion
 
 
@@ -106,6 +117,7 @@ namespace BelzontAdr
             CurrentCitySettings = new();
             return default;
         }
+
 
 
 

@@ -6,11 +6,11 @@ namespace BelzontAdr
     [XmlRoot("AdrCitywideSettings")]
     public class AdrCitywideSettings
     {
-        internal Guid CitizenMaleNameOverrides { get; set; }
-        internal Guid CitizenFemaleNameOverrides { get; set; }
-        internal Guid CitizenSurnameOverrides { get; set; }
-        internal Guid CitizenDogOverrides { get; set; }
-        internal Guid DefaultRoadNameOverrides { get; set; }
+        internal Guid CitizenMaleNameOverrides { get; private set; }
+        internal Guid CitizenFemaleNameOverrides { get; private set; }
+        internal Guid CitizenSurnameOverrides { get; private set; }
+        internal Guid CitizenDogOverrides { get; private set; }
+        internal Guid DefaultRoadNameOverrides { get; private set; }
         [XmlAttribute("SurnameAtFirst")]
         public bool SurnameAtFirst { get; set; }
 
@@ -22,7 +22,7 @@ namespace BelzontAdr
         public string CitizenSurnameOverridesStr { get => CitizenSurnameOverrides.ToString(); set => CitizenSurnameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
         [XmlAttribute("CitizenDogOverrides")]
         public string CitizenDogOverridesStr { get => CitizenDogOverrides.ToString(); set => CitizenDogOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
-        //[XmlAttribute("DefaultRoadNameOverrides")]
-        //public string DefaultRoadNameOverridesStr { get => DefaultRoadNameOverrides.ToString(); set => DefaultRoadNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
+        [XmlAttribute("DefaultRoadNameOverrides")]
+        public string DefaultRoadNameOverridesStr { get => DefaultRoadNameOverrides.ToString(); set => DefaultRoadNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
     }
 }

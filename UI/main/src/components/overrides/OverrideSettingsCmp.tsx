@@ -85,6 +85,16 @@ export class OverrideSettingsCmp extends Component<{}, {
           defaultValue={defaultSetting}
         />
       </Cs2FormLine>
+      <Cs2FormLine title={translate("overrideSettings.roadsFile")}>
+        <Cs2Select
+          options={Object.values(this.state.simpleFiles)}
+          getOptionLabel={(x: SimpleNameEntry) => x?.Name}
+          getOptionValue={(x: SimpleNameEntry) => x?.IdString}
+          onChange={(x) => NameFileManagementService.setDefaultRoadNameOverridesStr(x.IdString)}
+          value={this.state.indexedSimpleFiles[this.state.currentSettings.DefaultRoadNameOverridesStr]}
+          defaultValue={defaultSetting}
+        />
+      </Cs2FormLine>
     </DefaultPanelScreen>;
 
   }

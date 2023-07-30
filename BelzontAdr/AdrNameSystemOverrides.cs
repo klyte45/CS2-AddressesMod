@@ -1,13 +1,16 @@
 ﻿using Belzont.Utils;
 using Colossal.Entities;
 using Game;
+using Game.Buildings;
 using Game.Citizens;
 using Game.Common;
+using Game.Companies;
 using Game.Net;
 using Game.Prefabs;
 using Game.SceneFlow;
 using Game.UI;
 using Game.UI.Localization;
+using Game.Zones;
 using Unity.Entities;
 using static Game.UI.NameSystem;
 
@@ -27,11 +30,77 @@ namespace BelzontAdr
 
             var GetName = typeof(NameSystem).GetMethod("GetName", RedirectorUtils.allFlags);
             AddRedirect(GetName, GetType().GetMethod("GetName", RedirectorUtils.allFlags));
+
+            var GetRenderedLabelName = typeof(NameSystem).GetMethod("GetRenderedLabelName", RedirectorUtils.allFlags);
+            AddRedirect(GetRenderedLabelName, GetType().GetMethod("GetRenderedLabelName", RedirectorUtils.allFlags));
+
+            var GetSpawnableBuildingName = typeof(NameSystem).GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags);
+            AddRedirect(GetSpawnableBuildingName, GetType().GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags));
         }
         private static PrefabSystem prefabSystem;
         private static EntityManager entityManager;
         private static EndFrameBarrier m_EndFrameBarrier;
         private static AdrMainSystem adrMainSystem;
+
+
+        public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
+        {
+            if (!__instance.TryGetCustomName(entity, out __result) && GetAggregateName(out __result, entity))
+            {
+                string id = GetId(entity, true);
+                __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
+            }
+            return false;
+        }
+
+        private static bool GetSpawnableBuildingName(ref Name __result, ref Entity building, ref Entity zone, ref bool omitBrand)
+        {
+            BuildingUtils.GetAddress(entityManager, building, out Entity entity, out int num);
+            if (GetAggregateName(out var id, entity))
+            {
+                return true;
+            }
+            ZonePrefab prefab = prefabSystem.GetPrefab<ZonePrefab>(zone);
+            if (!omitBrand && prefab.m_AreaType != AreaType.Residential)
+            {
+                string brandId = GetBrandId(building);
+                if (brandId != null)
+                {
+                    __result = NameSystem.Name.FormattedName("Assets.NAMED_ADDRESS_NAME_FORMAT", new string[]
+                    {
+                        "NAME",
+                        brandId,
+                        "ROAD",
+                        id,
+                        "NUMBER",
+                        num.ToString()
+                    });
+                    return false;
+                }
+            }
+            __result = NameSystem.Name.FormattedName("Assets.ADDRESS_NAME_FORMAT", new string[]
+            {
+                "ROAD",
+                id,
+                "NUMBER",
+                num.ToString()
+            });
+            return false;
+        }
+
+        private static string GetBrandId(Entity building)
+        {
+            DynamicBuffer<Renter> buffer = entityManager.GetBuffer<Renter>(building, true);
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                CompanyData companyData;
+                if (entityManager.TryGetComponent(buffer[i].m_Renter, out companyData))
+                {
+                    return GetId(companyData.m_Brand, true);
+                }
+            }
+            return null;
+        }
 
         private static bool GetName(ref Name __result, ref NameSystem __instance, ref Entity entity, ref bool omitBrand)
         {
@@ -62,20 +131,32 @@ namespace BelzontAdr
                         return true;
                 }
             }
-            //if (entityManager.HasComponent<Aggregate>(entity))
-            //{
-            //    entityManager.TryGetBuffer<AggregateElement>(entity, true, out var elements);
-            //    LogUtils.DoLog("HAS AGGREGATE!");
-            //}
-            //if (entityManager.HasComponent<Aggregated>(entity))
-            //{
-            //    //entityManager.TryGetBuffer<AggregateElement>(entity, true, out var elements);
-            //    LogUtils.DoLog("HAS AGGREGATED!");
-            //}
+            if (entityManager.HasComponent<Aggregate>(entity))
+            {
+                var shallRunOrignal = GetAggregateName(out var genName, entity);
+                if (!shallRunOrignal)
+                {
+                    __result = Name.CustomName(genName);
+                }
+                return shallRunOrignal;
+            }
 
             return true;
         }
 
+        private static bool GetAggregateName(out string name, Entity entity)
+        {
+            name = null;
+            //entityManager.TryGetBuffer<AggregateElement>(entity, true, out var elements);
+            //var refRoad = elements[0].m_Edge;
+            //var refDistrict = entityManager.TryGetComponent<BorderDistrict>(refRoad, out var refDistrictBorders) ? refDistrictBorders.m_Left == default ? refDistrictBorders.m_Right : refDistrictBorders.m_Left : default;
+            //entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab);
+            //entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData)
+
+            if (!adrMainSystem.TryGetRoadNamesList(default, out var roadsNamesList)) return true;
+            name = GetFromList(roadsNamesList, entity);
+            return false;
+        }
 
         private static bool GetCitizenName(ref Name __result, ref Entity entity, ref Entity prefab)
         {
