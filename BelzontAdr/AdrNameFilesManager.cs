@@ -32,7 +32,7 @@ namespace BelzontAdr
             result.Clear();
             foreach (string filename in Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories))
             {
-                var name = filename.Replace(SimpleNameFolder, "")[1..];
+                var name = filename.Replace(SimpleNameFolder, "")[1..^4].Replace("\\", "/");
                 var fileContents = File.ReadAllLines(filename, Encoding.UTF8);
                 AdrNameFile file = new(name, fileContents.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray());
                 result[file.Id] = file;

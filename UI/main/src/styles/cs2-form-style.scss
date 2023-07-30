@@ -32,16 +32,21 @@
 }
 
 
-.cs2-fieldStyle {
+.cs2-fieldStyle,
+.cs2-fieldStyle-compact {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 8rem 16rem;
-    min-height: 64rem;
+    padding: 1rem 4rem;
 
     .react-select-container {
         width: 50%;
     }
+}
+
+.cs2-fieldStyle {
+    padding: 8rem 16rem;
+    min-height: 64rem;
 }
 
 .cs2-fieldStyle2 {

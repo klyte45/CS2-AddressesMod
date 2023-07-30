@@ -1,0 +1,27 @@
+.wordsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    padding-top: 4px;
+
+    .nameToken {
+        border-radius: 999px;
+        padding-left: 10px;
+        padding-right: 10px;
+        white-space: nowrap;
+        background-color: var(--selectedColorDark);
+        margin: 5px 4px;
+        position: relative;
+
+        .quantity {
+            position: absolute;
+            font-size: 15px;
+            top: -10px;
+            right: -10px;
+            border-radius: 999px;
+            background-color: var(--accentColorDark);
+            height: 20.000000px;
+            width: 20.000000px;
+            text-align: center;
+        }
+    }
+}
