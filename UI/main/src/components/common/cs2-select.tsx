@@ -28,5 +28,6 @@ export default <Option, Group extends GroupBase<Option>>(props: {
             onChange={props.onChange}
             value={props.value}
             unstyled={true}
+            filterOption={(x, input) => (x.label ?? "").toLowerCase().includes(input.toLowerCase())}
         />
     </>

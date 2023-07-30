@@ -1,11 +1,11 @@
 ///<reference path="euis.d.ts" />
-import { Cs2FormLine } from "#components/common/Cs2FormLine";
 import { NameFileViewerCmp } from "#components/fileManagement/NameFileViewerCmp";
-import "#styles/main.scss"
-import "#styles/react-tabs.scss"
+import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
+import "#styles/main.scss";
+import "#styles/react-tabs.scss";
 import translate from "#utility/translate";
 import { Component } from "react";
-import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
+import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 
 
 export default class Root extends Component<{}, {}> {
@@ -22,9 +22,13 @@ export default class Root extends Component<{}, {}> {
       <Tabs defaultIndex={2}>
         <TabList>
           <Tab>{translate("fileViewer.title")}</Tab>
+          <Tab>{translate("overrideSettings.title")}</Tab>
         </TabList>
         <TabPanel>
           <NameFileViewerCmp />
+        </TabPanel>
+        <TabPanel>
+          <OverrideSettingsCmp />
         </TabPanel>
       </Tabs>
     </>;
