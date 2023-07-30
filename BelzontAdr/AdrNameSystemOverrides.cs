@@ -3,6 +3,7 @@ using Colossal.Entities;
 using Game;
 using Game.Citizens;
 using Game.Common;
+using Game.Net;
 using Game.Prefabs;
 using Game.SceneFlow;
 using Game.UI;
@@ -22,13 +23,58 @@ namespace BelzontAdr
             m_EndFrameBarrier = world.GetOrCreateSystemManaged<EndFrameBarrier>();
 
             var GetCitizenName = typeof(NameSystem).GetMethod("GetCitizenName", RedirectorUtils.allFlags);
-
             AddRedirect(GetCitizenName, GetType().GetMethod("GetCitizenName", RedirectorUtils.allFlags));
+
+            var GetName = typeof(NameSystem).GetMethod("GetName", RedirectorUtils.allFlags);
+            AddRedirect(GetName, GetType().GetMethod("GetName", RedirectorUtils.allFlags));
         }
         private static PrefabSystem prefabSystem;
         private static EntityManager entityManager;
         private static EndFrameBarrier m_EndFrameBarrier;
         private static AdrMainSystem adrMainSystem;
+
+        private static bool GetName(ref Name __result, ref NameSystem __instance, ref Entity entity, ref bool omitBrand)
+        {
+            if (__instance.TryGetCustomName(entity, out string name))
+            {
+                __result = NameSystem.Name.CustomName(name);
+                return false;
+            }
+            if (entityManager.HasComponent<Household>(entity))
+            {
+                if (!adrMainSystem.TryGetSurnameList(out var surnames)) return true;
+
+                __result = NameSystem.Name.FormattedName("K45::ADR.main[localesFmt.household]", "surname", GetFromList(surnames, entity));
+                return false;
+            }
+
+            if (entityManager.HasComponent<HouseholdPet>(entity))
+            {
+                entityManager.TryGetComponent<PrefabRef>(entity, out var petPrefabRef);
+                entityManager.TryGetComponent<HouseholdPetData>(petPrefabRef, out var petData);
+                switch (petData.m_Type)
+                {
+                    case PetType.Dog:
+                        if (!adrMainSystem.TryGetDogsList(out var dogs)) return true;
+                        __result = NameSystem.Name.CustomName(GetFromList(dogs, entity));
+                        return false;
+                    default:
+                        return true;
+                }
+            }
+            //if (entityManager.HasComponent<Aggregate>(entity))
+            //{
+            //    entityManager.TryGetBuffer<AggregateElement>(entity, true, out var elements);
+            //    LogUtils.DoLog("HAS AGGREGATE!");
+            //}
+            //if (entityManager.HasComponent<Aggregated>(entity))
+            //{
+            //    //entityManager.TryGetBuffer<AggregateElement>(entity, true, out var elements);
+            //    LogUtils.DoLog("HAS AGGREGATED!");
+            //}
+
+            return true;
+        }
 
 
         private static bool GetCitizenName(ref Name __result, ref Entity entity, ref Entity prefab)
@@ -43,39 +89,39 @@ namespace BelzontAdr
             string name, surname;
             if (hasListForNames)
             {
-                if (!entityManager.TryGetComponent(entity, out ADRLocalizationData adrLoc))
-                {
-                    adrLoc.m_seedReference = (ushort)entity.Index;
-                    EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
-                    entityCommandBuffer.AddComponent(entity, adrLoc);
-                }
-
-                name = listForNames.Values[adrLoc.m_seedReference % listForNames.Values.Length];
+                name = GetFromList(listForNames, entity);
             }
             else
             {
                 GameManager.instance.localizationManager.activeDictionary.TryGetValue(GetId(entity, true), out name);
             }
             HouseholdMember householdMemberData = entityManager.GetComponentData<HouseholdMember>(entity);
-            if (hasListForSurnames)
-            {
-
-                if (!entityManager.TryGetComponent(householdMemberData.m_Household, out ADRLocalizationData adrLoc))
-                {
-                    adrLoc.m_seedReference = (ushort)householdMemberData.m_Household.Index;
-                    EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
-                    entityCommandBuffer.AddComponent(householdMemberData.m_Household, adrLoc);
-                }
-
-                surname = listForSurnames.Values[adrLoc.m_seedReference % listForSurnames.Values.Length];
-            }
-            else
-            {
-                surname = GameManager.instance.localizationManager.activeDictionary.TryGetValue(GetGenderedLastNameId(householdMemberData.m_Household, male), out surname) ? surname : "???";
-            }
+            surname = hasListForSurnames
+                ? GetFromList(listForSurnames, householdMemberData.m_Household)
+                : GameManager.instance.localizationManager.activeDictionary.TryGetValue(GetGenderedLastNameId(householdMemberData.m_Household, male), out surname) ? surname : "???";
             __result = Name.CustomName(adrMainSystem.DoNameFormat(name, surname));
             return false;
         }
+
+        private static ADRLocalizationData GetAdrLocData(Entity entity)
+        {
+            if (!entityManager.TryGetComponent(entity, out ADRLocalizationData adrLoc))
+            {
+                adrLoc.m_seedReference = (ushort)entity.Index;
+                EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
+                entityCommandBuffer.AddComponent(entity, adrLoc);
+            }
+
+            return adrLoc;
+        }
+
+        private static string GetFromList(AdrNameFile namesFile, Entity entityRef)
+        {
+            var adrLoc = GetAdrLocData(entityRef);
+            string surname = namesFile.Values[adrLoc.m_seedReference % namesFile.Values.Length];
+            return surname;
+        }
+
         private static string GetGenderedLastNameId(Entity household, bool male)
         {
             if (household == Entity.Null)

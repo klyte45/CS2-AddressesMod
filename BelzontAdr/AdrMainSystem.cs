@@ -31,6 +31,7 @@ namespace BelzontAdr
             eventCaller("main.setCitizenMaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenMaleNameOverridesStr = x; NotifyChanges(); });
             eventCaller("main.setCitizenFemaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenFemaleNameOverridesStr = x; NotifyChanges(); });
             eventCaller("main.setCitizenSurnameOverridesStr", (string x) => { CurrentCitySettings.CitizenSurnameOverridesStr = x; NotifyChanges(); });
+            eventCaller("main.setCitizenDogOverridesStr", (string x) => { CurrentCitySettings.CitizenDogOverridesStr = x; NotifyChanges(); });
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -59,12 +60,13 @@ namespace BelzontAdr
         {
             m_eventCaller?.Invoke("main.onCurrentCitywideSettingsLoaded", new object[0]);
         }
-        #region Citizen
+        #region Citizen & Pet
         internal bool TryGetNameList(bool male, out AdrNameFile names) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(male ? CurrentCitySettings.CitizenMaleNameOverrides : CurrentCitySettings.CitizenFemaleNameOverrides, out names);
 
         internal bool TryGetSurnameList(out AdrNameFile listForSurnames) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.CitizenSurnameOverrides, out listForSurnames);
 
         internal string DoNameFormat(string name, string surname) => CurrentCitySettings.SurnameAtFirst ? $"{surname} {name}" : $"{name} {surname}";
+        internal bool TryGetDogsList(out AdrNameFile listForDogs) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.CitizenDogOverrides, out listForDogs);
         #endregion
 
 

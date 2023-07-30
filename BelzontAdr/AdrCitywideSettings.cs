@@ -9,14 +9,20 @@ namespace BelzontAdr
         internal Guid CitizenMaleNameOverrides { get; set; }
         internal Guid CitizenFemaleNameOverrides { get; set; }
         internal Guid CitizenSurnameOverrides { get; set; }
+        internal Guid CitizenDogOverrides { get; set; }
+        internal Guid DefaultRoadNameOverrides { get; set; }
         [XmlAttribute("SurnameAtFirst")]
         public bool SurnameAtFirst { get; set; }
 
         [XmlAttribute("CitizenMaleNameOverrides")]
-        public string CitizenMaleNameOverridesStr { get => CitizenMaleNameOverrides.ToString(); set => CitizenMaleNameOverrides = new Guid(value); }
+        public string CitizenMaleNameOverridesStr { get => CitizenMaleNameOverrides.ToString(); set => CitizenMaleNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
         [XmlAttribute("CitizenFemaleNameOverrides")]
-        public string CitizenFemaleNameOverridesStr { get => CitizenFemaleNameOverrides.ToString(); set => CitizenFemaleNameOverrides = new Guid(value); }
+        public string CitizenFemaleNameOverridesStr { get => CitizenFemaleNameOverrides.ToString(); set => CitizenFemaleNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
         [XmlAttribute("CitizenSurnameOverrides")]
-        public string CitizenSurnameOverridesStr { get => CitizenSurnameOverrides.ToString(); set => CitizenSurnameOverrides = new Guid(value); }
+        public string CitizenSurnameOverridesStr { get => CitizenSurnameOverrides.ToString(); set => CitizenSurnameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
+        [XmlAttribute("CitizenDogOverrides")]
+        public string CitizenDogOverridesStr { get => CitizenDogOverrides.ToString(); set => CitizenDogOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
+        //[XmlAttribute("DefaultRoadNameOverrides")]
+        //public string DefaultRoadNameOverridesStr { get => DefaultRoadNameOverrides.ToString(); set => DefaultRoadNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
     }
 }

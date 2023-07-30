@@ -8,6 +8,7 @@ export default <Option, Group extends GroupBase<Option>>(props: {
     onChange?: (newValue: Option, actionMeta: ActionMeta<Option>) => void
     getOptionLabel?: GetOptionLabel<Option>,
     getOptionValue?: GetOptionValue<Option>,
+    defaultValue?: Option
 }) => <>
         <Select
             options={props.options}
@@ -29,5 +30,6 @@ export default <Option, Group extends GroupBase<Option>>(props: {
             value={props.value}
             unstyled={true}
             filterOption={(x, input) => (x.label ?? "").toLowerCase().includes(input.toLowerCase())}
+            defaultValue={props.defaultValue}
         />
     </>

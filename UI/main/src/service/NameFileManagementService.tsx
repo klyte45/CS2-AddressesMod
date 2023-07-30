@@ -13,7 +13,8 @@ export type AdrCitywideSettings = {
     SurnameAtFirst: boolean,
     CitizenMaleNameOverridesStr: string,
     CitizenFemaleNameOverridesStr: string,
-    CitizenSurnameOverridesStr: string
+    CitizenSurnameOverridesStr: string,
+    CitizenDogOverridesStr: string
 }
 
 export class NameFileManagementService {
@@ -25,5 +26,6 @@ export class NameFileManagementService {
     static async setCitizenMaleNameOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setCitizenMaleNameOverridesStr", x); }
     static async setCitizenFemaleNameOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setCitizenFemaleNameOverridesStr", x); }
     static async setCitizenSurnameOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setCitizenSurnameOverridesStr", x); }
+    static async setCitizenDogOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setCitizenDogOverridesStr", x); }
     static async onCityDataReloaded(x: () => void) {  engine.on("k45::adr.main.onCurrentCitywideSettingsLoaded", x); }
 }
