@@ -20,6 +20,7 @@ namespace BelzontAdr
 
         public override void DoOnCreateWorld(UpdateSystem updateSystem)
         {
+            AdrNameFilesManager.Instance.ReloadNameFiles();
         }
 
         public override void OnDispose()
@@ -33,5 +34,6 @@ namespace BelzontAdr
         protected override IEnumerable<OptionsUISystem.Section> GenerateModOptionsSections() => new OptionsUISystem.Section[0];
 
         public override AdrModData CreateNewModData() => new();
+
     }
 }

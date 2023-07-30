@@ -1,4 +1,5 @@
 ///<reference path="euis.d.ts" />
+import "#styles/main.scss"
 
 export default function Root(props) {
   return <>
