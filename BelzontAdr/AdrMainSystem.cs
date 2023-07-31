@@ -33,13 +33,8 @@ namespace BelzontAdr
             eventCaller("main.setCitizenFemaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenFemaleNameOverridesStr = x; NotifyChanges(); });
             eventCaller("main.setCitizenSurnameOverridesStr", (string x) => { CurrentCitySettings.CitizenSurnameOverridesStr = x; NotifyChanges(); });
             eventCaller("main.setCitizenDogOverridesStr", (string x) => { CurrentCitySettings.CitizenDogOverridesStr = x; NotifyChanges(); });
-            eventCaller("main.setDefaultRoadNameOverridesStr", (string x) =>
-            {
-                CurrentCitySettings.DefaultRoadNameOverridesStr = x;
-                typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
-                NotifyChanges();
-            });
-            eventCaller("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; NotifyChanges(); });
+            eventCaller("main.setDefaultRoadNameOverridesStr", (string x) => { CurrentCitySettings.DefaultRoadNameOverridesStr = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
+            eventCaller("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -55,6 +50,7 @@ namespace BelzontAdr
         {
         }
 
+        private void OnChangedRoadNameGenerationRules() => typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
         public AdrCitywideSettings CurrentCitySettings
         {
             get => currentCitySettings; private set

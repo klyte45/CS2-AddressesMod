@@ -117,8 +117,8 @@ export class RoadPrefixCmp extends Component<{}, {
                 </Cs2FormLine>
                 <h3>{translate("roadPrefixSettings.requiredOrForbiddenTitle")}</h3>
                 {
-                  ObjectTyped.keys(RoadFlags).filter(x => !isFinite(parseInt(x))).map((x, i) => {
-                    const targetVal = RoadFlags[x];
+                  [RoadFlags.EnableZoning, RoadFlags.SeparatedCarriageways, RoadFlags.PreferTrafficLights, RoadFlags.UseHighwayRules].map((x, i) => {
+                    const targetVal = x;
                     const editingItem = this.state.currentSettings.AdditionalRules[this.state.currentEditingRule]
                     const currentValue = (editingItem.RequiredFlagsInt & targetVal) != 0 ? true : (editingItem.ForbiddenFlagsInt & targetVal) != 0 ? null : false;
                     const onNewValue = (x) => {
@@ -134,7 +134,7 @@ export class RoadPrefixCmp extends Component<{}, {
                       }
                       NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
                     }
-                    return <Cs2FormLine title={translate("roadPrefixSettings.flag" + x)} key={i}>
+                    return <Cs2FormLine title={translate("roadPrefixSettings.flag" + RoadFlags[x])} key={i}>
                       <TriCheckbox isChecked={currentValue} onValueToggle={onNewValue} />
                     </Cs2FormLine>
                   })
