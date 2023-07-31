@@ -45,4 +45,26 @@ export class Checkbox extends Component<CheckboxTitlelessProps, { checked: () =>
     }
 }
 
+export interface TriCheckboxProps {
+    isChecked: true | false | null;
+    onValueToggle: (newVal: true | false | null) => void;
+}
+
+export class TriCheckbox extends Component<TriCheckboxProps, {}> {
+    constructor(props: TriCheckboxProps) {
+        super(props);
+        this.state = {
+            checked: props.isChecked
+        }
+    }
+    render() {
+        const { onValueToggle, isChecked } = this.props;
+        const nextVal: true | false | null = isChecked == true ? null : isChecked === null ? false : true;
+        return (<><div className={`cs2-toggle cs2-item-mouse-states cs2-toggle2 ${isChecked == true ? "checked" : isChecked === null ? "forbid" : "unchecked"}`} onClick={() => onValueToggle(nextVal)}>
+            <div className={`cs2-checkmark ${isChecked == true ? "checked" : isChecked === null ? "forbid" : ""}`} ></div>
+        </div>
+        </>);
+    }
+}
+
 

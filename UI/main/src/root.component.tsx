@@ -1,6 +1,7 @@
 ///<reference path="euis.d.ts" />
 import { NameFileViewerCmp } from "#components/fileManagement/NameFileViewerCmp";
 import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
+import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import "#styles/main.scss";
 import "#styles/react-tabs.scss";
 import translate from "#utility/translate";
@@ -23,12 +24,16 @@ export default class Root extends Component<{}, {}> {
         <TabList>
           <Tab>{translate("fileViewer.title")}</Tab>
           <Tab>{translate("overrideSettings.title")}</Tab>
+          <Tab>{translate("roadPrefixSettings.title")}</Tab>
         </TabList>
         <TabPanel>
           <NameFileViewerCmp />
         </TabPanel>
         <TabPanel>
           <OverrideSettingsCmp />
+        </TabPanel>
+        <TabPanel>
+          <RoadPrefixCmp />
         </TabPanel>
       </Tabs>
     </>;

@@ -1,4 +1,8 @@
-﻿using System;
+﻿
+using Game.Prefabs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace BelzontAdr
@@ -24,5 +28,41 @@ namespace BelzontAdr
         public string CitizenDogOverridesStr { get => CitizenDogOverrides.ToString(); set => CitizenDogOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
         [XmlAttribute("DefaultRoadNameOverrides")]
         public string DefaultRoadNameOverridesStr { get => DefaultRoadNameOverrides.ToString(); set => DefaultRoadNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
+        [XmlElement("RoadPrefix")]
+        public AdrRoadPrefixSetting RoadPrefixSetting { get; set; } = new AdrRoadPrefixSetting();
+    }
+
+    [XmlRoot("RoadPrefixSetting")]
+    public class AdrRoadPrefixSetting
+    {
+        public AdrRoadPrefixRule FallbackRule { get; set; } = new() { FormatPattern = "{name}" };
+        public List<AdrRoadPrefixRule> AdditionalRules { get; set; } = new();
+
+        public AdrRoadPrefixRule GetFirstApplicable(RoadData roadData) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(roadData)) ?? FallbackRule;
+    }
+
+    [XmlRoot("RoadPrefixRule")]
+    public class AdrRoadPrefixRule
+    {
+        internal float MinSpeed { get; set; }
+        internal float MaxSpeed { get; set; }
+        internal RoadFlags RequiredFlags { get; set; }
+        internal RoadFlags ForbiddenFlags { get; set; }
+        [XmlText]
+        public string FormatPattern { get; set; }
+
+        [XmlAttribute("MinSpeedKmh")]
+        public float MinSpeedKmh { get => MinSpeed * 1.8f; set => MinSpeed = value / 1.8f; }
+
+        [XmlAttribute("MaxSpeedKmh")]
+        public float MaxSpeedKmh { get => MaxSpeed * 1.8f; set => MaxSpeed = value / 1.8f; }
+
+        [XmlAttribute("RequiredFlags")]
+        public int RequiredFlagsInt { get => (int)RequiredFlags; set => RequiredFlags = (RoadFlags)value; }
+
+        [XmlAttribute("ForbiddenFlags")]
+        public int ForbiddenFlagsInt { get => (int)ForbiddenFlags; set => ForbiddenFlags = (RoadFlags)value; }
+
+        public bool IsApplicable(RoadData roadData) => roadData.m_SpeedLimit >= MinSpeed && roadData.m_SpeedLimit <= MaxSpeed && (RequiredFlags & roadData.m_Flags) == RequiredFlags && (ForbiddenFlags & roadData.m_Flags) == 0;
     }
 }

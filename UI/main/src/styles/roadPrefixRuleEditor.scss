@@ -1,0 +1,70 @@
+.adrRulesContainer {
+    position: absolute;
+    top: 70px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-top: 3px solid;
+    border-top-color: var(--menuBorderColor1);
+    overflow: hidden;
+
+    .rulesList {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 60%;
+        background-color: var(--menuPanel1);
+        border-right: 3px solid;
+        border-right-color: var(--menuBorderColor1);
+        overflow: auto;
+
+        >div {
+            &.selectedItem {
+                background-color: var(--menuBorderColor2);
+                color: black;
+            }
+
+            button,
+            div.buttonPlaceholder {
+                width: 35px;
+                height: 35px;
+                padding: 0;
+
+                .moveItemUp,
+                .moveItemDown,
+                .removeItem {
+                    width: 100%;
+                    height: 100%;
+                    mask-size: 100%;
+                    background-color: var(--normalTextColor);
+                }
+
+                .moveItemDown {
+                    mask-image: url(coui://gameui/Media/Glyphs/StrokeArrowDown.svg);
+                }
+
+                .moveItemUp {
+                    mask-image: url(coui://gameui/Media/Glyphs/StrokeArrowUp.svg);
+                }
+
+                .removeItem {
+                    mask-image: url(coui://gameui/Media/Glyphs/plus.svg);
+                    transform: rotateZ(45deg);
+                }
+            }
+        }
+    }
+
+    .ruleSetting {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 40%;
+        right: 0;
+        border-left: 3px solid;
+        border-left-color: var(--menuBorderColor1);
+        background-color: var(--menuPanel1);
+        overflow: auto;
+    }
+}

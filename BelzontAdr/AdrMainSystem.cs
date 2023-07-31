@@ -39,6 +39,7 @@ namespace BelzontAdr
                 typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
                 NotifyChanges();
             });
+            eventCaller("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; NotifyChanges(); });
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
