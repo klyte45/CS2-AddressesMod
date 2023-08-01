@@ -32,7 +32,6 @@ export class RoadPrefixCmp extends Component<{}, {
   }
   async getSettings() {
     const newVal = (await NameFileManagementService.getCurrentCitywideSettings()).RoadPrefixSetting;
-    console.log(newVal);
     this.setState({ currentSettings: newVal });
   }
 
@@ -64,8 +63,7 @@ export class RoadPrefixCmp extends Component<{}, {
                 compact={true}
                 key={i}
                 onClick={() => { this.setState({ currentEditingRule: i }) }} title={`${i + 1}: ${x.FormatPattern}`}
-                className={i == this.state.currentEditingRule ? "selectedItem" : ""}
-              >
+                className={i == this.state.currentEditingRule ? "selectedItem" : ""}>
                 {i > 0 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i - 1); NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings) }}><div className="moveItemUp" /></button> : <div className="buttonPlaceholder"></div>}
                 {i < arr.length - 1 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i + 1); NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings) }}><div className="moveItemDown" /></button> : <div className="buttonPlaceholder"></div>}
                 <button className="negativeBtn" onClick={() => { arr.splice(i, 1); NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings) }}><div className="removeItem" /></button>
