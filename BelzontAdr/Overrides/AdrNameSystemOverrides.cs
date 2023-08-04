@@ -36,6 +36,12 @@ namespace BelzontAdr
 
             var GetSpawnableBuildingName = typeof(NameSystem).GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags);
             AddRedirect(GetSpawnableBuildingName, GetType().GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags));
+
+            var GetMarkerTransportStopName = typeof(NameSystem).GetMethod("GetMarkerTransportStopName", RedirectorUtils.allFlags);
+            AddRedirect(GetMarkerTransportStopName, GetType().GetMethod("GetMarkerTransportStopName", RedirectorUtils.allFlags));
+
+            var GetStaticTransportStopName = typeof(NameSystem).GetMethod("GetStaticTransportStopName", RedirectorUtils.allFlags);
+            AddRedirect(GetStaticTransportStopName, GetType().GetMethod("GetStaticTransportStopName", RedirectorUtils.allFlags));
         }
         private static PrefabSystem prefabSystem;
         private static EntityManager entityManager;
@@ -46,13 +52,50 @@ namespace BelzontAdr
         public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
         {
             string pattern = null;
-            if (!__instance.TryGetCustomName(entity, out __result) && GetAggregateName(out pattern, out __result, entity))
+            if (entityManager.HasComponent<Aggregate>(entity))
             {
-                string id = GetId(entity, true);
-                __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
+                if (!__instance.TryGetCustomName(entity, out __result) && GetAggregateName(out pattern, out __result, entity))
+                {
+                    string id = GetId(entity, true);
+                    __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
+                    return false;
+                }
+                __result = pattern.Replace("{name}", __result);
                 return false;
             }
-            __result = pattern.Replace("{name}", __result);
+            return true;
+        }
+        private static bool GetMarkerTransportStopName(ref Name __result, ref NameSystem __instance, ref Entity stop)
+        {
+            Entity entity = stop;
+            int num = 0;
+            while (num < 8 && entityManager.TryGetComponent(entity, out Owner owner))
+            {
+                entity = owner.m_Owner;
+                num++;
+            }
+            if (entity != stop)
+            {
+                __result = __instance.GetName(entity);
+                return false;
+            }
+            return true;
+        }
+        private static bool GetStaticTransportStopName(ref Name __result, ref NameSystem __instance, ref Entity stop)
+        {
+            BuildingUtils.GetAddress(entityManager, stop, out Entity entity, out int num);
+            if (GetAggregateName(out var pattern, out var genName, entity))
+            {
+                return true;
+            }
+            var roadName = pattern.Replace("{name}", genName);
+            __result = NameSystem.Name.FormattedName("Assets.ADDRESS_NAME_FORMAT", new string[]
+               {
+                        "ROAD",
+                        roadName,
+                        "NUMBER",
+                        num.ToString()
+               });
             return false;
         }
 
