@@ -15,6 +15,7 @@ namespace BelzontAdr
         internal Guid CitizenSurnameOverrides { get; private set; }
         internal Guid CitizenDogOverrides { get; private set; }
         internal Guid DefaultRoadNameOverrides { get; private set; }
+        internal Guid DefaultDistrictNameOverrides { get; private set; }
         [XmlAttribute("SurnameAtFirst")]
         public bool SurnameAtFirst { get; set; }
 
@@ -28,6 +29,8 @@ namespace BelzontAdr
         public string CitizenDogOverridesStr { get => CitizenDogOverrides.ToString(); set => CitizenDogOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
         [XmlAttribute("DefaultRoadNameOverrides")]
         public string DefaultRoadNameOverridesStr { get => DefaultRoadNameOverrides.ToString(); set => DefaultRoadNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
+        [XmlAttribute("DefaultDistrictNameOverrides")]
+        public string DefaultDistrictNameOverridesStr { get => DefaultDistrictNameOverrides.ToString(); set => DefaultDistrictNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
         [XmlElement("RoadPrefix")]
         public AdrRoadPrefixSetting RoadPrefixSetting { get; set; } = new AdrRoadPrefixSetting();
     }

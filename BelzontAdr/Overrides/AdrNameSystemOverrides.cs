@@ -1,6 +1,7 @@
 ﻿using Belzont.Utils;
 using Colossal.Entities;
 using Game;
+using Game.Areas;
 using Game.Buildings;
 using Game.Citizens;
 using Game.Common;
@@ -13,6 +14,7 @@ using Game.UI.Localization;
 using Game.Zones;
 using Unity.Entities;
 using static Game.UI.NameSystem;
+using AreaType = Game.Zones.AreaType;
 
 namespace BelzontAdr
 {
@@ -55,6 +57,17 @@ namespace BelzontAdr
             if (entityManager.HasComponent<Aggregate>(entity))
             {
                 if (!__instance.TryGetCustomName(entity, out __result) && GetAggregateName(out pattern, out __result, entity))
+                {
+                    string id = GetId(entity, true);
+                    __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
+                    return false;
+                }
+                __result = pattern.Replace("{name}", __result);
+                return false;
+            }
+            else if (entityManager.HasComponent<District>(entity))
+            {
+                if (!__instance.TryGetCustomName(entity, out __result) && GetDistrictName(out pattern, out __result, entity))
                 {
                     string id = GetId(entity, true);
                     __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
@@ -187,6 +200,15 @@ namespace BelzontAdr
                 }
                 return shallRunOrignal;
             }
+            if (entityManager.HasComponent<District>(entity))
+            {
+                var shallRunOrignal = GetDistrictName(out var pattern, out var genName, entity);
+                if (!shallRunOrignal)
+                {
+                    __result = Name.CustomName(pattern.Replace("{name}", genName));
+                }
+                return shallRunOrignal;
+            }
 
             return true;
         }
@@ -194,15 +216,26 @@ namespace BelzontAdr
         private static bool GetAggregateName(out string format, out string name, Entity entity)
         {
             name = format = null;
-            if (!adrMainSystem.TryGetRoadNamesList(default, out var roadsNamesList)) return true;
+            Entity refDistrict = default;// entityManager.TryGetComponent<BorderDistrict>(refRoad, out var refDistrictBorders) ? refDistrictBorders.m_Left == default ? refDistrictBorders.m_Right : refDistrictBorders.m_Left : default;
+            if (!adrMainSystem.TryGetRoadNamesList(refDistrict, out var roadsNamesList)) return true;
             if (!entityManager.TryGetBuffer<AggregateElement>(entity, true, out var elements)) return true;
             var refRoad = elements[0].m_Edge;
-            // var refDistrict = entityManager.TryGetComponent<BorderDistrict>(refRoad, out var refDistrictBorders) ? refDistrictBorders.m_Left == default ? refDistrictBorders.m_Right : refDistrictBorders.m_Left : default;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;
             if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData)) return true;
             format = adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData).FormatPattern;
 
             name = GetFromList(roadsNamesList, entity);
+            return false;
+        }
+
+        private static bool GetDistrictName(out string format, out string name, Entity entity)
+        {
+            name = format = null;
+            if (!adrMainSystem.TryGetDistrictNamesList(out var districtNamesList)) return true;
+
+            format = "{name}";// adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData).FormatPattern;
+
+            name = GetFromList(districtNamesList, entity);
             return false;
         }
 

@@ -11,6 +11,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 enum TabsNames {
   Roads = "Roads",
   Citizen = "Citizen",
+  District = "District",
 }
 
 const tabsOrder: (TabsNames | undefined)[] = [
@@ -109,6 +110,18 @@ export class OverrideSettingsCmp extends Component<{}, State> {
           />
         </Cs2FormLine>
       </>,
+      [TabsNames.District]: <>
+        <Cs2FormLine title={translate("overrideSettings.districtsFile")}>
+          <Cs2Select
+            options={Object.values(this.state.simpleFiles)}
+            getOptionLabel={(x: SimpleNameEntry) => x?.Name}
+            getOptionValue={(x: SimpleNameEntry) => x?.IdString}
+            onChange={(x) => NameFileManagementService.setDefaultDistrictNameOverridesStr(x.IdString)}
+            value={this.state.indexedSimpleFiles[this.state.currentSettings.DefaultDistrictNameOverridesStr]}
+            defaultValue={defaultSetting}
+          />
+        </Cs2FormLine>
+      </>,
     }
   }
 
@@ -119,10 +132,10 @@ export class OverrideSettingsCmp extends Component<{}, State> {
 
       <Cs2SideTabs<TabsNames>
         componentsMapViewer={this.getComponents()}
-        tabsOrder={[TabsNames.Citizen, TabsNames.Roads]}
+        tabsOrder={[TabsNames.Citizen, TabsNames.Roads, TabsNames.District]}
         currentTab={this.state.currentTab}
-        onSetCurrentTab={(newTab) => this.setState({ currentTab: newTab })} 
-        i18nTitlePrefix={"overrideSettings.tab"}      />
+        onSetCurrentTab={(newTab) => this.setState({ currentTab: newTab })}
+        i18nTitlePrefix={"overrideSettings.tab"} />
 
 
     </DefaultPanelScreen>;

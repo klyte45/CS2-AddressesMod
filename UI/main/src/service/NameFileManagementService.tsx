@@ -39,6 +39,7 @@ export type AdrCitywideSettings = {
     CitizenSurnameOverridesStr: string,
     CitizenDogOverridesStr: string
     DefaultRoadNameOverridesStr: string,
+    DefaultDistrictNameOverridesStr: string,
     RoadPrefixSetting: AdrRoadPrefixSetting
 }
 
@@ -54,5 +55,6 @@ export class NameFileManagementService {
     static async setCitizenDogOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setCitizenDogOverridesStr", x); }
     static async setDefaultRoadNameOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setDefaultRoadNameOverridesStr", x); }
     static async setAdrRoadPrefixSetting(x: AdrRoadPrefixSetting): Promise<void> { await engine.call("k45::adr.main.setAdrRoadPrefixSetting", x); }
+    static async setDefaultDistrictNameOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setDefaultDistrictNameOverridesStr", x); }
     static async onCityDataReloaded(x: () => void) { engine.on("k45::adr.main.onCurrentCitywideSettingsLoaded", x); }
 }

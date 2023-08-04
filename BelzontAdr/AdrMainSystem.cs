@@ -35,6 +35,7 @@ namespace BelzontAdr
             eventCaller("main.setCitizenDogOverridesStr", (string x) => { CurrentCitySettings.CitizenDogOverridesStr = x; NotifyChanges(); });
             eventCaller("main.setDefaultRoadNameOverridesStr", (string x) => { CurrentCitySettings.DefaultRoadNameOverridesStr = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
             eventCaller("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
+            eventCaller("main.setDefaultDistrictNameOverridesStr", (string x) => { CurrentCitySettings.DefaultDistrictNameOverridesStr = x; NotifyChanges(); OnChangedDistrictNameGenerationRules(); });
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -51,6 +52,7 @@ namespace BelzontAdr
         }
 
         private void OnChangedRoadNameGenerationRules() => typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
+        private void OnChangedDistrictNameGenerationRules() => typeof(AreaBufferSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AreaBufferSystem>(), new object[0]);
         public AdrCitywideSettings CurrentCitySettings
         {
             get => currentCitySettings; private set
@@ -71,10 +73,8 @@ namespace BelzontAdr
 
         internal string DoNameFormat(string name, string surname) => CurrentCitySettings.SurnameAtFirst ? $"{surname} {name}" : $"{name} {surname}";
         internal bool TryGetDogsList(out AdrNameFile listForDogs) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.CitizenDogOverrides, out listForDogs);
-        internal bool TryGetRoadNamesList(Entity district, out AdrNameFile roadsNamesList)
-        {
-            return AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.DefaultRoadNameOverrides, out roadsNamesList);
-        }
+        internal bool TryGetRoadNamesList(Entity district, out AdrNameFile roadsNamesList) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.DefaultRoadNameOverrides, out roadsNamesList);
+        internal bool TryGetDistrictNamesList(out AdrNameFile districtNamesList) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.DefaultDistrictNameOverrides, out districtNamesList);
         #endregion
 
 
