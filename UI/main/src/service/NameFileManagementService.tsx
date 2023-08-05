@@ -41,9 +41,11 @@ export type AdrCitywideSettings = {
     DefaultRoadNameOverridesStr: string,
     DefaultDistrictNameOverridesStr: string,
     RoadPrefixSetting: AdrRoadPrefixSetting
+    RoadNameAsNameStation: boolean
 }
 
 export class NameFileManagementService {
+    static async onCityDataReloaded(x: () => void) { engine.on("k45::adr.main.onCurrentCitywideSettingsLoaded", x); }
     static async listSimpleNames(): Promise<SimpleNameEntry[]> { return await engine.call("k45::adr.main.listSimpleNames"); }
     static async reloadSimpleNames(): Promise<SimpleNameEntry[]> { return await engine.call("k45::adr.main.reloadSimpleNames"); }
     static async goToSimpleNamesFolder(): Promise<void> { return await engine.call("k45::adr.main.goToSimpleNamesFolder"); }
@@ -56,5 +58,5 @@ export class NameFileManagementService {
     static async setDefaultRoadNameOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setDefaultRoadNameOverridesStr", x); }
     static async setAdrRoadPrefixSetting(x: AdrRoadPrefixSetting): Promise<void> { await engine.call("k45::adr.main.setAdrRoadPrefixSetting", x); }
     static async setDefaultDistrictNameOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setDefaultDistrictNameOverridesStr", x); }
-    static async onCityDataReloaded(x: () => void) { engine.on("k45::adr.main.onCurrentCitywideSettingsLoaded", x); }
+    static async setRoadNameAsNameStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setRoadNameAsNameStation", x); }
 }

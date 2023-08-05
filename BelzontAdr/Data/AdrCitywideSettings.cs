@@ -16,6 +16,8 @@ namespace BelzontAdr
         internal Guid CitizenDogOverrides { get; private set; }
         internal Guid DefaultRoadNameOverrides { get; private set; }
         internal Guid DefaultDistrictNameOverrides { get; private set; }
+        [XmlAttribute("RoadNameAsNameStation")]
+        public bool RoadNameAsNameStation { get; set; }
         [XmlAttribute("SurnameAtFirst")]
         public bool SurnameAtFirst { get; set; }
 

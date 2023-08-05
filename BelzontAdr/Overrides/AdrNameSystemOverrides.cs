@@ -11,7 +11,6 @@ using Game.Prefabs;
 using Game.SceneFlow;
 using Game.UI;
 using Game.UI.Localization;
-using Game.Zones;
 using Unity.Entities;
 using static Game.UI.NameSystem;
 using AreaType = Game.Zones.AreaType;
@@ -162,7 +161,7 @@ namespace BelzontAdr
             return null;
         }
 
-        private static bool GetName(ref Name __result, ref NameSystem __instance, ref Entity entity, ref bool omitBrand)
+        private static bool GetName(ref Name __result, ref NameSystem __instance, Entity entity)
         {
             if (__instance.TryGetCustomName(entity, out string name))
             {
@@ -176,7 +175,6 @@ namespace BelzontAdr
                 __result = NameSystem.Name.FormattedName("K45::ADR.main[localesFmt.household]", "surname", GetFromList(surnames, entity));
                 return false;
             }
-
             if (entityManager.HasComponent<HouseholdPet>(entity))
             {
                 entityManager.TryGetComponent<PrefabRef>(entity, out var petPrefabRef);
@@ -208,6 +206,25 @@ namespace BelzontAdr
                     __result = Name.CustomName(pattern.Replace("{name}", genName));
                 }
                 return shallRunOrignal;
+            }
+            while (entityManager.TryGetComponent<Owner>(entity, out var owner))
+            {
+                entity = owner.m_Owner;
+            }
+            if (__instance.TryGetCustomName(entity, out name))
+            {
+                __result = NameSystem.Name.CustomName(name);
+                return false;
+            }
+            if (entityManager.TryGetComponent<Building>(entity, out var buildingData))
+            {
+                if (adrMainSystem.CurrentCitySettings.RoadNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity) && entityManager.TryGetComponent(buildingData.m_RoadEdge, out Aggregated roadAggregation))
+                {
+                    __result = GetAggregateName(out _, out string roadName, roadAggregation.m_Aggregate)
+                        ? __instance.GetName(roadAggregation.m_Aggregate)
+                        : Name.CustomName(roadName);
+                    return false;
+                }
             }
 
             return true;

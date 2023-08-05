@@ -24,6 +24,8 @@ namespace BelzontAdr
             eventCaller("main.reloadSimpleNames", () =>
             {
                 AdrNameFilesManager.Instance.ReloadNameFiles();
+                OnChangedDistrictNameGenerationRules();
+                OnChangedRoadNameGenerationRules();
                 return AdrNameFilesManager.Instance.SimpleNamesDict.Values.ToArray();
             });
             eventCaller("main.goToSimpleNamesFolder", () => { RemoteProcess.OpenFolder(AdrNameFilesManager.SimpleNameFolder); });
@@ -36,6 +38,7 @@ namespace BelzontAdr
             eventCaller("main.setDefaultRoadNameOverridesStr", (string x) => { CurrentCitySettings.DefaultRoadNameOverridesStr = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
             eventCaller("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
             eventCaller("main.setDefaultDistrictNameOverridesStr", (string x) => { CurrentCitySettings.DefaultDistrictNameOverridesStr = x; NotifyChanges(); OnChangedDistrictNameGenerationRules(); });
+            eventCaller("main.setRoadNameAsNameStation", (bool x) => { CurrentCitySettings.RoadNameAsNameStation = x; NotifyChanges(); });
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
