@@ -11,9 +11,11 @@ using Game.Prefabs;
 using Game.SceneFlow;
 using Game.UI;
 using Game.UI.Localization;
+using System.Collections.Generic;
 using Unity.Entities;
 using static Game.UI.NameSystem;
 using AreaType = Game.Zones.AreaType;
+using CargoTransportStation = Game.Buildings.CargoTransportStation;
 
 namespace BelzontAdr
 {
@@ -55,7 +57,8 @@ namespace BelzontAdr
             string pattern = null;
             if (entityManager.HasComponent<Aggregate>(entity))
             {
-                if (!__instance.TryGetCustomName(entity, out __result) && GetAggregateName(out pattern, out __result, entity))
+                if (__instance.TryGetCustomName(entity, out __result)) return false;
+                if (GetAggregateName(out pattern, out __result, entity))
                 {
                     string id = GetId(entity, true);
                     __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
@@ -66,7 +69,8 @@ namespace BelzontAdr
             }
             else if (entityManager.HasComponent<District>(entity))
             {
-                if (!__instance.TryGetCustomName(entity, out __result) && GetDistrictName(out pattern, out __result, entity))
+                if (__instance.TryGetCustomName(entity, out __result)) return false;
+                if (GetDistrictName(out pattern, out __result, entity))
                 {
                     string id = GetId(entity, true);
                     __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
@@ -218,10 +222,79 @@ namespace BelzontAdr
             }
             if (entityManager.TryGetComponent<Building>(entity, out var buildingData))
             {
-                if (adrMainSystem.CurrentCitySettings.RoadNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity) && entityManager.TryGetComponent(buildingData.m_RoadEdge, out Aggregated roadAggregation))
+                if (
+                    ((adrMainSystem.CurrentCitySettings.RoadNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity))
+                    || (adrMainSystem.CurrentCitySettings.RoadNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
+                    && entityManager.HasComponent<Aggregated>(buildingData.m_RoadEdge))
                 {
-                    __result = GetAggregateName(out _, out string roadName, roadAggregation.m_Aggregate)
-                        ? __instance.GetName(roadAggregation.m_Aggregate)
+
+                    Queue<Entity> roadsToMap = new Queue<Entity>();
+                    HashSet<Entity> roadsMapped = new();
+                    roadsToMap.Enqueue(buildingData.m_RoadEdge);
+                    Entity refAggregate = Entity.Null;
+                    int maxIterations = 20;
+                    while (roadsToMap.TryDequeue(out Entity nextItem))
+                    {
+                        if (maxIterations-- == 0) break;
+                        if (!entityManager.TryGetComponent<Aggregated>(nextItem, out var aggNextItem)) continue;
+                        var hasAggRef = entityManager.TryGetComponent<ADRAggregationStationRef>(aggNextItem.m_Aggregate, out var aggregationStationRef);
+                        if (hasAggRef && aggregationStationRef.m_refStationBuilding != Entity.Null && aggregationStationRef.m_refStationBuilding != entity)
+                        {
+                            if (roadsMapped.Add(nextItem) && entityManager.TryGetComponent(nextItem, out Edge edge))
+                            {
+                                if (entityManager.TryGetBuffer(edge.m_Start, true, out DynamicBuffer<ConnectedEdge> connectedStart))
+                                {
+                                    for (int k = 0; k < connectedStart.Length; k++)
+                                    {
+                                        if (!roadsMapped.Contains(connectedStart[k].m_Edge))
+                                        {
+                                            roadsToMap.Enqueue(connectedStart[k].m_Edge);
+                                        }
+                                    }
+                                }
+                                if (entityManager.TryGetBuffer(edge.m_End, true, out DynamicBuffer<ConnectedEdge> connectedEnd))
+                                {
+                                    for (int k = 0; k < connectedEnd.Length; k++)
+                                    {
+                                        if (!roadsMapped.Contains(connectedEnd[k].m_Edge))
+                                        {
+                                            roadsToMap.Enqueue(connectedEnd[k].m_Edge);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (hasAggRef)
+                            {
+                                if (aggregationStationRef.m_refStationBuilding != entity)
+                                {
+                                    EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
+                                    aggregationStationRef.m_refStationBuilding = entity;
+                                    entityCommandBuffer.SetComponent(aggNextItem.m_Aggregate, aggregationStationRef);
+                                }
+                            }
+                            else
+                            {
+                                EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
+                                aggregationStationRef = new()
+                                {
+                                    m_refStationBuilding = entity
+                                };
+                                entityCommandBuffer.AddComponent(aggNextItem.m_Aggregate, aggregationStationRef);
+                            }
+                            refAggregate = aggNextItem.m_Aggregate;
+                            break;
+                        }
+                    }
+                    if (refAggregate == Entity.Null)
+                    {
+                        return true;
+                    }
+
+                    __result = __instance.TryGetCustomName(refAggregate, out name) ? Name.CustomName(name)
+                        : GetAggregateName(out _, out string roadName, refAggregate) ? __instance.GetName(refAggregate)
                         : Name.CustomName(roadName);
                     return false;
                 }

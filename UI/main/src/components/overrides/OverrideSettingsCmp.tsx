@@ -112,6 +112,9 @@ export class OverrideSettingsCmp extends Component<{}, State> {
         <Cs2FormLine title={translate("overrideSettings.useRoadNameAsStationName")}>
           <Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameStation} onValueToggle={(x) => NameFileManagementService.setRoadNameAsNameStation(x)} />
         </Cs2FormLine>
+        <Cs2FormLine title={translate("overrideSettings.useRoadNameAsCargoStationName")}>
+          <Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameCargoStation} onValueToggle={(x) => NameFileManagementService.setRoadNameAsNameCargoStation(x)} />
+        </Cs2FormLine>
       </>,
       [TabsNames.District]: <>
         <Cs2FormLine title={translate("overrideSettings.districtsFile")}>

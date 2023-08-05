@@ -18,6 +18,8 @@ namespace BelzontAdr
         internal Guid DefaultDistrictNameOverrides { get; private set; }
         [XmlAttribute("RoadNameAsNameStation")]
         public bool RoadNameAsNameStation { get; set; }
+        [XmlAttribute("RoadNameAsNameCargoStation")]
+        public bool RoadNameAsNameCargoStation { get; set; }
         [XmlAttribute("SurnameAtFirst")]
         public bool SurnameAtFirst { get; set; }
 
