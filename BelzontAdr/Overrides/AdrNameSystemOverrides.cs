@@ -222,6 +222,37 @@ namespace BelzontAdr
             }
             if (entityManager.TryGetComponent<Building>(entity, out var buildingData))
             {
+                if (((adrMainSystem.CurrentCitySettings.DistrictNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity))
+                    || (adrMainSystem.CurrentCitySettings.DistrictNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
+                    && entityManager.TryGetComponent<CurrentDistrict>(entity, out var currDistrict) && currDistrict.m_District != Entity.Null)
+                {
+                    if (!entityManager.TryGetComponent<ADREntityStationRef>(currDistrict.m_District, out var entityStationRef))
+                    {
+                        var cmd = m_EndFrameBarrier.CreateCommandBuffer();
+                        entityStationRef = new ADREntityStationRef
+                        {
+                            m_refStationBuilding = entity
+                        };
+                        cmd.AddComponent(currDistrict.m_District, entityStationRef);
+                    }
+                    if (entityStationRef.m_refStationBuilding == Entity.Null)
+                    {
+                        var cmd = m_EndFrameBarrier.CreateCommandBuffer();
+                        entityStationRef.m_refStationBuilding = entity;
+                        cmd.SetComponent(currDistrict.m_District, entityStationRef);
+                    }
+                    if (entityStationRef.m_refStationBuilding == entity)
+                    {
+                        if (GetDistrictName(out var pattern, out var mainName, currDistrict.m_District))
+                        {
+                            string id = GetId(entity, true);
+                            __result = Name.LocalizedName(GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id);
+                            return false;
+                        }
+                        __result = Name.CustomName(pattern.Replace("{name}", mainName));
+                        return false;
+                    }
+                }
                 if (
                     ((adrMainSystem.CurrentCitySettings.RoadNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity))
                     || (adrMainSystem.CurrentCitySettings.RoadNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
@@ -237,7 +268,7 @@ namespace BelzontAdr
                     {
                         if (maxIterations-- == 0) break;
                         if (!entityManager.TryGetComponent<Aggregated>(nextItem, out var aggNextItem)) continue;
-                        var hasAggRef = entityManager.TryGetComponent<ADRAggregationStationRef>(aggNextItem.m_Aggregate, out var aggregationStationRef);
+                        var hasAggRef = entityManager.TryGetComponent<ADREntityStationRef>(aggNextItem.m_Aggregate, out var aggregationStationRef);
                         if (hasAggRef && aggregationStationRef.m_refStationBuilding != Entity.Null && aggregationStationRef.m_refStationBuilding != entity)
                         {
                             if (roadsMapped.Add(nextItem) && entityManager.TryGetComponent(nextItem, out Edge edge))

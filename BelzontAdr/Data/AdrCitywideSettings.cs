@@ -37,6 +37,10 @@ namespace BelzontAdr
         public string DefaultDistrictNameOverridesStr { get => DefaultDistrictNameOverrides.ToString(); set => DefaultDistrictNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
         [XmlElement("RoadPrefix")]
         public AdrRoadPrefixSetting RoadPrefixSetting { get; set; } = new AdrRoadPrefixSetting();
+        [XmlAttribute("DistrictNameAsNameCargoStation")]
+        public bool DistrictNameAsNameCargoStation { get; set; }
+        [XmlAttribute("DistrictNameAsNameStation")]
+        public bool DistrictNameAsNameStation { get; set; }
     }
 
     [XmlRoot("RoadPrefixSetting")]

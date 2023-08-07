@@ -127,6 +127,12 @@ export class OverrideSettingsCmp extends Component<{}, State> {
             defaultValue={defaultSetting}
           />
         </Cs2FormLine>
+        <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsStationName")}>
+          <Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameStation} onValueToggle={(x) => NameFileManagementService.setDistrictNameAsNameStation(x)} />
+        </Cs2FormLine>
+        <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsCargoStationName")}>
+          <Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameCargoStation} onValueToggle={(x) => NameFileManagementService.setDistrictNameAsNameCargoStation(x)} />
+        </Cs2FormLine>
       </>,
     }
   }

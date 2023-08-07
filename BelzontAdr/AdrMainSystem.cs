@@ -40,6 +40,8 @@ namespace BelzontAdr
             eventCaller("main.setDefaultDistrictNameOverridesStr", (string x) => { CurrentCitySettings.DefaultDistrictNameOverridesStr = x; NotifyChanges(); OnChangedDistrictNameGenerationRules(); });
             eventCaller("main.setRoadNameAsNameStation", (bool x) => { CurrentCitySettings.RoadNameAsNameStation = x; NotifyChanges(); });
             eventCaller("main.setRoadNameAsNameCargoStation", (bool x) => { CurrentCitySettings.RoadNameAsNameCargoStation = x; NotifyChanges(); });
+            eventCaller("main.setDistrictNameAsNameStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameStation = x; NotifyChanges(); });
+            eventCaller("main.setDistrictNameAsNameCargoStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameCargoStation = x; NotifyChanges(); });
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)

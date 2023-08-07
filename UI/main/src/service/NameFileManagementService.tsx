@@ -43,6 +43,8 @@ export type AdrCitywideSettings = {
     RoadPrefixSetting: AdrRoadPrefixSetting
     RoadNameAsNameStation: boolean
     RoadNameAsNameCargoStation: boolean
+    DistrictNameAsNameStation: boolean
+    DistrictNameAsNameCargoStation: boolean
 }
 
 export class NameFileManagementService {
@@ -61,4 +63,6 @@ export class NameFileManagementService {
     static async setDefaultDistrictNameOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setDefaultDistrictNameOverridesStr", x); }
     static async setRoadNameAsNameStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setRoadNameAsNameStation", x); }
     static async setRoadNameAsNameCargoStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setRoadNameAsNameCargoStation", x); }
+    static async setDistrictNameAsNameStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setDistrictNameAsNameStation", x); }
+    static async setDistrictNameAsNameCargoStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setDistrictNameAsNameCargoStation", x); }
 }
