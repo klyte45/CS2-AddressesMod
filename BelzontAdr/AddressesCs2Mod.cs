@@ -21,6 +21,7 @@ namespace BelzontAdr
         public override void DoOnCreateWorld(UpdateSystem updateSystem)
         {
             AdrNameFilesManager.Instance.ReloadNameFiles();
+            updateSystem.UpdateAfter<AdrDistrictsSystem>(SystemUpdatePhase.ModificationEnd);
         }
 
         public override void OnDispose()

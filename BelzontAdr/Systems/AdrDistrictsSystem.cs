@@ -5,6 +5,7 @@ using Colossal.OdinSerializer.Utilities;
 using Game;
 using Game.Areas;
 using Game.Common;
+using Game.Tools;
 using Game.UI;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ using static Belzont.Utils.NameSystemExtensions;
 
 namespace BelzontAdr
 {
-    public class AdrDistrictsSystem : SystemBase, IBelzontBindable
+    public class AdrDistrictsSystem : GameSystemBase, IBelzontBindable
     {
         private Action<string, object[]> m_eventCaller;
         private EntityQuery m_districtsUpdatedQuery;
@@ -22,6 +23,7 @@ namespace BelzontAdr
         private NameSystem nameSystem;
         private EndFrameBarrier m_EndFrameBarrier;
         private AdrMainSystem mainSystem;
+        private bool dirtyDistricts;
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
             eventCaller("district.listAllDistricts", ListAllDistricts);
@@ -40,8 +42,15 @@ namespace BelzontAdr
 
         protected override void OnUpdate()
         {
-            if (!m_districtsUpdatedQuery.IsEmptyIgnoreFilter)
+            if (dirtyDistricts)
             {
+                dirtyDistricts = false;
+                mainSystem.OnChangedRoadNameGenerationRules();
+                OnDistrictChanged();
+            }
+            else if (!m_districtsUpdatedQuery.IsEmptyIgnoreFilter)
+            {
+                mainSystem.OnChangedRoadNameGenerationRules();
                 OnDistrictChanged();
             }
         }
@@ -56,14 +65,16 @@ namespace BelzontAdr
                     {
                         ComponentType.ReadOnly<Area>(),
                         ComponentType.ReadOnly<District>(),
-                        ComponentType.ReadOnly<Node>(),
-                        ComponentType.ReadOnly<Triangle>()
                     },
                     Any = new ComponentType[]
                     {
                         ComponentType.ReadOnly<Updated>(),
                         ComponentType.ReadOnly<BatchesUpdated>(),
                         ComponentType.ReadOnly<Deleted>()
+                    },
+                    None =new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<Temp>()
                     }
                 }
             });
@@ -122,7 +133,8 @@ namespace BelzontAdr
                     {
                         adrDistrict.m_roadsNamesId = default;
                         commandBuffer.SetComponent(district, adrDistrict);
-                        mainSystem.OnChangedRoadNameGenerationRules();
+
+                        dirtyDistricts = true;
                     }
                 }
                 else if (Guid.TryParse(fileGuid, out var guid) && AdrNameFilesManager.Instance.SimpleNamesDict.ContainsKey(guid))
@@ -138,7 +150,7 @@ namespace BelzontAdr
                     {
                         commandBuffer.AddComponent(district, adrDistrict);
                     }
-                    mainSystem.OnChangedRoadNameGenerationRules();
+                    dirtyDistricts = true;
                 }
             }
         }

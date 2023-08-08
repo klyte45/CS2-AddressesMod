@@ -4,8 +4,10 @@ using Belzont.Utils;
 using Colossal;
 using Colossal.Entities;
 using Colossal.Serialization.Entities;
+using Game;
 using Game.Rendering;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Entities;
 using Unity.Jobs;
@@ -13,11 +15,12 @@ using Unity.Jobs;
 namespace BelzontAdr
 {
 
-    public class AdrMainSystem : SystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrMainSystem>
+    public class AdrMainSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrMainSystem>
     {
         private Action<string, object[]> m_eventCaller;
         private AdrCitywideSettings currentCitySettings = new();
         private AdrDistrictsSystem districtsSystem;
+        private Queue<Action> actionsToGo;
 
         World IBelzontSerializableSingleton<AdrMainSystem>.World => World;
 
@@ -60,12 +63,22 @@ namespace BelzontAdr
 
         protected override void OnUpdate()
         {
+            while (actionsToGo.TryDequeue(out var action))
+            {
+                action.Invoke();
+            }
         }
 
         protected override void OnCreate()
         {
             base.OnCreate();
             districtsSystem = World.GetOrCreateSystemManaged<AdrDistrictsSystem>();
+            actionsToGo = new Queue<Action>();
+        }
+
+        internal void EnqueueToRunOnUpdate(Action a)
+        {
+            actionsToGo.Enqueue(a);
         }
 
 
@@ -84,6 +97,7 @@ namespace BelzontAdr
         {
             m_eventCaller?.Invoke("main.onCurrentCitywideSettingsLoaded", new object[0]);
         }
+
         #region Citizen & Pet
         internal bool TryGetNameList(bool male, out AdrNameFile names) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(male ? CurrentCitySettings.CitizenMaleNameOverrides : CurrentCitySettings.CitizenFemaleNameOverrides, out names);
 

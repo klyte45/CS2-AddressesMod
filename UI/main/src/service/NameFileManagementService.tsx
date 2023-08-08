@@ -48,7 +48,8 @@ export type AdrCitywideSettings = {
 }
 
 export class NameFileManagementService {
-    static async onCityDataReloaded(x: () => void) { engine.on("k45::adr.main.onCurrentCitywideSettingsLoaded", x); }
+    static onCityDataReloaded(x: () => void) { return engine.on("k45::adr.main.onCurrentCitywideSettingsLoaded", x); }
+    static offCityDataReloaded() { engine.off("k45::adr.main.onCurrentCitywideSettingsLoaded"); }
     static async listSimpleNames(): Promise<SimpleNameEntry[]> { return await engine.call("k45::adr.main.listSimpleNames"); }
     static async reloadSimpleNames(): Promise<SimpleNameEntry[]> { return await engine.call("k45::adr.main.reloadSimpleNames"); }
     static async goToSimpleNamesFolder(): Promise<void> { return await engine.call("k45::adr.main.goToSimpleNamesFolder"); }

@@ -338,12 +338,12 @@ namespace BelzontAdr
         private static bool GetAggregateName(out string format, out string name, Entity entity)
         {
             name = format = null;
-            Entity refDistrict = default;// entityManager.TryGetComponent<BorderDistrict>(refRoad, out var refDistrictBorders) ? refDistrictBorders.m_Left == default ? refDistrictBorders.m_Right : refDistrictBorders.m_Left : default;
-            if (!adrMainSystem.TryGetRoadNamesList(refDistrict, out var roadsNamesList)) return true;
             if (!entityManager.TryGetBuffer<AggregateElement>(entity, true, out var elements)) return true;
             if (!entityManager.TryGetComponent<EdgeGeometry>(elements[0].m_Edge, out var geom0)) return true;
             if (!entityManager.TryGetComponent<EdgeGeometry>(elements[^1].m_Edge, out var geomLast)) return true;
             var refRoad = math.length(geom0.m_Bounds.min) < math.length(geomLast.m_Bounds.min) ? elements[0].m_Edge : elements[^1].m_Edge;
+            Entity refDistrict = entityManager.TryGetComponent<BorderDistrict>(refRoad, out var refDistrictBorders) ? refDistrictBorders.m_Left == default ? refDistrictBorders.m_Right : refDistrictBorders.m_Left : default;
+            if (!adrMainSystem.TryGetRoadNamesList(refDistrict, out var roadsNamesList)) return true;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;
             if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData)) return true;
             format = adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData).FormatPattern;
@@ -394,8 +394,14 @@ namespace BelzontAdr
             if (!entityManager.TryGetComponent(entity, out ADRLocalizationData adrLoc))
             {
                 adrLoc.m_seedReference = (ushort)entity.Index;
-                EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
-                entityCommandBuffer.AddComponent(entity, adrLoc);
+                adrMainSystem.EnqueueToRunOnUpdate(() =>
+                {
+                    if (!entityManager.HasComponent<ADRLocalizationData>(entity))
+                    {
+                        EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
+                        entityCommandBuffer.AddComponent(entity, adrLoc);
+                    }
+                });
             }
 
             return adrLoc;

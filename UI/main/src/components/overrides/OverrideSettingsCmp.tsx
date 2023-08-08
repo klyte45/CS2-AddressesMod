@@ -3,7 +3,9 @@ import { DefaultPanelScreen } from "#components/common/DefaultPanelScreen";
 import { Checkbox } from "#components/common/checkbox";
 import Cs2Select from "#components/common/cs2-select";
 import { Cs2SideTabs } from "#components/common/cs2-side-tabs";
+import { DistrictListItem, DistrictRelativeService } from "#service/DistrictRelativeService";
 import { AdrCitywideSettings, NameFileManagementService, SimpleNameEntry } from "#service/NameFileManagementService";
+import { nameToString } from "#utility/name.utils";
 import translate from "#utility/translate";
 import { Component } from "react";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
@@ -20,34 +22,52 @@ const tabsOrder: (TabsNames | undefined)[] = [
 
 type State = {
   simpleFiles?: SimpleNameEntry[];
+  innerContextSimpleFiles?: SimpleNameEntry[];
   currentSettings?: AdrCitywideSettings;
   indexedSimpleFiles?: Record<string, SimpleNameEntry>
-  currentTab: TabsNames
+  currentTab: TabsNames,
+  districts?: DistrictListItem[],
+  selectedDistrict?: DistrictListItem
 }
 
 
 const defaultSetting = { IdString: null, Values: [], Name: translate("overrideSettings.useVanillaOptionLbl") };
+const defaultSettingRoadByDistrict = { IdString: null, Values: [], Name: translate("overrideSettings.useSameAsCityOptionLbl") };
 export class OverrideSettingsCmp extends Component<{}, State> {
   constructor(props) {
     super(props);
     engine.whenReady.then(() => {
       this.listFiles();
       this.getSettings();
-      NameFileManagementService.onCityDataReloaded(() => this.getSettings());
+      this.listDistricts();
+      NameFileManagementService.onCityDataReloaded(() => { this.getSettings(); });
+      DistrictRelativeService.onDistrictChanged(() => this.listDistricts());
     });
     this.state = { currentTab: TabsNames.Roads }
+  }
+
+
+  override componentWillUnmount(): void {
+    NameFileManagementService.offCityDataReloaded();
+    DistrictRelativeService.offDistrictChanged();
   }
   async getSettings() {
     this.setState({ currentSettings: await NameFileManagementService.getCurrentCitywideSettings() });
   }
   async listFiles() {
     const simpleFiles = (await NameFileManagementService.listSimpleNames()).sort((a, b) => a.Name.localeCompare(b.Name))
-    simpleFiles.unshift(defaultSetting)
-    const indexedSimpleFiles = simpleFiles.reduce((p, n) => {
+    const generalSimpleFiles = [defaultSetting, ...simpleFiles]
+    const indexedSimpleFiles = generalSimpleFiles.reduce((p, n) => {
       p[n.IdString] = n;
       return p;
     }, {} as Record<string, SimpleNameEntry>)
-    this.setState({ simpleFiles: simpleFiles, indexedSimpleFiles: indexedSimpleFiles });
+    const innerContextSimpleFiles = [defaultSettingRoadByDistrict, ...simpleFiles]
+    this.setState({ simpleFiles: generalSimpleFiles, indexedSimpleFiles: indexedSimpleFiles, innerContextSimpleFiles: innerContextSimpleFiles });
+  }
+  async listDistricts() {
+    const districtNames = (await DistrictRelativeService.listAllDistricts())?.sort((a, b) => nameToString(a.Name).localeCompare(nameToString(b.Name)))
+
+    this.setState({ districts: districtNames, selectedDistrict: this.state?.selectedDistrict ? districtNames.find(x => x.Entity.Index == this.state.selectedDistrict.Entity.Index) : null });
   }
 
   private getComponents(): Record<TabsNames, JSX.Element> {
@@ -115,6 +135,26 @@ export class OverrideSettingsCmp extends Component<{}, State> {
         <Cs2FormLine title={translate("overrideSettings.useRoadNameAsCargoStationName")}>
           <Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameCargoStation} onValueToggle={(x) => NameFileManagementService.setRoadNameAsNameCargoStation(x)} />
         </Cs2FormLine>
+        <h2>{translate("overrideSettings.perDistrictRoadsFile")}</h2>
+        <Cs2Select
+          options={this.state.districts}
+          getOptionLabel={(x: DistrictListItem) => nameToString(x?.Name)}
+          getOptionValue={(x: DistrictListItem) => x?.Entity.Index.toString()}
+          onChange={(x) => this.setState({ selectedDistrict: x })}
+          value={this.state.selectedDistrict}
+        />
+        {
+          this.state.selectedDistrict && <>
+            <Cs2Select
+              options={this.state.innerContextSimpleFiles}
+              getOptionLabel={(x: SimpleNameEntry) => x?.Name}
+              getOptionValue={(x: SimpleNameEntry) => x?.IdString}
+              onChange={async (x) => await DistrictRelativeService.setRoadNamesFile(this.state.selectedDistrict.Entity, x.IdString)}
+              value={this.state.innerContextSimpleFiles.find(x => x.IdString == this.state.selectedDistrict?.CurrentValue)}
+              defaultValue={defaultSettingRoadByDistrict}
+            />
+          </>
+        }
       </>,
       [TabsNames.District]: <>
         <Cs2FormLine title={translate("overrideSettings.districtsFile")}>

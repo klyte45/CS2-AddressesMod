@@ -7,6 +7,7 @@ import "#styles/roadPrefixRuleEditor.scss";
 import translate from "#utility/translate";
 import { ObjectTyped } from "object-typed";
 import { Component } from "react";
+import { unmount } from "src/react-app";
 
 const basicRule: AdrRoadPrefixRule = {
   MinSpeedKmh: 0,
@@ -30,6 +31,11 @@ export class RoadPrefixCmp extends Component<{}, {
       NameFileManagementService.onCityDataReloaded(() => this.getSettings());
     });
   }
+
+  override componentWillUnmount() {
+    NameFileManagementService.offCityDataReloaded();
+  }
+
   async getSettings() {
     const newVal = (await NameFileManagementService.getCurrentCitywideSettings()).RoadPrefixSetting;
     this.setState({ currentSettings: newVal });
