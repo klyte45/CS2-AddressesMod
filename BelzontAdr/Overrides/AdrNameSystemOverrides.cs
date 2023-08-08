@@ -13,6 +13,7 @@ using Game.UI;
 using Game.UI.Localization;
 using System.Collections.Generic;
 using Unity.Entities;
+using Unity.Mathematics;
 using static Game.UI.NameSystem;
 using AreaType = Game.Zones.AreaType;
 using CargoTransportStation = Game.Buildings.CargoTransportStation;
@@ -340,7 +341,9 @@ namespace BelzontAdr
             Entity refDistrict = default;// entityManager.TryGetComponent<BorderDistrict>(refRoad, out var refDistrictBorders) ? refDistrictBorders.m_Left == default ? refDistrictBorders.m_Right : refDistrictBorders.m_Left : default;
             if (!adrMainSystem.TryGetRoadNamesList(refDistrict, out var roadsNamesList)) return true;
             if (!entityManager.TryGetBuffer<AggregateElement>(entity, true, out var elements)) return true;
-            var refRoad = elements[0].m_Edge;
+            if (!entityManager.TryGetComponent<EdgeGeometry>(elements[0].m_Edge, out var geom0)) return true;
+            if (!entityManager.TryGetComponent<EdgeGeometry>(elements[^1].m_Edge, out var geomLast)) return true;
+            var refRoad = math.length(geom0.m_Bounds.min) < math.length(geomLast.m_Bounds.min) ? elements[0].m_Edge : elements[^1].m_Edge;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;
             if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData)) return true;
             format = adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData).FormatPattern;
