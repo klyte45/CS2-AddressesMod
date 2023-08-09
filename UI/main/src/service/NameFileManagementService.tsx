@@ -67,4 +67,9 @@ export class NameFileManagementService {
     static async setRoadNameAsNameCargoStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setRoadNameAsNameCargoStation", x); }
     static async setDistrictNameAsNameStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setDistrictNameAsNameStation", x); }
     static async setDistrictNameAsNameCargoStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setDistrictNameAsNameCargoStation", x); }
+
+
+    static async exploreToRoadPrefixRulesFileDefault(): Promise<void> { await engine.call("k45::adr.main.exploreToRoadPrefixRulesFileDefault"); }
+    static async saveRoadPrefixRulesFileDefault(): Promise<void> { await engine.call("k45::adr.main.saveRoadPrefixRulesFileDefault"); }
+    static async loadRoadPrefixRulesFileDefault(): Promise<number> { return await engine.call("k45::adr.main.loadRoadPrefixRulesFileDefault"); }
 }

@@ -18,12 +18,16 @@ const basicRule: AdrRoadPrefixRule = {
 
 export class RoadPrefixCmp extends Component<{}, {
   currentSettings?: AdrRoadPrefixSetting;
-  currentEditingRule: number
+  currentEditingRule: number,
+  saveButtonState: number,
+  loadButtonState: number
 }> {
   constructor(props) {
     super(props);
     this.state = {
-      currentEditingRule: -1
+      currentEditingRule: -1,
+      saveButtonState: 0,
+      loadButtonState: 0
     }
     engine.whenReady.then(() => {
       this.getSettings();
@@ -39,7 +43,19 @@ export class RoadPrefixCmp extends Component<{}, {
     const newVal = (await NameFileManagementService.getCurrentCitywideSettings()).RoadPrefixSetting;
     this.setState({ currentSettings: newVal });
   }
-
+  async doSave() {
+    await new Promise((res) => this.setState({ saveButtonState: 1 }, () => res(0)))
+    await NameFileManagementService.saveRoadPrefixRulesFileDefault();
+    await new Promise((res) => this.setState({ saveButtonState: 2 }, () => res(0)))
+    setTimeout(() => this.setState({ saveButtonState: 0 }), 3000)
+  }
+  async doLoad() {
+    await new Promise((res) => this.setState({ loadButtonState: 999 }, () => res(0)))
+    var result = await NameFileManagementService.loadRoadPrefixRulesFileDefault();
+    await new Promise((res) => this.setState({ loadButtonState: result, currentEditingRule: -1 }, () => res(0)))
+    setTimeout(() => this.setState({ loadButtonState: 0 }), 3000)
+    this.getSettings();
+  }
   render() {
     if (!this.state?.currentSettings || !this.state?.currentSettings) return null;
     const buttonRow = <>
@@ -48,6 +64,21 @@ export class RoadPrefixCmp extends Component<{}, {
         this.state.currentSettings.AdditionalRules.push(basicRule);
         NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
       }}>{translate("roadPrefixSettings.addNewRule")}</button>
+      {
+        this.state.saveButtonState != 0 ? <button className="darkestBtn">{translate("roadPrefixSettings.loadFromDefaults")}</button>
+          : this.state.loadButtonState == 0 ? <button className="neutralBtn" onClick={() => this.doLoad()}>{translate("roadPrefixSettings.loadFromDefaults")}</button>
+            : this.state.loadButtonState == 999 ? <button className="darkestBtn">{translate("roadPrefixSettings.loadingWaiting")}</button>
+              : this.state.loadButtonState == -1 ? <button className="negativeBtn">{translate("roadPrefixSettings.loadErrorFileNotFound")}</button>
+                : this.state.loadButtonState == -2 ? <button className="negativeBtn">{translate("roadPrefixSettings.loadErrorCheckLogs")}</button>
+                  : this.state.loadButtonState == 1 ? <button className="positiveBtn">{translate("roadPrefixSettings.loadSuccess")}</button>
+                    : <button className="negativeBtn">{translate("roadPrefixSettings.loadUnknownState")}</button>
+      }
+      {
+        this.state.loadButtonState != 0 ? <button className="darkestBtn">{translate("roadPrefixSettings.saveBtn")}</button>
+          : this.state.saveButtonState == 0 ? <button className="neutralBtn" onClick={() => this.doSave()}>{translate("roadPrefixSettings.saveBtn")}</button>
+            : this.state.saveButtonState == 1 ? <button className="darkestBtn">{translate("roadPrefixSettings.savingWaiting")}</button>
+              : <button className="positiveBtn">{translate("roadPrefixSettings.saved")}</button>
+      }
     </>
     return <DefaultPanelScreen title={translate("roadPrefixSettings.title")} subtitle={translate("roadPrefixSettings.subtitle")} buttonsRowContent={buttonRow}>
       <Cs2FormLine title={translate("roadPrefixSettings.defaultFormat")}>

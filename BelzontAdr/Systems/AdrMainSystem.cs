@@ -8,6 +8,7 @@ using Game;
 using Game.Rendering;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Unity.Entities;
 using Unity.Jobs;
@@ -21,6 +22,8 @@ namespace BelzontAdr
         private AdrCitywideSettings currentCitySettings = new();
         private AdrDistrictsSystem districtsSystem;
         private Queue<Action> actionsToGo;
+
+        private static string DefaultRoadPrefixFilename = Path.Combine(AddressesCs2Mod.ModSettingsRootFolder, "DefaultRoadPrefixRules.xml");
 
         World IBelzontSerializableSingleton<AdrMainSystem>.World => World;
 
@@ -48,6 +51,25 @@ namespace BelzontAdr
             eventCaller("main.setRoadNameAsNameCargoStation", (bool x) => { CurrentCitySettings.RoadNameAsNameCargoStation = x; NotifyChanges(); });
             eventCaller("main.setDistrictNameAsNameStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameStation = x; NotifyChanges(); });
             eventCaller("main.setDistrictNameAsNameCargoStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameCargoStation = x; NotifyChanges(); });
+            eventCaller("main.exploreToRoadPrefixRulesFileDefault", () => RemoteProcess.OpenFolder(DefaultRoadPrefixFilename));
+            eventCaller("main.saveRoadPrefixRulesFileDefault", () => File.WriteAllText(DefaultRoadPrefixFilename, XmlUtils.DefaultXmlSerialize(CurrentCitySettings.RoadPrefixSetting)));
+            eventCaller("main.loadRoadPrefixRulesFileDefault", () =>
+            {
+                if (File.Exists(DefaultRoadPrefixFilename))
+                {
+                    try
+                    {
+                        CurrentCitySettings.RoadPrefixSetting = XmlUtils.DefaultXmlDeserialize<AdrRoadPrefixSetting>(File.ReadAllText(DefaultRoadPrefixFilename));
+                        return 1;
+                    }
+                    catch (Exception e)
+                    {
+                        LogUtils.DoWarnLog($"Error loading defaults road rules file: {e}");
+                        return -2;
+                    }
+                }
+                return -1;
+            });
         }
 
 
