@@ -5,16 +5,15 @@ import { SimpleInput } from "#components/common/input";
 import { AdrRoadPrefixRule, AdrRoadPrefixSetting, NameFileManagementService, RoadFlags } from "#service/NameFileManagementService";
 import "#styles/roadPrefixRuleEditor.scss";
 import translate from "#utility/translate";
-import { ObjectTyped } from "object-typed";
 import { Component } from "react";
-import { unmount } from "src/react-app";
 
 const basicRule: AdrRoadPrefixRule = {
   MinSpeedKmh: 0,
   MaxSpeedKmh: 0,
   RequiredFlagsInt: 0,
   ForbiddenFlagsInt: 0,
-  FormatPattern: "{name}"
+  FormatPattern: "{name}",
+  FullBridge: 0
 }
 
 export class RoadPrefixCmp extends Component<{}, {
@@ -143,6 +142,13 @@ export class RoadPrefixCmp extends Component<{}, {
                     </Cs2FormLine>
                   })
                 }
+                <Cs2FormLine title={translate("roadPrefixSettings.requireFullBridgeState")}>
+                  <TriCheckbox isChecked={currentRule.FullBridge < 0 ? null : currentRule.FullBridge > 0} onValueToggle={(x) => {
+                    currentRule.FullBridge = x === true ? 1 : x === null ? -1 : 0;
+                    NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
+                    return x;
+                  }} />
+                </Cs2FormLine>
               </>
             })[0]}
         </div>

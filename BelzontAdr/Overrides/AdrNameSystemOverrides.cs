@@ -346,7 +346,17 @@ namespace BelzontAdr
             if (!adrMainSystem.TryGetRoadNamesList(refDistrict, out var roadsNamesList)) return true;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;
             if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData)) return true;
-            format = adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData).FormatPattern;
+            var fullBridge = true;
+            for (int i = 0; i < elements.Length; i++)
+            {
+                if (!entityManager.TryGetComponent<Elevation>(elements[i].m_Edge, out var elevData) || elevData.m_Elevation[0] < 6)
+                {
+                    fullBridge = false;
+                    break;
+                }
+            }
+
+            format = adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData, fullBridge).FormatPattern;
 
             name = GetFromList(roadsNamesList, entity);
             return false;

@@ -49,7 +49,7 @@ namespace BelzontAdr
         public AdrRoadPrefixRule FallbackRule { get; set; } = new() { FormatPattern = "{name}" };
         public List<AdrRoadPrefixRule> AdditionalRules { get; set; } = new();
 
-        public AdrRoadPrefixRule GetFirstApplicable(RoadData roadData) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(roadData)) ?? FallbackRule;
+        public AdrRoadPrefixRule GetFirstApplicable(RoadData roadData, bool fullBridge) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(roadData, fullBridge)) ?? FallbackRule;
     }
 
     [XmlRoot("RoadPrefixRule")]
@@ -59,6 +59,7 @@ namespace BelzontAdr
         internal float MaxSpeed { get; set; }
         internal RoadFlags RequiredFlags { get; set; }
         internal RoadFlags ForbiddenFlags { get; set; }
+        internal bool? FullBridgeRequire { get; set; } = null;
         [XmlText]
         public string FormatPattern { get; set; }
 
@@ -74,6 +75,23 @@ namespace BelzontAdr
         [XmlAttribute("ForbiddenFlags")]
         public int ForbiddenFlagsInt { get => (int)ForbiddenFlags; set => ForbiddenFlags = (RoadFlags)value; }
 
-        public bool IsApplicable(RoadData roadData) => roadData.m_SpeedLimit >= MinSpeed && roadData.m_SpeedLimit <= MaxSpeed && (RequiredFlags & roadData.m_Flags) == RequiredFlags && (ForbiddenFlags & roadData.m_Flags) == 0;
+        [XmlAttribute("FullBridge")]
+        public int FullBridge
+        {
+            get => FullBridgeRequire.HasValue ? FullBridgeRequire.Value ? 1 : -1 : 0;
+            set => FullBridgeRequire = value switch
+            {
+                >= 1 => true,
+                <= -1 => false,
+                _ => null
+            };
+        }
+
+        public bool IsApplicable(RoadData roadData, bool fullBridge)
+            => roadData.m_SpeedLimit >= MinSpeed
+            && roadData.m_SpeedLimit <= MaxSpeed
+            && (RequiredFlags & roadData.m_Flags) == RequiredFlags
+            && (ForbiddenFlags & roadData.m_Flags) == 0
+            && (!FullBridgeRequire.HasValue || FullBridgeRequire.Value == fullBridge);
     }
 }
