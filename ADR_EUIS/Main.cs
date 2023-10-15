@@ -10,8 +10,10 @@ namespace ADR_EUIS
 
         public string DisplayName => "Addresses Mod for CS2";
 
-        public string UrlJs => "http://localhost:8500/k45-adr-main.js";//$"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-main.js";//
-        public string UrlCss => "http://localhost:8500/k45-adr-main.css";// $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-main.css";//
+        //public string UrlJs => "http://localhost:8500/k45-adr-main.js";
+        public string UrlJs => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-main.js";
+        //public string UrlCss => "http://localhost:8500/k45-adr-main.css";
+        public string UrlCss => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-main.css";
         public string UrlIcon => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/images/ADR.svg";
 
         public string ModderIdentifier => "k45";

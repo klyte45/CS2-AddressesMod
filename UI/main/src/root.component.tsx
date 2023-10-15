@@ -19,7 +19,7 @@ export default class Root extends Component<{}, {}> {
 
   render() {
     return <>
-      <button style={{ position: "fixed", right: 0, top: 0, zIndex: 999 }} onClick={() => location.reload()}>RELOAD!!!</button>
+      {/* <button style={{ position: "fixed", right: 0, top: 0, zIndex: 999 }} onClick={() => location.reload()}>RELOAD!!!</button> */}
       <Tabs defaultIndex={2}>
         <TabList>
           <Tab>{translate("fileViewer.title")}</Tab>
