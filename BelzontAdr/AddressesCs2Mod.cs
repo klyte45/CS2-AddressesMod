@@ -5,7 +5,7 @@ using Game.UI.Menu;
 using System.Collections.Generic;
 using System.Reflection;
 
-[assembly: AssemblyVersion("0.0.2.1")]
+[assembly: AssemblyVersion("0.0.2.2")]
 namespace BelzontAdr
 {
     public class AddressesCs2Mod : BasicIMod<AdrModData>, IMod
