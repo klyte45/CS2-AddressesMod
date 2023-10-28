@@ -1,10 +1,10 @@
 .adrRulesContainer {
     position: absolute;
-    top: 70px;
+    top: 70rem;
     bottom: 0;
     left: 0;
     right: 0;
-    border-top: 3px solid;
+    border-top: 3rem solid;
     border-top-color: var(--menuBorderColor1);
     overflow: hidden;
 
@@ -15,7 +15,7 @@
         left: 0;
         right: 60%;
         background-color: var(--menuPanel1);
-        border-right: 3px solid;
+        border-right: 3rem solid;
         border-right-color: var(--menuBorderColor1);
         overflow: auto;
 
@@ -27,8 +27,8 @@
 
             button,
             div.buttonPlaceholder {
-                width: 35px;
-                height: 35px;
+                width: 35rem;
+                height: 35rem;
                 padding: 0;
 
                 .moveItemUp,
@@ -62,7 +62,7 @@
         bottom: 0;
         left: 40%;
         right: 0;
-        border-left: 3px solid;
+        border-left: 3rem solid;
         border-left-color: var(--menuBorderColor1);
         background-color: var(--menuPanel1);
         overflow: auto;

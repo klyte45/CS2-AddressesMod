@@ -1,26 +1,26 @@
 .wordsContainer {
     display: flex;
     flex-wrap: wrap;
-    padding-top: 4px;
+    padding-top: 4rem;
 
     .nameToken {
-        border-radius: 999px;
-        padding-left: 10px;
-        padding-right: 10px;
+        border-radius: 999rem;
+        padding-left: 10rem;
+        padding-right: 10rem;
         white-space: nowrap;
         background-color: var(--selectedColorDark);
-        margin: 5px 4px;
+        margin: 5rem 4rem;
         position: relative;
 
         .quantity {
             position: absolute;
-            font-size: 15px;
-            top: -10px;
-            right: -10px;
-            border-radius: 999px;
+            font-size: 15rem;
+            top: -10rem;
+            right: -10rem;
+            border-radius: 999rem;
             background-color: var(--accentColorDark);
-            height: 20.000000px;
-            width: 20.000000px;
+            height: 20.000000rem;
+            width: 20.000000rem;
             text-align: center;
         }
     }
