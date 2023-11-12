@@ -1,12 +1,16 @@
 ﻿using Belzont.Interfaces;
-using System.Xml.Serialization;
+using Game.Modding;
 
 namespace BelzontAdr
 {
-    public class AdrModData : IBasicModData
+    public class AdrModData : BasicModData
     {
-        [XmlAttribute]
-        public bool DebugMode { get; set; }
+        public AdrModData(IMod mod) : base(mod)
+        {
+        }
 
+        public override void OnSetDefaults()
+        {     
+        }
     }
 }

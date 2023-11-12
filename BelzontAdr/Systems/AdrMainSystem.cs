@@ -16,7 +16,7 @@ using Unity.Jobs;
 namespace BelzontAdr
 {
 
-    public class AdrMainSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrMainSystem>
+    public partial class AdrMainSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrMainSystem>
     {
         private Action<string, object[]> m_eventCaller;
         private AdrCitywideSettings currentCitySettings = new();

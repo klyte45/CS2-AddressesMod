@@ -5,10 +5,9 @@ using Game.UI.Menu;
 using System.Collections.Generic;
 using System.Reflection;
 
-[assembly: AssemblyVersion("0.0.2.3")]
 namespace BelzontAdr
 {
-    public class AddressesCs2Mod : BasicIMod<AdrModData>, IMod
+    public class AddressesCs2Mod : BasicIMod, IMod
     {
         public static new AddressesCs2Mod Instance => (AddressesCs2Mod)BasicIMod.Instance;
 
@@ -34,9 +33,9 @@ namespace BelzontAdr
         {
         }
 
-        protected override IEnumerable<OptionsUISystem.Section> GenerateModOptionsSections() => new OptionsUISystem.Section[0];
-
-        public override AdrModData CreateNewModData() => new();
-
+        public override BasicModData CreateSettingsFile()
+        {
+            return new AdrModData(this); 
+        }
     }
 }

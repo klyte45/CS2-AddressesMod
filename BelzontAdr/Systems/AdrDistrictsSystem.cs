@@ -15,7 +15,7 @@ using static Belzont.Utils.NameSystemExtensions;
 
 namespace BelzontAdr
 {
-    public class AdrDistrictsSystem : GameSystemBase, IBelzontBindable
+    public partial class AdrDistrictsSystem : GameSystemBase, IBelzontBindable
     {
         private Action<string, object[]> m_eventCaller;
         private EntityQuery m_districtsUpdatedQuery;
