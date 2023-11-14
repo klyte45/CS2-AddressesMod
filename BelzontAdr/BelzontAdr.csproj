@@ -8,12 +8,12 @@
 		<EntityVersion>1.0.16</EntityVersion>
 		<InstallationPath>C:\Program Files (x86)\Steam\steamapps\common\Cities Skylines II</InstallationPath>
 		<DataPath>$(LOCALAPPDATA)\..\LocalLow\Colossal Order\Cities Skylines II</DataPath>
-    <Version>0.0.3.0</Version>
+    <Version>0.0.3.1</Version>
 		<UnityModProjectPath Condition="'$(Configuration)'=='Editor'">$(ProjectDir)..\..\UnityModsProject</UnityModProjectPath>
 		<UnityModProjectPath Condition="'$(Configuration)'=='Steam'">$(DataPath)\~Tooling~\UnityModsProject</UnityModProjectPath>
 
-		<ModPostProcessorPath Condition="'$(Configuration)'=='Editor'">$(ProjectDir)..\..\..\..\BeverlyHills\Assets\StreamingAssets\~Tooling~\ModPostProcessor.exe</ModPostProcessorPath>
-		<ModPostProcessorPath Condition="'$(Configuration)'=='Steam'">$(InstallationPath)\Cities2_Data\StreamingAssets\~Tooling~\ModPostProcessor.exe</ModPostProcessorPath>
+		<ModPostProcessorPath Condition="'$(Configuration)'=='Editor'">$(ProjectDir)..\..\..\..\BeverlyHills\Assets\StreamingAssets\~Tooling~\ModPostProcessor\ModPostProcessor.exe</ModPostProcessorPath>
+		<ModPostProcessorPath Condition="'$(Configuration)'=='Steam'">$(InstallationPath)\Cities2_Data\StreamingAssets\~Tooling~\ModPostProcessor\ModPostProcessor.exe</ModPostProcessorPath>
 		
 		<ManagedDLLPathEditor>..\..\..\..\BeverlyHills\Library\ScriptAssemblies</ManagedDLLPathEditor>
 		<ManagedDLLPathSteam>$(K45_CS2_ALLROOT)\_Managed DLLs</ManagedDLLPathSteam>
@@ -186,12 +186,15 @@
     
         <!--<Message Condition="Exists('$(ModPostProcessorPath)')" Text="Run post processor: $(ModPostProcessorPath) $(TargetPath) $(ProjectPath) $(UnityModProjectPath)" Importance="high" />
 		    <Message Condition="!Exists('$(ModPostProcessorPath)')" Text="Post processor was not found, please check the path: $(ModPostProcessorPath)" Importance="high" />
-		    <Exec Condition="Exists('$(ModPostProcessorPath)')" Command="&quot;$(ModPostProcessorPath)&quot; &quot;$(TargetPath)&quot; -p &quot;$(ProjectPath)&quot; -r &quot;$(UnityModProjectPath)&quot; -t Windows -t macOS -t Linux -b $(Configuration) -d -v"></Exec>-->
+		    <Exec Condition="Exists('$(ModPostProcessorPath)')" Command="&quot;$(ModPostProcessorPath)&quot; PostProcess &quot;$(TargetPath)&quot; -p &quot;$(ProjectPath)&quot; -r &quot;$(UnityModProjectPath)&quot; -t Windows -t macOS -t Linux -b $(Configuration) -d -v"></Exec>-->
     
 		<Message Text="Copy output to deploy dir @(DeployDir)" Importance="high" />
 		<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="@(DeployDir)" />
 	</Target>
 	<ItemGroup>
+	  <None Update="i18n\i18n.csv">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Update="System">
