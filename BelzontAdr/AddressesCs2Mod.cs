@@ -1,13 +1,32 @@
 ﻿using Belzont.Interfaces;
+using Belzont.Utils;
+using BelzontADR;
+using BepInEx;
 using Game;
 using Game.Modding;
 using Game.UI.Menu;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace BelzontAdr
 {
-    public class AddressesCs2Mod : BasicIMod, IMod
+#if THUNDERSTORE
+    [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+    public class EUIBepinexPlugin : BaseUnityPlugin
+    {
+        public void Awake()
+        {
+            LogUtils.LogsEnabled = false;
+            LogUtils.Logger = Logger;
+            LogUtils.DoInfoLog($"STARTING MOD!");
+            Redirector.PatchAll();
+        }
+    }
+#endif
+    public class AddressesCs2Mod : BasicIMod
+#if THUNDERSTORE 
+        <AdrModData>
+#endif
+        , IMod
     {
         public static new AddressesCs2Mod Instance => (AddressesCs2Mod)BasicIMod.Instance;
 
@@ -32,10 +51,16 @@ namespace BelzontAdr
         public override void DoOnLoad()
         {
         }
+#if THUNDERSTORE
+        public override AdrModData CreateNewModData() => new AdrModData();
+
+        protected override IEnumerable<OptionsUISystem.Section> GenerateModOptionsSections() { yield break; }
+#else
 
         public override BasicModData CreateSettingsFile()
         {
-            return new AdrModData(this); 
+            return new AdrModData(this);
         }
+#endif
     }
 }

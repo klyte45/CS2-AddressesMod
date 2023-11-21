@@ -1,28 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-			<TargetFramework>net48</TargetFramework>
-		
-<LangVersion>9.0</LangVersion>
-<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <TargetExt>.euis</TargetExt>
-	
+		<TargetFramework>net48</TargetFramework>		
+    <LangVersion>9.0</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TargetExt>.euis</TargetExt>	
+		<Configurations>Steam;Editor;Thunderstore</Configurations>
   </PropertyGroup>  
+  
+  <ItemGroup>
+    <DeployDir Include="$(K45_CS2_ALLROOT)\_appdataMods\$(SolutionName)" Condition="'$(Configuration)'!='Thunderstore'" />
+    <DeployDir Include="$(K45_CS2_ALLROOT)\_ThunderstoreOutput\Klyte45-$(SolutionName)" Condition="'$(Configuration)'=='Thunderstore'" />
+  </ItemGroup>
   <Target Name="PostBuild" AfterTargets="AfterBuild">		
 		<ItemGroup>
-			<FilesToCopy Include="$(OutDir)\**\*.*" Exclude="*.pdb" />
-			<DeployDir Include="$(K45_CS2_ALLROOT)\_appdataMods\$(SolutionName)" />
+			<FilesToCopy Include="$(OutDir)\**\*.*" Exclude="$(OutDir)\**\*.pdb" />
 		</ItemGroup>
 		<Message Text="Copy output to deploy dir @(DeployDir)" Importance="high" />	
 	<Copy SourceFiles="@(FilesToCopy)" DestinationFolder="@(DeployDir)" />
-	</Target>  
+	</Target>
   <ItemGroup>
-    <ProjectReference Include="..\BelzontAdr\BelzontAdr.csproj" />
-  </ItemGroup>
+    <ProjectReference Include="..\BelzontAdr\AddressesCS2.csproj" />
+  </ItemGroup>  
   <ItemGroup>
-      <Reference Include="K45EUIS_Ext">
-      <HintPath>$(K45_CS2_ALLROOT)\ExtraUIScreens\ExtraUIScreens\bin\Debug\ExtraUIScreens.dll</HintPath>
+     <Reference Include="K45EUIS_Ext">
+      <HintPath>$(K45_CS2_ALLROOT)\ExtraUIScreens\K45EUIS_Ext\bin\$(Configuration)\net480\K45EUIS_Ext.dll</HintPath>
       <Private>False</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="cohtml.Net">
       <HintPath>$(K45_CS2_ALLROOT)\_Managed DLLs\cohtml.Net.dll</HintPath>
@@ -136,9 +141,6 @@
       <HintPath>$(K45_CS2_ALLROOT)\_Managed DLLs\Colossal.Mono.Cecil.dll</HintPath>
       <Private>False</Private>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

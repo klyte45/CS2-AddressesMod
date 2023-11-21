@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AddressesCS2", "BelzontAdr\AddressesCS2.csproj", "{38911405-6695-0000-9B63-857718EC55C0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5330B027-A5E3-4D07-906B-F12A9F4B272C} = {5330B027-A5E3-4D07-906B-F12A9F4B272C}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ADR_EUIS", "ADR_EUIS\ADR_EUIS.csproj", "{95047D72-078F-4F50-BECE-D41C3228281E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_Frontends", "_Frontends\_Frontends.csproj", "{C066D118-4488-4227-AFD9-1C518B73308F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{38911405-6695-0000-9B63-857718EC55C0} = {38911405-6695-0000-9B63-857718EC55C0}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_Cleaner", "_Cleaner\_Cleaner.csproj", "{5330B027-A5E3-4D07-906B-F12A9F4B272C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Editor|Any CPU = Editor|Any CPU
+		Steam|Any CPU = Steam|Any CPU
+		Thunderstore|Any CPU = Thunderstore|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{38911405-6695-0000-9B63-857718EC55C0}.Editor|Any CPU.ActiveCfg = Editor|Any CPU
+		{38911405-6695-0000-9B63-857718EC55C0}.Editor|Any CPU.Build.0 = Editor|Any CPU
+		{38911405-6695-0000-9B63-857718EC55C0}.Steam|Any CPU.ActiveCfg = Steam|Any CPU
+		{38911405-6695-0000-9B63-857718EC55C0}.Steam|Any CPU.Build.0 = Steam|Any CPU
+		{38911405-6695-0000-9B63-857718EC55C0}.Thunderstore|Any CPU.ActiveCfg = Thunderstore|Any CPU
+		{38911405-6695-0000-9B63-857718EC55C0}.Thunderstore|Any CPU.Build.0 = Thunderstore|Any CPU
+		{95047D72-078F-4F50-BECE-D41C3228281E}.Editor|Any CPU.ActiveCfg = Editor|Any CPU
+		{95047D72-078F-4F50-BECE-D41C3228281E}.Editor|Any CPU.Build.0 = Editor|Any CPU
+		{95047D72-078F-4F50-BECE-D41C3228281E}.Steam|Any CPU.ActiveCfg = Steam|Any CPU
+		{95047D72-078F-4F50-BECE-D41C3228281E}.Steam|Any CPU.Build.0 = Steam|Any CPU
+		{95047D72-078F-4F50-BECE-D41C3228281E}.Thunderstore|Any CPU.ActiveCfg = Thunderstore|Any CPU
+		{95047D72-078F-4F50-BECE-D41C3228281E}.Thunderstore|Any CPU.Build.0 = Thunderstore|Any CPU
+		{C066D118-4488-4227-AFD9-1C518B73308F}.Editor|Any CPU.ActiveCfg = Editor|Any CPU
+		{C066D118-4488-4227-AFD9-1C518B73308F}.Editor|Any CPU.Build.0 = Editor|Any CPU
+		{C066D118-4488-4227-AFD9-1C518B73308F}.Steam|Any CPU.ActiveCfg = Steam|Any CPU
+		{C066D118-4488-4227-AFD9-1C518B73308F}.Steam|Any CPU.Build.0 = Steam|Any CPU
+		{C066D118-4488-4227-AFD9-1C518B73308F}.Thunderstore|Any CPU.ActiveCfg = Thunderstore|Any CPU
+		{C066D118-4488-4227-AFD9-1C518B73308F}.Thunderstore|Any CPU.Build.0 = Thunderstore|Any CPU
+		{5330B027-A5E3-4D07-906B-F12A9F4B272C}.Editor|Any CPU.ActiveCfg = Editor|Any CPU
+		{5330B027-A5E3-4D07-906B-F12A9F4B272C}.Editor|Any CPU.Build.0 = Editor|Any CPU
+		{5330B027-A5E3-4D07-906B-F12A9F4B272C}.Steam|Any CPU.ActiveCfg = Steam|Any CPU
+		{5330B027-A5E3-4D07-906B-F12A9F4B272C}.Steam|Any CPU.Build.0 = Steam|Any CPU
+		{5330B027-A5E3-4D07-906B-F12A9F4B272C}.Thunderstore|Any CPU.ActiveCfg = Thunderstore|Any CPU
+		{5330B027-A5E3-4D07-906B-F12A9F4B272C}.Thunderstore|Any CPU.Build.0 = Thunderstore|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9FF3C253-6321-4A89-ADA6-1A009D663201}
+	EndGlobalSection
+EndGlobal
