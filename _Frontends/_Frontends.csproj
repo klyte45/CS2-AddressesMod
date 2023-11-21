@@ -29,7 +29,7 @@
       <Output TaskParameter="Lines" ItemName="OutputFolder" />
     </ReadLinesFromFile>
     <ItemGroup>
-      <SourceFeMain Include="$(FrontendDir)\dist\**\*.*" />
+      <SourceFeMain Include="$(FrontendDir)\dist\**\*.*" Exclude="$(FrontendDir)\dist\**\*.map" />
     </ItemGroup>
     <PropertyGroup>
       <OutputFolder>%(OutputFolder.Identity)</OutputFolder>

@@ -9,8 +9,8 @@
     <RootNamespace>BelzontADR</RootNamespace>
     <InstallationPath>C:\Program Files (x86)\Steam\steamapps\common\Cities Skylines II</InstallationPath>
     <DataPath>$(LOCALAPPDATA)\..\LocalLow\Colossal Order\Cities Skylines II</DataPath>
-    <ThunderstoreVersion>0.0.4</ThunderstoreVersion>
-    <PdxModsVersion>0.0.4.0</PdxModsVersion>
+    <ThunderstoreVersion>0.0.0</ThunderstoreVersion>
+    <PdxModsVersion>0.0.4.1</PdxModsVersion>
     <Version Condition="'$(Configuration)'=='Thunderstore'">$(ThunderstoreVersion).65534</Version>
     <Version Condition="'$(Configuration)'!='Thunderstore'">$(PdxModsVersion)</Version>
     <PublishTrimmed>True</PublishTrimmed>
@@ -260,7 +260,8 @@
         "website_url": "",
         "description": "$(ThunderstoreDesc)",
         "dependencies": [
-        "BepInEx-BepInExPack-5.4.2100"
+        "BepInEx-BepInExPack-5.4.2100",
+        "Klyte45-ExtraUIScreens-0.0.0"
         ]
         }
       </ManifestContent>
