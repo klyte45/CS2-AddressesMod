@@ -17,6 +17,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_Frontends", "_Frontends\_F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_Cleaner", "_Cleaner\_Cleaner.csproj", "{5330B027-A5E3-4D07-906B-F12A9F4B272C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_Zipper", "..\BelzontTLM\_Zipper\_Zipper.csproj", "{7FA94BDF-78A1-481F-8B41-29ABCB41C4D0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{38911405-6695-0000-9B63-857718EC55C0} = {38911405-6695-0000-9B63-857718EC55C0}
+		{5330B027-A5E3-4D07-906B-F12A9F4B272C} = {5330B027-A5E3-4D07-906B-F12A9F4B272C}
+		{95047D72-078F-4F50-BECE-D41C3228281E} = {95047D72-078F-4F50-BECE-D41C3228281E}
+		{C066D118-4488-4227-AFD9-1C518B73308F} = {C066D118-4488-4227-AFD9-1C518B73308F}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Editor|Any CPU = Editor|Any CPU
@@ -48,6 +56,12 @@ Global
 		{5330B027-A5E3-4D07-906B-F12A9F4B272C}.Steam|Any CPU.Build.0 = Steam|Any CPU
 		{5330B027-A5E3-4D07-906B-F12A9F4B272C}.Thunderstore|Any CPU.ActiveCfg = Thunderstore|Any CPU
 		{5330B027-A5E3-4D07-906B-F12A9F4B272C}.Thunderstore|Any CPU.Build.0 = Thunderstore|Any CPU
+		{7FA94BDF-78A1-481F-8B41-29ABCB41C4D0}.Editor|Any CPU.ActiveCfg = Editor|Any CPU
+		{7FA94BDF-78A1-481F-8B41-29ABCB41C4D0}.Editor|Any CPU.Build.0 = Editor|Any CPU
+		{7FA94BDF-78A1-481F-8B41-29ABCB41C4D0}.Steam|Any CPU.ActiveCfg = Steam|Any CPU
+		{7FA94BDF-78A1-481F-8B41-29ABCB41C4D0}.Steam|Any CPU.Build.0 = Steam|Any CPU
+		{7FA94BDF-78A1-481F-8B41-29ABCB41C4D0}.Thunderstore|Any CPU.ActiveCfg = Thunderstore|Any CPU
+		{7FA94BDF-78A1-481F-8B41-29ABCB41C4D0}.Thunderstore|Any CPU.Build.0 = Thunderstore|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

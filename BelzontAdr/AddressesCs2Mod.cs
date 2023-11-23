@@ -1,6 +1,8 @@
-﻿using Belzont.Interfaces;
+﻿#if THUNDERSTORE
+using AddressesCS2;
+#endif
+using Belzont.Interfaces;
 using Belzont.Utils;
-using BelzontADR;
 using BepInEx;
 using Game;
 using Game.Modding;
