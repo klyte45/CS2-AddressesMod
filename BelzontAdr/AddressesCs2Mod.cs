@@ -1,13 +1,11 @@
 ﻿#if THUNDERSTORE
 using AddressesCS2;
+using BepInEx;
 #endif
 using Belzont.Interfaces;
 using Belzont.Utils;
-using BepInEx;
 using Game;
 using Game.Modding;
-using Game.UI.Menu;
-using System.Collections.Generic;
 
 namespace BelzontAdr
 {
@@ -24,11 +22,7 @@ namespace BelzontAdr
         }
     }
 #endif
-    public class AddressesCs2Mod : BasicIMod
-#if THUNDERSTORE 
-        <AdrModData>
-#endif
-        , IMod
+    public class AddressesCs2Mod : BasicIMod, IMod
     {
         public static new AddressesCs2Mod Instance => (AddressesCs2Mod)BasicIMod.Instance;
 
@@ -53,16 +47,12 @@ namespace BelzontAdr
         public override void DoOnLoad()
         {
         }
-#if THUNDERSTORE
-        public override AdrModData CreateNewModData() => new AdrModData();
 
-        protected override IEnumerable<OptionsUISystem.Section> GenerateModOptionsSections() { yield break; }
-#else
 
         public override BasicModData CreateSettingsFile()
         {
             return new AdrModData(this);
         }
-#endif
+
     }
 }

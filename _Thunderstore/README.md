@@ -1,3 +1,5 @@
+*Updated for version: 1.0.15f1*
+
 # Addresses & Names Mod for Cities Skylines 2
 ## _Name it all as you wish_
 
@@ -28,6 +30,6 @@ You can find several name files at [Addresses Files repository at GitHub](https:
 ## Experimental mod warning!
 This mod may cause issues in the game due their early stage of development. This may be updated in the future until the official platform PDXMods get done and released
 
-## Known issues and bugs
-- Due COUI (game UI framework) limitations, there are no scrollbars in the screens for now - it may be reviewed sometime in the future.
-- Limited support to Portuguese language
+## Support
+
+The most up to date information about installation and known issues and bugs is at the [Addresses CS2 Support Topic](https://discord.com/channels/1024242828114673724/1180516798110638190) inside of [Cities Skylines Modding Discord Server](https://discord.gg/GCH8A2DD9B).
