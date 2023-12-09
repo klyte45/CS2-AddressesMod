@@ -1,0 +1,871 @@
+.info-layout_BVk {
+    position: absolute;
+    top: calc(10rem + var(--floatingToggleSize) + 6rem);
+    left: 10rem;
+    bottom: 6rem
+}
+
+.game-main-screen_TRK.tool-options-visible_EaE .info-layout_BVk {
+    bottom: 222rem
+}
+
+.info-layout_BVk {
+    transition: transform 250ms, opacity 250ms, top 250ms, right 250ms, bottom 250ms, left 250ms;
+    transform: translate(0, 0);
+    opacity: 1
+}
+
+.info-layout_BVk {
+    transform-origin: top 50%
+}
+
+.hide-ui .info-layout_BVk {
+    transform: translate(0, -130rem)
+}
+
+.row_OqM {
+    display: flex;
+    flex-direction: row;
+    align-items: center
+}
+
+.selected-info-panel_iIe {
+    max-height: 100%
+}
+
+
+.panel_YqS {
+    --contentPadding: 0rem;
+    --contentPaddingHorizontal: var(--contentPadding);
+    --contentPaddingVertical: var(--contentPadding);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    border-top-left-radius: var(--panelRadius);
+    border-top-right-radius: var(--panelRadius);
+    border-bottom-left-radius: var(--panelRadius);
+    border-bottom-right-radius: var(--panelRadius);
+    pointer-events: auto
+}
+
+.panel_YqS.collapsed .content_AD7 {
+    display: none;
+    height: 0
+}
+
+.selected-info-panel_gG8 {
+    align-self: flex-start;
+    width: calc(400rem*(.33333 + var(--fontScale)/1.5));
+    max-height: 100%
+}
+
+.selected-info-panel_gG8.gamepad-active_TBU {
+    opacity: .5
+}
+
+.selected-info-panel_gG8.gamepad-active_TBU.focused {
+    opacity: 1
+}
+
+.header_H_U {
+    background-color: var(--panelColorDark);
+    backdrop-filter: var(--panelBlur);
+    color: var(--accentColorNormal)
+}
+
+.collapsible>.header_H_U:hover {
+    background-color: var(--panelColorDark-hover)
+}
+
+.collapsible>.header_H_U:active {
+    background-color: var(--panelColorDark-active)
+}
+
+.header_Bpo:first-child,
+.content_AD7:first-child,
+.footer_pD5:first-child {
+    border-top-left-radius: var(--panelRadius);
+    border-top-right-radius: var(--panelRadius)
+}
+
+.header_Bpo:last-child,
+.content_AD7:last-child,
+.footer_pD5:last-child {
+    border-bottom-left-radius: var(--panelRadius);
+    border-bottom-right-radius: var(--panelRadius)
+}
+
+.title-bar_PF4 {
+    padding: 6rem 10rem;
+    min-height: 36rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center
+}
+
+
+.icon_OVK {
+    margin-right: 10rem;
+    width: 24rem;
+    height: 24rem;
+    --iconColor: white
+}
+
+.title_SVH {
+    text-transform: uppercase
+}
+
+.title_zQN {
+    flex: 1;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+
+.ellipsis-text-input_h9o {
+    position: relative;
+    width: 100%
+}
+
+
+.container_Q9t.focused .input_lbJ,
+.container_Q9t.focused .label_GFm {
+    margin: 0
+}
+
+.input_lbJ:focus {
+    background-color: rgba(28, 37, 52, .72);
+    border-color: rgba(255, 255, 255, .5)
+}
+
+.container_Q9t:hover .label_GFm {
+    background-color: rgba(17, 23, 32, .25);
+    border-color: rgba(255, 255, 255, .25)
+}
+
+.input_lbJ.focused,
+.container_Q9t.focused .label_GFm {
+    background-color: rgba(255, 255, 255, .2);
+    border-top-color: var(--focusedColor);
+    border-left-color: var(--focusedColor);
+    border-bottom-color: var(--focusedColor);
+    border-right-color: var(--focusedColor)
+}
+
+.input_lbJ.focused:focus,
+.container_Q9t.focused .label_GFm:focus {
+    background-color: rgba(28, 37, 52, .72)
+}
+
+.input_MMV {
+    color: var(--textColor);
+    opacity: 0;
+    width: 100%
+}
+
+.input_MMV:focus {
+    opacity: 1
+}
+
+.input_MMV:focus+.label_qsp {
+    visibility: hidden
+}
+
+.input_lbJ,
+.label_GFm {
+    padding: 2rem;
+    border-style: solid;
+    border-top-width: var(--stroke1);
+    border-left-width: var(--stroke1);
+    border-bottom-width: var(--stroke1);
+    border-right-width: var(--stroke1);
+    border-color: rgba(0, 0, 0, 0);
+    border-radius: 3rem;
+    text-align: center;
+    line-height: 1.2em;
+    color: var(--textColorHighlight);
+
+    &.disabled {
+        pointer-events: none;
+    }
+}
+
+.input_lbJ:focus {
+    background-color: rgba(28, 37, 52, .72);
+    border-color: rgba(255, 255, 255, .5)
+}
+
+.label_qsp {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.button_bvQ {
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 50%
+}
+
+.button_bvQ:hover {
+    background-color: rgba(255, 255, 255, .2)
+}
+
+.button_bvQ:active {
+    background-color: rgba(255, 255, 255, .4)
+}
+
+.close-button_wKK {
+    margin-left: 10rem;
+    width: 24rem;
+    height: 24rem;
+    --iconColor: white
+}
+
+.tinted-icon_iKo {
+    background-color: var(--iconColor);
+    mask-size: contain;
+    mask-position: center
+}
+
+.icon_PhD {
+    width: var(--iconWidth);
+    height: var(--iconHeight)
+}
+
+.content_XD5 {
+    background-color: var(--panelColorNormal);
+    backdrop-filter: var(--panelBlur);
+    color: #fff;
+
+    .guic-vertical-slider-wrapper {
+        width: 3rem;
+    }
+}
+
+.content_AD7 {
+    flex: 1;
+    position: relative;
+    padding-top: var(--contentPaddingVertical);
+    padding-bottom: var(--contentPaddingVertical);
+    padding-left: var(--contentPaddingHorizontal);
+    padding-right: var(--contentPaddingHorizontal)
+}
+
+.scrollable_DXr {
+    --contentPadding: 0rem;
+    --contentPaddingHorizontal: var(--contentPadding);
+    --contentPaddingVertical: var(--contentPadding);
+    --scrollbarSize: 16rem;
+    --scrollbarPadding: var(--scrollbarSize);
+    --scrollbarThumbSize: 4rem;
+    --scrollbarMarginHorizontal: 6rem;
+    --scrollbarMarginVertical: 6rem;
+    max-height: 100%;
+    overflow: hidden;
+    position: relative;
+    padding: 0
+}
+
+.content_gqa {
+    max-height: 100%;
+    overflow: hidden;
+    padding-top: var(--contentPaddingVertical);
+    padding-left: var(--contentPaddingHorizontal);
+    padding-right: var(--contentPaddingHorizontal)
+}
+
+
+.scrollable_DXr.x_TNK .content_gqa {
+    overflow-x: auto
+}
+
+.scrollable_DXr.y_SMM .content_gqa {
+    overflow-y: auto
+}
+
+.scrollable_DXr.track-visible-y_RCA .content_gqa {
+    padding-right: var(--scrollbarPadding)
+}
+
+.scrollable_DXr.track-visible-x_qNT .track_e3O.x_TNK {
+    opacity: 1;
+    pointer-events: auto
+}
+
+.scrollable_DXr.track-visible-y_RCA .track_e3O.x_TNK {
+    right: var(--scrollbarSize)
+}
+
+.scrollable_DXr.track-visible-x_qNT .track_e3O.y_SMM {
+    bottom: var(--scrollbarSize)
+}
+
+.scrollable_DXr.track-visible-y_RCA .track_e3O.y_SMM {
+    opacity: 1;
+    pointer-events: auto
+}
+
+.scrollable_gsV {
+    flex: 0 1;
+    --scrollbarPadding: 0rem;
+    --scrollbarMarginVertical: 12rem
+}
+
+.info-section_I7V {
+    padding: 6rem
+}
+
+.info-section_I7V+.info-section_I7V {
+    border-top-style: solid;
+    border-top-width: var(--stroke2);
+    border-top-color: var(--dividerColor)
+}
+
+.description-section_wKs {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    font-size: var(--fontSizeS);
+    text-align: left;
+    color: var(--textColorDimmer);
+    line-height: 1.3;
+    --paragraphGap: 0.375em;
+    padding: 0
+}
+
+.content_Cdk {
+    color: var(--textColorDim);
+    border-top-left-radius: var(--panelRadiusInnerSIP);
+    border-top-right-radius: var(--panelRadiusInnerSIP);
+    border-bottom-left-radius: var(--panelRadiusInnerSIP);
+    border-bottom-right-radius: var(--panelRadiusInnerSIP);
+    --progressTrackColor: rgba(255, 255, 255, 0.1);
+    --progressTextColor: rgba(255, 255, 255, 0.8)
+}
+
+.content_Cdk.focused {
+    --progressTrackColor: rgba(255, 255, 255, 0.5);
+    --progressTextColor: var(--normalTextColorDarkDim)
+}
+
+.disable-focus-highlight_ik3.content_Cdk.focused,
+.disable-focus-highlight_ik3.content_Cdk.focused:hover,
+.disable-focus-highlight_ik3.content_Cdk.focused:active {
+    background-color: rgba(0, 0, 0, 0);
+    --textColor: var(--normalTextColor);
+    --textColorDim: var(--normalTextColorDim);
+    --textColorDimmer: var(--normalTextColorDimmer);
+    --textColorDimmest: var(--normalTextColorDimmest);
+    --textColorDark: var(--normalTextColorDark);
+    --textColorHighlight: var(--normalTextColorHighlight);
+    --textColorHighlightDim: var(--normalTextColorHighlightDim);
+    --textColorHighlightDimmer: var(--normalTextColorHighlightDimmer);
+    --textColorDisabled: var(--normalTextColorDisabled);
+    --textColorLocked: var(--normalTextColorLocked)
+}
+
+.item-focused_FuT.focused,
+.item-focused_FuT.focused:hover,
+.item-focused_FuT.focused:active,
+.item-focused_FuT.focused[disabled],
+.item-focused_FuT.focused[disabled]:hover,
+.item-focused_FuT.focused[disabled]:active {
+    background-color: var(--focusedColor);
+    --textColor: var(--focusedTextColor);
+    --textColorDim: var(--focusedTextColorDim);
+    --textColorDimmer: var(--focusedTextColorDimmer);
+    --textColorDimmest: var(--focusedTextColorDimmest);
+    --textColorDark: var(--focusedTextColorDark);
+    --textColorDarkDim: var(--focusedTextColorDarkDim);
+    --textColorDarkDimmer: var(--focusedTextColorDarkDimmer);
+    --textColorDarkDimmest: var(--focusedTextColorDarkDimmest);
+    --textColorHighlight: var(--focusedTextColorHighlight);
+    --textColorHighlightDim: var(--focusedTextColorHighlightDim);
+    --textColorHighlightDimmer: var(--focusedTextColorHighlightDimmer);
+    --textColorHighlightDimmest: var(--focusedTextColorHighlightDimmest);
+    --textColorDisabled: var(--focusedTextColorDisabled);
+    --textColorLocked: var(--focusedTextColorLocked)
+}
+
+
+.description_jgm {
+    padding: 10rem 16rem
+}
+
+.paragraphs_nbD p+p {
+    margin-top: var(--paragraphGap)
+}
+
+.effects-row_FPw {
+    margin: 0 6rem 10rem 0;
+    color: #8bdb46
+}
+
+.info-row_QQ9 {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: var(--fontSizeS);
+    padding: 5rem 10rem;
+    border-top-left-radius: var(--panelRadiusInnerSIP);
+    border-top-right-radius: var(--panelRadiusInnerSIP);
+    border-bottom-left-radius: var(--panelRadiusInnerSIP);
+    border-bottom-right-radius: var(--panelRadiusInnerSIP);
+    --progressTrackColor: rgba(255, 255, 255, 0.1)
+}
+
+.info-row_QQ9.focused {
+    --progressTrackColor: rgba(255, 255, 255, 0.5)
+}
+
+.info-row_QQ9.link_ICj,
+.tooltipRow_uIh {
+    padding: 0
+}
+
+.left_RyE {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1 0;
+    color: var(--textColorDim)
+}
+
+.left_RyE.link_ICj {
+    padding: 5rem 0 5rem 10rem
+}
+
+.left_RyE.link_ICj.hasIcon_iZ3 {
+    padding-left: 0
+}
+
+.subRow_NJI .left_RyE {
+    color: var(--textColorDimmer)
+}
+
+.uppercase_f0y {
+    text-transform: uppercase
+}
+
+.right_ZUb {
+    flex: 0 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    color: var(--textColorDimmer)
+}
+
+.right_ZUb.link_ICj {
+    border-top-left-radius: var(--panelRadiusInnerSIP);
+    border-top-right-radius: var(--panelRadiusInnerSIP);
+    border-bottom-left-radius: var(--panelRadiusInnerSIP);
+    border-bottom-right-radius: var(--panelRadiusInnerSIP);
+    padding: 5rem 10rem
+}
+
+.right_ZUb.link_ICj:hover {
+    background-color: var(--hoverColorNormal)
+}
+
+.right_ZUb.link_ICj:active {
+    background-color: var(--activeColorNormal)
+}
+
+.right_ZUb.link_ICj.focused {
+    background-color: var(--focusedColor)
+}
+
+.icon_ugE.link_ICj {
+    margin: -9rem 5rem -9rem 10rem
+}
+
+.label_Pzb {
+    font-size: var(--fontSizeXS);
+    color: var(--textColorDimmest);
+    margin-right: 5rem
+}
+
+.disabled__qz {
+    filter: grayscale(100%) contrast(80%) brightness(10%)
+}
+
+.row_Q8R {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between
+}
+
+.icon_hE2 {
+    width: 14rem;
+    height: 14rem;
+    align-self: center;
+    margin-right: 3rem
+}
+
+.ellipsis_C0N {
+    max-width: 175rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.bottom-padding_JS3 {
+    height: var(--contentPaddingVertical)
+}
+
+.scrollable_DXr.track-visible-x_qNT .bottom-padding_JS3 {
+    height: var(--scrollbarPadding)
+}
+
+.footer_Pa9 {
+    background-color: var(--panelColorDark);
+    backdrop-filter: var(--panelBlur);
+    color: var(--accentColorNormal)
+}
+
+.actions-section_X1x {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 5rem 10rem
+}
+
+.button_Z9O {
+    position: relative;
+    width: 36rem;
+    height: 36rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    --iconColor: var(--textColor)
+}
+
+.button_Z9O:hover {
+    background-color: var(--hoverColorNormal)
+}
+
+.button_Z9O:active {
+    background-color: var(--activeColorNormal)
+}
+
+.button_ECf {
+    transition: background-color 50ms
+}
+
+.item_It6 {
+    border-radius: 3rem;
+    color: var(--textColor);
+    --iconColor: var(--textColor);
+    background-color: var(--normalColor)
+}
+
+.item_It6:hover {
+    background-color: var(--hoverColorNormal)
+}
+
+.item_It6:hover.selected {
+    background-color: var(--selectedColor)
+}
+
+.item_It6:hover.focused {
+    background-color: var(--focusedColor)
+}
+
+.item_It6:active {
+    background-color: var(--activeColorNormal)
+}
+
+.item_It6:active.selected {
+    background-color: var(--selectedColor)
+}
+
+.item_It6:active.focused {
+    background-color: var(--focusedColor)
+}
+
+.item_It6.locked_dBl,
+.item_It6[disabled] {
+    color: var(--textColorLocked);
+    --iconColor: var(--textColorLocked)
+}
+
+.item_It6[disabled] {
+    background-color: var(--normalColor)
+}
+
+.icon_Iwk {
+    width: var(--iconWidth);
+    height: var(--iconHeight);
+    filter: drop-shadow(0 0 1rem rgba(0, 0, 0, 0.6))
+}
+
+.item_It6.locked_dBl .icon_Iwk,
+.item_It6[disabled] .icon_Iwk {
+    filter: grayscale(100%) contrast(80%) brightness(20%) drop-shadow(0 0 1rem rgba(0, 0, 0, 0.6))
+}
+
+.item_It6.locked_dBl.selected .icon_Iwk {
+    filter: grayscale(100%) contrast(80%) brightness(50%) drop-shadow(0 0 1rem rgba(0, 0, 0, 0.6))
+}
+
+.item-mouse-states_Fmi:hover {
+    background-color: var(--hoverColorNormal)
+}
+
+.item-mouse-states_Fmi:hover.selected {
+    background-color: var(--selectedColor)
+}
+
+.item-mouse-states_Fmi:hover.focused {
+    background-color: var(--focusedColor)
+}
+
+.item-mouse-states_Fmi:active {
+    background-color: var(--activeColorNormal)
+}
+
+.item-mouse-states_Fmi:active.selected {
+    background-color: var(--selectedColor)
+}
+
+.item-mouse-states_Fmi:active.focused {
+    background-color: var(--focusedColor)
+}
+
+.item-selected_tAM.selected {
+    background-color: var(--selectedColor);
+    --textColor: var(--selectedTextColor);
+    --textColorDim: var(--selectedTextColorDim);
+    --textColorDimmer: var(--selectedTextColorDimmer);
+    --textColorDimmest: var(--selectedTextColorDimmest);
+    --textColorDark: var(--selectedTextColorDark);
+    --textColorDarkDim: var(--selectedTextColorDarkDim);
+    --textColorDarkDimmer: var(--selectedTextColorDarkDimmer);
+    --textColorDarkDimmest: var(--selectedTextColorDarkDimmest);
+    --textColorHighlight: var(--selectedTextColorHighlight);
+    --textColorHighlightDim: var(--selectedTextColorHighlightDim);
+    --textColorHighlightDimmer: var(--selectedTextColorHighlightDimmer);
+    --textColorHighlightDimmest: var(--selectedTextColorHighlightDimmest);
+    --textColorDisabled: var(--selectedTextColorDisabled);
+    --textColorLocked: var(--selectedTextColorLocked)
+}
+
+.item-focused_FuT.focused,
+.item-focused_FuT.focused:hover,
+.item-focused_FuT.focused:active,
+.item-focused_FuT.focused[disabled],
+.item-focused_FuT.focused[disabled]:hover,
+.item-focused_FuT.focused[disabled]:active {
+    background-color: var(--focusedColor);
+    --textColor: var(--focusedTextColor);
+    --textColorDim: var(--focusedTextColorDim);
+    --textColorDimmer: var(--focusedTextColorDimmer);
+    --textColorDimmest: var(--focusedTextColorDimmest);
+    --textColorDark: var(--focusedTextColorDark);
+    --textColorDarkDim: var(--focusedTextColorDarkDim);
+    --textColorDarkDimmer: var(--focusedTextColorDarkDimmer);
+    --textColorDarkDimmest: var(--focusedTextColorDarkDimmest);
+    --textColorHighlight: var(--focusedTextColorHighlight);
+    --textColorHighlightDim: var(--focusedTextColorHighlightDim);
+    --textColorHighlightDimmer: var(--focusedTextColorHighlightDimmer);
+    --textColorHighlightDimmest: var(--focusedTextColorHighlightDimmest);
+    --textColorDisabled: var(--focusedTextColorDisabled);
+    --textColorLocked: var(--focusedTextColorLocked)
+}
+
+.button_xGY+.button_xGY {
+    margin-left: 6rem
+}
+
+
+.icon_Tdt {
+    width: 28rem;
+    height: 28rem
+}
+
+.end-of-line-btn_Kfh {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    justify-content: flex-end
+}
+
+.end-of-line-btn_Kfh .label_y4N {
+    flex: 0 1;
+    margin-right: 6rem;
+    coh-font-fit-mode: shrink;
+    color: #fcaf42
+}
+
+.toggle_LKL {
+    --iconColor: rgb(0, 200, 0)
+}
+
+.toggle_LKL.focused {
+    --iconColor: var(--textColorHighlight)
+}
+
+.toggle_LKL.off_X4Y {
+    --iconColor: #fcaf42
+}
+
+.toggle_LKL.off_X4Y.focused {
+    --iconColor: var(--textColorHighlight)
+}
+
+.notifications-section_cKq {
+    background-color: rgba(19, 28, 48, .75);
+    color: var(--textColor);
+    padding: 6rem 0
+}
+
+.notifications-section_cKq+.notifications-section_cKq {
+    border-top-style: solid;
+    border-top-width: var(--stroke2);
+    border-top-color: var(--dividerColor)
+}
+
+.notification_CLy {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border-top-left-radius: var(--panelRadiusInnerSIP);
+    border-top-right-radius: var(--panelRadiusInnerSIP);
+    border-bottom-left-radius: var(--panelRadiusInnerSIP);
+    border-bottom-right-radius: var(--panelRadiusInnerSIP);
+    padding: 4rem 10rem;
+    margin: 0 6rem
+}
+
+.icon_UMr {
+    width: 26rem;
+    height: 26rem
+}
+
+.label_RLF {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    white-space: nowrap;
+    flex: 1;
+    justify-content: space-between;
+    color: var(--textColorDim);
+    font-size: var(--fontSizeS);
+    margin-left: 10rem
+}
+
+.field_AjF {
+    margin: 1rem 10rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-height: 24rem;
+    font-size: var(--fontSizeS)
+}
+
+.icon_WOc {
+    width: 24rem;
+    height: 24rem;
+    filter: drop-shadow(0 0 1rem rgba(0, 0, 0, 0.2))
+}
+
+.content_dov {
+    margin-left: 5rem;
+    flex: 0 1;
+    line-height: 1.1
+}
+
+.capacity-bar_uEN {
+    padding: 6rem 10rem
+}
+
+.progress-bar_AtB {
+    --progressColor: rgb(55, 158, 46);
+    --trackSize: 20rem;
+    position: relative;
+    height: var(--trackSize);
+    background-color: var(--progressTrackColor);
+    border-top-left-radius: calc(.25*var(--trackSize));
+    border-top-right-radius: calc(.25*var(--trackSize));
+    border-bottom-left-radius: calc(.25*var(--trackSize));
+    border-bottom-right-radius: calc(.25*var(--trackSize));
+    color: var(--progressTextColor);
+    font-size: calc(.55*var(--trackSize));
+    line-height: calc(.7*var(--trackSize))
+}
+
+.progress-bar_AtB.excellent_cFG {
+    --progressColor: #2e9f3f
+}
+
+.progress-bar_AtB.good_f9U {
+    --progressColor: #75b849
+}
+
+.progress-bar_AtB.medium_P2l {
+    --progressColor: #b3b049
+}
+
+.progress-bar_AtB.bad_BRS {
+    --progressColor: #d0924b
+}
+
+.progress-bar_AtB.critical_cqP {
+    --progressColor: #b85050
+}
+
+.label_y0j {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+.progress-bounds_D6g {
+    height: 100%;
+    position: relative;
+    overflow: hidden
+}
+
+.progress_EvF {
+    height: 100%;
+    position: relative;
+    background-color: var(--progressColor);
+    border-top-left-radius: calc(.25*var(--trackSize));
+    border-top-right-radius: calc(.25*var(--trackSize));
+    border-bottom-left-radius: calc(.25*var(--trackSize));
+    border-bottom-right-radius: calc(.25*var(--trackSize))
+}
+
+.progress-bounds_D6g,
+.progress_EvF {
+    transition: width 400ms
+}
+
+.progress-label_DqS {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--textColorDark)
+}

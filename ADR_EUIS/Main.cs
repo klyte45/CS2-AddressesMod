@@ -4,7 +4,7 @@ using System;
 
 namespace ADR_EUIS
 {
-    public class ADR_EUIS_LineViewer : IEUISAppRegister
+    public class ADR_EUIS_Main : IEUISAppRegister
     {
         public string ModAppIdentifier => "main";
 
@@ -14,6 +14,21 @@ namespace ADR_EUIS
         public string UrlJs => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-main.js";
         //public string UrlCss => "http://localhost:8500/k45-adr-main.css";
         public string UrlCss => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-main.css";
+        public string UrlIcon => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/images/ADR.svg";
+
+        public string ModderIdentifier => "k45";
+        public string ModAcronym => "adr";
+    }
+    public class ADR_EUIS_Overlay : IEUISOverlayRegister
+    {
+        public string ModAppIdentifier => "vosTest";
+
+        public string DisplayName => "Addresses Mod for CS2";
+
+        //public string UrlJs => "http://localhost:8500/k45-advanced-tool.js";
+        //public string UrlCss => "http://localhost:8500/k45-advanced-tool.css";
+        public string UrlJs => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-advanced-tool.js";
+        public string UrlCss => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-advanced-tool.css";
         public string UrlIcon => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/images/ADR.svg";
 
         public string ModderIdentifier => "k45";
