@@ -1,6 +1,5 @@
 {
   "name": "@k45/adr-advanced-tool",
- 
   "scripts": {
     "start": "webpack serve --port 8700",
     "start:standalone": "webpack serve --env standalone",
@@ -27,6 +26,7 @@
     "@testing-library/react": "^12.0.0",
     "@types/testing-library__jest-dom": "^5.14.1",
     "babel-jest": "^27.0.6",
+    "clean-webpack-plugin": "^4.0.0",
     "concurrently": "^6.2.1",
     "cross-env": "^7.0.3",
     "eslint": "^7.32.0",
@@ -52,18 +52,20 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@emotion/cache": "file:../_replacements/cache-11.11.0-k45.tgz",
     "@types/jest": "^27.0.1",
     "@types/react": "^17.0.19",
     "@types/react-dom": "^17.0.9",
     "@types/systemjs": "^6.1.1",
     "@types/webpack-env": "^1.16.2",
+    "coherent-gameface-scrollable-container": "^3.1.0",
     "mini-css-extract-plugin": "^2.7.6",
     "object-typed": "^1.0.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-select": "file:../_replacements/react-select-5.7.3-k45.tgz",
     "single-spa": "^5.9.3",
     "single-spa-react": "^4.3.1",
-    "systemjs-webpack-interop": "file:../_replacements/systemjs-webpack-interop-2.3.7-euis.tgz",
-    "coherent-gameface-scrollable-container": "^3.1.0"
+    "systemjs-webpack-interop": "file:../_replacements/systemjs-webpack-interop-2.3.7-euis.tgz"
   }
 }
