@@ -1,6 +1,7 @@
 const { merge } = require("webpack-merge");
 const singleSpaDefaults = require("webpack-config-single-spa-react-ts");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const packageJsonAppName = require('./package.json').name;
 const modderId = /^@([a-z0-9\-]+)\//g.exec(packageJsonAppName)[1]
@@ -18,6 +19,7 @@ module.exports = (webpackConfigEnv, argv) => {
   return merge(defaultConfig, {
     entry: "./src/react-app.tsx",
     plugins: [
+      new CleanWebpackPlugin(),
       new MiniCssExtractPlugin({
         filename: `${modderId}-${appId}.css`
       }),

@@ -21,9 +21,9 @@ namespace ADR_EUIS
     }
     public class ADR_EUIS_Overlay : IEUISOverlayRegister
     {
-        public string ModAppIdentifier => "vosTest";
+        public string ModAppIdentifier => "advanced-tool";
 
-        public string DisplayName => "Addresses Mod for CS2";
+        public string DisplayName => "Addresses Advanced Tool";
 
         //public string UrlJs => "http://localhost:8500/k45-advanced-tool.js";
         //public string UrlCss => "http://localhost:8500/k45-advanced-tool.css";

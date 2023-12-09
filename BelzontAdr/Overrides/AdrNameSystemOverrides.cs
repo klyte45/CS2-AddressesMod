@@ -399,28 +399,20 @@ namespace BelzontAdr
             return false;
         }
 
-        private static ADRLocalizationData GetAdrLocData(Entity entity)
+        private static RandomLocalizationIndex GetAdrLocData(Entity entity)
         {
-            if (!entityManager.TryGetComponent(entity, out ADRLocalizationData adrLoc))
+            if (!entityManager.TryGetBuffer(entity, true, out DynamicBuffer<RandomLocalizationIndex> adrLoc))
             {
-                adrLoc.m_seedReference = (ushort)entity.Index;
-                adrMainSystem.EnqueueToRunOnUpdate(() =>
-                {
-                    if (!entityManager.HasComponent<ADRLocalizationData>(entity))
-                    {
-                        EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
-                        entityCommandBuffer.AddComponent(entity, adrLoc);
-                    }
-                });
+                return default;
             }
 
-            return adrLoc;
+            return adrLoc.Length > 0 ? adrLoc[0] : default;
         }
 
         private static string GetFromList(AdrNameFile namesFile, Entity entityRef)
         {
             var adrLoc = GetAdrLocData(entityRef);
-            string surname = namesFile.Values[adrLoc.m_seedReference % namesFile.Values.Length];
+            string surname = namesFile.Values[(uint)adrLoc.m_Index % namesFile.Values.Length];
             return surname;
         }
 
