@@ -1,10 +1,10 @@
-import { Cs2FormLine } from "#components/common/Cs2FormLine";
-import { DefaultPanelScreen } from "#components/common/DefaultPanelScreen";
-import { TriCheckbox } from "#components/common/checkbox";
-import { SimpleInput } from "#components/common/input";
+import { Cs2FormLine } from "@klyte45/euis-components";
+import { DefaultPanelScreen } from "@klyte45/euis-components";
+import { Cs2TriCheckbox } from "@klyte45/euis-components";
+import { SimpleInput } from "@klyte45/euis-components";
 import { AdrRoadPrefixRule, AdrRoadPrefixSetting, NameFileManagementService, RoadFlags } from "#service/NameFileManagementService";
 import "#styles/roadPrefixRuleEditor.scss";
-import translate from "#utility/translate";
+import { translate } from "@klyte45/euis-components";
 import { Component } from "react";
 
 const basicRule: AdrRoadPrefixRule = {
@@ -169,12 +169,12 @@ export class RoadPrefixCmp extends Component<{}, {
                       NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
                     }
                     return <Cs2FormLine title={translate("roadPrefixSettings.flag" + RoadFlags[x])} key={i}>
-                      <TriCheckbox isChecked={currentValue} onValueToggle={onNewValue} />
+                      <Cs2TriCheckbox isChecked={currentValue} onValueToggle={onNewValue} />
                     </Cs2FormLine>
                   })
                 }
                 <Cs2FormLine title={translate("roadPrefixSettings.requireFullBridgeState")}>
-                  <TriCheckbox isChecked={currentRule.FullBridge < 0 ? null : currentRule.FullBridge > 0} onValueToggle={(x) => {
+                  <Cs2TriCheckbox isChecked={currentRule.FullBridge < 0 ? null : currentRule.FullBridge > 0} onValueToggle={(x) => {
                     currentRule.FullBridge = x === true ? 1 : x === null ? -1 : 0;
                     NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
                     return x;

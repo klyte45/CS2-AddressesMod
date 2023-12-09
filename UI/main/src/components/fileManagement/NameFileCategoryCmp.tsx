@@ -1,7 +1,6 @@
 import { ObjectTyped } from "object-typed";
 import { Component } from "react";
 import TreeView from "react-treeview";
-import "#styles/treeview.scss"
 import { StructureTreeNode } from "./NameFileViewerCmp";
 import { SimpleNameEntry } from "#service/NameFileManagementService";
 

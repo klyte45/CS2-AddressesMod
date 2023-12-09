@@ -1,13 +1,10 @@
-import { DefaultPanelScreen } from "#components/common/DefaultPanelScreen";
-import { replaceArgs } from "#utility/name.utils";
-import translate from "#utility/translate";
+import { ExtendedSimpleNameEntry, NameFileManagementService, SimpleNameEntry } from "#service/NameFileManagementService";
+import "#styles/wordContainer.scss";
+import { DefaultPanelScreen, replaceArgs, translate } from "@klyte45/euis-components";
 import { ObjectTyped } from "object-typed";
 import { Component } from "react";
-import { NameFileEntryCmp } from "./NameFileEntryCmp";
-import "#styles/treeview.scss"
-import "#styles/wordContainer.scss"
-import { ExtendedSimpleNameEntry, NameFileManagementService, SimpleNameEntry } from "#service/NameFileManagementService";
 import { NameFileCategoryCmp } from "./NameFileCategoryCmp";
+import { NameFileEntryCmp } from "./NameFileEntryCmp";
 
 
 export type StructureTreeNode = {
@@ -29,7 +26,7 @@ export class NameFileViewerCmp extends Component<{}, {
     });
   }
   async listFiles(fullReload: boolean = false) {
-    const palettesSaved: SimpleNameEntry[] = fullReload ? await NameFileManagementService.reloadSimpleNames() : await NameFileManagementService.listSimpleNames();
+    const palettesSaved: SimpleNameEntry[] = fullReload ? await NameFileManagementService.reloadDiskSimpleNames() : await NameFileManagementService.listDiskSimpleNames();
     const paletteTree = categorizeFiles(palettesSaved)
     const root = paletteTree[""]?.rootContent ?? []
     delete paletteTree[""];
@@ -65,7 +62,7 @@ export class NameFileViewerCmp extends Component<{}, {
     } else {
       const buttons = <>
         <button className="neutralBtn" onClick={() => this.listFiles(true)}>{translate("fileViewer.reloadFiles")}</button>
-        <button className="neutralBtn" onClick={() => NameFileManagementService.goToSimpleNamesFolder()}>{translate("fileViewer.goToSimpleNamesFolder")}</button>
+        <button className="neutralBtn" onClick={() => NameFileManagementService.goToDiskSimpleNamesFolder()}>{translate("fileViewer.goToSimpleNamesFolder")}</button>
       </>
       return <DefaultPanelScreen
         title={translate("fileViewer.title")}

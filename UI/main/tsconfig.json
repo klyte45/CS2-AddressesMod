@@ -15,9 +15,6 @@
       "#service/*": [
         "src/service/*"
       ],
-      "#utility/*": [
-        "src/utility/*"
-      ],
       "#styles/*": [
         "src/styles/*"
       ],

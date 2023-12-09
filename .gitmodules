@@ -1,3 +1,6 @@
 [submodule "BelzontAdr/BelzontCommons"]
 	path = BelzontAdr/BelzontCommons
 	url = ../BelzontCommons
+[submodule "UI/_replacements"]
+	path = UI/_replacements
+	url = ../Cs2UIUtility

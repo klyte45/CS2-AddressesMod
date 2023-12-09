@@ -1,7 +1,7 @@
 {
   "name": "@k45/adr-main",
   "scripts": {
-    "start": "webpack serve",
+    "start": "webpack serve --port 8700 --env isLocal",
     "start:standalone": "webpack serve --env standalone",
     "build": "concurrently npm:build:*",
     "build:webpack": "webpack --mode=production",
@@ -67,6 +67,7 @@
     "single-spa": "^5.9.3",
     "single-spa-react": "^4.3.1",
     "systemjs-webpack-interop": "file:../_replacements/systemjs-webpack-interop-2.3.7-euis.tgz",
-    "tsconfig-paths-webpack-plugin": "^4.1.0"
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "@klyte45/euis-components": "file:../_replacements/euis-components/"
   }
 }

@@ -1,5 +1,5 @@
 import { Component } from "react";
-import { Cs2FormLine } from "#components/common/Cs2FormLine";
+import { Cs2FormLine } from "@klyte45/euis-components";
 import { ExtendedSimpleNameEntry } from "#service/NameFileManagementService";
 
 

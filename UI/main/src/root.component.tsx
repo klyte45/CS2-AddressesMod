@@ -1,10 +1,8 @@
-///<reference path="euis.d.ts" />
 import { NameFileViewerCmp } from "#components/fileManagement/NameFileViewerCmp";
 import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
 import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import "#styles/main.scss";
-import "#styles/react-tabs.scss";
-import translate from "#utility/translate";
+import { translate } from "@klyte45/euis-components";
 import { Component } from "react";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 

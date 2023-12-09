@@ -1,14 +1,7 @@
-import { Cs2FormLine } from "#components/common/Cs2FormLine";
-import { DefaultPanelScreen } from "#components/common/DefaultPanelScreen";
-import { Checkbox } from "#components/common/checkbox";
-import Cs2Select from "#components/common/cs2-select";
-import { Cs2SideTabs } from "#components/common/cs2-side-tabs";
 import { DistrictListItem, DistrictRelativeService } from "#service/DistrictRelativeService";
 import { AdrCitywideSettings, NameFileManagementService, SimpleNameEntry } from "#service/NameFileManagementService";
-import { nameToString } from "#utility/name.utils";
-import translate from "#utility/translate";
+import { Cs2Checkbox, Cs2FormLine, Cs2Select, Cs2SideTabs, DefaultPanelScreen, nameToString, translate } from "@klyte45/euis-components";
 import { Component } from "react";
-import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 
 enum TabsNames {
   Roads = "Roads",
@@ -105,7 +98,7 @@ export class OverrideSettingsCmp extends Component<{}, State> {
           />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.firstNameAtStart")}>
-          <Checkbox isChecked={() => this.state.currentSettings?.SurnameAtFirst} onValueToggle={(x) => NameFileManagementService.setSurnameAtFirst(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.SurnameAtFirst} onValueToggle={(x) => NameFileManagementService.setSurnameAtFirst(x)} />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.dogsFile")}>
           <Cs2Select
@@ -130,10 +123,10 @@ export class OverrideSettingsCmp extends Component<{}, State> {
           />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useRoadNameAsStationName")}>
-          <Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameStation} onValueToggle={(x) => NameFileManagementService.setRoadNameAsNameStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameStation} onValueToggle={(x) => NameFileManagementService.setRoadNameAsNameStation(x)} />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useRoadNameAsCargoStationName")}>
-          <Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameCargoStation} onValueToggle={(x) => NameFileManagementService.setRoadNameAsNameCargoStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameCargoStation} onValueToggle={(x) => NameFileManagementService.setRoadNameAsNameCargoStation(x)} />
         </Cs2FormLine>
         <h2>{translate("overrideSettings.perDistrictRoadsFile")}</h2>
         <Cs2Select
@@ -168,10 +161,10 @@ export class OverrideSettingsCmp extends Component<{}, State> {
           />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsStationName")}>
-          <Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameStation} onValueToggle={(x) => NameFileManagementService.setDistrictNameAsNameStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameStation} onValueToggle={(x) => NameFileManagementService.setDistrictNameAsNameStation(x)} />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsCargoStationName")}>
-          <Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameCargoStation} onValueToggle={(x) => NameFileManagementService.setDistrictNameAsNameCargoStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameCargoStation} onValueToggle={(x) => NameFileManagementService.setDistrictNameAsNameCargoStation(x)} />
         </Cs2FormLine>
       </>,
     }
