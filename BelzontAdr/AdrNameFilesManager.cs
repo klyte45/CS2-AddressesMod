@@ -10,7 +10,7 @@ namespace BelzontAdr
 
     public class AdrNameFilesManager
     {
-        public static string SimpleNameFolder { get; } = Path.Combine(AddressesCs2Mod.ModSettingsRootFolder, "SimpleNameFiles");
+        public static string NamesetsFolder { get; } = Path.Combine(AddressesCs2Mod.ModSettingsRootFolder, "NamesetsFolder");
         public static AdrNameFilesManager Instance => instance ??= new();
         private static AdrNameFilesManager instance;
 
@@ -19,12 +19,12 @@ namespace BelzontAdr
 
         private AdrNameFilesManager()
         {
-            KFileUtils.EnsureFolderCreation(SimpleNameFolder);
+            KFileUtils.EnsureFolderCreation(NamesetsFolder);
         }
 
         public void ReloadNameFiles()
         {
-            LoadSimpleNamesFiles(SimpleNamesFromFolder, SimpleNameFolder);
+            LoadSimpleNamesFiles(SimpleNamesFromFolder, NamesetsFolder);
         }
 
         private static Dictionary<Guid, AdrNameFile> LoadSimpleNamesFiles(Dictionary<Guid, AdrNameFile> result, string path)
@@ -32,7 +32,7 @@ namespace BelzontAdr
             result.Clear();
             foreach (string filename in Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories))
             {
-                var name = filename.Replace(SimpleNameFolder, "")[1..^4].Replace("\\", "/");
+                var name = filename.Replace(NamesetsFolder, "")[1..^4].Replace("\\", "/");
                 var fileContents = File.ReadAllLines(filename, Encoding.UTF8);
                 AdrNameFile file = new(name, fileContents.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray());
                 result[file.Id] = file;

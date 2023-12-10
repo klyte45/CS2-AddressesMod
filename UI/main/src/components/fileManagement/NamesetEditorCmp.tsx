@@ -41,7 +41,7 @@ export default class NamesetEditorCmp extends Component<Props, State> {
                 <div style={{ textAlign: "center", width: "100%", fontSize: "30rem" } as CSSProperties}>{this.state.namesetData.Name.split("/").pop()}</div>
                 <div className="fullDivider" />
                 <div>
-                    <Input title={translate("namesetsImport.cityImportName")} getValue={() => this.state.namesetData.Name} onValueChanged={(x) => { this.setState({ namesetData: Object.assign(this.state.namesetData, { Name: x }) }); return x; }} />
+                    <Input title={translate("namesetsImport.pathToNameset")} getValue={() => this.state.namesetData.Name} onValueChanged={(x) => { this.setState({ namesetData: Object.assign(this.state.namesetData, { Name: x }) }); return x; }} />
                 </div>
                 <GameScrollComponent>
                     <textarea

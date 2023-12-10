@@ -13,4 +13,7 @@ export class NamesetService {
     static async listCityNamesets(): Promise<SimpleNameEntry[]> { return await engine.call("k45::adr.namesets.listCityNamesets"); }
     static async listLibraryNamesets(): Promise<SimpleNameEntry[]> { return await engine.call("k45::adr.namesets.listLibraryNamesets"); }
     static async reloadLibraryNamesets(): Promise<SimpleNameEntry[]> { return await engine.call("k45::adr.namesets.reloadLibraryNamesets"); }
+    static async exportFromCityToLibrary(IdString: string): Promise<string> { return await engine.call("k45::adr.namesets.exportToLibrary", IdString); }
+
+    static async sortValues(values: string[]): Promise<string[]> { return await engine.call("k45::adr.namesets.sortValues", values); }
 }

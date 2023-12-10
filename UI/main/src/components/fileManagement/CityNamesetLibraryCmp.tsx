@@ -26,6 +26,8 @@ type State = {
     namesetBeingImported?: ExtendedSimpleNameEntry,
     namesetBeingDeleted?: ExtendedSimpleNameEntry,
     namesetBeingEdited?: ExtendedSimpleNameEntry,
+    lastMessage?: string | JSX.Element,
+    isExporting?: boolean
 }
 
 export type NamesetStructureTreeNode = {
@@ -55,11 +57,13 @@ export default class CityNamesetLibraryCmp extends Component<any, State> {
         const namesetTree = categorizeFiles(namesetsSaved)
         const root = namesetTree[""]?.rootContent ?? []
         delete namesetTree[""];
-        this.setState({
-            availableNamesets: {
-                rootContent: root,
-                subtrees: namesetTree
-            }
+        await new Promise((res) => {
+            this.setState({
+                availableNamesets: {
+                    rootContent: root,
+                    subtrees: namesetTree
+                }
+            }, () => res(0))
         });
     }
 
@@ -77,6 +81,10 @@ export default class CityNamesetLibraryCmp extends Component<any, State> {
                     <div style={{ display: "flex", position: "absolute", left: 5, right: 5, bottom: 5, flexDirection: "row-reverse" }}>
                         <button className="positiveBtn " onClick={() => this.setState({ currentScreen: Screen.PALETTE_IMPORT_LIB })}>{translate("cityNamesetsLibrary.importFromLibrary")}</button>
                         <button className="positiveBtn " onClick={() => this.goToEdit()}>{translate("cityNamesetsLibrary.createNewNameset")}</button>
+                        <div style={{ display: "flex", flex: "5 5" }}></div>
+                        <div style={{ display: "flex", alignItems: "center", paddingLeft: "10rem" }}>
+                            {this.state.lastMessage}
+                        </div>
                     </div>
                 </>;
             case Screen.PALETTE_IMPORT_LIB:
@@ -95,6 +103,7 @@ export default class CityNamesetLibraryCmp extends Component<any, State> {
         return <>
             <button className="negativeBtn" onClick={() => this.goToDelete(x)}>{translate("cityNamesetsLibrary.deleteNameset")}</button>
             <button className="neutralBtn" onClick={() => this.goToEdit(x)}>{translate("cityNamesetsLibrary.editNameset")}</button>
+            <button className="neutralBtn" disabled={this.state.isExporting} onClick={() => this.doExport(x)}>{translate("cityNamesetsLibrary.exportNameset")}</button>
         </>
     }
     goToEdit(x?: ExtendedSimpleNameEntry): void {
@@ -114,6 +123,26 @@ export default class CityNamesetLibraryCmp extends Component<any, State> {
         await new Promise((resp) => this.setState({ currentScreen: Screen.AWAITING_ACTION }, () => resp(undefined)));
         await NamesetService.deleteNamesetFromCity(x.IdString);
         this.setState({ currentScreen: Screen.DEFAULT });
+    }
+
+    async doExport(x: ExtendedSimpleNameEntry) {
+        await new Promise((resp) => this.setState({ isExporting: true }, () => resp(undefined)));
+        const exportResult = await NamesetService.exportFromCityToLibrary(x.IdString);
+        if (exportResult == null) {
+            this.setState({
+                isExporting: false,
+                lastMessage: <div style={{ color: "var(--warningColor)" }}>{translate("cityNamesetsLibrary.anErrorHasOccurredOnExporting")}</div>
+            }, () => setTimeout(() => this.setState({ lastMessage: null }), 7000))
+        } else {
+            await this.updateNamesets();
+            this.setState({
+                isExporting: false,
+                lastMessage: <div>{translate("cityNamesetsLibrary.fileExportedToLocation")}<br
+                /><div style={{ color: "var(--positiveColor)" }}>{exportResult}</div></div>
+            }, () => setTimeout(() => this.setState({ lastMessage: null }), 7000))
+
+        }
+
     }
 
     async doImportNameset({ namesetData, namesetNameImport }: { namesetData: ExtendedSimpleNameEntry; namesetNameImport: string; }) {

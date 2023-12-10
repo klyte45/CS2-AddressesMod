@@ -59,6 +59,7 @@ export default class NamesetLibrarySelectorCmp extends Component<Props, State> {
             {this.props.onBack && <div style={{ display: "flex", position: "absolute", left: 5, right: 5, bottom: 5, flexDirection: "row-reverse" }}>
                 <button className="negativeBtn" onClick={this.props.onBack}>{translate("namesetsLibrary.back")}</button>
                 <button className="neutralBtn" onClick={() => NamesetService.reloadLibraryNamesets().then(() => this.updateNamesets())}>{translate("namesetsLibrary.reloadFiles")}</button>
+                <button className="neutralBtn" onClick={() => NamesetService.goToDiskSimpleNamesFolder()}>{translate("namesetsLibrary.goToLibraryFolder")}</button>
             </div>}
         </>;
     }

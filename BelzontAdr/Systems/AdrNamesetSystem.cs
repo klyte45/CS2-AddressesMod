@@ -8,10 +8,15 @@ using Game;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text;
 using System.Xml.Serialization;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine;
 using static BelzontAdr.AdrNameFile;
 
 namespace BelzontAdr
@@ -30,12 +35,14 @@ namespace BelzontAdr
             eventCaller("namesets.addNamesetToCity", AddCityNameset);
             eventCaller("namesets.deleteFromCity", DeleteCityNameset);
             eventCaller("namesets.updateForCity", UpdateCityNameset);
+            eventCaller("namesets.exportToLibrary", ExportToLibrary);
             eventCaller("namesets.reloadLibraryNamesets", () =>
             {
                 AdrNameFilesManager.Instance.ReloadNameFiles();
                 return AdrNameFilesManager.Instance.SimpleNamesFromFolder.Values.ToArray();
             });
-            eventCaller("namesets.goToSimpleNamesFolder", () => { RemoteProcess.OpenFolder(AdrNameFilesManager.SimpleNameFolder); });
+            eventCaller("namesets.goToSimpleNamesFolder", () => { RemoteProcess.OpenFolder(AdrNameFilesManager.NamesetsFolder); });
+            eventCaller("namesets.sortValues", SortValues);
         }
 
         private Action<string, object[]> eventCaller;
@@ -89,6 +96,19 @@ namespace BelzontAdr
                 OnCityNamesetsChanged();
             }
         }
+        private string ExportToLibrary(string guid)
+        {
+            var parsedGuid = new Guid(guid);
+            if (CityNamesets.ContainsKey(parsedGuid))
+            {
+                var file = CityNamesets[parsedGuid];
+                var destinationFilename = Path.Combine(new string[] { AdrNameFilesManager.NamesetsFolder, "Exported" }.Concat(file.Name.Split("/").Select(x => string.Concat(x.Split(Path.GetInvalidFileNameChars())))).ToArray()) + $"_{parsedGuid}.txt";
+                KFileUtils.EnsureFolderCreation(Path.GetDirectoryName(destinationFilename));
+                File.WriteAllLines(destinationFilename, file.Values);
+                return destinationFilename.Replace(AdrNameFilesManager.NamesetsFolder, "<NamesetsFolder>");
+            }
+            return null;
+        }
         private void UpdateCityNameset(string guid, string name, string[] names)
         {
             var targetGuid = new Guid(guid);
@@ -103,6 +123,30 @@ namespace BelzontAdr
             {
                 LogUtils.DoWarnLog($"Nameset not found in the city! {guid}");
             }
+        }
+
+        private string[] SortValues(string[] values)
+        {
+            static string RemoveDiacritics(string text)
+            {
+                if (text != null)
+                    text = WebUtility.HtmlDecode(text);
+
+                string formD = text.Normalize(NormalizationForm.FormD);
+                StringBuilder sb = new StringBuilder();
+
+                foreach (char ch in formD)
+                {
+                    UnicodeCategory uc = CharUnicodeInfo.GetUnicodeCategory(ch);
+                    if (uc != UnicodeCategory.NonSpacingMark)
+                    {
+                        sb.Append(ch);
+                    }
+                }
+
+                return sb.ToString().Normalize(NormalizationForm.FormC);
+            }
+            return values.OrderBy(RemoveDiacritics, StringComparer.Create(CultureInfo.CurrentUICulture, true)).ToArray();
         }
 
         #region Serialization
