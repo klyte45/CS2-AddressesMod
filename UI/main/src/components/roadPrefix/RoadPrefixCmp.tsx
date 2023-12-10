@@ -4,7 +4,7 @@ import { Cs2TriCheckbox } from "@klyte45/euis-components";
 import { SimpleInput } from "@klyte45/euis-components";
 import { AdrRoadPrefixRule, AdrRoadPrefixSetting, NameFileManagementService, RoadFlags } from "#service/NameFileManagementService";
 import "#styles/roadPrefixRuleEditor.scss";
-import { translate } from "@klyte45/euis-components";
+import { translate } from "#utility/translate";
 import { Component } from "react";
 
 const basicRule: AdrRoadPrefixRule = {

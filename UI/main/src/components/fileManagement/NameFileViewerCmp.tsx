@@ -1,10 +1,11 @@
 import { ExtendedSimpleNameEntry, NameFileManagementService, SimpleNameEntry } from "#service/NameFileManagementService";
 import "#styles/wordContainer.scss";
-import { DefaultPanelScreen, replaceArgs, translate } from "@klyte45/euis-components";
+import { DefaultPanelScreen, replaceArgs } from "@klyte45/euis-components";
 import { ObjectTyped } from "object-typed";
 import { Component } from "react";
 import { NameFileCategoryCmp } from "./NameFileCategoryCmp";
 import { NameFileEntryCmp } from "./NameFileEntryCmp";
+import { translate } from "#utility/translate";
 
 
 export type StructureTreeNode = {

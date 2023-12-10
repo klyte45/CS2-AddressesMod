@@ -18,6 +18,9 @@
       "#styles/*": [
         "src/styles/*"
       ],
+      "#utility/*": [
+        "src/utility/*"
+      ],
     }
   },
   "include": ["src/**/*"],

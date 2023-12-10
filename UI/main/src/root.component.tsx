@@ -2,7 +2,7 @@ import { NameFileViewerCmp } from "#components/fileManagement/NameFileViewerCmp"
 import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
 import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import "#styles/main.scss";
-import { translate } from "@klyte45/euis-components";
+import { translate } from "#utility/translate";
 import { Component } from "react";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 

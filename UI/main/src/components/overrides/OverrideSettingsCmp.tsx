@@ -1,7 +1,8 @@
 import { DistrictListItem, DistrictRelativeService } from "#service/DistrictRelativeService";
 import { AdrCitywideSettings, NameFileManagementService, SimpleNameEntry } from "#service/NameFileManagementService";
-import { Cs2Checkbox, Cs2FormLine, Cs2Select, Cs2SideTabs, DefaultPanelScreen, nameToString, translate } from "@klyte45/euis-components";
+import { Cs2Checkbox, Cs2FormLine, Cs2Select, Cs2SideTabs, DefaultPanelScreen, nameToString } from "@klyte45/euis-components";
 import { Component } from "react";
+import { translate } from "#utility/translate";
 
 enum TabsNames {
   Roads = "Roads",
@@ -180,7 +181,8 @@ export class OverrideSettingsCmp extends Component<{}, State> {
         tabsOrder={[TabsNames.Citizen, TabsNames.Roads, TabsNames.District]}
         currentTab={this.state.currentTab}
         onSetCurrentTab={(newTab) => this.setState({ currentTab: newTab })}
-        i18nTitlePrefix={"overrideSettings.tab"} />
+        i18nTitlePrefix={"overrideSettings.tab"}
+        translateFn={translate} />
 
 
     </DefaultPanelScreen>;
