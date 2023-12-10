@@ -9,6 +9,7 @@ using Game.Rendering;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Unity.Entities;
 using Unity.Jobs;
 
@@ -61,6 +62,7 @@ namespace BelzontAdr
                 }
                 return -1;
             });
+            eventCaller("main.atob", (string x) => Encoding.UTF8.GetString(Convert.FromBase64String(x)));
         }
 
 

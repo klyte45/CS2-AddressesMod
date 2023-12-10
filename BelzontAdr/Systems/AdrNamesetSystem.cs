@@ -43,9 +43,10 @@ namespace BelzontAdr
             });
             eventCaller("namesets.goToSimpleNamesFolder", () => { RemoteProcess.OpenFolder(AdrNameFilesManager.NamesetsFolder); });
             eventCaller("namesets.sortValues", SortValues);
+            eventCaller("namesets.goToGitHubRepo", () => { Application.OpenURL("https://github.com/klyte45/AddressesFiles"); });
         }
 
-        private Action<string, object[]> eventCaller;
+        private Action<string, object[]> eventCaller; 
         public void SetupCaller(Action<string, object[]> eventCaller)
         {
             this.eventCaller = eventCaller;

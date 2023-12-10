@@ -17,3 +17,4 @@ export class NamesetService {
 
     static async sortValues(values: string[]): Promise<string[]> { return await engine.call("k45::adr.namesets.sortValues", values); }
 }
+
