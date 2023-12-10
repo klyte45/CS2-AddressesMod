@@ -1,24 +1,60 @@
 ﻿using Colossal;
+using Colossal.OdinSerializer.Utilities;
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Xml.Serialization;
 
 namespace BelzontAdr
 {
     public class AdrNameFile
     {
-        private static readonly Guid baseGuid = new(214, 657, 645, 54, 54, 45, 45, 45, 45, 45, 45);
 
         internal readonly Guid Id;
-        public readonly string Name;
-        public readonly string[] Values;
+        public string Name;
+        public readonly List<string> Values;
+        internal Guid Checksum { get; private set; }
         public string IdString => Id.ToString();
 
-        public AdrNameFile(string name, string[] values)
+        public AdrNameFile(string name, IEnumerable<string> values)
         {
-            Id = GuidUtils.Create(baseGuid, name);
             Name = name;
-            Values = values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray() ?? new string[0];
+            Values = values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new();
+            RecalculateChecksum();
+            Id = GuidUtils.Create(Checksum, name);
+        }
+        private void RecalculateChecksum()
+        {
+            Checksum = GuidUtils.Create(default, Values.SelectMany(x => Encoding.UTF8.GetBytes(x)).ToArray());
+        }
+        private AdrNameFile(Guid id, string name, IEnumerable<string> values)
+        {
+            Id = id;
+            Name = name;
+            Values = values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new();
+            RecalculateChecksum();
+        }
+        public static AdrNameFile FromXML(AdrNameFileXML xml)
+        {
+            return new AdrNameFile(xml.Id, xml.Name, xml.Values.Where(x => !x.IsNullOrWhitespace()));
+        }
+        public AdrNameFileXML ToXML()
+        {
+            return new AdrNameFileXML()
+            {
+                Id = Id,
+                Name = Name,
+                Values = Values
+            };
+        }
+
+        [XmlRoot("AdrNameFileXML")]
+        public class AdrNameFileXML
+        {
+            public Guid Id { get; set; }
+            public List<string> Values { get; set; }
+            public string Name { get; set; }
         }
     }
 }

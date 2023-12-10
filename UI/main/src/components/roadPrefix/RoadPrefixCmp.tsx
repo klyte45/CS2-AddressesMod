@@ -2,7 +2,7 @@ import { Cs2FormLine } from "@klyte45/euis-components";
 import { DefaultPanelScreen } from "@klyte45/euis-components";
 import { Cs2TriCheckbox } from "@klyte45/euis-components";
 import { SimpleInput } from "@klyte45/euis-components";
-import { AdrRoadPrefixRule, AdrRoadPrefixSetting, NameFileManagementService, RoadFlags } from "#service/NameFileManagementService";
+import { AdrRoadPrefixRule, AdrRoadPrefixSetting, NamingRulesService, RoadFlags } from "#service/NamingRulesService";
 import "#styles/roadPrefixRuleEditor.scss";
 import { translate } from "#utility/translate";
 import { Component } from "react";
@@ -31,27 +31,27 @@ export class RoadPrefixCmp extends Component<{}, {
     }
     engine.whenReady.then(() => {
       this.getSettings();
-      NameFileManagementService.onCityDataReloaded(() => this.getSettings());
+      NamingRulesService.onCityDataReloaded(() => this.getSettings());
     });
   }
 
   override componentWillUnmount() {
-    NameFileManagementService.offCityDataReloaded();
+    NamingRulesService.offCityDataReloaded();
   }
 
   async getSettings() {
-    const newVal = (await NameFileManagementService.getCurrentCitywideSettings()).RoadPrefixSetting;
+    const newVal = (await NamingRulesService.getCurrentCitywideSettings()).RoadPrefixSetting;
     this.setState({ currentSettings: newVal });
   }
   async doSave() {
     await new Promise((res) => this.setState({ saveButtonState: 1 }, () => res(0)))
-    await NameFileManagementService.saveRoadPrefixRulesFileDefault();
+    await NamingRulesService.saveRoadPrefixRulesFileDefault();
     await new Promise((res) => this.setState({ saveButtonState: 2 }, () => res(0)))
     setTimeout(() => this.setState({ saveButtonState: 0 }), 3000)
   }
   async doLoad() {
     await new Promise((res) => this.setState({ loadButtonState: 999 }, () => res(0)))
-    var result = await NameFileManagementService.loadRoadPrefixRulesFileDefault();
+    var result = await NamingRulesService.loadRoadPrefixRulesFileDefault();
     await new Promise((res) => this.setState({ loadButtonState: result, currentEditingRule: -1 }, () => res(0)))
     setTimeout(() => this.setState({ loadButtonState: 0 }), 3000)
     this.getSettings();
@@ -62,7 +62,7 @@ export class RoadPrefixCmp extends Component<{}, {
       <button className="neutralBtn" onClick={() => {
         this.state.currentSettings.AdditionalRules ??= [];
         this.state.currentSettings.AdditionalRules.push(basicRule);
-        NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
+        NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings);
       }}>{translate("roadPrefixSettings.addNewRule")}</button>
       {
         this.state.saveButtonState != 0 ? <button className="darkestBtn">{translate("roadPrefixSettings.loadFromDefaults")}</button>
@@ -86,7 +86,7 @@ export class RoadPrefixCmp extends Component<{}, {
           getValue={() => this.state.currentSettings.FallbackRule?.FormatPattern}
           onValueChanged={(x) => {
             this.state.currentSettings.FallbackRule = { FormatPattern: x } as AdrRoadPrefixRule
-            NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
+            NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings);
             return x;
           }}
           isValid={(newVal) => newVal?.includes("{name}")} />
@@ -100,9 +100,9 @@ export class RoadPrefixCmp extends Component<{}, {
                 key={i}
                 onClick={() => { this.setState({ currentEditingRule: i }) }} title={`${i + 1}: ${x.FormatPattern}`}
                 className={i == this.state.currentEditingRule ? "selectedItem" : ""}>
-                {i > 0 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i - 1); NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings) }}><div className="moveItemUp" /></button> : <div className="buttonPlaceholder"></div>}
-                {i < arr.length - 1 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i + 1); NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings) }}><div className="moveItemDown" /></button> : <div className="buttonPlaceholder"></div>}
-                <button className="negativeBtn" onClick={() => { arr.splice(i, 1); NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings) }}><div className="removeItem" /></button>
+                {i > 0 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i - 1); NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings) }}><div className="moveItemUp" /></button> : <div className="buttonPlaceholder"></div>}
+                {i < arr.length - 1 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i + 1); NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings) }}><div className="moveItemDown" /></button> : <div className="buttonPlaceholder"></div>}
+                <button className="negativeBtn" onClick={() => { arr.splice(i, 1); NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings) }}><div className="removeItem" /></button>
               </Cs2FormLine>
             })
           }
@@ -118,7 +118,7 @@ export class RoadPrefixCmp extends Component<{}, {
                     onValueChanged={(x) => {
                       if (!x?.includes("{name}")) return currentRule?.FormatPattern
                       currentRule.FormatPattern = x;
-                      NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
+                      NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings);
                       return x;
                     }}
                     isValid={(newVal) => newVal?.includes("{name}")} />
@@ -129,7 +129,7 @@ export class RoadPrefixCmp extends Component<{}, {
                     onValueChanged={(x) => {
                       if (!x.match(/^[0-9]+$/)) return currentRule.MinSpeedKmh.toFixed();
                       currentRule.MinSpeedKmh = parseInt(x)
-                      NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
+                      NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings);
                       return x;
                     }}
                     isValid={(newVal) => !!newVal.match(/^[0-9]+$/) && currentRule.MaxSpeedKmh >= parseInt(newVal)}
@@ -143,7 +143,7 @@ export class RoadPrefixCmp extends Component<{}, {
                       const newVal = parseInt(x);
                       if (!x.match(/^[0-9]+$/) || currentItem.MinSpeedKmh > newVal) return currentItem.MaxSpeedKmh.toFixed();
                       currentItem.MaxSpeedKmh = newVal
-                      NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
+                      NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings);
                       return newVal.toFixed();
                     }}
                     isValid={(newVal) => newVal.match(/^[0-9]+$/) && currentRule.MinSpeedKmh <= parseInt(newVal)}
@@ -166,7 +166,7 @@ export class RoadPrefixCmp extends Component<{}, {
                         currentRule.ForbiddenFlagsInt &= ~targetVal;
                         currentRule.RequiredFlagsInt &= ~targetVal;
                       }
-                      NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
+                      NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings);
                     }
                     return <Cs2FormLine title={translate("roadPrefixSettings.flag" + RoadFlags[x])} key={i}>
                       <Cs2TriCheckbox isChecked={currentValue} onValueToggle={onNewValue} />
@@ -176,7 +176,7 @@ export class RoadPrefixCmp extends Component<{}, {
                 <Cs2FormLine title={translate("roadPrefixSettings.requireFullBridgeState")}>
                   <Cs2TriCheckbox isChecked={currentRule.FullBridge < 0 ? null : currentRule.FullBridge > 0} onValueToggle={(x) => {
                     currentRule.FullBridge = x === true ? 1 : x === null ? -1 : 0;
-                    NameFileManagementService.setAdrRoadPrefixSetting(this.state.currentSettings);
+                    NamingRulesService.setAdrRoadPrefixSetting(this.state.currentSettings);
                     return x;
                   }} />
                 </Cs2FormLine>

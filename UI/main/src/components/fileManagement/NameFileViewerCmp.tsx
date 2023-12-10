@@ -1,4 +1,4 @@
-import { ExtendedSimpleNameEntry, NameFileManagementService, SimpleNameEntry } from "#service/NameFileManagementService";
+import { ExtendedSimpleNameEntry, NamingRulesService, SimpleNameEntry } from "#service/NamingRulesService";
 import "#styles/wordContainer.scss";
 import { DefaultPanelScreen, replaceArgs } from "@klyte45/euis-components";
 import { ObjectTyped } from "object-typed";
@@ -6,6 +6,7 @@ import { Component } from "react";
 import { NameFileCategoryCmp } from "./NameFileCategoryCmp";
 import { NameFileEntryCmp } from "./NameFileEntryCmp";
 import { translate } from "#utility/translate";
+import { NamesetService } from "#service/NamesetService";
 
 
 export type StructureTreeNode = {
@@ -27,7 +28,7 @@ export class NameFileViewerCmp extends Component<{}, {
     });
   }
   async listFiles(fullReload: boolean = false) {
-    const palettesSaved: SimpleNameEntry[] = fullReload ? await NameFileManagementService.reloadDiskSimpleNames() : await NameFileManagementService.listDiskSimpleNames();
+    const palettesSaved: SimpleNameEntry[] = fullReload ? await NamesetService.reloadLibraryNamesets() : await NamesetService.listLibraryNamesets();
     const paletteTree = categorizeFiles(palettesSaved)
     const root = paletteTree[""]?.rootContent ?? []
     delete paletteTree[""];
@@ -54,7 +55,7 @@ export class NameFileViewerCmp extends Component<{}, {
       return <DefaultPanelScreen title={item._CurrName ?? item.Name} subtitle={replaceArgs(translate("fileViewer.fileCounterFmt"), { count: item.Values.length.toFixed() })}
         buttonsRowContent={buttons}>
         <div className="wordsContainer">{
-          ObjectTyped.entries(groupedValues).sort((a, b) => (b[1] - a[1]) || a[0].localeCompare(b[0])).map((x, i) => <div className="nameToken" key={i} >
+          ObjectTyped.entries(groupedValues).sort((a, b) => (b[1] - a[1]) || a[0].localeCompare(b[0], undefined, { sensitivity: "base" })).map((x, i) => <div className="nameToken" key={i} >
             <div className="value">{x[0]}</div>
             {x[1] > 1 && <div className="quantity">{x[1]}</div>}
           </div>)
@@ -63,7 +64,7 @@ export class NameFileViewerCmp extends Component<{}, {
     } else {
       const buttons = <>
         <button className="neutralBtn" onClick={() => this.listFiles(true)}>{translate("fileViewer.reloadFiles")}</button>
-        <button className="neutralBtn" onClick={() => NameFileManagementService.goToDiskSimpleNamesFolder()}>{translate("fileViewer.goToSimpleNamesFolder")}</button>
+        <button className="neutralBtn" onClick={() => NamesetService.goToDiskSimpleNamesFolder()}>{translate("fileViewer.goToSimpleNamesFolder")}</button>
       </>
       return <DefaultPanelScreen
         title={translate("fileViewer.title")}

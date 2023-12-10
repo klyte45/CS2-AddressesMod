@@ -14,7 +14,7 @@ namespace BelzontAdr
         public static AdrNameFilesManager Instance => instance ??= new();
         private static AdrNameFilesManager instance;
 
-        internal readonly Dictionary<Guid, AdrNameFile> SimpleNamesDict = new();
+        internal readonly Dictionary<Guid, AdrNameFile> SimpleNamesFromFolder = new();
 
 
         private AdrNameFilesManager()
@@ -24,7 +24,7 @@ namespace BelzontAdr
 
         public void ReloadNameFiles()
         {
-            LoadSimpleNamesFiles(SimpleNamesDict, SimpleNameFolder);
+            LoadSimpleNamesFiles(SimpleNamesFromFolder, SimpleNameFolder);
         }
 
         private static Dictionary<Guid, AdrNameFile> LoadSimpleNamesFiles(Dictionary<Guid, AdrNameFile> result, string path)
@@ -36,7 +36,7 @@ namespace BelzontAdr
                 var fileContents = File.ReadAllLines(filename, Encoding.UTF8);
                 AdrNameFile file = new(name, fileContents.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray());
                 result[file.Id] = file;
-                LogUtils.DoLog($"LOADED Files at {path} ({filename} - GUID: {file.Id}) QTT: {result[file.Id].Values.Length}");
+                LogUtils.DoLog($"LOADED Files at {path} ({filename} - GUID: {file.Id}) QTT: {result[file.Id].Values.Count}");
             }
             return result;
         }

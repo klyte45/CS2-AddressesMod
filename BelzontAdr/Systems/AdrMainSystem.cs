@@ -9,7 +9,6 @@ using Game.Rendering;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Unity.Entities;
 using Unity.Jobs;
 
@@ -22,6 +21,7 @@ namespace BelzontAdr
         private AdrCitywideSettings currentCitySettings = new();
         private AdrDistrictsSystem districtsSystem;
         private Queue<Action> actionsToGo;
+        private AdrNamesetSystem namesetSystem;
 
         private static string DefaultRoadPrefixFilename = Path.Combine(AddressesCs2Mod.ModSettingsRootFolder, "DefaultRoadPrefixRules.xml");
 
@@ -29,15 +29,6 @@ namespace BelzontAdr
 
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
-            eventCaller("main.listSimpleNames", () => AdrNameFilesManager.Instance.SimpleNamesDict.Values.ToArray());
-            eventCaller("main.reloadSimpleNames", () =>
-            {
-                AdrNameFilesManager.Instance.ReloadNameFiles();
-                OnChangedDistrictNameGenerationRules();
-                OnChangedRoadNameGenerationRules();
-                return AdrNameFilesManager.Instance.SimpleNamesDict.Values.ToArray();
-            });
-            eventCaller("main.goToSimpleNamesFolder", () => { RemoteProcess.OpenFolder(AdrNameFilesManager.SimpleNameFolder); });
             eventCaller("main.getCurrentCitywideSettings", () => CurrentCitySettings);
             eventCaller("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.SurnameAtFirst = x; NotifyChanges(); });
             eventCaller("main.setCitizenMaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenMaleNameOverridesStr = x; NotifyChanges(); });
@@ -96,6 +87,7 @@ namespace BelzontAdr
             base.OnCreate();
             districtsSystem = World.GetOrCreateSystemManaged<AdrDistrictsSystem>();
             actionsToGo = new Queue<Action>();
+            namesetSystem = World.GetOrCreateSystemManaged<AdrNamesetSystem>();
         }
 
         internal void EnqueueToRunOnUpdate(Action a)
@@ -105,7 +97,7 @@ namespace BelzontAdr
 
 
         internal void OnChangedRoadNameGenerationRules() => typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
-        private void OnChangedDistrictNameGenerationRules() => typeof(AreaBufferSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AreaBufferSystem>(), new object[0]);
+        internal void OnChangedDistrictNameGenerationRules() => typeof(AreaBufferSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AreaBufferSystem>(), new object[0]);
         public AdrCitywideSettings CurrentCitySettings
         {
             get => currentCitySettings; private set
@@ -121,17 +113,17 @@ namespace BelzontAdr
         }
 
         #region Citizen & Pet
-        internal bool TryGetNameList(bool male, out AdrNameFile names) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(male ? CurrentCitySettings.CitizenMaleNameOverrides : CurrentCitySettings.CitizenFemaleNameOverrides, out names);
+        internal bool TryGetNameList(bool male, out AdrNameFile names) => namesetSystem.GetForGuid(male ? CurrentCitySettings.CitizenMaleNameOverrides : CurrentCitySettings.CitizenFemaleNameOverrides, out names);
 
-        internal bool TryGetSurnameList(out AdrNameFile listForSurnames) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.CitizenSurnameOverrides, out listForSurnames);
+        internal bool TryGetSurnameList(out AdrNameFile listForSurnames) => namesetSystem.GetForGuid(CurrentCitySettings.CitizenSurnameOverrides, out listForSurnames);
 
         internal string DoNameFormat(string name, string surname) => CurrentCitySettings.SurnameAtFirst ? $"{surname} {name}" : $"{name} {surname}";
-        internal bool TryGetDogsList(out AdrNameFile listForDogs) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.CitizenDogOverrides, out listForDogs);
+        internal bool TryGetDogsList(out AdrNameFile listForDogs) => namesetSystem.GetForGuid(CurrentCitySettings.CitizenDogOverrides, out listForDogs);
         internal bool TryGetRoadNamesList(Entity district, out AdrNameFile roadsNamesList)
-            => (EntityManager.TryGetComponent<ADRDistrictData>(district, out var adrDistrict) && adrDistrict.m_roadsNamesId != Guid.Empty && AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(adrDistrict.m_roadsNamesId, out roadsNamesList))
-                || AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.DefaultRoadNameOverrides, out roadsNamesList);
+            => (EntityManager.TryGetComponent<ADRDistrictData>(district, out var adrDistrict) && adrDistrict.m_roadsNamesId != Guid.Empty && namesetSystem.GetForGuid(adrDistrict.m_roadsNamesId, out roadsNamesList))
+                || namesetSystem.GetForGuid(CurrentCitySettings.DefaultRoadNameOverrides, out roadsNamesList);
 
-        internal bool TryGetDistrictNamesList(out AdrNameFile districtNamesList) => AdrNameFilesManager.Instance.SimpleNamesDict.TryGetValue(CurrentCitySettings.DefaultDistrictNameOverrides, out districtNamesList);
+        internal bool TryGetDistrictNamesList(out AdrNameFile districtNamesList) => namesetSystem.GetForGuid(CurrentCitySettings.DefaultDistrictNameOverrides, out districtNamesList);
         #endregion
 
 

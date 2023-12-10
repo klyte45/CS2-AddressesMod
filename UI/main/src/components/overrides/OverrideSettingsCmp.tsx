@@ -1,8 +1,9 @@
 import { DistrictListItem, DistrictRelativeService } from "#service/DistrictRelativeService";
-import { AdrCitywideSettings, NameFileManagementService, SimpleNameEntry } from "#service/NameFileManagementService";
+import { AdrCitywideSettings, NamingRulesService, SimpleNameEntry } from "#service/NamingRulesService";
 import { Cs2Checkbox, Cs2FormLine, Cs2Select, Cs2SideTabs, DefaultPanelScreen, nameToString } from "@klyte45/euis-components";
 import { Component } from "react";
 import { translate } from "#utility/translate";
+import { NamesetService } from "#service/NamesetService";
 
 enum TabsNames {
   Roads = "Roads",
@@ -34,7 +35,7 @@ export class OverrideSettingsCmp extends Component<{}, State> {
       this.listFiles();
       this.getSettings();
       this.listDistricts();
-      NameFileManagementService.onCityDataReloaded(() => { this.getSettings(); });
+      NamingRulesService.onCityDataReloaded(() => { this.getSettings(); });
       DistrictRelativeService.onDistrictChanged(() => this.listDistricts());
     });
     this.state = { currentTab: TabsNames.Roads }
@@ -42,14 +43,14 @@ export class OverrideSettingsCmp extends Component<{}, State> {
 
 
   override componentWillUnmount(): void {
-    NameFileManagementService.offCityDataReloaded();
+    NamingRulesService.offCityDataReloaded();
     DistrictRelativeService.offDistrictChanged();
   }
   async getSettings() {
-    this.setState({ currentSettings: await NameFileManagementService.getCurrentCitywideSettings() });
+    this.setState({ currentSettings: await NamingRulesService.getCurrentCitywideSettings() });
   }
   async listFiles() {
-    const simpleFiles = (await NameFileManagementService.listSimpleNames()).sort((a, b) => a.Name.localeCompare(b.Name))
+    const simpleFiles = (await NamesetService.listCityNamesets()).sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: "base" }))
     const generalSimpleFiles = [defaultSetting, ...simpleFiles]
     const indexedSimpleFiles = generalSimpleFiles.reduce((p, n) => {
       p[n.IdString] = n;
@@ -59,7 +60,7 @@ export class OverrideSettingsCmp extends Component<{}, State> {
     this.setState({ simpleFiles: generalSimpleFiles, indexedSimpleFiles: indexedSimpleFiles, innerContextSimpleFiles: innerContextSimpleFiles });
   }
   async listDistricts() {
-    const districtNames = (await DistrictRelativeService.listAllDistricts())?.sort((a, b) => nameToString(a.Name).localeCompare(nameToString(b.Name)))
+    const districtNames = (await DistrictRelativeService.listAllDistricts())?.sort((a, b) => nameToString(a.Name).localeCompare(nameToString(b.Name), undefined, { sensitivity: "base" }))
 
     this.setState({ districts: districtNames, selectedDistrict: this.state?.selectedDistrict ? districtNames.find(x => x.Entity.Index == this.state.selectedDistrict.Entity.Index) : null });
   }
@@ -73,7 +74,7 @@ export class OverrideSettingsCmp extends Component<{}, State> {
             options={Object.values(this.state.simpleFiles)}
             getOptionLabel={(x: SimpleNameEntry) => x?.Name}
             getOptionValue={(x: SimpleNameEntry) => x?.IdString}
-            onChange={(x) => NameFileManagementService.setCitizenMaleNameOverridesStr(x.IdString)}
+            onChange={(x) => NamingRulesService.setCitizenMaleNameOverridesStr(x.IdString)}
             value={this.state.indexedSimpleFiles[this.state.currentSettings.CitizenMaleNameOverridesStr]}
             defaultValue={defaultSetting}
           />
@@ -83,7 +84,7 @@ export class OverrideSettingsCmp extends Component<{}, State> {
             options={Object.values(this.state.simpleFiles)}
             getOptionLabel={(x: SimpleNameEntry) => x?.Name}
             getOptionValue={(x: SimpleNameEntry) => x?.IdString}
-            onChange={(x) => NameFileManagementService.setCitizenFemaleNameOverridesStr(x.IdString)}
+            onChange={(x) => NamingRulesService.setCitizenFemaleNameOverridesStr(x.IdString)}
             value={this.state.indexedSimpleFiles[this.state.currentSettings.CitizenFemaleNameOverridesStr]}
             defaultValue={defaultSetting}
           />
@@ -93,20 +94,20 @@ export class OverrideSettingsCmp extends Component<{}, State> {
             options={Object.values(this.state.simpleFiles)}
             getOptionLabel={(x: SimpleNameEntry) => x?.Name}
             getOptionValue={(x: SimpleNameEntry) => x?.IdString}
-            onChange={(x) => NameFileManagementService.setCitizenSurnameOverridesStr(x.IdString)}
+            onChange={(x) => NamingRulesService.setCitizenSurnameOverridesStr(x.IdString)}
             value={this.state.indexedSimpleFiles[this.state.currentSettings.CitizenSurnameOverridesStr]}
             defaultValue={defaultSetting}
           />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.firstNameAtStart")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.SurnameAtFirst} onValueToggle={(x) => NameFileManagementService.setSurnameAtFirst(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.SurnameAtFirst} onValueToggle={(x) => NamingRulesService.setSurnameAtFirst(x)} />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.dogsFile")}>
           <Cs2Select
             options={Object.values(this.state.simpleFiles)}
             getOptionLabel={(x: SimpleNameEntry) => x?.Name}
             getOptionValue={(x: SimpleNameEntry) => x?.IdString}
-            onChange={(x) => NameFileManagementService.setCitizenDogOverridesStr(x.IdString)}
+            onChange={(x) => NamingRulesService.setCitizenDogOverridesStr(x.IdString)}
             value={this.state.indexedSimpleFiles[this.state.currentSettings.CitizenDogOverridesStr]}
             defaultValue={defaultSetting}
           />
@@ -118,16 +119,16 @@ export class OverrideSettingsCmp extends Component<{}, State> {
             options={Object.values(this.state.simpleFiles)}
             getOptionLabel={(x: SimpleNameEntry) => x?.Name}
             getOptionValue={(x: SimpleNameEntry) => x?.IdString}
-            onChange={(x) => NameFileManagementService.setDefaultRoadNameOverridesStr(x.IdString)}
+            onChange={(x) => NamingRulesService.setDefaultRoadNameOverridesStr(x.IdString)}
             value={this.state.indexedSimpleFiles[this.state.currentSettings.DefaultRoadNameOverridesStr]}
             defaultValue={defaultSetting}
           />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useRoadNameAsStationName")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameStation} onValueToggle={(x) => NameFileManagementService.setRoadNameAsNameStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameStation(x)} />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useRoadNameAsCargoStationName")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameCargoStation} onValueToggle={(x) => NameFileManagementService.setRoadNameAsNameCargoStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameCargoStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameCargoStation(x)} />
         </Cs2FormLine>
         <h2>{translate("overrideSettings.perDistrictRoadsFile")}</h2>
         <Cs2Select
@@ -156,16 +157,16 @@ export class OverrideSettingsCmp extends Component<{}, State> {
             options={Object.values(this.state.simpleFiles)}
             getOptionLabel={(x: SimpleNameEntry) => x?.Name}
             getOptionValue={(x: SimpleNameEntry) => x?.IdString}
-            onChange={(x) => NameFileManagementService.setDefaultDistrictNameOverridesStr(x.IdString)}
+            onChange={(x) => NamingRulesService.setDefaultDistrictNameOverridesStr(x.IdString)}
             value={this.state.indexedSimpleFiles[this.state.currentSettings.DefaultDistrictNameOverridesStr]}
             defaultValue={defaultSetting}
           />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsStationName")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameStation} onValueToggle={(x) => NameFileManagementService.setDistrictNameAsNameStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameStation} onValueToggle={(x) => NamingRulesService.setDistrictNameAsNameStation(x)} />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsCargoStationName")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameCargoStation} onValueToggle={(x) => NameFileManagementService.setDistrictNameAsNameCargoStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameCargoStation} onValueToggle={(x) => NamingRulesService.setDistrictNameAsNameCargoStation(x)} />
         </Cs2FormLine>
       </>,
     }

@@ -2,7 +2,7 @@ import { ObjectTyped } from "object-typed";
 import { Component } from "react";
 import TreeView from "react-treeview";
 import { StructureTreeNode } from "./NameFileViewerCmp";
-import { SimpleNameEntry } from "#service/NameFileManagementService";
+import { SimpleNameEntry } from "#service/NamingRulesService";
 
 export class NameFileCategoryCmp extends Component<{ entry: StructureTreeNode; doWithPaletteData: (x: SimpleNameEntry, i: number) => JSX.Element }, { showing: Record<string, boolean>; }> {
 

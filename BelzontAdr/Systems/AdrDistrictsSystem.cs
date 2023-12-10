@@ -23,6 +23,7 @@ namespace BelzontAdr
         private NameSystem nameSystem;
         private EndFrameBarrier m_EndFrameBarrier;
         private AdrMainSystem mainSystem;
+        private AdrNamesetSystem namesetSystem;
         private bool dirtyDistricts;
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
@@ -89,6 +90,7 @@ namespace BelzontAdr
             nameSystem = World.GetExistingSystemManaged<NameSystem>();
             m_EndFrameBarrier = World.GetOrCreateSystemManaged<EndFrameBarrier>();
             mainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
+            namesetSystem = World.GetOrCreateSystemManaged<AdrNamesetSystem>();
         }
         private struct DistrictListItem
         {
@@ -137,7 +139,7 @@ namespace BelzontAdr
                         dirtyDistricts = true;
                     }
                 }
-                else if (Guid.TryParse(fileGuid, out var guid) && AdrNameFilesManager.Instance.SimpleNamesDict.ContainsKey(guid))
+                else if (Guid.TryParse(fileGuid, out var guid) && namesetSystem.GetForGuid(guid, out _))
                 {
 
                     var hasComponent = EntityManager.TryGetComponent<ADRDistrictData>(district, out var adrDistrict);

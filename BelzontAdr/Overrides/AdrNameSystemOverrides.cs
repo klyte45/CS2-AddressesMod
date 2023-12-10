@@ -412,7 +412,7 @@ namespace BelzontAdr
         private static string GetFromList(AdrNameFile namesFile, Entity entityRef)
         {
             var adrLoc = GetAdrLocData(entityRef);
-            string surname = namesFile.Values[(uint)adrLoc.m_Index % namesFile.Values.Length];
+            string surname = namesFile.Values[(int)((uint)adrLoc.m_Index % namesFile.Values.Count)];
             return surname;
         }
 
