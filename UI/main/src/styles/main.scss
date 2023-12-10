@@ -171,6 +171,15 @@ div.tableRegularRow {
     border-top-color: var(--menuBorderColor1);
     border-bottom-color: var(--menuBorderColor1);
 
+    gameface-scrollable-container {
+        display: flex;
+        flex: 1;
+
+        .guic-scrollable-container{
+            padding-right: 16rem;
+        }
+    }
+
     .sectionColumnContainer {
         display: flex;
 
@@ -364,6 +373,6 @@ button,
 
 @import '@klyte45/euis-components/src/styles/cs2-form-style.scss';
 
-input {
+input, textarea {
     @extend %cs2-form-style
 }

@@ -1,4 +1,4 @@
-import { NameFileViewerCmp } from "#components/fileManagement/NameFileViewerCmp";
+import CityNamesetLibraryCmp from "#components/fileManagement/CityNamesetLibraryCmp";
 import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
 import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import "#styles/main.scss";
@@ -20,12 +20,12 @@ export default class Root extends Component<{}, {}> {
       {/* <button style={{ position: "fixed", right: 0, top: 0, zIndex: 999 }} onClick={() => location.reload()}>RELOAD!!!</button> */}
       <Tabs defaultIndex={2}>
         <TabList>
-          <Tab>{translate("fileViewer.title")}</Tab>
+          <Tab>{translate("namesetManagement.title")}</Tab>
           <Tab>{translate("overrideSettings.title")}</Tab>
           <Tab>{translate("roadPrefixSettings.title")}</Tab>
         </TabList>
         <TabPanel>
-          <NameFileViewerCmp />
+          <CityNamesetLibraryCmp />
         </TabPanel>
         <TabPanel>
           <OverrideSettingsCmp />

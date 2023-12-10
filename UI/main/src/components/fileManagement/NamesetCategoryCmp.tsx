@@ -1,10 +1,10 @@
 import { ObjectTyped } from "object-typed";
 import { Component } from "react";
 import TreeView from "react-treeview";
-import { StructureTreeNode } from "./NameFileViewerCmp";
 import { SimpleNameEntry } from "#service/NamingRulesService";
+import { StructureTreeNode } from "#utility/categorizeFiles";
 
-export class NameFileCategoryCmp extends Component<{ entry: StructureTreeNode; doWithPaletteData: (x: SimpleNameEntry, i: number) => JSX.Element }, { showing: Record<string, boolean>; }> {
+export class NamesetCategoryCmp extends Component<{ entry: StructureTreeNode; doWithNamesetData: (x: SimpleNameEntry, i: number) => JSX.Element }, { showing: Record<string, boolean>; }> {
 
     constructor(props) {
         super(props);
@@ -21,9 +21,9 @@ export class NameFileCategoryCmp extends Component<{ entry: StructureTreeNode; d
                     key={i}
                     collapsed={!this.state.showing[x[0]]}
                     onClick={() => this.toggle(x[0])}
-                ><NameFileCategoryCmp entry={x[1]} doWithPaletteData={this.props.doWithPaletteData} /></TreeView>;
+                ><NamesetCategoryCmp entry={x[1]} doWithNamesetData={this.props.doWithNamesetData} /></TreeView>;
             })}
-            {this.props.entry.rootContent.sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: "base" })).map(this.props.doWithPaletteData)}
+            {this.props.entry.rootContent.sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: "base" })).map(this.props.doWithNamesetData)}
         </>;
     }
     toggle(item: string): void {
