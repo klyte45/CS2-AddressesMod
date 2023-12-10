@@ -1,13 +1,13 @@
-///<reference path="euis.d.ts" />
-
-import { VanillaSideWindow } from "./components/VanillaSideWindow";
-import { VanillaWindowActionButton } from "./components/VanillaWindowActionButton";
-import { VanillaWindowSectionDescription } from "./components/VanillaWindowSectionDescription";
-import { VanillaWindowSectionIconNotification } from "./components/VanillaWindowSectionIconNotification";
-import { VanillaWindowSectionMainKeyValue } from "./components/VanillaWindowSectionMainKeyValue";
-import { VanillaWindowSectionProgressBar } from "./components/VanillaWindowSectionProgressBar";
-import { VanillaWindowSectionSubKeyValue } from "./components/VanillaWindowSectionSubKeyValue";
-import { VanillaWindowToggleButton } from "./components/VanillaWindowToggleButton";
+import {
+  VanillaSideWindow,
+  VanillaWindowActionButton,
+  VanillaWindowSectionDescription,
+  VanillaWindowSectionIconNotification,
+  VanillaWindowSectionMainKeyValue,
+  VanillaWindowSectionProgressBar,
+  VanillaWindowSectionSubKeyValue,
+  VanillaWindowToggleButton
+} from "@klyte45/euis-components";
 
 export default function Root(props) {
   return <>
@@ -25,7 +25,58 @@ export default function Root(props) {
           "Lorem ipsum dolor sit amet, consectetu...",
           "Mauris in nulla lorem. Donec neque nun...",
           "Lorem ipsum dolor sit amet, consectetu...",
-          
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+          "Lorem ipsum dolor sit amet, consectetu...",
+
         ]}
           effects={[
             { icon: "Media/Gamepad/PS/PS_X.svg", description: "Cross!!!!" },

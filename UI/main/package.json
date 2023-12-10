@@ -1,7 +1,7 @@
 {
   "name": "@k45/adr-main",
   "scripts": {
-    "start": "webpack serve --port 8700 --env isLocal",
+    "start": "webpack serve --port 8715 --env isLocal",
     "start:standalone": "webpack serve --env standalone",
     "build": "concurrently npm:build:*",
     "build:webpack": "webpack --mode=production",
