@@ -1,4 +1,4 @@
-﻿#if THUNDERSTORE
+﻿#if BEPINEX_CS2
 using AddressesCS2;
 using BepInEx;
 #endif
@@ -9,7 +9,7 @@ using Game.Modding;
 
 namespace BelzontAdr
 {
-#if THUNDERSTORE
+#if BEPINEX_CS2
     [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     public class EUIBepinexPlugin : BaseUnityPlugin
     {
