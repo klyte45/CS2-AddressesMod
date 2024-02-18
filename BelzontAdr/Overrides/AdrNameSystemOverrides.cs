@@ -1,4 +1,5 @@
-﻿using Belzont.Utils;
+﻿using Belzont.Interfaces;
+using Belzont.Utils;
 using Colossal.Entities;
 using Game;
 using Game.Areas;
@@ -9,6 +10,7 @@ using Game.Companies;
 using Game.Net;
 using Game.Prefabs;
 using Game.SceneFlow;
+using Game.Simulation;
 using Game.UI;
 using Game.UI.Localization;
 using System.Collections.Generic;
@@ -412,8 +414,10 @@ namespace BelzontAdr
         private static string GetFromList(AdrNameFile namesFile, Entity entityRef)
         {
             var adrLoc = GetAdrLocData(entityRef);
-            string surname = namesFile.Values[(int)((uint)adrLoc.m_Index % namesFile.Values.Count)];
-            return surname;
+            var index = Random.CreateFromIndex((uint)(adrMainSystem.CurrentCitySettings.CityNameSeeds + adrLoc.m_Index));
+            string name = namesFile.Values[index.NextInt(namesFile.Values.Count)];
+            if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Generated name for Entity {entityRef}: '{name}' ({adrLoc.m_Index})");
+            return name;
         }
 
         private static string GetGenderedLastNameId(Entity household, bool male)

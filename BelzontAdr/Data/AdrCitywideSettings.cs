@@ -1,4 +1,5 @@
 ﻿
+using Colossal.Randomization;
 using Game.Prefabs;
 using System;
 using System.Collections.Generic;
@@ -41,6 +42,8 @@ namespace BelzontAdr
         public bool DistrictNameAsNameCargoStation { get; set; }
         [XmlAttribute("DistrictNameAsNameStation")]
         public bool DistrictNameAsNameStation { get; set; }
+
+        public long CityNameSeeds { get; set; } = new System.Random().NextLong();
     }
 
     [XmlRoot("RoadPrefixSetting")]

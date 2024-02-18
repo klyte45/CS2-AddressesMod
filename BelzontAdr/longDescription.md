@@ -1,4 +1,4 @@
-# Addresses & Names Mod for Cities Skylines 2
+# Addresses &amp; Names Mod for Cities Skylines 2
 ## _Name it all as you wish_
 
 This mod is the successor of the CS1 homonimous mod. It allows changing vanilla methods of name generation to custom name sets.

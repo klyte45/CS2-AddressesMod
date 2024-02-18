@@ -65,8 +65,6 @@ namespace BelzontAdr
             eventCaller("main.atob", (string x) => Encoding.UTF8.GetString(Convert.FromBase64String(x)));
         }
 
-
-
         public void SetupCaller(Action<string, object[]> eventCaller)
         {
             m_eventCaller = eventCaller;
@@ -98,8 +96,8 @@ namespace BelzontAdr
         }
 
 
-        internal void OnChangedRoadNameGenerationRules() => typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
-        internal void OnChangedDistrictNameGenerationRules() => typeof(AreaBufferSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AreaBufferSystem>(), new object[0]);
+        internal void OnChangedRoadNameGenerationRules() => EnqueueToRunOnUpdate(() => typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]));
+        internal void OnChangedDistrictNameGenerationRules() => EnqueueToRunOnUpdate(()=> typeof(AreaBufferSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AreaBufferSystem>(), new object[0]));
         public AdrCitywideSettings CurrentCitySettings
         {
             get => currentCitySettings; private set
