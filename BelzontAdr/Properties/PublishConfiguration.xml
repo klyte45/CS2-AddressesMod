@@ -1,0 +1,13 @@
+<Publish>
+  <ModId Value="" />
+  <DisplayName Value="Addresses &amp; Names Mod" />
+  <ShortDescription Value="Extends name generation systems." />
+  <LongDescription />
+  <Thumbnail Value="Properties/Thumbnail.png" />
+  <ForumLink Value="" />
+  <ModVersion Value="0.1.0.0" />
+  <GameVersion Value="1.0.*" />
+  <ChangeLog />
+  <Tag Value="Code Mod" />
+  <Dependency Id="74151" Version="0.1.0.0" DisplayName="Extra UI Screens" />
+</Publish>

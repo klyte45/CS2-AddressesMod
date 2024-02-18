@@ -26,13 +26,7 @@ namespace BelzontAdr
     {
         public static new AddressesCs2Mod Instance => (AddressesCs2Mod)BasicIMod.Instance;
 
-        public override string SimpleName => "Addresses CS2";
-
-        public override string SafeName => "Addresses";
-
         public override string Acronym => "Adr";
-
-        public override string Description => "!!!";
 
         public override void DoOnCreateWorld(UpdateSystem updateSystem)
         {

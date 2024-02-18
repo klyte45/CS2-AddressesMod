@@ -1,30 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
-    <LangVersion>9.0</LangVersion>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>10.0</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TargetExt>.euis</TargetExt>
-    <Configurations>Steam;Editor;BepInExCs2</Configurations>
+    <Configurations>Debug;Release</Configurations>
+    <DebugType Condition="'$(Configuration)'=='Release'">None</DebugType>
+    <DebugSymbols Condition="'$(Configuration)'=='Release'">False</DebugSymbols>
   </PropertyGroup>
 
   <ItemGroup>
-    <DeployDir Include="$(K45_CS2_ALLROOT)\_appdataMods\$(SolutionName)" Condition="'$(Configuration)'!='BepInExCs2'" />
-    <DeployDir Include="$(K45_CS2_ALLROOT)\_ThunderstoreOutput\Klyte45-$(SolutionName);$(K45_CS2_ALLROOT)\_ThunderstoreDist\Klyte45-$(SolutionName)" Condition="'$(Configuration)'=='BepInExCs2'" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="AfterBuild">
-    <ItemGroup>
-      <FilesToCopy Include="$(OutDir)\**\*.*" Exclude="$(OutDir)\**\*.pdb" />
-    </ItemGroup>
-    <Message Text="Copy output to deploy dir @(DeployDir)" Importance="high" />
-    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="%(DeployDir.Identity)" />
-  </Target>
   <ItemGroup>
-    <ProjectReference Include="..\BelzontAdr\AddressesCS2.csproj" />
+    <ProjectReference Include="..\BelzontAdr\AddressesCS2.csproj">
+      <CopyLocalSatelliteAssemblies>False</CopyLocalSatelliteAssemblies>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="K45EUIS_Ext">
-      <HintPath>$(K45_CS2_ALLROOT)\ExtraUIScreens\K45EUIS_Ext\bin\$(Configuration)\net480\K45EUIS_Ext.dll</HintPath>
+      <HintPath>$(K45_CS2_ALLROOT)\ExtraUIScreens\K45EUIS_Ext\bin\$(Configuration)\$(TargetFramework)\K45EUIS_Ext.dll</HintPath>
       <Private>False</Private>
       <EmbedInteropTypes>False</EmbedInteropTypes>
       <SpecificVersion>False</SpecificVersion>

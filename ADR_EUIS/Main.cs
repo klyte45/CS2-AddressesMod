@@ -19,22 +19,6 @@ namespace ADR_EUIS
         public string ModderIdentifier => "k45";
         public string ModAcronym => "adr";
     }
-    public class ADR_EUIS_Overlay : IEUISOverlayRegister
-    {
-        public string ModAppIdentifier => "advanced-tool";
-
-        public string DisplayName => "Addresses Advanced Tool";
-
-        //public string UrlJs => "http://localhost:8700/k45-adr-advanced-tool.js";
-        //public string UrlCss => "http://localhost:8700/k45-adr-advanced-tool.css";
-        public string UrlJs => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-advanced-tool.js";
-        public string UrlCss => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/k45-adr-advanced-tool.css";
-        public string UrlIcon => $"coui://{AddressesCs2Mod.Instance.CouiHost}/UI/images/ADR.svg";
-
-        public string ModderIdentifier => "k45";
-        public string ModAcronym => "adr";
-    }
-
     public class ADR_EUIS : IEUISModRegister
     {
         public string ModderIdentifier => "k45";

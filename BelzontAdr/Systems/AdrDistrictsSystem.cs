@@ -87,7 +87,7 @@ namespace BelzontAdr
                 ComponentType.ReadOnly<Triangle>(),
                 ComponentType.Exclude<Deleted>()
             });
-            nameSystem = World.GetExistingSystemManaged<NameSystem>();
+            nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
             m_EndFrameBarrier = World.GetOrCreateSystemManaged<EndFrameBarrier>();
             mainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
             namesetSystem = World.GetOrCreateSystemManaged<AdrNamesetSystem>();
@@ -107,6 +107,7 @@ namespace BelzontAdr
             for (var i = 0; i < entities.Length; i++)
             {
                 var entity = entities[i];
+                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"result = {result} | nameSystem = {nameSystem} | EntityManager = {EntityManager}");
                 result.Add(new()
                 {
                     Entity = entity,

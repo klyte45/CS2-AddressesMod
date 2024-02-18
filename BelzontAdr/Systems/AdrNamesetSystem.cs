@@ -21,7 +21,7 @@ using static BelzontAdr.AdrNameFile;
 
 namespace BelzontAdr
 {
-    public class AdrNamesetSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrNamesetSystem>
+    public partial class AdrNamesetSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrNamesetSystem>
     {
         const int CURRENT_VERSION = 0;
 
