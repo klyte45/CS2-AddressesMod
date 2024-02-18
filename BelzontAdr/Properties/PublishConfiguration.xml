@@ -55,7 +55,13 @@ The most up to date information about installation and known issues and bugs is 
   <ForumLink Value="" />
   <ModVersion Value="0.1.0.0" />
   <GameVersion Value="1.0.*" />
-  <ChangeLog />
+  <ChangeLog># v0.1.0r0 (18-FEB-24)
+- Fixing lack of randomness when generating names</ChangeLog>
   <Tag Value="Code Mod" />
+  <Screenshot Value="Screenshots\00_namesets manager scr.jpg" />
+  <Screenshot Value="Screenshots\01_editor.jpg" />
+  <Screenshot Value="Screenshots\02_settings.jpg" />
+  <Screenshot Value="Screenshots\03_GH integration.jpg" />
+  <Screenshot Value="Screenshots\04_qualifiers.jpg" />
   <Dependency Id="74151" Version="0.1.0.0" DisplayName="Extra UI Screens" />
 </Publish>
