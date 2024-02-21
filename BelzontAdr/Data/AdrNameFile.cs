@@ -13,14 +13,21 @@ namespace BelzontAdr
 
         internal readonly Guid Id;
         public string Name;
-        public readonly List<string> Values;
+        public ImmutableList<string> Values
+        {
+            get => values; set
+            {
+                values = value;
+                shuffleDirty = true;
+            }
+        }
         internal Guid Checksum { get; private set; }
         public string IdString => Id.ToString();
 
         public AdrNameFile(string name, IEnumerable<string> values)
         {
             Name = name;
-            Values = values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new();
+            Values = new ImmutableList<string>(values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new());
             RecalculateChecksum();
             Id = GuidUtils.Create(Checksum, name);
         }
@@ -32,7 +39,7 @@ namespace BelzontAdr
         {
             Id = id;
             Name = name;
-            Values = values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new();
+            Values = new ImmutableList<string>(values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new());
             RecalculateChecksum();
         }
         public static AdrNameFile FromXML(AdrNameFileXML xml)
@@ -45,9 +52,21 @@ namespace BelzontAdr
             {
                 Id = Id,
                 Name = Name,
-                Values = Values
+                Values = Values.ToList()
             };
         }
+        public List<string> GetShuffledList(AdrMainSystem adrMainSystem)
+        {
+            if (shuffleDirty || shuffledList == null)
+            {
+                var randomizer = Unity.Mathematics.Random.CreateFromIndex((uint)adrMainSystem.CurrentCitySettings.CityNameSeeds);
+                shuffledList = Values.ToList().OrderBy(x => randomizer.NextInt()).ToList();
+            }
+            return shuffledList;
+        }
+        private bool shuffleDirty;
+        private List<string> shuffledList;
+        private ImmutableList<string> values;
 
         [XmlRoot("AdrNameFileXML")]
         public class AdrNameFileXML
@@ -55,6 +74,8 @@ namespace BelzontAdr
             public Guid Id { get; set; }
             public List<string> Values { get; set; }
             public string Name { get; set; }
+
+
         }
     }
 }

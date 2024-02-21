@@ -1,5 +1,5 @@
 <Publish>
-  <ModId Value="" />
+  <ModId Value="74182" />
   <DisplayName Value="Addresses &amp; Names Mod" />
   <ShortDescription Value="Extends name generation systems." />
   <LongDescription># Addresses &amp; Names Mod for Cities Skylines 2
@@ -53,9 +53,11 @@ This mod may cause issues in the game due their early stage of development. This
 The most up to date information about installation and known issues and bugs is at the forum topíc.</LongDescription>
   <Thumbnail Value="Properties/Thumbnail.png" />
   <ForumLink Value="" />
-  <ModVersion Value="0.1.0.0" />
+  <ModVersion Value="0.1.0.1" />
   <GameVersion Value="1.0.*" />
-  <ChangeLog># v0.1.0r0 (18-FEB-24)
+  <ChangeLog># v0.1.0r1 (20-FEB-24)
+- Changing shuffle method to generate names to a more performatic solution
+## v0.1.0r0 (18-FEB-24)
 - Fixing lack of randomness when generating names</ChangeLog>
   <Tag Value="Code Mod" />
   <Screenshot Value="Screenshots\00_namesets manager scr.jpg" />
@@ -63,5 +65,5 @@ The most up to date information about installation and known issues and bugs is 
   <Screenshot Value="Screenshots\02_settings.jpg" />
   <Screenshot Value="Screenshots\03_GH integration.jpg" />
   <Screenshot Value="Screenshots\04_qualifiers.jpg" />
-  <Dependency Id="74151" Version="0.1.0.0" DisplayName="Extra UI Screens" />
+  <Dependency Id="74151" ModVersion="0.1.0.0" DisplayName="Extra UI Screens" />
 </Publish>

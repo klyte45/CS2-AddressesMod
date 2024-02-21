@@ -46,7 +46,7 @@ namespace BelzontAdr
             eventCaller("namesets.goToGitHubRepo", () => { Application.OpenURL("https://github.com/klyte45/AddressesFiles"); });
         }
 
-        private Action<string, object[]> eventCaller; 
+        private Action<string, object[]> eventCaller;
         public void SetupCaller(Action<string, object[]> eventCaller)
         {
             this.eventCaller = eventCaller;
@@ -116,8 +116,7 @@ namespace BelzontAdr
             if (CityNamesets.TryGetValue(targetGuid, out var nameset))
             {
                 nameset.Name = name;
-                nameset.Values.Clear();
-                nameset.Values.AddRange(names.Where(x => !x.IsNullOrWhitespace()));
+                nameset.Values = new ImmutableList<string>(names.Where(x => !x.IsNullOrWhitespace()).ToList());
                 OnCityNamesetsChanged();
             }
             else
