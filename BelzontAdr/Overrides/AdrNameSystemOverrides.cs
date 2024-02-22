@@ -1,6 +1,7 @@
 ﻿using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Entities;
+using Colossal.UI.Binding;
 using Game;
 using Game.Areas;
 using Game.Buildings;
@@ -12,6 +13,7 @@ using Game.Prefabs;
 using Game.SceneFlow;
 using Game.UI;
 using Game.UI.Localization;
+using HarmonyLib;
 using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -23,6 +25,95 @@ namespace BelzontAdr
 {
     public class AdrNameSystemOverrides : Redirector, IRedirectable
     {
+        private class NameAccess
+        {
+            public static AccessTools.StructFieldRef<NameSystem.Name, NameType> fieldRefNameType = HarmonyLib.AccessTools.StructFieldRefAccess<NameSystem.Name, NameType>("m_NameType");
+            public static AccessTools.StructFieldRef<NameSystem.Name, string> fieldRefNameId = HarmonyLib.AccessTools.StructFieldRefAccess<NameSystem.Name, string>("m_NameID");
+            public static AccessTools.StructFieldRef<NameSystem.Name, string[]> fieldRefNameArgs = HarmonyLib.AccessTools.StructFieldRefAccess<NameSystem.Name, string[]>("m_NameArgs");
+
+            public NameType m_NameType
+            {
+                get => fieldRefNameType(ref name); set => fieldRefNameType(ref name) = value;
+            }
+            public string m_NameID
+            {
+                get => fieldRefNameId(ref name); set => fieldRefNameId(ref name) = value;
+            }
+            public string[] m_NameArgs
+            {
+                get => fieldRefNameArgs(ref name); set => fieldRefNameArgs(ref name) = value;
+            }
+
+            private Name name;
+
+            public Name Name => name;
+
+            public NameAccess(ref Name name)
+            {
+                this.name = name;
+            }
+            public void Write(IJsonWriter writer)
+            {
+                var m_NameType = this.m_NameType & ~AdrSupportsGeneratorType;
+                if (m_NameType == NameType.Custom)
+                {
+                    BindCustomName(writer);
+                }
+                else if (m_NameType == NameType.Formatted)
+                {
+                    BindFormattedName(writer);
+                }
+                else if (m_NameType == NameType.Localized)
+                {
+                    BindLocalizedName(writer);
+                }
+            }
+
+            private void BindCustomName(IJsonWriter writer)
+            {
+                writer.TypeBegin("names.CustomName");
+                writer.PropertyName("name");
+                writer.Write(m_NameID);
+                WriteK45Properties(writer);
+                writer.TypeEnd();
+            }
+
+            private static void WriteK45Properties(IJsonWriter writer)
+            {
+                writer.PropertyName("k45_addressesSupportGeneration");
+                writer.Write(true);
+            }
+
+            private void BindFormattedName(IJsonWriter writer)
+            {
+                writer.TypeBegin("names.FormattedName");
+                writer.PropertyName("nameId");
+                writer.Write(m_NameID);
+                writer.PropertyName("nameArgs");
+                int num = ((m_NameArgs != null) ? (m_NameArgs.Length / 2) : 0);
+                writer.MapBegin(num);
+                for (int i = 0; i < num; i++)
+                {
+                    writer.Write(m_NameArgs[i * 2] ?? string.Empty);
+                    writer.Write(m_NameArgs[i * 2 + 1] ?? string.Empty);
+                }
+
+                writer.MapEnd();
+                WriteK45Properties(writer);
+                writer.TypeEnd();
+            }
+
+            private void BindLocalizedName(IJsonWriter writer)
+            {
+                writer.TypeBegin("names.LocalizedName");
+                writer.PropertyName("nameId");
+                writer.Write(m_NameID ?? string.Empty);
+                WriteK45Properties(writer);
+                writer.TypeEnd();
+            }
+
+        }
+
         public void DoPatches(World world)
         {
             prefabSystem = world.GetExistingSystemManaged<PrefabSystem>();
@@ -30,29 +121,34 @@ namespace BelzontAdr
             entityManager = world.EntityManager;
             m_EndFrameBarrier = world.GetOrCreateSystemManaged<EndFrameBarrier>();
 
-            var GetCitizenName = typeof(NameSystem).GetMethod("GetCitizenName", RedirectorUtils.allFlags);
-            AddRedirect(GetCitizenName, GetType().GetMethod("GetCitizenName", RedirectorUtils.allFlags));
+            var GetCitizenNameRef = typeof(NameSystem).GetMethod("GetCitizenName", RedirectorUtils.allFlags);
+            AddRedirect(GetCitizenNameRef, GetType().GetMethod(nameof(GetCitizenName), RedirectorUtils.allFlags));
 
-            var GetName = typeof(NameSystem).GetMethod("GetName", RedirectorUtils.allFlags);
-            AddRedirect(GetName, GetType().GetMethod("GetName", RedirectorUtils.allFlags));
+            var GetNameRef = typeof(NameSystem).GetMethod("GetName", RedirectorUtils.allFlags);
+            AddRedirect(GetNameRef, GetType().GetMethod(nameof(GetName), RedirectorUtils.allFlags));
 
-            var GetRenderedLabelName = typeof(NameSystem).GetMethod("GetRenderedLabelName", RedirectorUtils.allFlags);
-            AddRedirect(GetRenderedLabelName, GetType().GetMethod("GetRenderedLabelName", RedirectorUtils.allFlags));
+            var GetRenderedLabelNameRef = typeof(NameSystem).GetMethod("GetRenderedLabelName", RedirectorUtils.allFlags);
+            AddRedirect(GetRenderedLabelNameRef, GetType().GetMethod(nameof(GetRenderedLabelName), RedirectorUtils.allFlags));
 
-            var GetSpawnableBuildingName = typeof(NameSystem).GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags);
-            AddRedirect(GetSpawnableBuildingName, GetType().GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags));
+            var GetSpawnableBuildingNameRef = typeof(NameSystem).GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags);
+            AddRedirect(GetSpawnableBuildingNameRef, GetType().GetMethod(nameof(GetSpawnableBuildingName), RedirectorUtils.allFlags));
 
-            var GetMarkerTransportStopName = typeof(NameSystem).GetMethod("GetMarkerTransportStopName", RedirectorUtils.allFlags);
-            AddRedirect(GetMarkerTransportStopName, GetType().GetMethod("GetMarkerTransportStopName", RedirectorUtils.allFlags));
+            var GetMarkerTransportStopNameRef = typeof(NameSystem).GetMethod("GetMarkerTransportStopName", RedirectorUtils.allFlags);
+            AddRedirect(GetMarkerTransportStopNameRef, GetType().GetMethod(nameof(GetMarkerTransportStopName), RedirectorUtils.allFlags));
 
-            var GetStaticTransportStopName = typeof(NameSystem).GetMethod("GetStaticTransportStopName", RedirectorUtils.allFlags);
-            AddRedirect(GetStaticTransportStopName, GetType().GetMethod("GetStaticTransportStopName", RedirectorUtils.allFlags));
+            var GetStaticTransportStopNameRef = typeof(NameSystem).GetMethod("GetStaticTransportStopName", RedirectorUtils.allFlags);
+            AddRedirect(GetStaticTransportStopNameRef, GetType().GetMethod(nameof(GetStaticTransportStopName), RedirectorUtils.allFlags));
+
+
+            var NameWrite = typeof(NameSystem.Name).GetMethod("Write", RedirectorUtils.allFlags);
+            AddRedirect(NameWrite, GetType().GetMethod(nameof(NameWriteOverride), RedirectorUtils.allFlags));
+
         }
         private static PrefabSystem prefabSystem;
         private static EntityManager entityManager;
         private static EndFrameBarrier m_EndFrameBarrier;
         private static AdrMainSystem adrMainSystem;
-
+        private static readonly NameType AdrSupportsGeneratorType = (NameType)0xf450000;
 
         public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
         {
@@ -95,6 +191,7 @@ namespace BelzontAdr
             if (entity != stop)
             {
                 __result = __instance.GetName(entity);
+                NameAccess.fieldRefNameType(ref __result) |= AdrSupportsGeneratorType;
                 return false;
             }
             return true;
@@ -114,6 +211,7 @@ namespace BelzontAdr
                         "NUMBER",
                         num.ToString()
                });
+            NameAccess.fieldRefNameType(ref __result) |= AdrSupportsGeneratorType;
             return false;
         }
 
@@ -140,6 +238,7 @@ namespace BelzontAdr
                         "NUMBER",
                         num.ToString()
                     });
+                    NameAccess.fieldRefNameType(ref __result) |= AdrSupportsGeneratorType;
                     return false;
                 }
             }
@@ -179,6 +278,7 @@ namespace BelzontAdr
                 if (!adrMainSystem.TryGetSurnameList(out var surnames)) return true;
 
                 __result = NameSystem.Name.FormattedName("K45::ADR.main[localesFmt.household]", "surname", GetFromList(surnames, entity));
+                NameAccess.fieldRefNameType(ref __result) |= AdrSupportsGeneratorType;
                 return false;
             }
             if (entityManager.HasComponent<HouseholdPet>(entity))
@@ -190,6 +290,7 @@ namespace BelzontAdr
                     case PetType.Dog:
                         if (!adrMainSystem.TryGetDogsList(out var dogs)) return true;
                         __result = NameSystem.Name.CustomName(GetFromList(dogs, entity));
+                        NameAccess.fieldRefNameType(ref __result) |= AdrSupportsGeneratorType;
                         return false;
                     default:
                         return true;
@@ -201,6 +302,7 @@ namespace BelzontAdr
                 if (!shallRunOrignal)
                 {
                     __result = Name.CustomName(pattern.Replace("{name}", genName));
+                    NameAccess.fieldRefNameType(ref __result) |= AdrSupportsGeneratorType;
                 }
                 return shallRunOrignal;
             }
@@ -210,6 +312,7 @@ namespace BelzontAdr
                 if (!shallRunOrignal)
                 {
                     __result = Name.CustomName(pattern.Replace("{name}", genName));
+                    NameAccess.fieldRefNameType(ref __result) |= AdrSupportsGeneratorType;
                 }
                 return shallRunOrignal;
             }
@@ -230,18 +333,16 @@ namespace BelzontAdr
                 {
                     if (!entityManager.TryGetComponent<ADREntityStationRef>(currDistrict.m_District, out var entityStationRef))
                     {
-                        var cmd = m_EndFrameBarrier.CreateCommandBuffer();
                         entityStationRef = new ADREntityStationRef
                         {
                             m_refStationBuilding = entity
                         };
-                        cmd.AddComponent(currDistrict.m_District, entityStationRef);
+                        __instance.EntityManager.AddComponentData(currDistrict.m_District, entityStationRef);
                     }
                     if (entityStationRef.m_refStationBuilding == Entity.Null)
                     {
-                        var cmd = m_EndFrameBarrier.CreateCommandBuffer();
                         entityStationRef.m_refStationBuilding = entity;
-                        cmd.SetComponent(currDistrict.m_District, entityStationRef);
+                        __instance.EntityManager.SetComponentData(currDistrict.m_District, entityStationRef);
                     }
                     if (entityStationRef.m_refStationBuilding == entity)
                     {
@@ -252,6 +353,7 @@ namespace BelzontAdr
                             return false;
                         }
                         __result = Name.CustomName(pattern.Replace("{name}", mainName));
+                        NameAccess.fieldRefNameType(ref __result) |= AdrSupportsGeneratorType;
                         return false;
                     }
                 }
@@ -397,6 +499,7 @@ namespace BelzontAdr
                 ? GetFromList(listForSurnames, householdMemberData.m_Household)
                 : GameManager.instance.localizationManager.activeDictionary.TryGetValue(GetGenderedLastNameId(householdMemberData.m_Household, male), out surname) ? surname : "???";
             __result = Name.CustomName(adrMainSystem.DoNameFormat(name, surname));
+            NameAccess.fieldRefNameType(ref __result) |= AdrSupportsGeneratorType;
             return false;
         }
 
@@ -479,5 +582,17 @@ namespace BelzontAdr
             }
             return localization.m_LocalizationID;
         }
+
+        public static bool NameWriteOverride(IJsonWriter writer, ref Name __instance)
+        {
+            if ((NameAccess.fieldRefNameType(ref __instance) & AdrSupportsGeneratorType) == AdrSupportsGeneratorType)
+            {
+                new NameAccess(ref __instance).Write(writer);
+                return false;
+            }
+            return true;
+        }
+
+
     }
 }
