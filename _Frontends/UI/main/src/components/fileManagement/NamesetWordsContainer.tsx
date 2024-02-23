@@ -2,7 +2,7 @@ import { GameScrollComponent } from "@klyte45/euis-components";
 import { ObjectTyped } from "object-typed";
 import { Component } from "react";
 import '#styles/wordContainer.scss'
-import { NamesetService } from "#service/NamesetService";
+import { NamesetService } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate";
 
 

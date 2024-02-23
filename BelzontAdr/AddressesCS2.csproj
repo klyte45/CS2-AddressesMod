@@ -28,7 +28,7 @@
   <!--Mod data-->
   <PropertyGroup>
     <ModId>74182</ModId>
-    <Version>0.1.0.1</Version>
+    <Version>0.1.0.2</Version>
     <GameVersion>1.0.*</GameVersion>
     <ThumbnailPath>Properties/Thumbnail.png</ThumbnailPath>
     <DisplayName>Addresses &amp;amp%3b Names Mod</DisplayName>
@@ -42,7 +42,7 @@
     <Screenshots Include="Screenshots/*.jpg" />
     <Dependency Include="EUIS">
       <ModId>74151</ModId>
-      <Version>0.1.0.0</Version>
+      <Version>0.1.0.2</Version>
       <DisplayName>Extra UI Screens</DisplayName>
     </Dependency>
   </ItemGroup>

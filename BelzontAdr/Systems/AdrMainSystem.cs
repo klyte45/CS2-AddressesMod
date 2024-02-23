@@ -28,24 +28,24 @@ namespace BelzontAdr
 
         World IBelzontSerializableSingleton<AdrMainSystem>.World => World;
 
-        public void SetupCallBinder(Action<string, Delegate> eventCaller)
+        public void SetupCallBinder(Action<string, Delegate> doBindLink)
         {
-            eventCaller("main.getCurrentCitywideSettings", () => CurrentCitySettings);
-            eventCaller("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.SurnameAtFirst = x; NotifyChanges(); });
-            eventCaller("main.setCitizenMaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenMaleNameOverridesStr = x; NotifyChanges(); });
-            eventCaller("main.setCitizenFemaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenFemaleNameOverridesStr = x; NotifyChanges(); });
-            eventCaller("main.setCitizenSurnameOverridesStr", (string x) => { CurrentCitySettings.CitizenSurnameOverridesStr = x; NotifyChanges(); });
-            eventCaller("main.setCitizenDogOverridesStr", (string x) => { CurrentCitySettings.CitizenDogOverridesStr = x; NotifyChanges(); });
-            eventCaller("main.setDefaultRoadNameOverridesStr", (string x) => { CurrentCitySettings.DefaultRoadNameOverridesStr = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
-            eventCaller("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
-            eventCaller("main.setDefaultDistrictNameOverridesStr", (string x) => { CurrentCitySettings.DefaultDistrictNameOverridesStr = x; NotifyChanges(); OnChangedDistrictNameGenerationRules(); districtsSystem.OnDistrictChanged(); });
-            eventCaller("main.setRoadNameAsNameStation", (bool x) => { CurrentCitySettings.RoadNameAsNameStation = x; NotifyChanges(); });
-            eventCaller("main.setRoadNameAsNameCargoStation", (bool x) => { CurrentCitySettings.RoadNameAsNameCargoStation = x; NotifyChanges(); });
-            eventCaller("main.setDistrictNameAsNameStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameStation = x; NotifyChanges(); });
-            eventCaller("main.setDistrictNameAsNameCargoStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameCargoStation = x; NotifyChanges(); });
-            eventCaller("main.exploreToRoadPrefixRulesFileDefault", () => RemoteProcess.OpenFolder(DefaultRoadPrefixFilename));
-            eventCaller("main.saveRoadPrefixRulesFileDefault", () => File.WriteAllText(DefaultRoadPrefixFilename, XmlUtils.DefaultXmlSerialize(CurrentCitySettings.RoadPrefixSetting)));
-            eventCaller("main.loadRoadPrefixRulesFileDefault", () =>
+            doBindLink("main.getCurrentCitywideSettings", () => CurrentCitySettings);
+            doBindLink("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.SurnameAtFirst = x; NotifyChanges(); });
+            doBindLink("main.setCitizenMaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenMaleNameOverridesStr = x; NotifyChanges(); });
+            doBindLink("main.setCitizenFemaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenFemaleNameOverridesStr = x; NotifyChanges(); });
+            doBindLink("main.setCitizenSurnameOverridesStr", (string x) => { CurrentCitySettings.CitizenSurnameOverridesStr = x; NotifyChanges(); });
+            doBindLink("main.setCitizenDogOverridesStr", (string x) => { CurrentCitySettings.CitizenDogOverridesStr = x; NotifyChanges(); });
+            doBindLink("main.setDefaultRoadNameOverridesStr", (string x) => { CurrentCitySettings.DefaultRoadNameOverridesStr = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
+            doBindLink("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
+            doBindLink("main.setDefaultDistrictNameOverridesStr", (string x) => { CurrentCitySettings.DefaultDistrictNameOverridesStr = x; NotifyChanges(); OnChangedDistrictNameGenerationRules(); districtsSystem.OnDistrictChanged(); });
+            doBindLink("main.setRoadNameAsNameStation", (bool x) => { CurrentCitySettings.RoadNameAsNameStation = x; NotifyChanges(); });
+            doBindLink("main.setRoadNameAsNameCargoStation", (bool x) => { CurrentCitySettings.RoadNameAsNameCargoStation = x; NotifyChanges(); });
+            doBindLink("main.setDistrictNameAsNameStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameStation = x; NotifyChanges(); });
+            doBindLink("main.setDistrictNameAsNameCargoStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameCargoStation = x; NotifyChanges(); });
+            doBindLink("main.exploreToRoadPrefixRulesFileDefault", () => RemoteProcess.OpenFolder(DefaultRoadPrefixFilename));
+            doBindLink("main.saveRoadPrefixRulesFileDefault", () => File.WriteAllText(DefaultRoadPrefixFilename, XmlUtils.DefaultXmlSerialize(CurrentCitySettings.RoadPrefixSetting)));
+            doBindLink("main.loadRoadPrefixRulesFileDefault", () =>
             {
                 if (File.Exists(DefaultRoadPrefixFilename))
                 {
@@ -62,7 +62,8 @@ namespace BelzontAdr
                 }
                 return -1;
             });
-            eventCaller("main.atob", (string x) => Encoding.UTF8.GetString(Convert.FromBase64String(x)));
+            doBindLink("main.atob", (string x) => Encoding.UTF8.GetString(Convert.FromBase64String(x)));
+            doBindLink("main.getEntityOptions", GetEntityOptions);
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -78,6 +79,7 @@ namespace BelzontAdr
         {
             while (actionsToGo.TryDequeue(out var action))
             {
+                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Running action {action}");
                 action.Invoke();
             }
         }
@@ -92,12 +94,23 @@ namespace BelzontAdr
 
         internal void EnqueueToRunOnUpdate(Action a)
         {
+            if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Enqueue action {a}");
             actionsToGo.Enqueue(a);
+            if (BasicIMod.VerboseMode) LogUtils.DoVerboseLog($"actions to go after add: {actionsToGo?.Count}!");
         }
 
 
-        internal void OnChangedRoadNameGenerationRules() => EnqueueToRunOnUpdate(() => typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]));
-        internal void OnChangedDistrictNameGenerationRules() => EnqueueToRunOnUpdate(()=> typeof(AreaBufferSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags)?.Invoke(World.GetExistingSystemManaged<AreaBufferSystem>(), new object[0]));
+        internal void OnChangedRoadNameGenerationRules() => EnqueueToRunOnUpdate(() =>
+        {
+            if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Run action typeof(AggregateMeshSystem).GetMethod(\"OnDictionaryChanged\",...)");
+            typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags).Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
+        });
+
+        internal void OnChangedDistrictNameGenerationRules() => EnqueueToRunOnUpdate(() =>
+        {
+            if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Run action typeof(AreaBufferSystem).GetMethod(\"OnDictionaryChanged\", ...)");
+            typeof(AreaBufferSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags).Invoke(World.GetExistingSystemManaged<AreaBufferSystem>(), new object[0]);
+        });
         public AdrCitywideSettings CurrentCitySettings
         {
             get => currentCitySettings; private set
@@ -112,6 +125,19 @@ namespace BelzontAdr
             m_eventCaller?.Invoke("main.onCurrentCitywideSettingsLoaded", new object[0]);
         }
 
+
+        private AdrEntityData GetEntityOptions(Entity e)
+        {
+            return EntityManager.HasComponent<ADRDistrictData>(e) ? new AdrEntityData { allowX = true }
+                : EntityManager.HasComponent<ADREntityStationRef>(e) ? new AdrEntityData { allowY = true }
+                : null;
+        }
+
+        private class AdrEntityData
+        {
+            public bool allowX;
+            public bool allowY;
+        }
         #region Citizen & Pet
         internal bool TryGetNameList(bool male, out AdrNameFile names) => namesetSystem.GetForGuid(male ? CurrentCitySettings.CitizenMaleNameOverrides : CurrentCitySettings.CitizenFemaleNameOverrides, out names);
 

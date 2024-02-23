@@ -12,7 +12,7 @@
       "#enum/*": [
         "src/enum/*"
       ],
-      "#service/*": [
+      "@klyte45/adr-commons": [
         "src/service/*"
       ],
       "#styles/*": [

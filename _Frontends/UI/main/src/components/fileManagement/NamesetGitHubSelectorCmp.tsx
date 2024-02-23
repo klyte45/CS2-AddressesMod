@@ -1,5 +1,5 @@
-import { GitHubAddressesFilesSevice, GitHubFileItem } from "#service/GitHubAddressesFilesSevice";
-import { NamesetService } from "#service/NamesetService";
+import { GitHubAddressesFilesSevice, GitHubFileItem } from "@klyte45/adr-commons";
+import { NamesetService } from "@klyte45/adr-commons";
 import { categorizeFiles } from "#utility/categorizeFiles";
 import { translate } from "#utility/translate";
 import { Component } from "react";

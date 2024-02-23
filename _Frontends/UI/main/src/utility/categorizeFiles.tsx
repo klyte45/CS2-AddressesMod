@@ -1,4 +1,4 @@
-import { SimpleNameEntry } from "#service/NamingRulesService";
+import { SimpleNameEntry } from "@klyte45/adr-commons";
 import { ObjectTyped } from "object-typed";
 
 

@@ -18,7 +18,8 @@
   "dependencies": {
     "classnames": "^2.3.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@klyte45/adr-commons": "file:../_shared/adr-commons/"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",

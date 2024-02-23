@@ -34,8 +34,8 @@ type GitHubResponseBlob = {
 
 export type GitHubResponseContainer<T> = {
     success: boolean,
-    data: T,
-    resetTime?: number
+    data: T | null,
+    resetTime?: number | null
 }
 
 export class GitHubAddressesFilesSevice {
@@ -43,8 +43,8 @@ export class GitHubAddressesFilesSevice {
     static async listAtTreePoint(url?: string): Promise<GitHubResponseContainer<GitHubItem[]>> {
         try {
             const result = await new Promise<GitHubResponseTree>((resp, err) => {
+                var xhr = new XMLHttpRequest();
                 try {
-                    var xhr = new XMLHttpRequest();
                     xhr.onreadystatechange = () => {
                         if (xhr.readyState === 4) {
                             if (xhr.status / 100 == 2) {

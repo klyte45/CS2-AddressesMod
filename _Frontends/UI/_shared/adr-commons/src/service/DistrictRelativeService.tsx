@@ -1,5 +1,4 @@
-import { Entity } from  "@klyte45/euis-components";
-import { NameCustom, NameFormatted } from  "@klyte45/euis-components";
+import { Entity, NameCustom, NameFormatted } from "../../";
 
 export type DistrictListItem = {
     Entity: Entity;

@@ -1,6 +1,6 @@
 import { Component } from "react";
 import { Cs2FormLine } from "@klyte45/euis-components";
-import { ExtendedSimpleNameEntry } from "#service/NamingRulesService";
+import { ExtendedSimpleNameEntry } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate";
 
 

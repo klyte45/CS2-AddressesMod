@@ -3,7 +3,6 @@ using AddressesCS2;
 using BepInEx;
 #endif
 using Belzont.Interfaces;
-using Belzont.Utils;
 using Game;
 using Game.Modding;
 
@@ -32,6 +31,7 @@ namespace BelzontAdr
         {
             AdrNameFilesManager.Instance.ReloadNameFiles();
             updateSystem.UpdateAfter<AdrDistrictsSystem>(SystemUpdatePhase.ModificationEnd);
+            updateSystem.UpdateAfter<AdrMainSystem>(SystemUpdatePhase.ModificationEnd);
         }
 
         public override void OnDispose()

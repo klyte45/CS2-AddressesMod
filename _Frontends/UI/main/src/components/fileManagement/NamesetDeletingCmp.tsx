@@ -1,4 +1,4 @@
-import { ExtendedSimpleNameEntry } from '#service/NamingRulesService';
+import { ExtendedSimpleNameEntry } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate"
 import { Component } from "react";
 import { NamesetWordsContainer } from './NamesetWordsContainer';

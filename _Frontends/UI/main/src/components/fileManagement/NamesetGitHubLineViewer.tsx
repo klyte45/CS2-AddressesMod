@@ -1,4 +1,4 @@
-import { GitHubFileItem } from "#service/GitHubAddressesFilesSevice";
+import { GitHubFileItem } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate";
 import { Cs2FormLine, replaceArgs, setupSignificance } from "@klyte45/euis-components";
 import { Component } from "react";

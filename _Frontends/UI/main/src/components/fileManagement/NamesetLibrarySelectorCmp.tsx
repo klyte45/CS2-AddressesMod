@@ -1,10 +1,10 @@
 import { translate } from "#utility/translate"
 import { Component } from "react";
-import { NamesetService } from "#service/NamesetService";
+import { NamesetService } from "@klyte45/adr-commons";
 import { categorizeFiles } from "#utility/categorizeFiles";
 import { NamesetCategoryCmp } from "./NamesetCategoryCmp";
 import { NamesetLineViewer } from "./NamesetLineViewer";
-import { ExtendedSimpleNameEntry } from "#service/NamingRulesService";
+import { ExtendedSimpleNameEntry } from "@klyte45/adr-commons";
 import { GameScrollComponent } from "@klyte45/euis-components";
 
 type State = {

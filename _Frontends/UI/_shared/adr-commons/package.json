@@ -1,0 +1,25 @@
+{
+    "name": "@klyte45/adr-commons",
+    "version": "0.0.0",
+    "description": "Common frontend files for Addresses & Names Mod",
+    "main": "index.tsx",
+    "devDependencies": {
+        "@emotion/cache": "file:../cache-11.11.0-k45.tgz",
+        "@types/jest": "^27.0.1",
+        "@types/react": "^17.0.19",
+        "@types/react-dom": "^17.0.9",
+        "@types/systemjs": "^6.1.1",
+        "@types/webpack-env": "^1.16.2",
+        "object-typed": "^1.0.0",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "react-select": "file:../react-select-5.7.3-k45.tgz",
+        "react-tabs": "^4.3.0",
+        "react-treeview": "^0.4.7",
+        "single-spa": "^5.9.3",
+        "single-spa-react": "^4.3.1",
+        "systemjs-webpack-interop": "file:../systemjs-webpack-interop-2.3.7-euis.tgz",
+        "coherent-gameface-scrollable-container": "^3.1.0",
+        "tsconfig-paths-webpack-plugin": "^4.1.0"
+    }
+}

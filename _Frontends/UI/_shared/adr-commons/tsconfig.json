@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "jsx": "react-jsx",
+    "target": "ES2015",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "typeRoots": [
+      "../euis-components/types"
+    ]
+  },
+  
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test*"]
+}

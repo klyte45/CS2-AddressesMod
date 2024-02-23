@@ -21,7 +21,6 @@ namespace BelzontAdr
         private EntityQuery m_districtsUpdatedQuery;
         private EntityQuery m_districtsAreaQuery;
         private NameSystem nameSystem;
-        private EndFrameBarrier m_EndFrameBarrier;
         private AdrMainSystem mainSystem;
         private AdrNamesetSystem namesetSystem;
         private bool dirtyDistricts;
@@ -88,7 +87,6 @@ namespace BelzontAdr
                 ComponentType.Exclude<Deleted>()
             });
             nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
-            m_EndFrameBarrier = World.GetOrCreateSystemManaged<EndFrameBarrier>();
             mainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
             namesetSystem = World.GetOrCreateSystemManaged<AdrNamesetSystem>();
         }
@@ -129,13 +127,12 @@ namespace BelzontAdr
         {
             if (EntityManager.HasComponent<District>(district))
             {
-                var commandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
                 if (fileGuid.IsNullOrWhitespace())
                 {
                     if (EntityManager.TryGetComponent<ADRDistrictData>(district, out var adrDistrict))
                     {
                         adrDistrict.m_roadsNamesId = default;
-                        commandBuffer.SetComponent(district, adrDistrict);
+                        EntityManager.SetComponentData(district, adrDistrict);
 
                         dirtyDistricts = true;
                     }
@@ -147,11 +144,11 @@ namespace BelzontAdr
                     adrDistrict.m_roadsNamesId = guid;
                     if (hasComponent)
                     {
-                        commandBuffer.SetComponent(district, adrDistrict);
+                        EntityManager.SetComponentData(district, adrDistrict);
                     }
                     else
                     {
-                        commandBuffer.AddComponent(district, adrDistrict);
+                        EntityManager.AddComponentData(district, adrDistrict);
                     }
                     dirtyDistricts = true;
                 }

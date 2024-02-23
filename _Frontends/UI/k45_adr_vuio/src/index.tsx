@@ -9,4 +9,4 @@ const register: ModRegistrar = (moduleRegistry) => {
     //console.log( moduleRegistry.registry.get("game-ui/game/components/tool-options/mouse-tool-options/mouse-tool-options.tsx"))
 }
 
-export default register;
+export default register; 

@@ -1,4 +1,4 @@
-import { ExtendedSimpleNameEntry, SimpleNameEntry } from '#service/NamingRulesService';
+import { ExtendedSimpleNameEntry, SimpleNameEntry } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate";
 import { GameScrollComponent, Input } from "@klyte45/euis-components";
 import { CSSProperties, Component } from "react";

@@ -1,16 +1,16 @@
-import { NamesetService } from "#service/NamesetService";
+import { NamesetService } from "@klyte45/adr-commons";
 import { ArrayUtils, GameScrollComponent } from "@klyte45/euis-components";
 import { translate } from "#utility/translate"
 import { Component } from "react";
 import NamesetDeletingCmp from "./NamesetDeletingCmp";
 import NamesetEditorCmp from "./NamesetEditorCmp";
 import NamesetImportingCmp from "./NamesetImportingCmp";
-import { ExtendedSimpleNameEntry } from "#service/NamingRulesService";
+import { ExtendedSimpleNameEntry } from "@klyte45/adr-commons";
 import { categorizeFiles } from "#utility/categorizeFiles";
 import { NamesetCategoryCmp } from "./NamesetCategoryCmp";
 import { NamesetLineViewer } from "./NamesetLineViewer";
 import NamesetLibrarySelectorCmp from "./NamesetLibrarySelectorCmp";
-import { GitHubAddressesFilesSevice, GitHubFileItem } from "#service/GitHubAddressesFilesSevice";
+import { GitHubAddressesFilesSevice, GitHubFileItem } from "@klyte45/adr-commons";
 import NamesetGitHubSelectorCmp from "./NamesetGitHubSelectorCmp";
 
 enum Screen {

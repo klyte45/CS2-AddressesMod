@@ -1,4 +1,4 @@
-import { GitHubAddressesFilesSevice, GitHubFileItem, GitHubTreeItem } from "#service/GitHubAddressesFilesSevice";
+import { GitHubAddressesFilesSevice, GitHubFileItem, GitHubTreeItem } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate";
 import { replaceArgs } from "@klyte45/euis-components";
 import { Component } from "react";

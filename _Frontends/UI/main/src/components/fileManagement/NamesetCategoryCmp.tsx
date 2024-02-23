@@ -1,7 +1,7 @@
 import { ObjectTyped } from "object-typed";
 import { Component } from "react";
 import TreeView from "react-treeview";
-import { SimpleNameEntry } from "#service/NamingRulesService";
+import { SimpleNameEntry } from "@klyte45/adr-commons";
 import { StructureTreeNode } from "#utility/categorizeFiles";
 
 export class NamesetCategoryCmp extends Component<{ entry: StructureTreeNode; doWithNamesetData: (x: SimpleNameEntry, i: number) => JSX.Element }, { showing: Record<string, boolean>; }> {

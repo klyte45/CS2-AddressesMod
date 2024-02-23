@@ -1,9 +1,9 @@
-import { DistrictListItem, DistrictRelativeService } from "#service/DistrictRelativeService";
-import { AdrCitywideSettings, NamingRulesService, SimpleNameEntry } from "#service/NamingRulesService";
+import { DistrictListItem, DistrictRelativeService } from "@klyte45/adr-commons";
+import { AdrCitywideSettings, NamingRulesService, SimpleNameEntry } from "@klyte45/adr-commons";
 import { Cs2Checkbox, Cs2FormLine, Cs2Select, Cs2SideTabs, DefaultPanelScreen, nameToString } from "@klyte45/euis-components";
 import { Component } from "react";
 import { translate } from "#utility/translate";
-import { NamesetService } from "#service/NamesetService";
+import { NamesetService } from "@klyte45/adr-commons";
 
 enum TabsNames {
   Roads = "Roads",

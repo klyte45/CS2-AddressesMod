@@ -2,7 +2,7 @@ import { Cs2FormLine } from "@klyte45/euis-components";
 import { DefaultPanelScreen } from "@klyte45/euis-components";
 import { Cs2TriCheckbox } from "@klyte45/euis-components";
 import { SimpleInput } from "@klyte45/euis-components";
-import { AdrRoadPrefixRule, AdrRoadPrefixSetting, NamingRulesService, RoadFlags } from "#service/NamingRulesService";
+import { AdrRoadPrefixRule, AdrRoadPrefixSetting, NamingRulesService, RoadFlags } from "@klyte45/adr-commons";
 import "#styles/roadPrefixRuleEditor.scss";
 import { translate } from "#utility/translate";
 import { Component } from "react";

@@ -1,29 +1,38 @@
+import { NamesetService, NamingRulesService } from "@klyte45/adr-commons";
 import { useModding } from "modding/modding-context";
 import { ModuleRegistry, ModuleRegistryExtend } from "modding/types";
+import { Component, ReactNode } from "react";
+import { ValueBinding } from "common/data-binding/binding";
+import { Entity } from "common/utils/equality";
+import { toEntityTyped } from "@klyte45/adr-commons";
+import { AddressesInfoOptionsComponent } from "components/AddressesInfoOptionsComponent";
 
 let currentEntity: any = null;
 export const AddressesBindings = () => {
     const bindings = useModding().api.bindings;
-    const selectedEntity = bindings.selectedInfo.selectedEntity$.value;
-    bindings.selectedInfo.middleSections$.subscribe((section) => {
-        if (!selectedEntity.index) {
+    bindings.selectedInfo.selectedEntity$.subscribe((entity) => {
+        if (!entity.index) {
             currentEntity = null;
-            return section
+            return entity
         }
-        if (currentEntity != selectedEntity.index) {
-            currentEntity = selectedEntity.index
-            if ((bindings.selectedInfo.titleSection$.value?.name as any)?.k45_addressesSupportGeneration && section.every(x => x?.__Type != "K45.Addresses" as any)) {
-                section.push({
-                    __Type: "K45.Addresses"
-                } as any);
-            }
+        if (currentEntity != entity.index) {
+            currentEntity = entity.index
         }
-        return section;
+        return entity;
     })
+    bindings.selectedInfo.middleSections$.subscribe((val) => {
+        if (currentEntity && val.every(x => x?.__Type != "K45.Addresses" as any)) {
+            val.push({
+                __Type: "K45.Addresses"
+            } as any);
+        }
+        return val;
+    })
+
     return <></>;
 }
 
 export const AddressesLayoutRegistering = (componentList: any): any => {
-    componentList["K45.Addresses"] = () => <>Addresses Options goes here =V</>
+    componentList["K45.Addresses"] = () => <AddressesInfoOptionsComponent entity={useModding().api.bindings.selectedInfo.selectedEntity$} />
     return componentList as any;
-}
+} 
