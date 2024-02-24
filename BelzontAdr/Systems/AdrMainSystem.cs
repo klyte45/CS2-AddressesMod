@@ -15,7 +15,6 @@ using Unity.Jobs;
 
 namespace BelzontAdr
 {
-
     public partial class AdrMainSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrMainSystem>
     {
         private Action<string, object[]> m_eventCaller;
@@ -63,7 +62,6 @@ namespace BelzontAdr
                 return -1;
             });
             doBindLink("main.atob", (string x) => Encoding.UTF8.GetString(Convert.FromBase64String(x)));
-            doBindLink("main.getEntityOptions", GetEntityOptions);
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -126,18 +124,7 @@ namespace BelzontAdr
         }
 
 
-        private AdrEntityData GetEntityOptions(Entity e)
-        {
-            return EntityManager.HasComponent<ADRDistrictData>(e) ? new AdrEntityData { allowX = true }
-                : EntityManager.HasComponent<ADREntityStationRef>(e) ? new AdrEntityData { allowY = true }
-                : null;
-        }
 
-        private class AdrEntityData
-        {
-            public bool allowX;
-            public bool allowY;
-        }
         #region Citizen & Pet
         internal bool TryGetNameList(bool male, out AdrNameFile names) => namesetSystem.GetForGuid(male ? CurrentCitySettings.CitizenMaleNameOverrides : CurrentCitySettings.CitizenFemaleNameOverrides, out names);
 
@@ -189,10 +176,6 @@ namespace BelzontAdr
             CurrentCitySettings = new();
             return default;
         }
-
-
-
-
         #endregion
     }
 }

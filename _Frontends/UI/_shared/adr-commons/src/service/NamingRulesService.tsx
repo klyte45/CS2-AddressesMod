@@ -73,7 +73,5 @@ export class NamingRulesService {
     static async saveRoadPrefixRulesFileDefault(): Promise<void> { await engine.call("k45::adr.main.saveRoadPrefixRulesFileDefault"); }
     static async loadRoadPrefixRulesFileDefault(): Promise<number> { return await engine.call("k45::adr.main.loadRoadPrefixRulesFileDefault"); }
 
-
-    static async getEntityOptions(x: Entity): Promise<any> { return await engine.call("k45::adr.main.getEntityOptions", x); }
 }
 

@@ -7,6 +7,7 @@ export * from "./src/service/DistrictRelativeService"
 export * from "./src/service/GitHubAddressesFilesSevice"
 export * from "./src/service/NamesetService"
 export * from "./src/service/NamingRulesService"
+export * from "./src/service/SelectInfoPanelService"
 
 export * from "../../_replacements/euis-components/src/utility/Entity"
-export * from "../../_replacements/euis-components/src/utility/name.utils"
+export * from "../../_replacements/euis-components/src/utility/name.utils" 

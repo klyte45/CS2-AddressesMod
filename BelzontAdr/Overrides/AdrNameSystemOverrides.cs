@@ -243,7 +243,8 @@ namespace BelzontAdr
                         entityStationRef.m_refStationBuilding = entity;
                         cmd.SetComponent(currDistrict.m_District, entityStationRef);
                     }
-                    if (entityStationRef.m_refStationBuilding == entity)
+                    var refStation = entityStationRef.m_refStationBuilding;
+                    if (refStation == entity)
                     {
                         if (GetDistrictName(out var pattern, out var mainName, currDistrict.m_District))
                         {
@@ -260,67 +261,7 @@ namespace BelzontAdr
                     || (adrMainSystem.CurrentCitySettings.RoadNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
                     && entityManager.HasComponent<Aggregated>(buildingData.m_RoadEdge))
                 {
-
-                    Queue<Entity> roadsToMap = new Queue<Entity>();
-                    HashSet<Entity> roadsMapped = new();
-                    roadsToMap.Enqueue(buildingData.m_RoadEdge);
-                    Entity refAggregate = Entity.Null;
-                    int maxIterations = 20;
-                    while (roadsToMap.TryDequeue(out Entity nextItem))
-                    {
-                        if (maxIterations-- == 0) break;
-                        if (!entityManager.TryGetComponent<Aggregated>(nextItem, out var aggNextItem)) continue;
-                        var hasAggRef = entityManager.TryGetComponent<ADREntityStationRef>(aggNextItem.m_Aggregate, out var aggregationStationRef);
-                        if (hasAggRef && aggregationStationRef.m_refStationBuilding != Entity.Null && aggregationStationRef.m_refStationBuilding != entity)
-                        {
-                            if (roadsMapped.Add(nextItem) && entityManager.TryGetComponent(nextItem, out Edge edge))
-                            {
-                                if (entityManager.TryGetBuffer(edge.m_Start, true, out DynamicBuffer<ConnectedEdge> connectedStart))
-                                {
-                                    for (int k = 0; k < connectedStart.Length; k++)
-                                    {
-                                        if (!roadsMapped.Contains(connectedStart[k].m_Edge))
-                                        {
-                                            roadsToMap.Enqueue(connectedStart[k].m_Edge);
-                                        }
-                                    }
-                                }
-                                if (entityManager.TryGetBuffer(edge.m_End, true, out DynamicBuffer<ConnectedEdge> connectedEnd))
-                                {
-                                    for (int k = 0; k < connectedEnd.Length; k++)
-                                    {
-                                        if (!roadsMapped.Contains(connectedEnd[k].m_Edge))
-                                        {
-                                            roadsToMap.Enqueue(connectedEnd[k].m_Edge);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (hasAggRef)
-                            {
-                                if (aggregationStationRef.m_refStationBuilding != entity)
-                                {
-                                    EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
-                                    aggregationStationRef.m_refStationBuilding = entity;
-                                    entityCommandBuffer.SetComponent(aggNextItem.m_Aggregate, aggregationStationRef);
-                                }
-                            }
-                            else
-                            {
-                                EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
-                                aggregationStationRef = new()
-                                {
-                                    m_refStationBuilding = entity
-                                };
-                                entityCommandBuffer.AddComponent(aggNextItem.m_Aggregate, aggregationStationRef);
-                            }
-                            refAggregate = aggNextItem.m_Aggregate;
-                            break;
-                        }
-                    }
+                    Entity refAggregate = GetMainReferenceAggregate(entity, buildingData);
                     if (refAggregate == Entity.Null)
                     {
                         return true;
@@ -335,6 +276,73 @@ namespace BelzontAdr
 
             return true;
         }
+
+        private static Entity GetMainReferenceAggregate(Entity entity, Building buildingData)
+        {
+            Queue<Entity> roadsToMap = new Queue<Entity>();
+            HashSet<Entity> roadsMapped = new();
+            roadsToMap.Enqueue(buildingData.m_RoadEdge);
+            Entity refAggregate = Entity.Null;
+            int maxIterations = 30;
+            while (roadsToMap.TryDequeue(out Entity nextItem))
+            {
+                if (maxIterations-- == 0) break;
+                if (!entityManager.TryGetComponent<Aggregated>(nextItem, out var aggNextItem)) continue;
+                var hasAggRef = entityManager.TryGetComponent<ADREntityStationRef>(aggNextItem.m_Aggregate, out var aggregationStationRef);
+                if (!entityManager.HasComponent<Road>(nextItem) || (hasAggRef && aggregationStationRef.m_refStationBuilding != Entity.Null && aggregationStationRef.m_refStationBuilding != entity))
+                {
+                    if (roadsMapped.Add(nextItem) && entityManager.TryGetComponent(nextItem, out Edge edge))
+                    {
+                        if (entityManager.TryGetBuffer(edge.m_Start, true, out DynamicBuffer<ConnectedEdge> connectedStart))
+                        {
+                            for (int k = 0; k < connectedStart.Length; k++)
+                            {
+                                if (!roadsMapped.Contains(connectedStart[k].m_Edge))
+                                {
+                                    roadsToMap.Enqueue(connectedStart[k].m_Edge);
+                                }
+                            }
+                        }
+                        if (entityManager.TryGetBuffer(edge.m_End, true, out DynamicBuffer<ConnectedEdge> connectedEnd))
+                        {
+                            for (int k = 0; k < connectedEnd.Length; k++)
+                            {
+                                if (!roadsMapped.Contains(connectedEnd[k].m_Edge))
+                                {
+                                    roadsToMap.Enqueue(connectedEnd[k].m_Edge);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (hasAggRef)
+                    {
+                        if (aggregationStationRef.m_refStationBuilding != entity)
+                        {
+                            EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
+                            aggregationStationRef.m_refStationBuilding = entity;
+                            entityCommandBuffer.SetComponent(aggNextItem.m_Aggregate, aggregationStationRef);
+                        }
+                    }
+                    else
+                    {
+                        EntityCommandBuffer entityCommandBuffer = m_EndFrameBarrier.CreateCommandBuffer();
+                        aggregationStationRef = new()
+                        {
+                            m_refStationBuilding = entity
+                        };
+                        entityCommandBuffer.AddComponent(aggNextItem.m_Aggregate, aggregationStationRef);
+                    }
+                    refAggregate = aggNextItem.m_Aggregate;
+                    break;
+                }
+            }
+
+            return refAggregate;
+        }
+
 
         private static bool GetAggregateName(out string format, out string name, Entity entity)
         {
