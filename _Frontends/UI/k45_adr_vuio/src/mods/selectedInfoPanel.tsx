@@ -1,11 +1,5 @@
-import { NamesetService, NamingRulesService } from "@klyte45/adr-commons";
-import { useModding } from "modding/modding-context";
-import { ModuleRegistry, ModuleRegistryExtend } from "modding/types";
-import { Component, ReactNode } from "react";
-import { ValueBinding } from "common/data-binding/binding";
-import { Entity } from "common/utils/equality";
-import { toEntityTyped } from "@klyte45/adr-commons";
 import { AddressesInfoOptionsComponent } from "components/AddressesInfoOptionsComponent";
+import { useModding } from "modding/modding-context";
 
 let currentEntity: any = null;
 export const AddressesBindings = () => {
@@ -33,6 +27,6 @@ export const AddressesBindings = () => {
 }
 
 export const AddressesLayoutRegistering = (componentList: any): any => {
-    componentList["K45.Addresses"] = () => <AddressesInfoOptionsComponent entity={useModding().api.bindings.selectedInfo.selectedEntity$} />
+    componentList["K45.Addresses"] = () =><><AddressesInfoOptionsComponent entity={useModding().api.bindings.selectedInfo.selectedEntity$} /></>
     return componentList as any;
 } 

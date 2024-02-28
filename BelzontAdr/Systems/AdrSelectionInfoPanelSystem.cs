@@ -70,6 +70,7 @@ namespace BelzontAdr
                         entity = x,
                         name = new ValuableName(nameSystem.GetName(x))
                     }));
+                    result.entityValue = AdrNameSystemOverrides.GetMainReferenceAggregate(e, building);
                 }
             }
 
@@ -88,7 +89,7 @@ namespace BelzontAdr
             nodesToMap.Enqueue(edge.m_End);
             roadsMapped.Add(buildingData.m_RoadEdge);
             if (EntityManager.TryGetComponent<Aggregated>(buildingData.m_RoadEdge, out var starterAgg)) result.Add(starterAgg.m_Aggregate);
-            var maxHops = 8;
+            var maxHops = 30;
             while (maxHops-- > 0 && nodesToMap.TryDequeue(out Entity nextItem))
             {
                 if (!EntityManager.TryGetBuffer<ConnectedEdge>(nextItem, true, out var connections)) continue;

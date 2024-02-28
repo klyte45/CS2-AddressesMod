@@ -11,3 +11,5 @@ export * from "./src/service/SelectInfoPanelService"
 
 export * from "../../_replacements/euis-components/src/utility/Entity"
 export * from "../../_replacements/euis-components/src/utility/name.utils" 
+
+export * from "./src/model/SelectInfoPanelModels"

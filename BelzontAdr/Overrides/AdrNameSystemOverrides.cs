@@ -277,7 +277,7 @@ namespace BelzontAdr
             return true;
         }
 
-        private static Entity GetMainReferenceAggregate(Entity entity, Building buildingData)
+        internal static Entity GetMainReferenceAggregate(Entity entity, Building buildingData)
         {
             Queue<Entity> roadsToMap = new Queue<Entity>();
             HashSet<Entity> roadsMapped = new();
