@@ -169,6 +169,11 @@ namespace BelzontAdr
 
         private static bool GetName(ref Name __result, ref NameSystem __instance, Entity entity)
         {
+            return GetName_Internal(ref __result, ref __instance, entity, new(), entity);
+        }
+
+        private static bool GetName_Internal(ref Name __result, ref NameSystem __instance, Entity entity, HashSet<Entity> pastEntities, Entity original)
+        {
             if (__instance.TryGetCustomName(entity, out string name))
             {
                 __result = NameSystem.Name.CustomName(name);
@@ -200,7 +205,7 @@ namespace BelzontAdr
                 var shallRunOrignal = GetAggregateName(out var pattern, out var genName, entity);
                 if (!shallRunOrignal)
                 {
-                    __result = Name.CustomName(pattern.Replace("{name}", genName));
+                    __result = Name.CustomName(entityManager.HasComponent<Building>(original) ? genName : pattern.Replace("{name}", genName));
                 }
                 return shallRunOrignal;
             }
@@ -213,14 +218,19 @@ namespace BelzontAdr
                 }
                 return shallRunOrignal;
             }
+            var wasOriginal = entity == original;
             while (entityManager.TryGetComponent<Owner>(entity, out var owner))
             {
                 entity = owner.m_Owner;
             }
-            if (__instance.TryGetCustomName(entity, out name))
+            if (entityManager.TryGetComponent<ADREntityManualBuildingRef>(entity, out var manualRef) && manualRef.m_refNamedEntity != Entity.Null)
             {
-                __result = NameSystem.Name.CustomName(name);
-                return false;
+                if (pastEntities.Contains(manualRef.m_refNamedEntity))
+                {
+                    entityManager.RemoveComponent<ADREntityManualBuildingRef>(manualRef.m_refNamedEntity);
+                }
+                pastEntities.Add(entity);
+                return GetName_Internal(ref __result, ref __instance, manualRef.m_refNamedEntity, pastEntities, wasOriginal ? entity : original);
             }
             if (entityManager.TryGetComponent<Building>(entity, out var buildingData))
             {

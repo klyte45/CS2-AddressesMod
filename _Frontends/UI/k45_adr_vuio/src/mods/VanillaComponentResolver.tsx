@@ -2,6 +2,7 @@ import { ActiveFocusDivProps, PassiveFocusDivProps } from "common/focus/focus-di
 import { UniqueFocusKey, useUniqueFocusKey } from "common/focus/focus-key";
 import { Theme } from "game/data-binding/prefab/prefab-bindings";
 import { ModuleRegistry } from "modding/types";
+import { HTMLAttributes } from "react";
 import { DropdownField } from "widgets/data-binding/widget-bindings";
 
 type PropsToggleField = {
@@ -17,7 +18,7 @@ type PropsRadioToggle = {
     theme?: Theme | any
     style?: CSSStyleRule
     className?: string
-}
+} & HTMLAttributes<any>
 
 type PropsRadioGroupToggleField = {
     value: any,
@@ -25,7 +26,7 @@ type PropsRadioGroupToggleField = {
     disabled?: boolean,
     onChange?: (x: any) => any,
     onToggleSelected?: (x: any) => any,
-}
+} & HTMLAttributes<any>
 
 type PropsInfoSection = {
     focusKey?: UniqueFocusKey | null

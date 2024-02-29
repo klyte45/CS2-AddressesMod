@@ -12,13 +12,13 @@ export class AddressesInfoOptionsComponent extends Component<Props, State> {
     constructor(props: Props) {
         super(props)
         this.state = {} as any
-        this.loadOptions(props.entity.value)
+        this.loadOptions(props.entity.value, false)
     }
 
-    private async loadOptions(entity: Entity) {
-        if (lastEntity != entity) {
+    private async loadOptions(entity: Entity, force: boolean) {
+        if (force || lastEntity != entity) {
             lastEntity = entity;
-            const result = await SelectInfoPanelService.getEntityOptions(toEntityTyped(entity)); 
+            const result = await SelectInfoPanelService.getEntityOptions(toEntityTyped(entity));
             console.log(result)
             this.setState({ optionsResult: result })
         }
@@ -37,7 +37,7 @@ export class AddressesInfoOptionsComponent extends Component<Props, State> {
     private getSubRows() {
         switch (this.state.optionsResult.type?.value__) {
             case AdrEntityType.PublicTransportStation:
-                return <StationBuildingOptionsComponent entity={toEntityTyped(this.props.entity.value)} response={this.state.optionsResult} />
+                return <StationBuildingOptionsComponent onChanged={() => this.loadOptions(this.props.entity.value, true)} entity={toEntityTyped(this.props.entity.value)} response={this.state.optionsResult} />
             default:
                 return <></>
         }

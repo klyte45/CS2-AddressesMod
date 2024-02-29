@@ -21,6 +21,7 @@ namespace BelzontAdr
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
             eventCaller("selectionPanel.getEntityOptions", GetEntityOptions);
+            eventCaller("selectionPanel.setEntityRoadReference", SetEntityRoadReference);
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -52,25 +53,23 @@ namespace BelzontAdr
                 if (EntityManager.HasComponent<PublicTransportStation>(e))
                 {
                     result.type = AdrEntityType.PublicTransportStation;
+                    if (EntityManager.TryGetComponent<ADREntityManualBuildingRef>(e, out var manualRef)) result.entityValue = manualRef.m_refNamedEntity;
                     if (EntityManager.TryGetComponent<CurrentDistrict>(e, out var currDistrict)
                         && currDistrict.m_District != Entity.Null)
                     {
-                        result.allowDistrict = mainSystem.CurrentCitySettings.DistrictNameAsNameStation;
-                        if (EntityManager.TryGetComponent<ADREntityStationRef>(currDistrict.m_District, out var adrData) && adrData.m_refStationBuilding == e)
+                        result.allowDistrict = true;
+                        if (result.entityValue == Entity.Null && EntityManager.TryGetComponent<ADREntityStationRef>(currDistrict.m_District, out var adrData) && adrData.m_refStationBuilding == e)
                         {
                             result.entityValue = currDistrict.m_District;
                         }
-                        if (result.allowDistrict)
-                        {
-                            result.districtRef = currDistrict.m_District;
-                        }
+                        result.districtRef = currDistrict.m_District;
                     }
+                    if (result.entityValue == Entity.Null) result.entityValue = AdrNameSystemOverrides.GetMainReferenceAggregate(e, building);
                     result.roadAggegateOptions.AddRange(GetRoadOptionsForBuildingEntity(building).Select(x => new EntityOption
                     {
                         entity = x,
                         name = new ValuableName(nameSystem.GetName(x))
                     }));
-                    result.entityValue = AdrNameSystemOverrides.GetMainReferenceAggregate(e, building);
                 }
             }
 
@@ -78,12 +77,27 @@ namespace BelzontAdr
             return result;
         }
 
+        private bool SetEntityRoadReference(Entity target, Entity reference)
+        {
+            if (EntityManager.TryGetComponent<ADREntityManualBuildingRef>(target, out var refComp))
+            {
+                refComp.m_refNamedEntity = reference;
+                EntityManager.SetComponentData(target, refComp);
+            }
+            else
+            {
+                refComp = new ADREntityManualBuildingRef();
+                refComp.m_refNamedEntity = reference;
+                EntityManager.AddComponentData(target, refComp);
+            }
+            return true;
+        }
 
-        private List<Entity> GetRoadOptionsForBuildingEntity(Building buildingData)
+        private HashSet<Entity> GetRoadOptionsForBuildingEntity(Building buildingData)
         {
             Queue<Entity> nodesToMap = new Queue<Entity>();
             HashSet<Entity> roadsMapped = new();
-            List<Entity> result = new();
+            HashSet<Entity> result = new();
             if (!EntityManager.TryGetComponent<Edge>(buildingData.m_RoadEdge, out var edge)) return null;
             nodesToMap.Enqueue(edge.m_Start);
             nodesToMap.Enqueue(edge.m_End);
@@ -98,23 +112,17 @@ namespace BelzontAdr
                     if (roadsMapped.Contains(item.m_Edge)) continue;
                     roadsMapped.Add(item.m_Edge);
                     if (!EntityManager.HasComponent<Road>(item.m_Edge)) continue;
-                    if (EntityManager.TryGetComponent<Aggregated>(item.m_Edge, out var agg)) continue;
-                    if (agg.m_Aggregate == starterAgg.m_Aggregate)
+                    if (!EntityManager.TryGetComponent<Edge>(item.m_Edge, out var edgeItem)) continue;
+                    if (edgeItem.m_Start != nextItem)
                     {
-                        if (EntityManager.TryGetComponent<Edge>(item.m_Edge, out var edgeItem)) continue;
-                        if (edgeItem.m_Start != nextItem)
-                        {
-                            nodesToMap.Enqueue(edgeItem.m_Start);
-                        }
-                        else
-                        {
-                            nodesToMap.Enqueue(edgeItem.m_End);
-                        }
+                        nodesToMap.Enqueue(edgeItem.m_Start);
                     }
                     else
                     {
-                        result.Add(agg.m_Aggregate);
+                        nodesToMap.Enqueue(edgeItem.m_End);
                     }
+                    if (!EntityManager.TryGetComponent<Aggregated>(item.m_Edge, out var agg)) continue;
+                    result.Add(agg.m_Aggregate);
                 }
             }
             return result;
