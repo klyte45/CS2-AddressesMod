@@ -1,11 +1,11 @@
 ﻿using Belzont.Interfaces;
+using Belzont.Utils;
 using Colossal.Entities;
 using Game;
 using Game.Areas;
 using Game.Buildings;
 using Game.Common;
 using Game.Net;
-using Game.Prefabs;
 using Game.UI;
 using System;
 using System.Collections.Generic;
@@ -24,6 +24,8 @@ namespace BelzontAdr
         {
             eventCaller("selectionPanel.getEntityOptions", GetEntityOptions);
             eventCaller("selectionPanel.setEntityRoadReference", SetEntityRoadReference);
+            eventCaller("selectionPanel.redrawSeed", ResetEntityAdrSeed);
+            eventCaller("selectionPanel.changeSeedByDelta", ChangeEntityAdrSeedByDelta);
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -54,14 +56,43 @@ namespace BelzontAdr
             {
                 if (EntityManager.HasComponent<PublicTransportStation>(e))
                 {
+                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have building and PublicTransportStation");
                     result.type = AdrEntityType.PublicTransportStation;
                     StationRefFill(e, result, building);
                 }
                 else if (EntityManager.HasComponent<Game.Buildings.CargoTransportStation>(e))
                 {
-                    result.type = AdrEntityType.PublicTransportStation;
+                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have building and CargoTransportStation");
+                    result.type = AdrEntityType.CargoTransportStation;
                     StationRefFill(e, result, building);
                 }
+                else
+                {
+                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have building only");
+                }
+            }
+            else if (EntityManager.TryGetComponent<Aggregated>(e, out var agg))
+            {
+                if (EntityManager.HasComponent<Road>(e))
+                {
+                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have Aggregated and Road");
+                    result.type = AdrEntityType.RoadAggregation;
+                    result.entityValue = agg.m_Aggregate;
+                }
+                else
+                {
+                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have agg only");
+                }
+            }
+            else if (EntityManager.HasComponent<Aggregate>(e))
+            {
+                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is Aggregate");
+                result.type = AdrEntityType.RoadAggregation;
+                result.entityValue = e;
+            }
+            else
+            {
+                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have no special rule");
             }
 
 
@@ -98,12 +129,40 @@ namespace BelzontAdr
             }
             else
             {
-                refComp = new ADREntityManualBuildingRef();
+                refComp = new();
                 refComp.m_refNamedEntity = reference;
                 EntityManager.AddComponentData(target, refComp);
             }
             EntityManager.AddComponent<Updated>(target);
             return true;
+        }
+
+        private bool ResetEntityAdrSeed(Entity target)
+        {
+            if (EntityManager.HasComponent<ADRRandomizationData>(target))
+            {
+                EntityManager.SetComponentData(target, new ADRRandomizationData());
+                EntityManager.AddComponent<Updated>(target);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private bool ChangeEntityAdrSeedByDelta(Entity target, int delta)
+        {
+            if (EntityManager.TryGetComponent<ADRRandomizationData>(target, out var rand))
+            {
+                rand.m_seedIdentifier = (ushort)((delta + rand.m_seedIdentifier) & 0xFFFF);
+                EntityManager.SetComponentData(target, rand);
+                EntityManager.AddComponent<Updated>(target);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private HashSet<Entity> GetRoadOptionsForBuildingEntity(Building buildingData)
@@ -156,6 +215,7 @@ namespace BelzontAdr
             None = 0,
             PublicTransportStation,
             CargoTransportStation,
+            RoadAggregation
 
         }
 

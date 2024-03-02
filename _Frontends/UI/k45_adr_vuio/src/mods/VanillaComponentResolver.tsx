@@ -78,6 +78,24 @@ type PropsDropdownItem = {
     children?: JSX.Element | JSX.Element[] | string,
 }
 
+type PropsIconButton = {
+    src: string
+    tinted: boolean
+    theme?: Theme & any
+    className?: string
+    children?: string | JSX.Element | JSX.Element[]
+    onSelect: () => any
+}
+
+type PropsTooltip = {
+    tooltip: string | JSX.Element | JSX.Element[]
+    disabled?: boolean
+    theme?: Theme & any
+    direction?: "up" | "down" | "left" | "right"
+    alignment?: "left" | "right" | "center"
+    className?: string
+    children: string | JSX.Element | JSX.Element[]
+}
 
 const registryIndex = {
     RadioToggle: ["game-ui/common/input/toggle/radio-toggle/radio-toggle.tsx", "RadioToggle"],
@@ -96,6 +114,9 @@ const registryIndex = {
     themeDropdown: ["game-ui/menu/widgets/dropdown-field/dropdown-field.module.scss", "classes"],
     DropdownItem: ["game-ui/common/input/dropdown/items/dropdown-item.tsx", "DropdownItem"],
     DropdownToggle: ["game-ui/common/input/dropdown/dropdown-toggle.tsx", "DropdownToggle"],
+    IconButton: ["game-ui/common/input/button/icon-button.tsx", "IconButton"],
+    themeGamepadToolOptions: ["game-ui/game/components/tool-options/tool-button/tool-button.module.scss", "classes"],
+    Tooltip: ["game-ui/common/tooltip/tooltip.tsx", "Tooltip"]
 }
 
 
@@ -128,10 +149,13 @@ export class VanillaComponentResolver {
     public get Dropdown(): (props: PropsDropdown) => JSX.Element { return this.cachedData["Dropdown"] ?? this.updateCache("Dropdown") }
     public get DropdownItem(): (props: PropsDropdownItem) => JSX.Element { return this.cachedData["DropdownItem"] ?? this.updateCache("DropdownItem") }
     public get DropdownToggle(): (props: PropsDropdownToggle) => JSX.Element { return this.cachedData["DropdownToggle"] ?? this.updateCache("DropdownToggle") }
+    public get IconButton(): (props: PropsIconButton) => JSX.Element { return this.cachedData["IconButton"] ?? this.updateCache("IconButton") }
+    public get Tooltip(): (props: PropsTooltip) => JSX.Element { return this.cachedData["Tooltip"] ?? this.updateCache("Tooltip") }
 
 
     public get themeToggleLine(): Theme | any { return this.cachedData["themeToggleLine"] ?? this.updateCache("themeToggleLine") }
     public get themeDropdown(): Theme | any { return this.cachedData["themeDropdown"] ?? this.updateCache("themeDropdown") }
+    public get themeGamepadToolOptions(): Theme | any { return this.cachedData["themeGamepadToolOptions"] ?? this.updateCache("themeGamepadToolOptions") }
 
 
     public get FOCUS_DISABLED(): UniqueFocusKey { return this.cachedData["FOCUS_DISABLED"] ?? this.updateCache("FOCUS_DISABLED") }

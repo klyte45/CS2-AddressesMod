@@ -5,7 +5,6 @@ import { AddressesBindings, AddressesLayoutRegistering } from "mods/selectedInfo
 
 
 const register: ModRegistrar = (moduleRegistry) => {
-    console.log("AHDAHJD")
     VanillaComponentResolver.setRegistry(moduleRegistry);
     moduleRegistry.append('Game', AddressesBindings)
     moduleRegistry.extend("game-ui/game/components/selected-info-panel/selected-info-sections/selected-info-sections.tsx", 'selectedInfoSectionComponents', AddressesLayoutRegistering)
