@@ -1,9 +1,14 @@
 ﻿using Belzont.Interfaces;
 using Colossal.Entities;
+using Colossal.Rendering;
 using Game;
 using Game.Areas;
 using Game.Buildings;
+using Game.Common;
 using Game.Net;
+using Game.Objects;
+using Game.Prefabs;
+using Game.Simulation;
 using Game.UI;
 using System;
 using System.Collections.Generic;
@@ -90,6 +95,7 @@ namespace BelzontAdr
                 refComp.m_refNamedEntity = reference;
                 EntityManager.AddComponentData(target, refComp);
             }
+            EntityManager.AddComponent<Updated>(target);
             return true;
         }
 

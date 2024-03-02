@@ -418,21 +418,29 @@ namespace BelzontAdr
             return false;
         }
 
-        private static RandomLocalizationIndex GetAdrLocData(Entity entity)
+        private static ADRRandomizationData? GetAdrLocData(Entity entity)
         {
-            if (!entityManager.TryGetBuffer(entity, true, out DynamicBuffer<RandomLocalizationIndex> adrLoc))
+            if (!entityManager.TryGetComponent(entity, out ADRRandomizationData data))
             {
-                return default;
+                data = new ADRRandomizationData();
+                entityManager.AddComponentData(entity, data);
+
+                var cmd = m_EndFrameBarrier.CreateCommandBuffer();
+                cmd.AddComponent<BatchesUpdated>(entity);
+                cmd.AddComponent<Updated>(entity);
+                return null;
             }
 
-            return adrLoc.Length > 0 ? adrLoc[0] : default;
+            return data;
         }
 
         private static string GetFromList(AdrNameFile namesFile, Entity entityRef)
         {
             var adrLoc = GetAdrLocData(entityRef);
-            string name = namesFile.GetShuffledList(adrMainSystem)[adrLoc.m_Index % namesFile.Values.Count];
-            if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Generated name for Entity {entityRef}: '{name}' ({adrLoc.m_Index})");
+            if (adrLoc == null) return null;
+            var adrLocEnsured = adrLoc ?? throw new System.Exception("IMPUSSIBRU");
+            string name = namesFile.GetShuffledList(adrMainSystem)[adrLocEnsured.m_seedIdentifier % namesFile.Values.Count];
+            if (BasicIMod.VerboseMode) LogUtils.DoVerboseLog($"Generated name for Entity {entityRef}: '{name}' ({adrLocEnsured.m_seedIdentifier})");
             return name;
         }
 

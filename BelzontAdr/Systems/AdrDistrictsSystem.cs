@@ -45,12 +45,12 @@ namespace BelzontAdr
             if (dirtyDistricts)
             {
                 dirtyDistricts = false;
-                mainSystem.OnChangedRoadNameGenerationRules();
+                mainSystem.MarkRoadsDirty();
                 OnDistrictChanged();
             }
             else if (!m_districtsUpdatedQuery.IsEmptyIgnoreFilter)
             {
-                mainSystem.OnChangedRoadNameGenerationRules();
+                mainSystem.MarkRoadsDirty();
                 OnDistrictChanged();
             }
         }

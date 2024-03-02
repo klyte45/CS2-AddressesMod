@@ -73,8 +73,8 @@ namespace BelzontAdr
         private void OnCityNamesetsChanged()
         {
             eventCaller.Invoke("namesets.onCityNamesetsChanged", null);
-            mainSystem.OnChangedDistrictNameGenerationRules();
-            mainSystem.OnChangedRoadNameGenerationRules();
+            mainSystem.MarkDistrictsDirty();
+            mainSystem.MarkRoadsDirty();
             isDirty = true;
         }
 

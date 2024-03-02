@@ -6,6 +6,7 @@ using Colossal.Entities;
 using Colossal.Serialization.Entities;
 using Game;
 using Game.Rendering;
+using Game.SceneFlow;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,7 +21,7 @@ namespace BelzontAdr
         private Action<string, object[]> m_eventCaller;
         private AdrCitywideSettings currentCitySettings = new();
         private AdrDistrictsSystem districtsSystem;
-        private Queue<Action> actionsToGo;
+        private Queue<Action> actionsToGoOnUpdate;
         private AdrNamesetSystem namesetSystem;
 
         private static string DefaultRoadPrefixFilename = Path.Combine(AddressesCs2Mod.ModSettingsRootFolder, "DefaultRoadPrefixRules.xml");
@@ -35,9 +36,9 @@ namespace BelzontAdr
             doBindLink("main.setCitizenFemaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenFemaleNameOverridesStr = x; NotifyChanges(); });
             doBindLink("main.setCitizenSurnameOverridesStr", (string x) => { CurrentCitySettings.CitizenSurnameOverridesStr = x; NotifyChanges(); });
             doBindLink("main.setCitizenDogOverridesStr", (string x) => { CurrentCitySettings.CitizenDogOverridesStr = x; NotifyChanges(); });
-            doBindLink("main.setDefaultRoadNameOverridesStr", (string x) => { CurrentCitySettings.DefaultRoadNameOverridesStr = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
-            doBindLink("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; OnChangedRoadNameGenerationRules(); NotifyChanges(); });
-            doBindLink("main.setDefaultDistrictNameOverridesStr", (string x) => { CurrentCitySettings.DefaultDistrictNameOverridesStr = x; NotifyChanges(); OnChangedDistrictNameGenerationRules(); districtsSystem.OnDistrictChanged(); });
+            doBindLink("main.setDefaultRoadNameOverridesStr", (string x) => { CurrentCitySettings.DefaultRoadNameOverridesStr = x; MarkRoadsDirty(); NotifyChanges(); });
+            doBindLink("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; MarkRoadsDirty(); NotifyChanges(); });
+            doBindLink("main.setDefaultDistrictNameOverridesStr", (string x) => { CurrentCitySettings.DefaultDistrictNameOverridesStr = x; NotifyChanges(); MarkDistrictsDirty(); districtsSystem.OnDistrictChanged(); });
             doBindLink("main.setRoadNameAsNameStation", (bool x) => { CurrentCitySettings.RoadNameAsNameStation = x; NotifyChanges(); });
             doBindLink("main.setRoadNameAsNameCargoStation", (bool x) => { CurrentCitySettings.RoadNameAsNameCargoStation = x; NotifyChanges(); });
             doBindLink("main.setDistrictNameAsNameStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameStation = x; NotifyChanges(); });
@@ -75,10 +76,13 @@ namespace BelzontAdr
 
         protected override void OnUpdate()
         {
-            while (actionsToGo.TryDequeue(out var action))
+            if (!GameManager.instance.isLoading && !GameManager.instance.isGameLoading)
             {
-                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Running action {action}");
-                action.Invoke();
+                while (actionsToGoOnUpdate.TryDequeue(out var action))
+                {
+                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Running action {action}");
+                    action.Invoke();
+                }
             }
         }
 
@@ -86,29 +90,57 @@ namespace BelzontAdr
         {
             base.OnCreate();
             districtsSystem = World.GetOrCreateSystemManaged<AdrDistrictsSystem>();
-            actionsToGo = new Queue<Action>();
+            actionsToGoOnUpdate = new Queue<Action>();
             namesetSystem = World.GetOrCreateSystemManaged<AdrNamesetSystem>();
+    
         }
 
-        internal void EnqueueToRunOnUpdate(Action a)
+        private void EnqueueToRunOnUpdate(Action a)
         {
             if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Enqueue action {a}");
-            actionsToGo.Enqueue(a);
-            if (BasicIMod.VerboseMode) LogUtils.DoVerboseLog($"actions to go after add: {actionsToGo?.Count}!");
+            actionsToGoOnUpdate.Enqueue(a);
+            if (BasicIMod.VerboseMode) LogUtils.DoVerboseLog($"actions to go after add: {actionsToGoOnUpdate?.Count}!");
         }
+ 
 
-
-        internal void OnChangedRoadNameGenerationRules() => EnqueueToRunOnUpdate(() =>
+        private void ResetRoadsCache()
         {
             if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Run action typeof(AggregateMeshSystem).GetMethod(\"OnDictionaryChanged\",...)");
             typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags).Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
-        });
+            isDirtyRoads = false;
+        }
 
-        internal void OnChangedDistrictNameGenerationRules() => EnqueueToRunOnUpdate(() =>
+        private void ResetDistrictsCache()
         {
             if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Run action typeof(AreaBufferSystem).GetMethod(\"OnDictionaryChanged\", ...)");
             typeof(AreaBufferSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags).Invoke(World.GetExistingSystemManaged<AreaBufferSystem>(), new object[0]);
-        });
+            isDirtyDistricts = false;
+        }
+
+        private void OnChangedRoadNameGenerationRules() => EnqueueToRunOnUpdate(ResetRoadsCache);
+
+        private void OnChangedDistrictNameGenerationRules() => EnqueueToRunOnUpdate(ResetDistrictsCache);
+
+        private bool isDirtyRoads;
+        private bool isDirtyDistricts;
+
+        internal void MarkRoadsDirty()
+        {
+            if (!isDirtyRoads)
+            {
+                isDirtyRoads = true;
+                OnChangedRoadNameGenerationRules();
+            }
+        }
+        internal void MarkDistrictsDirty()
+        {
+            if (!isDirtyDistricts)
+            {
+                isDirtyDistricts = true;
+                OnChangedDistrictNameGenerationRules();
+            }
+        }
+
         public AdrCitywideSettings CurrentCitySettings
         {
             get => currentCitySettings; private set
