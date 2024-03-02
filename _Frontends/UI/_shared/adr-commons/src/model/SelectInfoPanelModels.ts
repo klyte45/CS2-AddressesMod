@@ -14,7 +14,8 @@ export type SelectedInfoOptions = {
 }
 export enum AdrEntityType {
     None = 0,
-    PublicTransportStation
+    PublicTransportStation,
+    CargoTransportStation
 }
 export type EntityOption = {
     entity: Entity

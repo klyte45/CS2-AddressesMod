@@ -458,11 +458,9 @@ namespace BelzontAdr
             }
             string text = male ? randomGenderedLocalization.m_MaleID : randomGenderedLocalization.m_FemaleID;
             DynamicBuffer<RandomLocalizationIndex> dynamicBuffer;
-            if (entityManager.TryGetBuffer(household, true, out dynamicBuffer) && dynamicBuffer.Length > 0)
-            {
-                return LocalizationUtils.AppendIndex(text, dynamicBuffer[0]);
-            }
-            return text;
+            return entityManager.TryGetBuffer(household, true, out dynamicBuffer) && dynamicBuffer.Length > 0
+                ? LocalizationUtils.AppendIndex(text, dynamicBuffer[0])
+                : text;
         }
 
         private static string GetId(Entity entity, bool useRandomLocalization = true)

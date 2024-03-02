@@ -1,14 +1,11 @@
 ﻿using Belzont.Interfaces;
 using Colossal.Entities;
-using Colossal.Rendering;
 using Game;
 using Game.Areas;
 using Game.Buildings;
 using Game.Common;
 using Game.Net;
-using Game.Objects;
 using Game.Prefabs;
-using Game.Simulation;
 using Game.UI;
 using System;
 using System.Collections.Generic;
@@ -58,28 +55,38 @@ namespace BelzontAdr
                 if (EntityManager.HasComponent<PublicTransportStation>(e))
                 {
                     result.type = AdrEntityType.PublicTransportStation;
-                    if (EntityManager.TryGetComponent<ADREntityManualBuildingRef>(e, out var manualRef)) result.entityValue = manualRef.m_refNamedEntity;
-                    if (EntityManager.TryGetComponent<CurrentDistrict>(e, out var currDistrict)
-                        && currDistrict.m_District != Entity.Null)
-                    {
-                        result.allowDistrict = true;
-                        if (result.entityValue == Entity.Null && EntityManager.TryGetComponent<ADREntityStationRef>(currDistrict.m_District, out var adrData) && adrData.m_refStationBuilding == e)
-                        {
-                            result.entityValue = currDistrict.m_District;
-                        }
-                        result.districtRef = currDistrict.m_District;
-                    }
-                    if (result.entityValue == Entity.Null) result.entityValue = AdrNameSystemOverrides.GetMainReferenceAggregate(e, building);
-                    result.roadAggegateOptions.AddRange(GetRoadOptionsForBuildingEntity(building).Select(x => new EntityOption
-                    {
-                        entity = x,
-                        name = new ValuableName(nameSystem.GetName(x))
-                    }));
+                    StationRefFill(e, result, building);
+                }
+                else if (EntityManager.HasComponent<Game.Buildings.CargoTransportStation>(e))
+                {
+                    result.type = AdrEntityType.PublicTransportStation;
+                    StationRefFill(e, result, building);
                 }
             }
 
 
             return result;
+        }
+
+        private void StationRefFill(Entity e, AdrEntityData result, Building building)
+        {
+            if (EntityManager.TryGetComponent<ADREntityManualBuildingRef>(e, out var manualRef)) result.entityValue = manualRef.m_refNamedEntity;
+            if (EntityManager.TryGetComponent<CurrentDistrict>(e, out var currDistrict)
+                && currDistrict.m_District != Entity.Null)
+            {
+                result.allowDistrict = true;
+                if (result.entityValue == Entity.Null && EntityManager.TryGetComponent<ADREntityStationRef>(currDistrict.m_District, out var adrData) && adrData.m_refStationBuilding == e)
+                {
+                    result.entityValue = currDistrict.m_District;
+                }
+                result.districtRef = currDistrict.m_District;
+            }
+            if (result.entityValue == Entity.Null) result.entityValue = AdrNameSystemOverrides.GetMainReferenceAggregate(e, building);
+            result.roadAggegateOptions.AddRange(GetRoadOptionsForBuildingEntity(building).Select(x => new EntityOption
+            {
+                entity = x,
+                name = new ValuableName(nameSystem.GetName(x))
+            }));
         }
 
         private bool SetEntityRoadReference(Entity target, Entity reference)
@@ -148,6 +155,7 @@ namespace BelzontAdr
         {
             None = 0,
             PublicTransportStation,
+            CargoTransportStation,
 
         }
 

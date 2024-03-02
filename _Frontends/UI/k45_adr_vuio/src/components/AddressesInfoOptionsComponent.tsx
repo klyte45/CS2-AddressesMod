@@ -37,6 +37,7 @@ export class AddressesInfoOptionsComponent extends Component<Props, State> {
     private getSubRows() {
         switch (this.state.optionsResult.type?.value__) {
             case AdrEntityType.PublicTransportStation:
+            case AdrEntityType.CargoTransportStation:
                 return <StationBuildingOptionsComponent onChanged={() => this.loadOptions(this.props.entity.value, true)} entity={toEntityTyped(this.props.entity.value)} response={this.state.optionsResult} />
             default:
                 return <></>
