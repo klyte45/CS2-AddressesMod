@@ -173,6 +173,11 @@ namespace BelzontAdr
             Entity refDistrict = EntityManager.TryGetComponent<BorderDistrict>(refRoad, out var refDistrictBorders) ? refDistrictBorders.m_Left == default ? refDistrictBorders.m_Right : refDistrictBorders.m_Left : default;
             return TryGetRoadNamesList(refDistrict, out roadsNamesList);
         }
+
+        public float3 GetZeroMarkerPosition()
+        {
+            return default;
+        }
         #endregion
 
 

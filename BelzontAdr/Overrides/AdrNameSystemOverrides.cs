@@ -372,7 +372,7 @@ namespace BelzontAdr
 
             format = adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData, fullBridge).FormatPattern;
 
-            name = GetFromList(roadsNamesList, entity);
+            name = GetFromList(roadsNamesList, entity, true);
             return false;
         }
 
@@ -384,7 +384,7 @@ namespace BelzontAdr
 
             format = "{name}";// adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData).FormatPattern;
 
-            name = GetFromList(districtNamesList, entity);
+            name = GetFromList(districtNamesList, entity, true);
             return false;
         }
 
@@ -414,7 +414,7 @@ namespace BelzontAdr
             return false;
         }
 
-        private static ADRRandomizationData? GetAdrLocData(Entity entity)
+        private static ADRRandomizationData? GetAdrLocData(Entity entity, bool allowNull)
         {
             if (!entityManager.TryGetComponent(entity, out ADRRandomizationData data))
             {
@@ -422,15 +422,18 @@ namespace BelzontAdr
                 entityManager.AddComponentData(entity, data);
                 entityManager.AddComponent<BatchesUpdated>(entity);
                 entityManager.AddComponent<Updated>(entity);
-                return null;
+                if (allowNull)
+                {
+                    return null;
+                }
             }
 
             return data;
         }
 
-        private static string GetFromList(AdrNameFile namesFile, Entity entityRef)
+        private static string GetFromList(AdrNameFile namesFile, Entity entityRef, bool allowNull = false)
         {
-            var adrLoc = GetAdrLocData(entityRef);
+            var adrLoc = GetAdrLocData(entityRef, allowNull);
             if (adrLoc == null) return null;
             var adrLocEnsured = adrLoc ?? throw new System.Exception("IMPUSSIBRU");
             string name = namesFile.Values[adrLocEnsured.m_seedIdentifier % namesFile.Values.Count];
@@ -461,8 +464,7 @@ namespace BelzontAdr
                 return null;
             }
             Entity entity2 = Entity.Null;
-            PrefabRef prefabRef;
-            if (entityManager.TryGetComponent(entity, out prefabRef))
+            if (entityManager.TryGetComponent(entity, out PrefabRef prefabRef))
             {
                 entity2 = prefabRef.m_Prefab;
             }
