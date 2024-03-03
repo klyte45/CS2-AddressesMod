@@ -13,14 +13,7 @@ namespace BelzontAdr
 
         internal readonly Guid Id;
         public string Name;
-        public ImmutableList<string> Values
-        {
-            get => values; set
-            {
-                values = value;
-                shuffleDirty = true;
-            }
-        }
+        public ImmutableList<string> Values { get; set; }
         internal Guid Checksum { get; private set; }
         public string IdString => Id.ToString();
 
@@ -55,18 +48,6 @@ namespace BelzontAdr
                 Values = Values.ToList()
             };
         }
-        public List<string> GetShuffledList(AdrMainSystem adrMainSystem)
-        {
-            if (shuffleDirty || shuffledList == null)
-            {
-                var randomizer = Unity.Mathematics.Random.CreateFromIndex((uint)adrMainSystem.CurrentCitySettings.CityNameSeeds);
-                shuffledList = Values.ToList().OrderBy(x => randomizer.NextInt()).ToList();
-            }
-            return shuffledList;
-        }
-        private bool shuffleDirty;
-        private List<string> shuffledList;
-        private ImmutableList<string> values;
 
         [XmlRoot("AdrNameFileXML")]
         public class AdrNameFileXML

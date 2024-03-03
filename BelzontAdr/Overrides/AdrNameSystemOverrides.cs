@@ -14,7 +14,6 @@ using Game.UI;
 using Game.UI.Localization;
 using System.Collections.Generic;
 using Unity.Entities;
-using Unity.Mathematics;
 using static Game.UI.NameSystem;
 using AreaType = Game.Zones.AreaType;
 using CargoTransportStation = Game.Buildings.CargoTransportStation;
@@ -357,12 +356,8 @@ namespace BelzontAdr
         private static bool GetAggregateName(out string format, out string name, Entity entity)
         {
             name = format = null;
-            if (!entityManager.TryGetBuffer<AggregateElement>(entity, true, out var elements)) return true;
-            if (!entityManager.TryGetComponent<EdgeGeometry>(elements[0].m_Edge, out var geom0)) return true;
-            if (!entityManager.TryGetComponent<EdgeGeometry>(elements[^1].m_Edge, out var geomLast)) return true;
-            var refRoad = math.length(geom0.m_Bounds.min) < math.length(geomLast.m_Bounds.min) ? elements[0].m_Edge : elements[^1].m_Edge;
-            Entity refDistrict = entityManager.TryGetComponent<BorderDistrict>(refRoad, out var refDistrictBorders) ? refDistrictBorders.m_Left == default ? refDistrictBorders.m_Right : refDistrictBorders.m_Left : default;
-            if (!adrMainSystem.TryGetRoadNamesList(refDistrict, out var roadsNamesList)) return true;
+            if (!adrMainSystem.FindReferenceRoad(entity, out DynamicBuffer<AggregateElement> elements, out Entity refRoad)) return true;
+            if (!adrMainSystem.GetRoadNameList(refRoad, out var roadsNamesList)) return true;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;
             if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData)) return true;
             var fullBridge = true;
@@ -380,6 +375,7 @@ namespace BelzontAdr
             name = GetFromList(roadsNamesList, entity);
             return false;
         }
+
 
         private static bool GetDistrictName(out string format, out string name, Entity entity)
         {
@@ -424,10 +420,8 @@ namespace BelzontAdr
             {
                 data = new ADRRandomizationData();
                 entityManager.AddComponentData(entity, data);
-
-                var cmd = m_EndFrameBarrier.CreateCommandBuffer();
-                cmd.AddComponent<BatchesUpdated>(entity);
-                cmd.AddComponent<Updated>(entity);
+                entityManager.AddComponent<BatchesUpdated>(entity);
+                entityManager.AddComponent<Updated>(entity);
                 return null;
             }
 
@@ -439,7 +433,7 @@ namespace BelzontAdr
             var adrLoc = GetAdrLocData(entityRef);
             if (adrLoc == null) return null;
             var adrLocEnsured = adrLoc ?? throw new System.Exception("IMPUSSIBRU");
-            string name = namesFile.GetShuffledList(adrMainSystem)[adrLocEnsured.m_seedIdentifier % namesFile.Values.Count];
+            string name = namesFile.Values[adrLocEnsured.m_seedIdentifier % namesFile.Values.Count];
             if (BasicIMod.VerboseMode) LogUtils.DoVerboseLog($"Generated name for Entity {entityRef}: '{name}' ({adrLocEnsured.m_seedIdentifier})");
             return name;
         }
@@ -450,15 +444,12 @@ namespace BelzontAdr
             {
                 return null;
             }
-            PrefabRef refData;
-            RandomGenderedLocalization randomGenderedLocalization;
-            if (!entityManager.TryGetComponent(household, out refData) || !prefabSystem.GetPrefab<PrefabBase>(refData).TryGet<RandomGenderedLocalization>(out randomGenderedLocalization))
+            if (!entityManager.TryGetComponent(household, out PrefabRef refData) || !prefabSystem.GetPrefab<PrefabBase>(refData).TryGet(out RandomGenderedLocalization randomGenderedLocalization))
             {
                 return GetId(household, true);
             }
             string text = male ? randomGenderedLocalization.m_MaleID : randomGenderedLocalization.m_FemaleID;
-            DynamicBuffer<RandomLocalizationIndex> dynamicBuffer;
-            return entityManager.TryGetBuffer(household, true, out dynamicBuffer) && dynamicBuffer.Length > 0
+            return entityManager.TryGetBuffer(household, true, out DynamicBuffer<RandomLocalizationIndex> dynamicBuffer) && dynamicBuffer.Length > 0
                 ? LocalizationUtils.AppendIndex(text, dynamicBuffer[0])
                 : text;
         }

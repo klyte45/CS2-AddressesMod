@@ -78,7 +78,8 @@ type PropsDropdownItem = {
     children?: JSX.Element | JSX.Element[] | string,
 }
 
-type PropsIconButton = {
+type PropsIconButton = HTMLAttributes<any> & {
+    focusKey?: UniqueFocusKey | null,
     src: string
     tinted: boolean
     theme?: Theme & any

@@ -11,12 +11,16 @@ export type SelectedInfoOptions = {
     roadAggegateOptions: EntityOption[]
     allowDistrict: boolean
     districtRef: Entity
+    hasCustomNameList?: boolean
+    customNameListName?: string
+
 }
 export enum AdrEntityType {
     None = 0,
     PublicTransportStation,
     CargoTransportStation,
-    RoadAggregation
+    RoadAggregation,
+    District
 }
 export type EntityOption = {
     entity: Entity

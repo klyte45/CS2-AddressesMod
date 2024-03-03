@@ -20,7 +20,7 @@ export class AddressesInfoOptionsComponent extends Component<Props, State> {
     private async loadOptions(entity: Entity, force: boolean) {
         if (force || lastEntity != entity) {
             lastEntity = entity;
-            const result = await SelectInfoPanelService.getEntityOptions(toEntityTyped(entity));            
+            const result = await SelectInfoPanelService.getEntityOptions(toEntityTyped(entity));
             this.setState({ optionsResult: result })
         }
     }
@@ -43,6 +43,7 @@ export class AddressesInfoOptionsComponent extends Component<Props, State> {
             case AdrEntityType.CargoTransportStation:
                 return <StationBuildingOptionsComponent onChanged={() => this.loadOptions(this.props.entity.value, true)} entity={toEntityTyped(this.props.entity.value)} response={this.state.optionsResult} />
             case AdrEntityType.RoadAggregation:
+            case AdrEntityType.District:
                 return <SeedManagementOptionsComponent onChanged={() => this.loadOptions(this.props.entity.value, true)} entity={toEntityTyped(this.props.entity.value)} response={this.state.optionsResult} />
             default:
                 return <></>

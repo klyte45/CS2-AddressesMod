@@ -88,6 +88,19 @@ namespace BelzontAdr
             {
                 if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is Aggregate");
                 result.type = AdrEntityType.RoadAggregation;
+                if (mainSystem.FindReferenceRoad(e, out _, out var refRoad))
+                {
+                    result.hasCustomNameList = mainSystem.GetRoadNameList(refRoad, out var namesList);
+                    result.customNameListName = namesList.Name;
+                }
+                result.entityValue = e;
+            }
+            else if (EntityManager.HasComponent<District>(e))
+            {
+                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is District");
+                result.type = AdrEntityType.District;
+                result.hasCustomNameList = mainSystem.TryGetDistrictNamesList(out var districtNamesList);
+                result.customNameListName = districtNamesList.Name;
                 result.entityValue = e;
             }
             else
@@ -208,6 +221,8 @@ namespace BelzontAdr
             public readonly List<EntityOption> roadAggegateOptions = new();
             public bool allowDistrict;
             public Entity districtRef;
+            public bool hasCustomNameList;
+            public string customNameListName;
         }
 
         private enum AdrEntityType
@@ -215,7 +230,8 @@ namespace BelzontAdr
             None = 0,
             PublicTransportStation,
             CargoTransportStation,
-            RoadAggregation
+            RoadAggregation,
+            District
 
         }
 
