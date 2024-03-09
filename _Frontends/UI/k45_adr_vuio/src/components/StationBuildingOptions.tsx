@@ -1,5 +1,4 @@
 import { Entity, SelectInfoPanelService, SelectedInfoOptions, nameToString, replaceArgs } from "@klyte45/adr-commons";
-import { useUniqueFocusKey } from "common/focus/focus-key";
 import { VanillaComponentResolver } from "mods/VanillaComponentResolver";
 import { Component } from "react";
 import { translate } from "utility/translate";
@@ -29,14 +28,14 @@ export class StationBuildingOptionsComponent extends Component<Props, State>{
         const currentVal = props.response.entityValue;
         const focusKey = VR.FOCUS_DISABLED;
         return <>
-            <VR.InfoRow subRow={rowTheme} className={rowTheme} left={<><VR.RadioToggle onChange={() => this.setReference(props.entity, props.response.districtRef)} focusKey={focusKey} className={VR.themeToggleLine.toggle} checked={isDistrictSelected} />{translate("StationBuildingOptions.UseDistrictOpt")}</>} />
+            <VR.InfoRow subRow={true} className={rowTheme} left={<><VR.RadioToggle onChange={() => this.setReference(props.entity, props.response.districtRef)} focusKey={focusKey} className={VR.themeToggleLine.toggle} checked={isDistrictSelected} />{translate("StationBuildingOptions.UseDistrictOpt")}</>} />
             {
                 props.response.roadAggegateOptions.map(x =>
-                    <VR.InfoRow subRow={rowTheme} className={rowTheme} left={<><VR.RadioToggle onChange={() => this.setReference(props.entity, x.entity)} focusKey={focusKey} className={VR.themeToggleLine.toggle} checked={currentVal.Index == x.entity.Index} />{replaceArgs(translate("StationBuildingOptions.RoadOptPattern", "{name}"), { name: nameToString(x.name)!! })}</>} />)
+                    <VR.InfoRow subRow={true} className={rowTheme} left={<><VR.RadioToggle onChange={() => this.setReference(props.entity, x.entity)} focusKey={focusKey} className={VR.themeToggleLine.toggle} checked={currentVal.Index == x.entity.Index} />{replaceArgs(translate("StationBuildingOptions.RoadOptPattern", "{name}"), { name: nameToString(x.name)!! })}</>} />)
             }
             {
                 props.response.buildingsOptions.map(x =>
-                    <VR.InfoRow subRow={rowTheme} className={rowTheme} left={<><VR.RadioToggle onChange={() => this.setReference(props.entity, x.entity)} focusKey={focusKey} className={VR.themeToggleLine.toggle} checked={currentVal.Index == x.entity.Index} />{replaceArgs(translate("StationBuildingOptions.BuildingOptPattern", "{name}"), { name: nameToString(x.name)!! })}</>} />)
+                    <VR.InfoRow subRow={true} className={rowTheme} left={<><VR.RadioToggle onChange={() => this.setReference(props.entity, x.entity)} focusKey={focusKey} className={VR.themeToggleLine.toggle} checked={currentVal.Index == x.entity.Index} />{replaceArgs(translate("StationBuildingOptions.BuildingOptPattern", "{name}"), { name: nameToString(x.name)!! })}</>} />)
             }
         </>
     }

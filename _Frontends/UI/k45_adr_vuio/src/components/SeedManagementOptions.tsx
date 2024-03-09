@@ -1,5 +1,4 @@
 import { Entity, SelectInfoPanelService, SelectedInfoOptions, nameToString, replaceArgs } from "@klyte45/adr-commons";
-import { useUniqueFocusKey } from "common/focus/focus-key";
 import { VanillaComponentResolver } from "mods/VanillaComponentResolver";
 import { Component } from "react";
 import { translate } from "utility/translate";
@@ -40,7 +39,7 @@ export class SeedManagementOptionsComponent extends Component<Props, State>{
         if (props.response.hasCustomNameList) {
 
             const right = <>
-                <VR.Tooltip tooltip={translate("SeedManagementOptions.UsePreviousNameInList")}>
+                <VR.Tooltip tooltip={translate("SeedManagementOptions.UsePreviousNameInList")} >
                     <VR.IconButton focusKey={focusKey} onSelect={() => this.changeSeedRefDelta(currentVal, -1)} style={{ background: "var(--accentColorNormal)" }} theme={VR.themeGamepadToolOptions} src="Media/Glyphs/ThickStrokeArrowLeft.svg" tinted={true} />
                 </VR.Tooltip>
                 <VR.Tooltip tooltip={translate("SeedManagementOptions.RegenerateNameTooltip")}>
@@ -52,7 +51,7 @@ export class SeedManagementOptionsComponent extends Component<Props, State>{
             </>
             return <>
                 <VR.InfoRow left={<>{translate("SeedManagementOptions.NamingSource")}</>} right={<>{replaceArgs(translate("SeedManagementOptions.GeneratorFilenameTemplate"), { filename: props.response.customNameListName!! })}</>} />
-                <VR.InfoRow subRow={rowTheme} left={<>{translate("SeedManagementOptions.GenerationSeedActions")}</>} right={right} />
+                <VR.InfoRow subRow={true} left={<>{translate("SeedManagementOptions.GenerationSeedActions")}</>} right={right} />
             </>
         } else {
             return <>

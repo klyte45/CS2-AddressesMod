@@ -1,9 +1,8 @@
-import { ActiveFocusDivProps, PassiveFocusDivProps } from "common/focus/focus-div";
-import { UniqueFocusKey, useUniqueFocusKey } from "common/focus/focus-key";
-import { Theme } from "game/data-binding/prefab/prefab-bindings";
-import { ModuleRegistry } from "modding/types";
+
+import { FocusKey, Theme, UniqueFocusKey } from "cs2/bindings";
+import { ModuleRegistry } from "cs2/modding";
+import { DropdownItemProps, DropdownProps, DropdownToggleProps, IconButtonProps, InfoRowProps, InfoSectionProps, TooltipProps } from "cs2/ui";
 import { HTMLAttributes } from "react";
-import { DropdownField } from "widgets/data-binding/widget-bindings";
 
 type PropsToggleField = {
     "value": any,
@@ -28,66 +27,9 @@ type PropsRadioGroupToggleField = {
     onToggleSelected?: (x: any) => any,
 } & HTMLAttributes<any>
 
-type PropsInfoSection = {
-    focusKey?: UniqueFocusKey | null
-    tooltip?: JSX.Element
-    disableFocus?: boolean
-    className?: string
-    children: JSX.Element | JSX.Element[] | string;
-}
-
-type PropsInfoRow = {
-    icon?: string
-    left: JSX.Element
-    right?: JSX.Element
-    tooltip?: JSX.Element
-    link?: string
-    uppercase?: boolean
-    subRow?: string
-    className?: string
-    disableFocus?: boolean
-}
-
 type PropsTooltipRow = {
 
 }
-
-type PropsDropdown = {
-    theme?: any,
-    children?: JSX.Element | JSX.Element[] | string,
-    disableFocus?: boolean,
-    focusKey?: UniqueFocusKey | null
-}
-
-type PropsDropdownToggle = {
-    theme?: any,
-    children?: JSX.Element | JSX.Element[] | string,
-    disableFocus?: boolean,
-    focusKey?: UniqueFocusKey | null
-}
-type PropsDropdownItem = {
-    focusKey?: UniqueFocusKey | null
-    value?: any
-    selected: boolean
-    theme?: any
-    sounds?: any
-    className?: string
-    onChange?: (x: any) => any
-    onToggleSelected?: (x: any) => any
-    closeOnSelect?: boolean
-    children?: JSX.Element | JSX.Element[] | string,
-}
-
-type PropsIconButton = HTMLAttributes<any> & {
-    focusKey?: UniqueFocusKey | null,
-    src: string
-    tinted: boolean
-    theme?: Theme & any
-    className?: string
-    children?: string | JSX.Element | JSX.Element[]
-    onSelect: () => any
-}
-
 type PropsTooltip = {
     tooltip: string | JSX.Element | JSX.Element[]
     disabled?: boolean
@@ -142,15 +84,15 @@ export class VanillaComponentResolver {
     public get RadioToggle(): (props: PropsRadioToggle) => JSX.Element { return this.cachedData["RadioToggle"] ?? this.updateCache("RadioToggle") }
     public get ToggleField(): (props: PropsToggleField) => JSX.Element { return this.cachedData["ToggleField"] ?? this.updateCache("ToggleField") }
     public get RadioGroupToggleField(): (props: PropsRadioGroupToggleField) => JSX.Element { return this.cachedData["RadioGroupToggleField"] ?? this.updateCache("RadioGroupToggleField") }
-    public get InfoSection(): (props: PropsInfoSection) => JSX.Element { return this.cachedData["InfoSection"] ?? this.updateCache("InfoSection") }
-    public get InfoRow(): (props: PropsInfoRow) => JSX.Element { return this.cachedData["InfoRow"] ?? this.updateCache("InfoRow") }
+    public get InfoSection(): (props: InfoSectionProps & { children: JSX.Element | JSX.Element[] }) => JSX.Element { return this.cachedData["InfoSection"] ?? this.updateCache("InfoSection") }
+    public get InfoRow(): (props: InfoRowProps) => JSX.Element { return this.cachedData["InfoRow"] ?? this.updateCache("InfoRow") }
     public get TooltipRow(): (props: PropsTooltipRow) => JSX.Element { return this.cachedData["TooltipRow"] ?? this.updateCache("TooltipRow") }
-    public get ActiveFocusDiv(): (props: ActiveFocusDivProps) => JSX.Element { return this.cachedData["ActiveFocusDiv"] ?? this.updateCache("ActiveFocusDiv") }
-    public get PassiveFocusDiv(): (props: PassiveFocusDivProps) => JSX.Element { return this.cachedData["PassiveFocusDiv"] ?? this.updateCache("PassiveFocusDiv") }
-    public get Dropdown(): (props: PropsDropdown) => JSX.Element { return this.cachedData["Dropdown"] ?? this.updateCache("Dropdown") }
-    public get DropdownItem(): (props: PropsDropdownItem) => JSX.Element { return this.cachedData["DropdownItem"] ?? this.updateCache("DropdownItem") }
-    public get DropdownToggle(): (props: PropsDropdownToggle) => JSX.Element { return this.cachedData["DropdownToggle"] ?? this.updateCache("DropdownToggle") }
-    public get IconButton(): (props: PropsIconButton) => JSX.Element { return this.cachedData["IconButton"] ?? this.updateCache("IconButton") }
+    public get ActiveFocusDiv(): (props: any) => JSX.Element { return this.cachedData["ActiveFocusDiv"] ?? this.updateCache("ActiveFocusDiv") }
+    public get PassiveFocusDiv(): (props: any) => JSX.Element { return this.cachedData["PassiveFocusDiv"] ?? this.updateCache("PassiveFocusDiv") }
+    public get Dropdown(): (props: DropdownProps) => JSX.Element { return this.cachedData["Dropdown"] ?? this.updateCache("Dropdown") }
+    //public get DropdownItem(): (props: DropdownItemProps<T>) => JSX.Element { return this.cachedData["DropdownItem"] ?? this.updateCache("DropdownItem") }
+    public get DropdownToggle(): (props: DropdownToggleProps) => JSX.Element { return this.cachedData["DropdownToggle"] ?? this.updateCache("DropdownToggle") }
+    public get IconButton(): (props: IconButtonProps) => JSX.Element { return this.cachedData["IconButton"] ?? this.updateCache("IconButton") }
     public get Tooltip(): (props: PropsTooltip) => JSX.Element { return this.cachedData["Tooltip"] ?? this.updateCache("Tooltip") }
 
 
@@ -161,7 +103,7 @@ export class VanillaComponentResolver {
 
     public get FOCUS_DISABLED(): UniqueFocusKey { return this.cachedData["FOCUS_DISABLED"] ?? this.updateCache("FOCUS_DISABLED") }
     public get FOCUS_AUTO(): UniqueFocusKey { return this.cachedData["FOCUS_AUTO"] ?? this.updateCache("FOCUS_AUTO") }
-    public get useUniqueFocusKey(): typeof useUniqueFocusKey { return this.cachedData["useUniqueFocusKey"] ?? this.updateCache("useUniqueFocusKey") }
+    public get useUniqueFocusKey(): (focusKey: FocusKey, debugName: string) => UniqueFocusKey | null { return this.cachedData["useUniqueFocusKey"] ?? this.updateCache("useUniqueFocusKey") }
 
 
-}
+} 

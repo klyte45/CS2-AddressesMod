@@ -32,6 +32,9 @@ namespace BelzontAdr
             AdrNameFilesManager.Instance.ReloadNameFiles();
             updateSystem.UpdateAfter<AdrDistrictsSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAfter<AdrMainSystem>(SystemUpdatePhase.ModificationEnd);
+#if DEBUG
+            updateSystem.UpdateAfter<AdrAggregationSystem>(SystemUpdatePhase.Modification2B);
+#endif
         }
 
         public override void OnDispose()

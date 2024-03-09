@@ -53,19 +53,24 @@ This mod may cause issues in the game due their early stage of development. This
 The most up to date information about installation and known issues and bugs is at the forum topíc.</LongDescription>
   <Thumbnail Value="Properties/Thumbnail.png" />
   <ForumLink Value="" />
-  <ModVersion Value="0.1.0.2" />
-  <GameVersion Value="1.0.*" />
-  <ChangeLog># v0.1.0r2 (XX-XXX-XX)
+  <ModVersion Value="0.1.0.3" />
+  <GameVersion Value="1.0.21*" />
+  <ChangeLog># v0.1.0r3 (08-MAR-24)
 - Fixed name labels update when changing name generation method
+- Added source selector for station names (info panel when clicking on building)
+- Added option to change seed of roads and districts (info panel when clicking on their labels). Methods
+- Next name of the list
+- Previous name of the list
+- Randomize a new seed
 ## v0.1.0r1 (20-FEB-24)
 - Changing shuffle method to generate names to a more performatic solution
 ## v0.1.0r0 (18-FEB-24)
 - Fixing lack of randomness when generating names</ChangeLog>
   <Tag Value="Code Mod" />
-  <Screenshot Value="Screenshots\00_namesets manager scr.jpg" />
+  <Screenshot Value="Screenshots\00_namesets_manager_scr.jpg" />
   <Screenshot Value="Screenshots\01_editor.jpg" />
   <Screenshot Value="Screenshots\02_settings.jpg" />
-  <Screenshot Value="Screenshots\03_GH integration.jpg" />
+  <Screenshot Value="Screenshots\03_GH_integration.jpg" />
   <Screenshot Value="Screenshots\04_qualifiers.jpg" />
   <Dependency Id="74151" ModVersion="0.1.0.2" DisplayName="Extra UI Screens" />
 </Publish>
