@@ -1,12 +1,11 @@
 import { AdrEntityType, SelectInfoPanelService, SelectedInfoOptions, toEntityTyped } from "@klyte45/adr-commons";
+import { ValueBinding } from "cs2/api";
+import { Entity } from "cs2/utils";
+import { VanillaComponentResolver } from "mods/VanillaComponentResolver";
 import { Component, ReactNode } from "react";
-import { StationBuildingOptionsComponent } from "./StationBuildingOptions";
-import { InfoSection, InfoRow, MenuButton } from "cs2/ui";
 import { translate } from "utility/translate";
 import { SeedManagementOptionsComponent } from "./SeedManagementOptions";
-import { Entity } from "cs2/utils";
-import { ValueBinding } from "cs2/api";
-import { VanillaComponentResolver } from "mods/VanillaComponentResolver";
+import { StationBuildingOptionsComponent } from "./StationBuildingOptions";
 
 type Props = { entity: ValueBinding<Entity> };
 type State = { optionsResult: SelectedInfoOptions }
