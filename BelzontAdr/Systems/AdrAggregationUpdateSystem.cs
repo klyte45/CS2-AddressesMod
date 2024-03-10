@@ -280,16 +280,16 @@ namespace BelzontAdr
             private bool TryCombine(ref Entity aggType, ref bool isHighway, NativeList<AggregateElement> edgeList, bool isTemp, NativeParallelHashMap<Entity, Entity> updateMap)
             {
                 if (GetStart(edgeList.AsArray(), out Entity startEdge, out Entity startNode, out bool isStartNode)
-                    && ShouldCombine(startEdge, startNode, isStartNode, ref aggType, ref isHighway, Entity.Null, isTemp, out Entity entity, out bool flag))
+                    && ShouldCombine(startEdge, startNode, isStartNode, ref aggType, ref isHighway, Entity.Null, isTemp, out Entity mainAgg, out bool flag))
                 {
-                    DynamicBuffer<AggregateElement> dynamicBuffer = m_AggregateElements[entity];
-                    int length = dynamicBuffer.Length;
-                    dynamicBuffer.ResizeUninitialized(dynamicBuffer.Length + edgeList.Length);
+                    DynamicBuffer<AggregateElement> thisAggList = m_AggregateElements[mainAgg];
+                    int length = thisAggList.Length;
+                    thisAggList.ResizeUninitialized(thisAggList.Length + edgeList.Length);
                     if (flag)
                     {
                         for (int i = length - 1; i >= 0; i--)
                         {
-                            dynamicBuffer[edgeList.Length + i] = dynamicBuffer[i];
+                            thisAggList[edgeList.Length + i] = thisAggList[i];
                         }
                     }
                     for (int j = 0; j < edgeList.Length; j++)
@@ -297,46 +297,31 @@ namespace BelzontAdr
                         AggregateElement aggregateElement = edgeList[j];
                         m_AggregatedData[aggregateElement.m_Edge] = new Aggregated
                         {
-                            m_Aggregate = entity
+                            m_Aggregate = mainAgg
                         };
-                        dynamicBuffer[math.select(length, 0, flag) + edgeList.Length - j - 1] = aggregateElement;
+                        thisAggList[math.select(length, 0, flag) + edgeList.Length - j - 1] = aggregateElement;
                     }
-                    m_CommandBuffer.AddComponent<Updated>(entity);
+                    m_CommandBuffer.AddComponent<Updated>(mainAgg);
                     if (GetEnd(edgeList.AsArray(), out Entity startEdge2, out Entity startNode2, out bool isStartNode2)
-                        && ShouldCombine(startEdge2, startNode2, isStartNode2, ref aggType, ref isHighway, entity, isTemp, out Entity entity2, out bool flag2))
+                        && ShouldCombine(startEdge2, startNode2, isStartNode2, ref aggType, ref isHighway, mainAgg, isTemp, out Entity otherAgg, out bool flag2))
                     {
-                        DynamicBuffer<AggregateElement> dynamicBuffer2 = m_AggregateElements[entity2];
-                        length = dynamicBuffer.Length;
-                        dynamicBuffer.ResizeUninitialized(dynamicBuffer2.Length + dynamicBuffer.Length);
-                        if (flag)
+                        DynamicBuffer<AggregateElement> otherAggList = m_AggregateElements[otherAgg];
+
+                        if (thisAggList.Length >= otherAggList.Length)
                         {
-                            for (int k = length - 1; k >= 0; k--)
-                            {
-                                dynamicBuffer[dynamicBuffer2.Length + k] = dynamicBuffer[k];
-                            }
+                            MergeAggs(updateMap, mainAgg, flag, thisAggList, otherAgg, flag2, otherAggList, false);
                         }
-                        for (int l = 0; l < dynamicBuffer2.Length; l++)
+                        else
                         {
-                            AggregateElement aggregateElement2 = dynamicBuffer2[l];
-                            m_AggregatedData[aggregateElement2.m_Edge] = new Aggregated
-                            {
-                                m_Aggregate = entity
-                            };
-                            dynamicBuffer[math.select(length, 0, flag) + math.select(l, dynamicBuffer2.Length - l - 1, flag2 == flag)] = aggregateElement2;
-                        }
-                        dynamicBuffer2.Clear();
-                        m_CommandBuffer.AddComponent<Deleted>(entity2);
-                        if (updateMap.ContainsKey(entity2))
-                        {
-                            updateMap[entity2] = entity;
+                            MergeAggs(updateMap, otherAgg, flag2, otherAggList, mainAgg, flag, thisAggList, true);
                         }
                     }
                     return true;
                 }
                 if (GetEnd(edgeList.AsArray(), out Entity startEdge3, out Entity startNode3, out bool isStartNode3)
-                    && ShouldCombine(startEdge3, startNode3, isStartNode3, ref aggType, ref isHighway, Entity.Null, isTemp, out Entity entity3, out bool flag3))
+                    && ShouldCombine(startEdge3, startNode3, isStartNode3, ref aggType, ref isHighway, Entity.Null, isTemp, out Entity existingAgg, out bool flag3))
                 {
-                    DynamicBuffer<AggregateElement> dynamicBuffer3 = m_AggregateElements[entity3];
+                    DynamicBuffer<AggregateElement> dynamicBuffer3 = m_AggregateElements[existingAgg];
                     int length2 = dynamicBuffer3.Length;
                     dynamicBuffer3.ResizeUninitialized(dynamicBuffer3.Length + edgeList.Length);
                     if (flag3)
@@ -351,16 +336,44 @@ namespace BelzontAdr
                         AggregateElement aggregateElement3 = edgeList[n];
                         m_AggregatedData[aggregateElement3.m_Edge] = new Aggregated
                         {
-                            m_Aggregate = entity3
+                            m_Aggregate = existingAgg
                         };
                         dynamicBuffer3[math.select(length2, 0, flag3) + n] = aggregateElement3;
                     }
-                    m_CommandBuffer.AddComponent<Updated>(entity3);
+                    m_CommandBuffer.AddComponent<Updated>(existingAgg);
                     return true;
                 }
                 return false;
             }
 
+            private void MergeAggs(NativeParallelHashMap<Entity, Entity> updateMap, Entity targAgg, bool targAggIsStart, DynamicBuffer<AggregateElement> targAggList,
+                Entity srcAgg, bool srcAggIsStart, DynamicBuffer<AggregateElement> srcAggList, bool inverted)
+            {
+                var length = targAggList.Length;
+                targAggList.ResizeUninitialized(srcAggList.Length + targAggList.Length);
+                if (targAggIsStart ^ inverted)
+                {
+                    for (int k = length - 1; k >= 0; k--)
+                    {
+                        targAggList[srcAggList.Length + k] = targAggList[k];
+                    }
+                }
+                for (int l = 0; l < srcAggList.Length; l++)
+                {
+                    AggregateElement aggregateElement2 = srcAggList[l];
+                    m_AggregatedData[aggregateElement2.m_Edge] = new Aggregated
+                    {
+                        m_Aggregate = targAgg
+                    };
+                    targAggList[math.select(length, 0, targAggIsStart ^ inverted) + math.select(l, srcAggList.Length - l - 1, srcAggIsStart == targAggIsStart ^ inverted)] = aggregateElement2;
+                }
+                srcAggList.Clear();
+                m_CommandBuffer.AddComponent<Deleted>(srcAgg);
+                if (updateMap.ContainsKey(srcAgg))
+                {
+                    updateMap[srcAgg] = targAgg;
+                }
+            }
 
             private bool GetBestConnectionEdge(ref Entity connectionTypePrefab, ref bool isHighway, Entity prevEdge, Entity prevNode, bool prevIsStart, out Entity nextEdge, out Entity nextNode, out bool nextIsStart)
             {
