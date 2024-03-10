@@ -175,7 +175,11 @@ namespace BelzontAdr
                     edgeSetIsHw.Clear();
                     for (int m = 0; m < nativeArray3.Length; m++)
                     {
-                        ValidateAggregate(nativeArray3[m], nativeArray4[m], edgeSet, emptySet, updateMap);
+                        var x = nativeArray3[m];
+                        var y = nativeArray4[m];
+                        ValidateAggregate(ref x, ref y, edgeSet, emptySet, updateMap);
+                        nativeArray3[m] = x;
+                        nativeArray4[m] = y;
                     }
                     for (int n = 0; n < nativeArray3.Length; n++)
                     {
@@ -613,7 +617,7 @@ namespace BelzontAdr
             }
 
 
-            private void ValidateAggregate(Entity aggregate, bool isHighway, NativeParallelHashSet<Entity> edgeSet, NativeParallelHashSet<Entity> emptySet, NativeParallelHashMap<Entity, Entity> updateMap)
+            private void ValidateAggregate(ref Entity aggregate, ref bool isHighway, NativeParallelHashSet<Entity> edgeSet, NativeParallelHashSet<Entity> emptySet, NativeParallelHashMap<Entity, Entity> updateMap)
             {
                 DynamicBuffer<AggregateElement> elements = m_AggregateElements[aggregate];
                 Entity aggTypePrefab = m_PrefabRefData[aggregate].m_Prefab;
@@ -687,7 +691,7 @@ namespace BelzontAdr
                     }
                 }
                 elements.Clear();
-                LogUtils.DoInfoLog($"maxRefEdge ={maxRefEdge} @ {maxRefEdgeCt}; refEdge ={refEdge} @ {refEdgeCt}");
+
                 if (maxRefEdgeCt >= refEdgeCt)
                 {
                     if (refEdge != Entity.Null) edgeSet.Add(refEdge);

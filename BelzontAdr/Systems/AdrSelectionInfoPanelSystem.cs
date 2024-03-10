@@ -91,7 +91,10 @@ namespace BelzontAdr
                 if (mainSystem.FindReferenceRoad(e, out _, out var refRoad))
                 {
                     result.hasCustomNameList = mainSystem.GetRoadNameList(refRoad, out var namesList);
-                    result.customNameListName = namesList.Name;
+                    if (result.hasCustomNameList)
+                    {
+                        result.customNameListName = namesList.Name;
+                    }
                 }
                 result.entityValue = e;
             }
@@ -100,7 +103,10 @@ namespace BelzontAdr
                 if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is District");
                 result.type = AdrEntityType.District;
                 result.hasCustomNameList = mainSystem.TryGetDistrictNamesList(out var districtNamesList);
-                result.customNameListName = districtNamesList.Name;
+                if (result.hasCustomNameList)
+                {
+                    result.customNameListName = districtNamesList.Name;
+                }
                 result.entityValue = e;
             }
             else
