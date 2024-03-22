@@ -1,4 +1,4 @@
-﻿#if DEBUG
+﻿#if DEBUG && ADR_AGGSYS
 using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Collections;
@@ -8,19 +8,24 @@ using Game.Common;
 using Game.Net;
 using Game.Prefabs;
 using Game.Tools;
+using Game.Zones;
 using HarmonyLib;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using static BelzontAdr.ADRAggregationData;
 
 namespace BelzontAdr
 {
     public partial class AdrAggregationSystem : GameSystemBase
     {
         private ModificationBarrier2B m_ModificationBarrier;
+        private EntityQuery m_EdgeDataQuery;
         private EntityQuery m_ModifiedQuery;
+        private EntityQuery m_AggregationChangedQuery;
+        private PrefabSystem prefabSystem;
 
         protected override void OnCreate()
         {
@@ -36,12 +41,29 @@ namespace BelzontAdr
 
 
             m_ModificationBarrier = World.GetOrCreateSystemManaged<ModificationBarrier2B>();
+            m_EdgeDataQuery = GetEntityQuery(new EntityQueryDesc[]
+            {
+                new() {
+                    All = new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<Aggregated>(),
+                    },
+                    Absent = new []{
+                        ComponentType.ReadOnly<ADREdgeData>()
+                    },
+                    None = new[]{
+                        ComponentType.ReadOnly<Deleted>(),
+                        ComponentType.ReadOnly<Temp>()
+                    }
+                }
+            });
             m_ModifiedQuery = GetEntityQuery(new EntityQueryDesc[]
             {
                 new() {
                     All = new ComponentType[]
                     {
-                        ComponentType.ReadOnly<Aggregated>()
+                        ComponentType.ReadOnly<Aggregated>(),
+                        ComponentType.ReadOnly<ADREdgeData>(),
                     },
                     Any = new ComponentType[]
                     {
@@ -52,10 +74,62 @@ namespace BelzontAdr
                     None = new ComponentType[0]
                 }
             });
-            RequireForUpdate(m_ModifiedQuery);
+            m_AggregationChangedQuery = GetEntityQuery(new EntityQueryDesc[]
+           {
+                new() {
+                    All = new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<Aggregate>()
+                    },
+                    Any = new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<Created>(),
+                        ComponentType.ReadOnly<Updated>(),
+                        ComponentType.ReadOnly<BatchesUpdated>()
+                    },
+                    None = new[]{
+                        ComponentType.ReadOnly<Temp>(),
+                        ComponentType.ReadOnly<Deleted>(),
+                    }
+                },
+               //new()
+               //{
+               //    All = new []
+               //    {
+               //        ComponentType.ReadOnly<Aggregate>()
+               //    },
+               //    Absent = new []
+               //    {
+               //        ComponentType.ReadWrite<ADRAggregationData>()
+               //    }
+               //}
+           });
+            RequireAnyForUpdate(m_AggregationChangedQuery, m_ModifiedQuery, m_EdgeDataQuery);
+
+            isAllowedMod = AccessTools.FieldRefAccess<bool>(typeof(SafeCommandBufferSystem), "m_IsAllowed");
+            prefabSystem = World.GetExistingSystemManaged<PrefabSystem>();
+
         }
+        private AccessTools.FieldRef<object, bool> isAllowedMod;
+        private Entity highwayAggRef;
 
         protected override void OnUpdate()
+        {
+            if (!isAllowedMod(m_ModificationBarrier)) return;
+            if (highwayAggRef == Entity.Null)
+            {
+                if (prefabSystem.TryGetPrefab(new PrefabID(nameof(AggregateNetPrefab), "Highway"), out var prefab))
+                {
+                    highwayAggRef = prefabSystem.GetEntity(prefab);
+                    LogUtils.DoInfoLog($"Higway agg prefab set to: {highwayAggRef}");
+                }
+            }
+            if (!m_EdgeDataQuery.IsEmpty) UpdateVanillaAggregations();
+            if (!m_ModifiedQuery.IsEmpty) UpdateVanillaAggregations();
+            if (!m_AggregationChangedQuery.IsEmpty) UpdateADRAggregations();
+        }
+
+        private void UpdateVanillaAggregations()
         {
             NativeList<ArchetypeChunk> chunks = m_ModifiedQuery.ToArchetypeChunkListAsync(Allocator.TempJob, out JobHandle job);
             var aggJob = new AdrAggregationUpdateJob
@@ -76,6 +150,32 @@ namespace BelzontAdr
                 m_PlaceableNetData = GetComponentLookup<PlaceableNetData>(true),
                 m_RoadData = GetComponentLookup<RoadData>(true),
                 m_ElevationData = GetComponentLookup<Elevation>(true),
+                m_SubBlockData = GetBufferLookup<SubBlock>(true),
+                m_AdrAggregateData = GetComponentLookup<ADRAggregationData>(),
+                m_highwayAggRef = highwayAggRef
+            };
+            JobHandle jobHandle = aggJob.Schedule(JobHandle.CombineDependencies(Dependency, job));
+            chunks.Dispose(jobHandle);
+            m_ModificationBarrier.AddJobHandleForProducer(jobHandle);
+            Dependency = jobHandle;
+        }
+
+        protected void UpdateADRAggregations()
+        {
+            NativeList<ArchetypeChunk> chunks = m_ModifiedQuery.ToArchetypeChunkListAsync(Allocator.TempJob, out JobHandle job);
+            var aggJob = new AdrAggregationDataUpdateJob
+            {
+                m_AggregateElements = GetBufferLookup<AggregateElement>(),
+                m_Chunks = chunks,
+                m_CommandBuffer = m_ModificationBarrier.CreateCommandBuffer(),
+                m_CurveData = GetComponentLookup<Curve>(true),
+                m_PrefabGeometryData = GetComponentLookup<NetGeometryData>(true),
+                m_PrefabRefData = GetComponentLookup<PrefabRef>(true),
+                m_EntityType = GetEntityTypeHandle(),
+                m_BuildOrderData = GetComponentLookup<Game.Net.BuildOrder>(true),
+                m_ElevationData = GetComponentLookup<Elevation>(true),
+                m_AdrAggregateData = GetComponentLookup<ADRAggregationData>(true),
+                m_highwayAggRef = highwayAggRef
             };
             JobHandle jobHandle = aggJob.Schedule(JobHandle.CombineDependencies(Dependency, job));
             chunks.Dispose(jobHandle);
@@ -88,6 +188,7 @@ namespace BelzontAdr
         {
             public ComponentLookup<Aggregated> m_AggregatedData;
             public BufferLookup<AggregateElement> m_AggregateElements;
+            public ComponentLookup<ADRAggregationData> m_AdrAggregateData;
             [ReadOnly] public NativeList<ArchetypeChunk> m_Chunks;
             public EntityCommandBuffer m_CommandBuffer;
             [ReadOnly] public BufferLookup<ConnectedEdge> m_ConnectedEdges;
@@ -100,8 +201,10 @@ namespace BelzontAdr
             [ReadOnly] public ComponentLookup<PrefabRef> m_PrefabRefData;
             [ReadOnly] public ComponentLookup<PlaceableNetData> m_PlaceableNetData;
             [ReadOnly] public ComponentLookup<RoadData> m_RoadData;
+            [ReadOnly] public BufferLookup<SubBlock> m_SubBlockData;
             [ReadOnly] public ComponentLookup<Temp> m_TempData;
             [ReadOnly] public EntityTypeHandle m_EntityType;
+            [ReadOnly] public Entity m_highwayAggRef;
 
 
             public unsafe void Execute()
@@ -113,6 +216,7 @@ namespace BelzontAdr
                 }
                 NativeParallelHashSet<Entity> edgeSet = new(num, Allocator.Temp);
                 NativeParallelHashSet<bool> edgeSetIsHw = new(num, Allocator.Temp);
+                NativeParallelHashSet<sbyte> edgeSetEl = new(num, Allocator.Temp);
                 NativeParallelHashSet<Entity> emptySet = new(num, Allocator.Temp);
                 NativeParallelHashMap<Entity, Entity> updateMap = new(num, Allocator.Temp);
 
@@ -138,6 +242,7 @@ namespace BelzontAdr
                                     m_AggregateElements[aggregated.m_Aggregate].Add(new AggregateElement(entity));
                                     edgeSet.Add(aggregated.m_Aggregate);
                                     edgeSetIsHw.Add(IsHighway(m_PrefabRefData[entity]));
+                                    edgeSetEl.Add((sbyte)GetElevationRef(entity));
                                 }
                             }
                             else
@@ -171,19 +276,17 @@ namespace BelzontAdr
                 {
                     NativeArray<Entity> nativeArray3 = edgeSet.ToNativeArray(Allocator.TempJob);
                     NativeArray<bool> nativeArray4 = edgeSetIsHw.ToNativeArray(Allocator.TempJob);
+                    NativeArray<sbyte> nativeArray5 = edgeSetEl.ToNativeArray(Allocator.TempJob);
                     edgeSet.Clear();
                     edgeSetIsHw.Clear();
+                    edgeSetEl.Clear();
                     for (int m = 0; m < nativeArray3.Length; m++)
                     {
-                        var x = nativeArray3[m];
-                        var y = nativeArray4[m];
-                        ValidateAggregate(ref x, ref y, edgeSet, emptySet, updateMap);
-                        nativeArray3[m] = x;
-                        nativeArray4[m] = y;
+                        ValidateAggregate(nativeArray3[m], nativeArray4[m], (ElevationType)nativeArray5[m], edgeSet, emptySet, updateMap);
                     }
                     for (int n = 0; n < nativeArray3.Length; n++)
                     {
-                        CombineAggregate(nativeArray3[n], nativeArray4[n], updateMap);
+                        CombineAggregate(nativeArray3[n], nativeArray4[n], (ElevationType)nativeArray5[n], updateMap);
                     }
                     nativeArray3.Dispose();
                     nativeArray4.Dispose();
@@ -215,12 +318,11 @@ namespace BelzontAdr
                             for (int num4 = 0; num4 < nativeArray5.Length; num4++)
                             {
                                 Entity entity4 = nativeArray5[num4];
-                                Aggregated aggregated3 = m_AggregatedData[entity4];
-                                Entity entity5;
-                                if (aggregated3.m_Aggregate != Entity.Null && updateMap.TryGetValue(aggregated3.m_Aggregate, out entity5) && entity5 != aggregated3.m_Aggregate)
+                                Aggregated aggregatedData = m_AggregatedData[entity4];
+                                if (aggregatedData.m_Aggregate != Entity.Null && updateMap.TryGetValue(aggregatedData.m_Aggregate, out Entity aggEntity) && aggEntity != aggregatedData.m_Aggregate)
                                 {
-                                    aggregated3.m_Aggregate = entity5;
-                                    m_AggregatedData[entity4] = aggregated3;
+                                    aggregatedData.m_Aggregate = aggEntity;
+                                    m_AggregatedData[entity4] = aggregatedData;
                                 }
                             }
                         }
@@ -251,13 +353,14 @@ namespace BelzontAdr
                 }
                 Edge edge = m_EdgeData[startEdge];
                 bool isHighway = IsHighway(m_PrefabRefData[startEdge]);
-                AddElements(startEdge, edge.m_Start, true, ref aggregateType, ref isHighway, emptySet, edgeList);
+                var elType = GetElevationRef(startEdge);
+                AddElements(startEdge, edge.m_Start, true, ref aggregateType, ref isHighway, elType, emptySet, edgeList);
                 CollectionUtils.Reverse(edgeList.AsArray());
                 AggregateElement aggregateElement = new(startEdge);
                 edgeList.Add(aggregateElement);
-                AddElements(startEdge, edge.m_End, false, ref aggregateType, ref isHighway, emptySet, edgeList);
+                AddElements(startEdge, edge.m_End, false, ref aggregateType, ref isHighway, elType, emptySet, edgeList);
                 bool flag = m_TempData.HasComponent(startEdge);
-                if (!TryCombine(ref aggregateType, ref isHighway, edgeList, flag, updateMap))
+                if (!TryCombine(ref aggregateType, ref isHighway, elType, edgeList, flag, updateMap))
                 {
                     AggregateNetData aggregateNetData = m_PrefabAggregateData[aggregateType];
                     Entity entity = m_CommandBuffer.CreateEntity(aggregateNetData.m_Archetype);
@@ -281,10 +384,10 @@ namespace BelzontAdr
                 edgeList.Clear();
             }
 
-            private bool TryCombine(ref Entity aggType, ref bool isHighway, NativeList<AggregateElement> edgeList, bool isTemp, NativeParallelHashMap<Entity, Entity> updateMap)
+            private bool TryCombine(ref Entity aggType, ref bool isHighway, ElevationType elevationType, NativeList<AggregateElement> edgeList, bool isTemp, NativeParallelHashMap<Entity, Entity> updateMap)
             {
                 if (GetStart(edgeList.AsArray(), out Entity startEdge, out Entity startNode, out bool isStartNode)
-                    && ShouldCombine(startEdge, startNode, isStartNode, ref aggType, ref isHighway, Entity.Null, isTemp, out Entity mainAgg, out bool flag))
+                    && ShouldCombine(startEdge, startNode, isStartNode, ref aggType, ref isHighway, elevationType, Entity.Null, isTemp, out Entity mainAgg, out bool flag))
                 {
                     DynamicBuffer<AggregateElement> thisAggList = m_AggregateElements[mainAgg];
                     int length = thisAggList.Length;
@@ -307,7 +410,7 @@ namespace BelzontAdr
                     }
                     m_CommandBuffer.AddComponent<Updated>(mainAgg);
                     if (GetEnd(edgeList.AsArray(), out Entity startEdge2, out Entity startNode2, out bool isStartNode2)
-                        && ShouldCombine(startEdge2, startNode2, isStartNode2, ref aggType, ref isHighway, mainAgg, isTemp, out Entity otherAgg, out bool flag2))
+                        && ShouldCombine(startEdge2, startNode2, isStartNode2, ref aggType, ref isHighway, elevationType, mainAgg, isTemp, out Entity otherAgg, out bool flag2))
                     {
                         DynamicBuffer<AggregateElement> otherAggList = m_AggregateElements[otherAgg];
 
@@ -323,7 +426,7 @@ namespace BelzontAdr
                     return true;
                 }
                 if (GetEnd(edgeList.AsArray(), out Entity startEdge3, out Entity startNode3, out bool isStartNode3)
-                    && ShouldCombine(startEdge3, startNode3, isStartNode3, ref aggType, ref isHighway, Entity.Null, isTemp, out Entity existingAgg, out bool flag3))
+                    && ShouldCombine(startEdge3, startNode3, isStartNode3, ref aggType, ref isHighway, elevationType, Entity.Null, isTemp, out Entity existingAgg, out bool flag3))
                 {
                     DynamicBuffer<AggregateElement> dynamicBuffer3 = m_AggregateElements[existingAgg];
                     int length2 = dynamicBuffer3.Length;
@@ -379,14 +482,12 @@ namespace BelzontAdr
                 }
             }
 
-            private bool GetBestConnectionEdge(ref Entity connectionTypePrefab, ref bool isHighway, Entity prevEdge, Entity prevNode, bool prevIsStart, out Entity nextEdge, out Entity nextNode, out bool nextIsStart)
+            private bool GetBestConnectionEdge(ref Entity connectionTypePrefab, ref bool isHighway, ElevationType elevationType, Entity prevEdge, Entity prevNode, bool prevIsStart, out Entity nextEdge, out Entity nextNode, out bool nextIsStart)
             {
                 Curve curve = m_CurveData[prevEdge];
                 float2 directionAngle;
                 float2 x;
                 float2 xz;
-
-                var refElevation = GetElevationRef(prevEdge);
 
                 if (prevIsStart)
                 {
@@ -413,12 +514,12 @@ namespace BelzontAdr
                         var refElConnected = GetElevationRef(connectedEdge.m_Edge);
                         var connectionEdgeType = GetAggregateType(connectedEdge.m_Edge);
                         var isHighwayConnected = IsHighway(m_PrefabRefData[connectedEdge.m_Edge]);
-                        if (isHighway || isHighwayConnected || refElConnected == refElevation)
+                        if (isHighway || isHighwayConnected || refElConnected == elevationType)
                         {
                             Edge edge = m_EdgeData[connectedEdge.m_Edge];
                             if (edge.m_Start == prevNode)
                             {
-                                if (connectionEdgeType == connectionTypePrefab || isHighway || isHighwayConnected)
+                                //    if (elevationType == refElConnected || isHighway || isHighwayConnected)
                                 {
                                     Curve curve2 = m_CurveData[connectedEdge.m_Edge];
                                     float2 float2 = math.normalizesafe(-MathUtils.StartTangent(curve2.m_Bezier).xz, default);
@@ -443,7 +544,7 @@ namespace BelzontAdr
                             }
                             else if (edge.m_End == prevNode)
                             {
-                                if (connectionEdgeType == connectionTypePrefab || isHighway || isHighwayConnected)
+                                //     if ((refElConnected == elevationType) || isHighway || isHighwayConnected)
                                 {
 
                                     Curve curve3 = m_CurveData[connectedEdge.m_Edge];
@@ -474,10 +575,10 @@ namespace BelzontAdr
             }
 
 
-            private void AddElements(Entity startEdge, Entity startNode, bool isStartNode, ref Entity aggType, ref bool isHighway, NativeParallelHashSet<Entity> emptySet, NativeList<AggregateElement> elements)
+            private void AddElements(Entity startEdge, Entity startNode, bool isStartNode, ref Entity aggType, ref bool isHighway, ElevationType elevationType, NativeParallelHashSet<Entity> emptySet, NativeList<AggregateElement> elements)
             {
-                while (GetBestConnectionEdge(ref aggType, ref isHighway, startEdge, startNode, isStartNode, out Entity entity, out Entity entity2, out bool flag)
-                    && GetBestConnectionEdge(ref aggType, ref isHighway, entity, startNode, !flag, out Entity lhs, out _, out _)
+                while (GetBestConnectionEdge(ref aggType, ref isHighway, elevationType, startEdge, startNode, isStartNode, out Entity entity, out Entity entity2, out bool flag)
+                    && GetBestConnectionEdge(ref aggType, ref isHighway, elevationType, entity, startNode, !flag, out Entity lhs, out _, out _)
                     && lhs == startEdge
                     && emptySet.Contains(entity))
                 {
@@ -491,13 +592,13 @@ namespace BelzontAdr
             }
 
 
-            private void CombineAggregate(Entity aggregate, bool isHighway, NativeParallelHashMap<Entity, Entity> updateMap)
+            private void CombineAggregate(Entity aggregate, bool isHighway, ElevationType elevationType, NativeParallelHashMap<Entity, Entity> updateMap)
             {
                 DynamicBuffer<AggregateElement> dynamicBuffer = m_AggregateElements[aggregate];
                 Entity prefab = m_PrefabRefData[aggregate].m_Prefab;
                 bool isTemp = m_TempData.HasComponent(aggregate);
                 while (GetStart(dynamicBuffer.AsNativeArray(), out Entity startEdge, out Entity startNode, out bool isStartNode)
-                    && ShouldCombine(startEdge, startNode, isStartNode, ref prefab, ref isHighway, aggregate, isTemp, out Entity entity, out bool c))
+                    && ShouldCombine(startEdge, startNode, isStartNode, ref prefab, ref isHighway, elevationType, aggregate, isTemp, out Entity entity, out bool c))
                 {
                     DynamicBuffer<AggregateElement> dynamicBuffer2 = m_AggregateElements[entity];
                     int length = dynamicBuffer.Length;
@@ -523,7 +624,7 @@ namespace BelzontAdr
                     }
                 }
                 while (GetEnd(dynamicBuffer.AsNativeArray(), out Entity startEdge2, out Entity startNode2, out bool isStartNode2)
-                    && ShouldCombine(startEdge2, startNode2, isStartNode2, ref prefab, ref isHighway, aggregate, isTemp, out Entity entity2, out bool c2))
+                    && ShouldCombine(startEdge2, startNode2, isStartNode2, ref prefab, ref isHighway, elevationType, aggregate, isTemp, out Entity entity2, out bool c2))
                 {
                     DynamicBuffer<AggregateElement> dynamicBuffer3 = m_AggregateElements[entity2];
                     int length2 = dynamicBuffer.Length;
@@ -617,12 +718,12 @@ namespace BelzontAdr
             }
 
 
-            private void ValidateAggregate(ref Entity aggregate, ref bool isHighway, NativeParallelHashSet<Entity> edgeSet, NativeParallelHashSet<Entity> emptySet, NativeParallelHashMap<Entity, Entity> updateMap)
+            private void ValidateAggregate(Entity aggregate, bool isHighway, ElevationType elRef, NativeParallelHashSet<Entity> edgeSet, NativeParallelHashSet<Entity> emptySet, NativeParallelHashMap<Entity, Entity> updateMap)
             {
                 DynamicBuffer<AggregateElement> elements = m_AggregateElements[aggregate];
                 Entity aggTypePrefab = m_PrefabRefData[aggregate].m_Prefab;
 
-                ADRAggregationData.ElevationType elRefEdge = 0;
+                ElevationType elRefEdge = elRef;
                 bool refIsHighway = isHighway;
 
                 Entity refEdge = Entity.Null;
@@ -639,7 +740,7 @@ namespace BelzontAdr
                         var aggType = GetAggregateType(aggregateElement.m_Edge);
                         var elCurrent = GetElevationRef(aggregateElement.m_Edge);
                         var isHighwayCurrent = refIsHighway || IsHighway(m_PrefabRefData[aggregateElement.m_Edge]);
-                        if (aggType != aggTypePrefab && ((!isHighwayCurrent && elCurrent != elRefEdge) || !isHighwayCurrent))
+                        if (elCurrent != elRefEdge && !isHighwayCurrent)
                         {
                             emptySet.Add(aggregateElement.m_Edge);
                             m_AggregatedData[aggregateElement.m_Edge] = default;
@@ -714,10 +815,10 @@ namespace BelzontAdr
                 else
                 {
                     Edge edge = m_EdgeData[refEdge];
-                    AddElements(refEdge, edge.m_Start, true, ref aggTypePrefab, ref refIsHighway, edgeSet, elements);
+                    AddElements(refEdge, edge.m_Start, true, ref aggTypePrefab, ref refIsHighway, elRefEdge, edgeSet, elements);
                     CollectionUtils.Reverse(elements.AsNativeArray());
                     elements.Add(new AggregateElement(refEdge));
-                    AddElements(refEdge, edge.m_End, false, ref aggTypePrefab, ref refIsHighway, edgeSet, elements);
+                    AddElements(refEdge, edge.m_End, false, ref aggTypePrefab, ref refIsHighway, elRefEdge, edgeSet, elements);
                     m_CommandBuffer.AddComponent<Updated>(aggregate);
                 }
                 if (!edgeSet.IsEmpty)
@@ -735,10 +836,10 @@ namespace BelzontAdr
             }
 
 
-            private bool ShouldCombine(Entity startEdge, Entity startNode, bool isStartNode, ref Entity aggregationType, ref bool isHighway, Entity aggregate, bool isTemp, out Entity otherAggregate, out bool otherIsStart)
+            private bool ShouldCombine(Entity startEdge, Entity startNode, bool isStartNode, ref Entity aggregationType, ref bool isHighway, ElevationType elevationType, Entity aggregate, bool isTemp, out Entity otherAggregate, out bool otherIsStart)
             {
-                if (GetBestConnectionEdge(ref aggregationType, ref isHighway, startEdge, startNode, isStartNode, out Entity nextEdge, out _, out bool flag)
-                    && GetBestConnectionEdge(ref aggregationType, ref isHighway, nextEdge, startNode, !flag, out Entity lhs, out _, out _)
+                if (GetBestConnectionEdge(ref aggregationType, ref isHighway, elevationType, startEdge, startNode, isStartNode, out Entity nextEdge, out _, out bool flag)
+                    && GetBestConnectionEdge(ref aggregationType, ref isHighway, elevationType, nextEdge, startNode, !flag, out Entity lhs, out _, out _)
                     && lhs == startEdge
                     && m_AggregatedData.HasComponent(nextEdge))
                 {
@@ -768,10 +869,10 @@ namespace BelzontAdr
             }
 
 
-            private void AddElements(Entity startEdge, Entity startNode, bool isStartNode, ref Entity aggregationType, ref bool isHighway, NativeParallelHashSet<Entity> edgeSet, DynamicBuffer<AggregateElement> elements)
+            private void AddElements(Entity startEdge, Entity startNode, bool isStartNode, ref Entity aggregationType, ref bool isHighway, ElevationType elevationType, NativeParallelHashSet<Entity> edgeSet, DynamicBuffer<AggregateElement> elements)
             {
-                while (GetBestConnectionEdge(ref aggregationType, ref isHighway, startEdge, startNode, isStartNode, out Entity nextEdge, out Entity nextNode, out bool nextIsStart)
-                    && GetBestConnectionEdge(ref aggregationType, ref isHighway, nextEdge, startNode, !nextIsStart, out Entity lhs, out _, out _) && lhs == startEdge && edgeSet.Contains(nextEdge))
+                while (GetBestConnectionEdge(ref aggregationType, ref isHighway, elevationType, startEdge, startNode, isStartNode, out Entity nextEdge, out Entity nextNode, out bool nextIsStart)
+                    && GetBestConnectionEdge(ref aggregationType, ref isHighway, elevationType, nextEdge, startNode, !nextIsStart, out Entity lhs, out _, out _) && lhs == startEdge && edgeSet.Contains(nextEdge))
                 {
                     elements.Add(new AggregateElement(nextEdge));
                     edgeSet.Remove(nextEdge);
@@ -788,15 +889,155 @@ namespace BelzontAdr
                 return m_PrefabGeometryData[prefabRef.m_Prefab].m_AggregateType;
             }
 
-            private bool IsHighway(PrefabRef type)
+            private readonly bool IsHighway(PrefabRef type)
             {
-                return (m_RoadData[type.m_Prefab].m_Flags & Game.Prefabs.RoadFlags.UseHighwayRules) != 0;
+                return type.m_Prefab == m_highwayAggRef;
             }
 
-            private ADRAggregationData.ElevationType GetElevationRef(Entity segmentEntity)
+            private ElevationType GetElevationRef(Entity edgeEntity)
             {
-                var elevation = m_ElevationData[segmentEntity].m_Elevation;
-                return (ADRAggregationData.ElevationType)math.sign(math.trunc((elevation.x + elevation.y) * (.5f / 7.5f)));
+                var elevation = m_ElevationData[edgeEntity].m_Elevation;
+                var absEl = math.abs(elevation);
+                var refEl = absEl.x > absEl.y ? elevation.x : elevation.y;
+                return math.abs(refEl) > 7.5f ? (ElevationType)math.sign(refEl) : ElevationType.GroundOrHighway;
+            }
+        }
+
+        //    [BurstCompile]
+        private struct AdrAggregationDataUpdateJob : IJob
+        {
+            [ReadOnly] public BufferLookup<AggregateElement> m_AggregateElements;
+            [ReadOnly] public ComponentLookup<ADRAggregationData> m_AdrAggregateData;
+            [ReadOnly] public NativeList<ArchetypeChunk> m_Chunks;
+            public EntityCommandBuffer m_CommandBuffer;
+            [ReadOnly] public ComponentLookup<Curve> m_CurveData;
+            [ReadOnly] public ComponentLookup<Elevation> m_ElevationData;
+            [ReadOnly] public ComponentLookup<NetGeometryData> m_PrefabGeometryData;
+            [ReadOnly] public ComponentLookup<PrefabRef> m_PrefabRefData;
+            [ReadOnly] public ComponentLookup<Game.Net.BuildOrder> m_BuildOrderData;
+            [ReadOnly] public EntityTypeHandle m_EntityType;
+            [ReadOnly] public Entity m_highwayAggRef;
+
+
+            public unsafe void Execute()
+            {
+                for (int i = 0; i < m_Chunks.Length; i++)
+                {
+                    var arr = m_Chunks[i].GetNativeArray(m_EntityType);
+                    for (int j = 0; j < arr.Length; j++)
+                    {
+                        var aggEntity = arr[j];
+                        var baseDt = m_AdrAggregateData.TryGetComponent(aggEntity, out var data) ? data : CreateAggregate(aggEntity);
+
+                        var elements = m_AggregateElements[aggEntity];
+                        var elArr = elements.ToNativeArray(Allocator.Temp);
+                        float totalMeters = 0;
+                        var isHw = false;
+                        float2 widthRange = new(float.MaxValue, float.MinValue);
+                        float2 heightRange = new(float.MaxValue, float.MinValue);
+                        uint priority = uint.MaxValue;
+                        for (int k = 0; k < elArr.Length; k++)
+                        {
+                            var edge = elArr[k].m_Edge;
+                            totalMeters += m_CurveData[edge].m_Length;
+                            var prefabRef = m_PrefabRefData[edge];
+                            isHw |= IsHighway(prefabRef);
+                            widthRange.x = math.min(widthRange.x, m_PrefabGeometryData[prefabRef.m_Prefab].m_DefaultWidth);
+                            widthRange.y = math.max(widthRange.x, m_PrefabGeometryData[prefabRef.m_Prefab].m_DefaultWidth);
+                            heightRange.x = math.min(heightRange.x, math.min(m_ElevationData[edge].m_Elevation.x, m_ElevationData[edge].m_Elevation.y));
+                            heightRange.y = math.max(heightRange.y, math.max(m_ElevationData[edge].m_Elevation.x, m_ElevationData[edge].m_Elevation.y));
+                            priority = math.min(priority, m_BuildOrderData[edge].m_End);
+                        }
+
+                        baseDt.lenghtMeters = totalMeters;
+                        baseDt.widthRange = widthRange;
+                        baseDt.heightRange = heightRange;
+                        if (!baseDt.lockedHwData)
+                        {
+                            if (isHw)
+                            {
+                                baseDt.highwayClass = widthRange.y < 10 ? HighwayClass.AccessRamp : HighwayClass.Priority_Medium;
+                                baseDt.highwayDirection = HighwayDirection.None;
+                            }
+                            baseDt.aggregationType = isHw ? ElevationType.GroundOrHighway : GetElevationRef(heightRange);
+                        }
+                        m_CommandBuffer.SetComponent(aggEntity, baseDt);
+                        elArr.Dispose();
+                    }
+                }
+            }
+            private readonly bool IsHighway(PrefabRef type)
+            {
+                return type.m_Prefab == m_highwayAggRef;
+            }
+
+            private readonly ElevationType GetElevationRef(float2 elevation)
+            {
+                var absEl = math.abs(elevation);
+                var refEl = absEl.x > absEl.y ? elevation.x : elevation.y;
+                return math.abs(refEl) > 7.5f ? (ElevationType)math.sign(refEl) : ElevationType.GroundOrHighway;
+            }
+
+            private ADRAggregationData CreateAggregate(Entity aggregation)
+            {
+                var adrAggData = new ADRAggregationData();
+                m_CommandBuffer.AddComponent(aggregation, adrAggData);
+                return adrAggData;
+            }
+        }
+
+        private struct AdrEdgeProfileUpdate : IJob
+        {
+            [ReadOnly] public BufferLookup<AggregateElement> m_AggregateElements;
+            [ReadOnly] public ComponentLookup<ADREdgeData> m_AdrEdgeData;
+            [ReadOnly] public NativeList<ArchetypeChunk> m_Chunks;
+            public EntityCommandBuffer m_CommandBuffer;
+            [ReadOnly] public ComponentLookup<Curve> m_CurveData;
+            [ReadOnly] public ComponentLookup<Elevation> m_ElevationData;
+            [ReadOnly] public ComponentLookup<NetGeometryData> m_PrefabGeometryData;
+            [ReadOnly] public ComponentLookup<PrefabRef> m_PrefabRefData;
+            [ReadOnly] public ComponentLookup<RoadData> m_RoadData;
+            [ReadOnly] public EntityTypeHandle m_EntityType;
+            [ReadOnly] public Entity m_highwayAggRef;
+
+
+            public unsafe void Execute()
+            {
+                for (int i = 0; i < m_Chunks.Length; i++)
+                {
+                    var arr = m_Chunks[i].GetNativeArray(m_EntityType);
+                    for (int j = 0; j < arr.Length; j++)
+                    {
+                        var edge = arr[j];
+                        var baseDt = m_AdrEdgeData.TryGetComponent(edge, out var data) ? data : CreateAggregate(edge);
+                        var prefabRef = m_PrefabRefData[edge];
+                        baseDt.isHighway = IsHighway(prefabRef);
+                        baseDt.width = m_PrefabGeometryData[prefabRef.m_Prefab].m_DefaultWidth;
+                        baseDt.heightRange.x = math.min(m_ElevationData[edge].m_Elevation.x, m_ElevationData[edge].m_Elevation.y);
+                        baseDt.heightRange.y = math.max(m_ElevationData[edge].m_Elevation.x, m_ElevationData[edge].m_Elevation.y);
+                        baseDt.maxSpeed = m_RoadData[prefabRef.m_Prefab].m_SpeedLimit;
+                        baseDt.acceptsZoning = m_RoadData[prefabRef.m_Prefab].m_ZoneBlockPrefab != Entity.Null;
+                        m_CommandBuffer.SetComponent(edge, baseDt);
+                    }
+                }
+            }
+            private readonly bool IsHighway(PrefabRef type)
+            {
+                return type.m_Prefab == m_highwayAggRef;
+            }
+
+            private readonly ElevationType GetElevationRef(float2 elevation)
+            {
+                var absEl = math.abs(elevation);
+                var refEl = absEl.x > absEl.y ? elevation.x : elevation.y;
+                return math.abs(refEl) > 7.5f ? (ElevationType)math.sign(refEl) : ElevationType.GroundOrHighway;
+            }
+
+            private ADREdgeData CreateAggregate(Entity edge)
+            {
+                var adrAggData = new ADREdgeData();
+                m_CommandBuffer.AddComponent(edge, adrAggData);
+                return adrAggData;
             }
         }
     }

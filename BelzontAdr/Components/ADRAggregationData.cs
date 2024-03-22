@@ -1,9 +1,11 @@
 ﻿using Colossal.Serialization.Entities;
 using System;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace BelzontAdr
 {
+
     public struct ADRAggregationData : IComponentData, IQueryTypeParameter, ISerializable
     {
         public enum HighwayClass : byte
@@ -60,9 +62,12 @@ namespace BelzontAdr
         public HighwayDirection highwayDirection;
         public ushort roadNumberReference;
         public Entity parentAggregation;
-        public ushort priority;
-        public uint lenghtMeters;
+        public uint priority;
+        public float lenghtMeters;
         public ElevationType aggregationType;
+        public bool lockedHwData;
+        public float2 widthRange;
+        public float2 heightRange;
 
         public readonly void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
@@ -74,6 +79,9 @@ namespace BelzontAdr
             writer.Write(priority);
             writer.Write(lenghtMeters);
             writer.Write((sbyte)aggregationType);
+            writer.Write(lockedHwData);
+            writer.Write(widthRange);
+            writer.Write(heightRange);
         }
 
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
@@ -94,6 +102,9 @@ namespace BelzontAdr
             reader.Read(out lenghtMeters);
             reader.Read(out sbyte aggType);
             aggregationType = (ElevationType)aggType;
+            reader.Read(out lockedHwData);
+            reader.Read(out widthRange);
+            reader.Read(out heightRange);
         }
     }
 }

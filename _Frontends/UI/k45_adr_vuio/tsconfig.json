@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "jsx": "react-jsx",
+    "jsx":"react-jsx",
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "Node",
@@ -10,10 +10,10 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": "src",
     "skipLibCheck": true,
-    "typeRoots": [
-      "./types",
-      "../_replacements/euis-components/types"
-    ],
-    "types": []
+    "typeRoots": ["./types"],
+    "resolveJsonModule": true,
+    "paths": {
+      "mod.json": ["../mod.json"]
+    }
   },
-}
+} 

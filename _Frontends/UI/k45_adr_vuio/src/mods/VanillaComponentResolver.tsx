@@ -1,6 +1,6 @@
 
 import { FocusKey, Theme, UniqueFocusKey } from "cs2/bindings";
-import { ModuleRegistry } from "cs2/modding";
+import { ModuleRegistry, getModule } from "cs2/modding";
 import { DropdownItemProps, DropdownProps, DropdownToggleProps, IconButtonProps, InfoRowProps, InfoSectionProps, TooltipProps } from "cs2/ui";
 import { HTMLAttributes } from "react";
 
@@ -65,20 +65,15 @@ const registryIndex = {
 
 
 export class VanillaComponentResolver {
-    public static get instance(): VanillaComponentResolver { return this._instance!! }
+    public static get instance(): VanillaComponentResolver { return this._instance ??= new VanillaComponentResolver() }
     private static _instance?: VanillaComponentResolver
 
-    public static setRegistry(in_registry: ModuleRegistry) { this._instance = new VanillaComponentResolver(in_registry); }
-    private registryData: ModuleRegistry;
 
-    constructor(in_registry: ModuleRegistry) {
-        this.registryData = in_registry;
-    }
 
     private cachedData: Partial<Record<keyof typeof registryIndex, any>> = {}
     private updateCache(entry: keyof typeof registryIndex) {
         const entryData = registryIndex[entry];
-        return this.cachedData[entry] = this.registryData.registry.get(entryData[0])!![entryData[1]]
+        return this.cachedData[entry] = getModule(entryData[0], entryData[1])
     }
 
     public get RadioToggle(): (props: PropsRadioToggle) => JSX.Element { return this.cachedData["RadioToggle"] ?? this.updateCache("RadioToggle") }

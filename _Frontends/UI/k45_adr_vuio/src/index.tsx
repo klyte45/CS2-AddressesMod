@@ -4,9 +4,7 @@ import { AddressesBindings, AddressesLayoutRegistering } from "mods/selectedInfo
 
 
 
-const register: ModRegistrar = (moduleRegistry) => {
-    VanillaComponentResolver.setRegistry(moduleRegistry);
-    
+const register: ModRegistrar = (moduleRegistry) => {    
     moduleRegistry.append('Game', AddressesBindings)
     moduleRegistry.extend("game-ui/game/components/selected-info-panel/selected-info-sections/selected-info-sections.tsx", 'selectedInfoSectionComponents', AddressesLayoutRegistering)
     //moduleRegistry.find([].concat(...moduleRegistry.find(/.*\/selected-info.*\.tsx/) as any[]).sort((a: any, b) => a.lo caleCompare(b))
