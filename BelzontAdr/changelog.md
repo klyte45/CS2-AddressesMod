@@ -1,4 +1,4 @@
-# v0.1.1r0 (22-MAR-24)
+# v0.1.1r1 (23-MAR-24)
 - Adjusting to publish at Paradox Mods release build
 - Fixed name labels update when changing name generation method
 - Added source selector for station names (info panel when clicking on building)
