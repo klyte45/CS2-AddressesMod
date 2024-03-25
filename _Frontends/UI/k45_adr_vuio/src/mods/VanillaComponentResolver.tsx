@@ -1,8 +1,8 @@
 
-import { FocusKey, Theme, UniqueFocusKey } from "cs2/bindings";
-import { ModuleRegistry, getModule } from "cs2/modding";
-import { DropdownItemProps, DropdownProps, DropdownToggleProps, IconButtonProps, InfoRowProps, InfoSectionProps, TooltipProps } from "cs2/ui";
-import { HTMLAttributes } from "react";
+import { FocusKey, IntInputField, Theme, UniqueFocusKey } from "cs2/bindings";
+import { getModule } from "cs2/modding";
+import { DropdownProps, DropdownToggleProps, IconButtonProps, InfoRowProps, InfoSectionProps } from "cs2/ui";
+import { HTMLAttributes, HtmlHTMLAttributes, InputHTMLAttributes } from "react";
 
 type PropsToggleField = {
     "value": any,
@@ -40,6 +40,13 @@ type PropsTooltip = {
     children: string | JSX.Element | JSX.Element[]
 }
 
+export type PropsEllipsesTextInput = {
+    "value"?: string,
+    "maxLength"?: number,
+    "theme"?: Theme,
+    "className"?: string
+} & InputHTMLAttributes<PropsEllipsesTextInput>
+
 const registryIndex = {
     RadioToggle: ["game-ui/common/input/toggle/radio-toggle/radio-toggle.tsx", "RadioToggle"],
     ToggleField: ["game-ui/menu/components/shared/game-options/toggle-field/toggle-field.tsx", "ToggleField"],
@@ -59,7 +66,8 @@ const registryIndex = {
     DropdownToggle: ["game-ui/common/input/dropdown/dropdown-toggle.tsx", "DropdownToggle"],
     IconButton: ["game-ui/common/input/button/icon-button.tsx", "IconButton"],
     themeGamepadToolOptions: ["game-ui/game/components/tool-options/tool-button/tool-button.module.scss", "classes"],
-    Tooltip: ["game-ui/common/tooltip/tooltip.tsx", "Tooltip"]
+    Tooltip: ["game-ui/common/tooltip/tooltip.tsx", "Tooltip"],
+    EllipsisTextInput: ['game-ui/common/input/text/ellipsis-text-input/ellipsis-text-input.tsx', "EllipsisTextInput"],
 }
 
 
@@ -89,6 +97,7 @@ export class VanillaComponentResolver {
     public get DropdownToggle(): (props: DropdownToggleProps) => JSX.Element { return this.cachedData["DropdownToggle"] ?? this.updateCache("DropdownToggle") }
     public get IconButton(): (props: IconButtonProps) => JSX.Element { return this.cachedData["IconButton"] ?? this.updateCache("IconButton") }
     public get Tooltip(): (props: PropsTooltip) => JSX.Element { return this.cachedData["Tooltip"] ?? this.updateCache("Tooltip") }
+    public get EllipsisTextInput(): (props: PropsEllipsesTextInput) => JSX.Element { return this.cachedData["EllipsisTextInput"] ?? this.updateCache("EllipsisTextInput") }
 
 
     public get themeToggleLine(): Theme | any { return this.cachedData["themeToggleLine"] ?? this.updateCache("themeToggleLine") }

@@ -32,6 +32,7 @@ namespace BelzontAdr
             AdrNameFilesManager.Instance.ReloadNameFiles();
             updateSystem.UpdateAfter<AdrDistrictsSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAfter<AdrMainSystem>(SystemUpdatePhase.ModificationEnd);
+            updateSystem.UpdateAfter<AdrEditorUISystem>(SystemUpdatePhase.UIUpdate);
 #if DEBUG && ADR_AGGSYS
             updateSystem.UpdateAt<AdrAggregationSystem>(SystemUpdatePhase.Modification2B);
 #endif

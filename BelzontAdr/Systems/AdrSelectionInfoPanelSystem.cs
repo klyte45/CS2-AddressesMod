@@ -52,6 +52,12 @@ namespace BelzontAdr
         private AdrEntityData GetEntityOptions(Entity e)
         {
             var result = new AdrEntityData();
+            if (EntityManager.HasComponent<CustomName>(e))
+            {
+                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} uses custom name");
+                result.type = AdrEntityType.CustomName;
+                return result;
+            }
             if (EntityManager.TryGetComponent<Building>(e, out var building))
             {
                 if (EntityManager.HasComponent<PublicTransportStation>(e))
@@ -233,6 +239,7 @@ namespace BelzontAdr
 
         private enum AdrEntityType
         {
+            CustomName = -1,
             None = 0,
             PublicTransportStation,
             CargoTransportStation,

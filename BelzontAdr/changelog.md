@@ -1,4 +1,8 @@
-# v0.1.1r1 (23-MAR-24)
+# v0.1.2r0 (25-MAR-24)
+- Added support to configure seeds values for roads and districts in the Editor
+- Added limited support to edit names of any clickable item in the Editor
+
+**Previously: v0.1.1r1 (23-MAR-24)**
 - Adjusting to publish at Paradox Mods release build
 - Fixed name labels update when changing name generation method
 - Added source selector for station names (info panel when clicking on building)

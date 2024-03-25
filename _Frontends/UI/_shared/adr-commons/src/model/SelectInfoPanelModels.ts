@@ -16,6 +16,7 @@ export type SelectedInfoOptions = {
 
 }
 export enum AdrEntityType {
+    CustomName = -1,
     None = 0,
     PublicTransportStation,
     CargoTransportStation,

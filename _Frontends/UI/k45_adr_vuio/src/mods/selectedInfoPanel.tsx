@@ -4,6 +4,7 @@ import { selectedInfo } from "cs2/bindings";
 let currentEntity: any = null;
 const selectedEntity$ = selectedInfo.selectedEntity$;
 const middleSections$ = selectedInfo.middleSections$;
+let lastMiddleSection: any = null;
 export const AddressesBindings = () => {
     selectedEntity$.subscribe((entity) => {
         if (!entity.index) {
@@ -21,12 +22,12 @@ export const AddressesBindings = () => {
                 __Type: "K45.Addresses"
             } as any);
         }
-        return val;
+        return lastMiddleSection = val;
     })
     return <></>;
 }
 
 export const AddressesLayoutRegistering = (componentList: any): any => {
-    componentList["K45.Addresses"] = () => <><AddressesInfoOptionsComponent entity={selectedEntity$} /></>
+    componentList["K45.Addresses"] = () => <><AddressesInfoOptionsComponent entity={selectedEntity$} entityRef={lastMiddleSection} isEditor={true} /></>
     return componentList as any;
 } 
