@@ -418,10 +418,6 @@ namespace BelzontAdr
         {
             if (!entityManager.TryGetComponent(entity, out ADRRandomizationData data))
             {
-                data = new ADRRandomizationData();
-                entityManager.AddComponentData(entity, data);
-                entityManager.AddComponent<BatchesUpdated>(entity);
-                entityManager.AddComponent<Updated>(entity);
                 if (allowNull)
                 {
                     return null;
@@ -436,8 +432,8 @@ namespace BelzontAdr
             var adrLoc = GetAdrLocData(entityRef, allowNull);
             if (adrLoc == null) return null;
             var adrLocEnsured = adrLoc ?? throw new System.Exception("IMPUSSIBRU");
-            string name = namesFile.Values[adrLocEnsured.m_seedIdentifier % namesFile.Values.Count];
-            if (BasicIMod.VerboseMode) LogUtils.DoVerboseLog($"Generated name for Entity {entityRef}: '{name}' ({adrLocEnsured.m_seedIdentifier})");
+            string name = namesFile.Values[adrLocEnsured.SeedIdentifier % namesFile.Values.Count];
+            if (BasicIMod.VerboseMode) LogUtils.DoVerboseLog($"Generated name for Entity {entityRef}: '{name}' ({adrLocEnsured.SeedIdentifier})");
             return name;
         }
 

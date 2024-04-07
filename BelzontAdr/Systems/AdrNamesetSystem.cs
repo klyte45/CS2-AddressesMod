@@ -5,6 +5,11 @@ using Colossal;
 using Colossal.OdinSerializer.Utilities;
 using Colossal.Serialization.Entities;
 using Game;
+using Game.Areas;
+using Game.Citizens;
+using Game.Common;
+using Game.Net;
+using Game.Tools;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
@@ -15,6 +20,7 @@ using System.Net;
 using System.Text;
 using System.Xml.Serialization;
 using Unity.Collections;
+using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 using static BelzontAdr.AdrNameFile;
@@ -26,6 +32,9 @@ namespace BelzontAdr
         const int CURRENT_VERSION = 0;
 
         private AdrMainSystem mainSystem;
+        private EntityQuery m_UnsetRandomQuery;
+        private static Unity.Mathematics.Random seedGenerator = new();
+        internal static ref Unity.Mathematics.Random SeedGenerator => ref seedGenerator;
 
         #region UI Bindings
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
@@ -61,11 +70,43 @@ namespace BelzontAdr
         {
             base.OnCreate();
             mainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
+
+            m_UnsetRandomQuery = GetEntityQuery(new EntityQueryDesc[]
+              {
+                    new() {
+                        Any = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Aggregate>(),
+                            ComponentType.ReadOnly<Household>(),
+                            ComponentType.ReadOnly<HouseholdPet>(),
+                            ComponentType.ReadOnly<Citizen>(),
+                            ComponentType.ReadOnly<HouseholdMember>(),
+                            ComponentType.ReadOnly<District>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadWrite<ADRRandomizationData>(),
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+              });
+            RequireForUpdate(m_UnsetRandomQuery);
         }
 
         protected override void OnUpdate()
         {
-
+            if (!m_UnsetRandomQuery.IsEmpty)
+            {
+                var nameLessList = m_UnsetRandomQuery.ToEntityArray(Allocator.Temp);
+                if (AddressesCs2Mod.TraceMode) LogUtils.DoTraceLog($"Running NamesetSystem OnUpdate for {nameLessList.Length} entities");
+                for (int i = 0; i < nameLessList.Length; i++)
+                {
+                    EntityManager.AddComponentData(nameLessList[i], new ADRRandomizationData());
+                    if (!EntityManager.HasComponent<BatchesUpdated>(nameLessList[i])) EntityManager.AddComponent<BatchesUpdated>(nameLessList[i]);
+                    if (!EntityManager.HasComponent<Updated>(nameLessList[i])) EntityManager.AddComponent<Updated>(nameLessList[i]);
+                }
+            }
         }
         private readonly Dictionary<Guid, AdrNameFile> CityNamesets = new();
 
@@ -155,7 +196,8 @@ namespace BelzontAdr
         {
             var xml = new AdrNamesetSystemXML
             {
-                CityNamesets = CityNamesets.Values.Select(x => x.ToXML()).ToList()
+                CityNamesets = CityNamesets.Values.Select(x => x.ToXML()).ToList(),
+                seedId = seedGenerator.state
             };
             return xml;
         }
@@ -189,6 +231,7 @@ namespace BelzontAdr
             var Namesets = XmlUtils.DefaultXmlDeserialize<AdrNamesetSystemXML>(namesetData);
             CityNamesets.Clear();
             CityNamesets.AddRange(Namesets.CityNamesets.ToDictionary(x => x.Id, x => AdrNameFile.FromXML(x)));
+            seedGenerator.state = Namesets.seedId == 0 ? (uint)new System.Random().Next() : Namesets.seedId;
             OnCityNamesetsChanged();
         }
 
@@ -208,8 +251,9 @@ namespace BelzontAdr
         public class AdrNamesetSystemXML
         {
             public List<AdrNameFileXML> CityNamesets;
+            public uint seedId = 0;
         }
-        #endregion
+        #endregion      
     }
 }
 

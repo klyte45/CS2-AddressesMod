@@ -166,7 +166,8 @@ namespace BelzontAdr
         {
             if (EntityManager.HasComponent<ADRRandomizationData>(target))
             {
-                EntityManager.SetComponentData(target, new ADRRandomizationData());
+                var data = new ADRRandomizationData();
+                EntityManager.SetComponentData(target, data);
                 EntityManager.AddComponent<Updated>(target);
                 return true;
             }
@@ -179,7 +180,7 @@ namespace BelzontAdr
         {
             if (EntityManager.TryGetComponent<ADRRandomizationData>(target, out var rand))
             {
-                rand.m_seedIdentifier = (ushort)((delta + rand.m_seedIdentifier) & 0xFFFF);
+                rand.AddDelta(delta);
                 EntityManager.SetComponentData(target, rand);
                 EntityManager.AddComponent<Updated>(target);
                 return true;
