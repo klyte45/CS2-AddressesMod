@@ -27,7 +27,7 @@
     <ThumbnailPath>Properties/Thumbnail.png</ThumbnailPath>
     <DisplayName>Addresses &amp;amp%3b Names Mod</DisplayName>
     <ShortDescription>Extends name generation systems.</ShortDescription>
-    <ForumLink></ForumLink>
+    <ForumLink>https://forum.paradoxplaza.com/forum/threads/addresses-names-mod-for-cs2.1651551/</ForumLink>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -58,7 +58,7 @@
         <ShortDescription Value="$(ShortDescription)" />
         <LongDescription />
         <Thumbnail Value="$(ThumbnailPath)" />
-        <ForumLink Value="" />
+        <ForumLink Value="$(ForumLink)" />
         <ModVersion Value="$(Version)" />
         <GameVersion Value="$(GameVersion)" />
         <ChangeLog />
