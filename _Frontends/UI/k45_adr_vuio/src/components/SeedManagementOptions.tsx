@@ -1,5 +1,5 @@
-import { Entity, SelectInfoPanelService, SelectedInfoOptions, nameToString, replaceArgs } from "@klyte45/adr-commons";
-import { VanillaComponentResolver } from "mods/VanillaComponentResolver";
+import { Entity, SelectInfoPanelService, SelectedInfoOptions, replaceArgs } from "@klyte45/adr-commons";
+import { VanillaComponentResolver } from '@klyte45/vuio-commons';
 import { Component } from "react";
 import { translate } from "utility/translate";
 
@@ -8,7 +8,7 @@ type State = { loading: boolean }
 
 
 
-export class SeedManagementOptionsComponent extends Component<Props, State>{
+export class SeedManagementOptionsComponent extends Component<Props, State> {
     constructor(props: Props) {
         super(props)
     }

@@ -4,7 +4,7 @@ import { bindValue } from "cs2/api";
 import { Panel, PanelSection, Portal } from "cs2/ui";
 import { Entity } from "cs2/utils";
 import { ChangeEvent, Component } from "react";
-import { PropsEllipsesTextInput, VanillaComponentResolver } from "./VanillaComponentResolver";
+import { PropsEllipsesTextInput, VanillaComponentResolver } from '@klyte45/vuio-commons'
 
 const selectedEntity$ = bindValue<Entity>("k45::ADR", "AdrEditorUISystem::selectedEntity");
 type State = {

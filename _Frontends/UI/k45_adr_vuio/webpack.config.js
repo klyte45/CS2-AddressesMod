@@ -115,7 +115,7 @@ module.exports = (en) => {
           compiler.hooks.done.tap("AfterDonePlugin", (stats) => {
             console.log(stats.toString({ colors: true }));
             console.log(`\n🔨 ${!runCount++ ? "Built" : "Updated"} ${MOD.id}`);
-            console.log("   " + gray(OUTPUT_DIR) + "\n");
+            console.log("   " + gray(outDir) + "\n");
           });
         },
       },

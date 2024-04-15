@@ -1,5 +1,4 @@
 import { ModRegistrar } from "cs2/modding";
-import { VanillaComponentResolver } from "mods/VanillaComponentResolver";
 import { EditorBindings } from "mods/editorInfoPanel";
 import { AddressesBindings, AddressesLayoutRegistering } from "mods/selectedInfoPanel";
 

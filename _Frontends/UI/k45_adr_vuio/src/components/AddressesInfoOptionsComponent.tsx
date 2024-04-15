@@ -1,7 +1,7 @@
 import { AdrEntityType, SelectInfoPanelService, SelectedInfoOptions, toEntityTyped } from "@klyte45/adr-commons";
 import { ValueBinding } from "cs2/api";
 import { Entity } from "cs2/utils";
-import { VanillaComponentResolver } from "mods/VanillaComponentResolver";
+import { VanillaComponentResolver } from '@klyte45/vuio-commons';
 import { Component, ReactNode } from "react";
 import { translate } from "utility/translate";
 import { SeedManagementOptionsComponent } from "./SeedManagementOptions";
