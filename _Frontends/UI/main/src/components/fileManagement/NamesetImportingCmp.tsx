@@ -1,6 +1,6 @@
 import { ExtendedSimpleNameEntry } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate";
-import { Input } from "@klyte45/euis-components";
+import { DefaultPanelScreen, Input } from "@klyte45/euis-components";
 import { Component } from "react";
 import { NamesetWordsContainer } from './NamesetWordsContainer';
 
@@ -16,7 +16,7 @@ type Props = {
     onBack: () => void,
     onOk: (x: State) => void
 }
-
+ 
 
 
 export default class NamesetImportingCmp extends Component<Props, State> {
@@ -31,20 +31,20 @@ export default class NamesetImportingCmp extends Component<Props, State> {
     }
 
     render() {
+        const buttonsRowContent = <>
+            <button className="negativeBtn " onClick={this.props.onBack}>{translate("namesetsImport.cancel")}</button>
+            <button className="positiveBtn " onClick={() => this.props.onOk(this.state)}>{translate("namesetsImport.import")}</button>
+        </>
         return <>
-            <h1>{translate("namesetsImport.title")}</h1>
-            <h3>{translate("namesetsImport.subtitle")}</h3>
-            <section style={{ position: "absolute", bottom: this.props.onBack ? 52 : 0, left: 5, right: 5, top: 107 }}>
+            <DefaultPanelScreen title={translate("namesetsImport.title")} subtitle={translate("namesetsImport.subtitle")} buttonsRowContent={buttonsRowContent}>
                 <div>
                     <Input title={translate("namesetsImport.cityImportName")} getValue={() => this.state.namesetNameImport} onValueChanged={(x) => { this.setState({ namesetNameImport: x }); return x; }} />
                 </div>
                 <NamesetWordsContainer values={this.state.namesetData.Values} />
-            </section>
-            <div style={{ display: "flex", position: "absolute", left: 5, right: 5, bottom: 5, flexDirection: "row-reverse" }}>
-                <button className="negativeBtn " onClick={this.props.onBack}>{translate("namesetsImport.cancel")}</button>
-                <button className="positiveBtn " onClick={() => this.props.onOk(this.state)}>{translate("namesetsImport.import")}</button>
-            </div>
-        </>;
+            </DefaultPanelScreen>
+
+        </>
+            ;
     }
 }
 

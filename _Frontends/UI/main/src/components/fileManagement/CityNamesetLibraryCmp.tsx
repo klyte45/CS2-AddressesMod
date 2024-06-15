@@ -1,5 +1,5 @@
 import { NamesetService } from "@klyte45/adr-commons";
-import { ArrayUtils, GameScrollComponent } from "@klyte45/euis-components";
+import { ArrayUtils, DefaultPanelScreen, GameScrollComponent } from "@klyte45/euis-components";
 import { translate } from "#utility/translate"
 import { Component } from "react";
 import NamesetDeletingCmp from "./NamesetDeletingCmp";
@@ -75,26 +75,20 @@ export default class CityNamesetLibraryCmp extends Component<any, State> {
     render() {
         switch (this.state.currentScreen) {
             case Screen.DEFAULT:
-                return <>
-                    <h1>{translate("cityNamesetsLibrary.title")}</h1>
-                    <h3>{translate("cityNamesetsLibrary.subtitle")}</h3>
-                    <section style={{ overflow: "scroll", position: "absolute", bottom: 52, left: 5, right: 5, top: 107 }}>
-                        <GameScrollComponent>
-                            {Object.keys(this.state?.availableNamesets.subtrees ?? {}).length == 0 && !this.state?.availableNamesets.rootContent.length
-                                ? <h2>{translate("cityNamesetsLibrary.noNamesetsMsg")} <a onClick={() => this.setState({ currentScreen: Screen.NAMESET_IMPORT_LIB })}>{translate("cityNamesetsLibrary.clickToImport")}</a> <a onClick={() => this.goToEdit()}>{translate("cityNamesetsLibrary.clickToCreate")}</a></h2>
-                                : <NamesetCategoryCmp entry={this.state?.availableNamesets} doWithNamesetData={(x, i) => <NamesetLineViewer entry={x} key={i} actionButtons={(y) => this.getActionButtons(y)} />} />}
-                        </GameScrollComponent>
-                    </section>
-                    <div style={{ display: "flex", position: "absolute", left: 5, right: 5, bottom: 5, flexDirection: "row-reverse" }}>
-                        <button className="positiveBtn " onClick={() => this.setState({ currentScreen: Screen.NAMESET_IMPORT_LIB })}>{translate("cityNamesetsLibrary.importFromLibrary")}</button>
-                        <button className="positiveBtn " onClick={() => this.setState({ currentScreen: Screen.NAMESET_IMPORT_GITHUB })}>{translate("cityNamesetsLibrary.importFromGitHub")}</button>
-                        <button className="positiveBtn " onClick={() => this.goToEdit()}>{translate("cityNamesetsLibrary.createNewNameset")}</button>
-                        <div style={{ display: "flex", flex: "5 5" }}></div>
-                        <div style={{ display: "flex", alignItems: "center", paddingLeft: "10rem" }}>
-                            {this.state.lastMessage}
-                        </div>
+                const buttonsRowContent = <>
+                    <button className="positiveBtn " onClick={() => this.setState({ currentScreen: Screen.NAMESET_IMPORT_LIB })}>{translate("cityNamesetsLibrary.importFromLibrary")}</button>
+                    <button className="positiveBtn " onClick={() => this.setState({ currentScreen: Screen.NAMESET_IMPORT_GITHUB })}>{translate("cityNamesetsLibrary.importFromGitHub")}</button>
+                    <button className="positiveBtn " onClick={() => this.goToEdit()}>{translate("cityNamesetsLibrary.createNewNameset")}</button>
+                    <div style={{ display: "flex", flex: "5 5" }}></div>
+                    <div style={{ display: "flex", alignItems: "center", paddingLeft: "10rem" }}>
+                        {this.state.lastMessage}
                     </div>
-                </>;
+                </>
+                return <DefaultPanelScreen title={translate("cityNamesetsLibrary.title")} subtitle={translate("cityNamesetsLibrary.subtitle")} buttonsRowContent={buttonsRowContent} scrollable>
+                    {Object.keys(this.state?.availableNamesets.subtrees ?? {}).length == 0 && !this.state?.availableNamesets.rootContent.length
+                        ? <h2>{translate("cityNamesetsLibrary.noNamesetsMsg")} <a onClick={() => this.setState({ currentScreen: Screen.NAMESET_IMPORT_LIB })}>{translate("cityNamesetsLibrary.clickToImport")}</a> <a onClick={() => this.goToEdit()}>{translate("cityNamesetsLibrary.clickToCreate")}</a></h2>
+                        : <NamesetCategoryCmp entry={this.state?.availableNamesets} doWithNamesetData={(x, i) => <NamesetLineViewer entry={x} key={i} actionButtons={(y) => this.getActionButtons(y)} />} />}
+                </DefaultPanelScreen>
             case Screen.NAMESET_IMPORT_LIB:
                 return <NamesetLibrarySelectorCmp onBack={() => this.setState({ currentScreen: Screen.DEFAULT })} actionButtons={(p) => <><button className="positiveBtn" onClick={() => this.goToImportDetails(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
             case Screen.NAMESET_IMPORT_GITHUB:

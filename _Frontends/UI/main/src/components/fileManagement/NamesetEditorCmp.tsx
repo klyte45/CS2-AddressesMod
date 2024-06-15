@@ -1,6 +1,6 @@
 import { ExtendedSimpleNameEntry, SimpleNameEntry } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate";
-import { GameScrollComponent, Input } from "@klyte45/euis-components";
+import { DefaultPanelScreen, GameScrollComponent, Input } from "@klyte45/euis-components";
 import { CSSProperties, Component } from "react";
 
 type State = {
@@ -34,29 +34,23 @@ export default class NamesetEditorCmp extends Component<Props, State> {
     }
 
     render() {
-        return <>
-            <h1>{translate("namesetEditor.title")}</h1>
-            <h3>{translate("namesetEditor.subtitle")}</h3>
-            <section style={{ overflow: "hidden", position: "absolute", bottom: this.props.onBack ? 52 : 0, left: 5, right: 5, top: 107 }}>
-                <div style={{ textAlign: "center", width: "100%", fontSize: "30rem" } as CSSProperties}>{this.state.namesetData.Name.split("/").pop()}</div>
-                <div className="fullDivider" />
-                <div>
-                    <Input title={translate("namesetsImport.pathToNameset")} getValue={() => this.state.namesetData.Name} onValueChanged={(x) => { this.setState({ namesetData: Object.assign(this.state.namesetData, { Name: x }) }); return x; }} />
-                </div>
-                <GameScrollComponent>
-                    <textarea
-                        onBlur={(x) => this.setState({ namesetData: Object.assign(this.state.namesetData, { Values: x.target.value.split("\n").map(x => x.trim()) }) })}
-                        style={{ width: "100%", height: Math.max(40, 1.315 * this.state.namesetData.Values.length) + "em", minHeight: "100%" }}
-                        defaultValue={this.state.namesetData.Values.join("\n")}
-                    />
-                </GameScrollComponent>
-            </section>
-            <div style={{ display: "flex", position: "absolute", left: 5, right: 5, bottom: 5, flexDirection: "row-reverse" }}>
-                <button className="negativeBtn " onClick={this.props.onBack}>{translate("namesetEditor.cancel")}</button>
-                <button className="positiveBtn " onClick={() => this.props.onOk(this.state)}>{translate("namesetEditor.save")}</button>
+        return <DefaultPanelScreen title={translate("namesetEditor.title")} subtitle={translate("namesetEditor.subtitle")} buttonsRowContent={<>
+            <button className="negativeBtn " onClick={this.props.onBack}>{translate("namesetEditor.cancel")}</button>
+            <button className="positiveBtn " onClick={() => this.props.onOk(this.state)}>{translate("namesetEditor.save")}</button>
+        </>}>
+            <div style={{ textAlign: "center", width: "100%", fontSize: "30rem" } as CSSProperties}>{this.state.namesetData.Name.split("/").pop()}</div>
+            <div className="fullDivider" />
+            <div>
+                <Input title={translate("namesetsImport.pathToNameset")} getValue={() => this.state.namesetData.Name} onValueChanged={(x) => { this.setState({ namesetData: Object.assign(this.state.namesetData, { Name: x }) }); return x; }} />
             </div>
-
-        </>;
+            <GameScrollComponent>
+                <textarea
+                    onBlur={(x) => this.setState({ namesetData: Object.assign(this.state.namesetData, { Values: x.target.value.split("\n").map(x => x.trim()) }) })}
+                    style={{ width: "100%", height: Math.max(40, 1.315 * this.state.namesetData.Values.length) + "em", minHeight: "100%" }}
+                    defaultValue={this.state.namesetData.Values.join("\n")}
+                />
+            </GameScrollComponent>
+        </DefaultPanelScreen>;
     }
 }
 

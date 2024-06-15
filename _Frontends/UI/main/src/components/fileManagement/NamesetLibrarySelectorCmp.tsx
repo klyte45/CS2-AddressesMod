@@ -5,7 +5,7 @@ import { categorizeFiles } from "#utility/categorizeFiles";
 import { NamesetCategoryCmp } from "./NamesetCategoryCmp";
 import { NamesetLineViewer } from "./NamesetLineViewer";
 import { ExtendedSimpleNameEntry } from "@klyte45/adr-commons";
-import { GameScrollComponent } from "@klyte45/euis-components";
+import { DefaultPanelScreen, GameScrollComponent } from "@klyte45/euis-components";
 
 type State = {
     availableNamesets: NamesetStructureTreeNode,
@@ -51,19 +51,15 @@ export default class NamesetLibrarySelectorCmp extends Component<Props, State> {
     }
 
     render() {
+        const buttonsRowContent = <>
+            <button className="negativeBtn" onClick={this.props.onBack}>{translate("namesetsLibrary.back")}</button>
+            <button className="neutralBtn" onClick={() => NamesetService.reloadLibraryNamesets().then(() => this.updateNamesets())}>{translate("namesetsLibrary.reloadFiles")}</button>
+            <button className="neutralBtn" onClick={() => NamesetService.goToDiskSimpleNamesFolder()}>{translate("namesetsLibrary.goToLibraryFolder")}</button>
+        </>
         return <>
-            <h1>{translate("namesetsLibrary.title")}</h1>
-            <h3>{translate("namesetsLibrary.subtitle")}</h3>
-            <section style={{ overflow: "scroll", position: "absolute", bottom: this.props.onBack ? 52 : 0, left: 5, right: 5, top: 107 }}>
-                <GameScrollComponent >
-                    <NamesetCategoryCmp entry={this.state?.availableNamesets} doWithNamesetData={(x, i) => <NamesetLineViewer entry={x} key={i} actionButtons={this.props.actionButtons} />} />
-                </GameScrollComponent>
-            </section>
-            {this.props.onBack && <div style={{ display: "flex", position: "absolute", left: 5, right: 5, bottom: 5, flexDirection: "row-reverse" }}>
-                <button className="negativeBtn" onClick={this.props.onBack}>{translate("namesetsLibrary.back")}</button>
-                <button className="neutralBtn" onClick={() => NamesetService.reloadLibraryNamesets().then(() => this.updateNamesets())}>{translate("namesetsLibrary.reloadFiles")}</button>
-                <button className="neutralBtn" onClick={() => NamesetService.goToDiskSimpleNamesFolder()}>{translate("namesetsLibrary.goToLibraryFolder")}</button>
-            </div>}
+            <DefaultPanelScreen title={translate("namesetsLibrary.title")} subtitle={translate("namesetsLibrary.subtitle")} buttonsRowContent={buttonsRowContent} scrollable>
+                <NamesetCategoryCmp entry={this.state?.availableNamesets} doWithNamesetData={(x, i) => <NamesetLineViewer entry={x} key={i} actionButtons={this.props.actionButtons} />} />
+            </DefaultPanelScreen>
         </>;
     }
 }
