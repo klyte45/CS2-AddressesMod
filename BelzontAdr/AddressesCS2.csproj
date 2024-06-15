@@ -17,6 +17,9 @@
   <!--Imports must be after PropertyGroup block-->
   <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
   <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
+  <Import Project="$(SolutionDir)\_Build\belzont_public.targets" />
+
+  <!--File with machine specific data - can be disabled-->
   <Import Project="$(K45_CS2_ALLROOT)\_Shared\belzont.targets" />
 
   <!--Mod data-->
@@ -25,7 +28,7 @@
     <Version>0.1.2.1</Version>
     <GameVersion>1.1.*</GameVersion>
     <ThumbnailPath>Properties/Thumbnail.png</ThumbnailPath>
-    <DisplayName>Addresses &amp;amp%3b Names Mod</DisplayName>
+    <DisplayName>Addresses &amp; Names Mod</DisplayName>
     <ShortDescription>Extends name generation systems.</ShortDescription>
     <ForumLink>https://forum.paradoxplaza.com/forum/threads/addresses-names-mod-for-cs2.1651551/</ForumLink>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -49,29 +52,6 @@
       <_Parameter3>$(ShortDescription)</_Parameter3>
     </AssemblyAttribute>
   </ItemGroup>
-  <!--Publishing generation files-->
-  <Target Name="SetupAttributes" BeforeTargets="BeforeBuild">
-    <PropertyGroup>
-      <PublishContent>
-        <ModId Value="$(ModId)" />
-        <DisplayName Value="$(DisplayName)" />
-        <ShortDescription Value="$(ShortDescription)" />
-        <LongDescription />
-        <Thumbnail Value="$(ThumbnailPath)" />
-        <ForumLink Value="$(ForumLink)" />
-        <ModVersion Value="$(Version)" />
-        <GameVersion Value="$(GameVersion)" />
-        <ChangeLog />
-      </PublishContent>
-      <PublishContent>$(PublishContent)@(ModTag->'&lt;Tag Value="%(Identity)" /&gt;','%0a%0d')</PublishContent>
-      <PublishContent>$(PublishContent)@(Screenshots->'&lt;Screenshot Value="%(Identity)" /&gt;','%0a%0d')</PublishContent>
-      <PublishContent>$(PublishContent)@(Dependency->'&lt;Dependency Id="%(ModId)" ModVersion="%(Version)" DisplayName="%(DisplayName)"/&gt;','%0a%0d')</PublishContent>
-    </PropertyGroup>
-    <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$(PublishContent)" Query="//Publish" />
-
-    <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/longDescription.md)))" Query="//LongDescription" />
-    <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)changelog.md)))" Query="//ChangeLog" />
-  </Target>
 
   <Target Name="EUIS Build" BeforeTargets="DeployWIP" AfterTargets="RunModPostProcessor">
     <Message Importance="high" Text="EUIS Build!" />
