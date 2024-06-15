@@ -56,5 +56,5 @@ The most up to date information about installation and known issues and bugs is 
   <Screenshot Value="Screenshots\02_settings.jpg" />
   <Screenshot Value="Screenshots\03_GH_integration.jpg" />
   <Screenshot Value="Screenshots\04_qualifiers.jpg" />
-  <Dependency Id="74151" ModVersion="0.1.1.2" DisplayName="Extra UI Screens" />
+  <Dependency Id="74151" ModVersion="" DisplayName="Extra UI Screens" />
 </Publish>

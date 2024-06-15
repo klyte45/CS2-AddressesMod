@@ -40,7 +40,6 @@
     <Screenshots Include="Screenshots/*.jpg" />
     <Dependency Include="EUIS">
       <ModId>74151</ModId>
-      <Version>0.1.1.2</Version>
       <DisplayName>Extra UI Screens</DisplayName>
     </Dependency>
   </ItemGroup>
