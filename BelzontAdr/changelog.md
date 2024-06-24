@@ -1,4 +1,7 @@
-# v0.1.2r1 (06-APR-24)
+# v0.1.2r2 (24-APR-24)
+- Economy 2.0 recompilation
+
+**Previously:  v0.1.2r1 (06-APR-24)**
 - Fixing UI error display behavior
 - New random name generation method, avoiding all new streets having same name bug
 
