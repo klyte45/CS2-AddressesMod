@@ -1,5 +1,4 @@
-﻿using Belzont.Utils;
-using Colossal.Serialization.Entities;
+﻿using Colossal.Serialization.Entities;
 using System;
 using Unity.Entities;
 
@@ -13,7 +12,9 @@ namespace BelzontAdr
 
         public readonly ushort SeedIdentifier => m_seedIdentifier;
 
-        public ADRRandomizationData()
+        public ADRRandomizationData() { }
+
+        public void Redraw()
         {
             m_seedIdentifier = (ushort)AdrNamesetSystem.SeedGenerator.NextUInt(ushort.MinValue, ushort.MaxValue);
         }

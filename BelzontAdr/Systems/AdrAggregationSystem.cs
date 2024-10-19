@@ -1,4 +1,4 @@
-﻿#if DEBUG && ADR_AGGSYS
+﻿#if true || DEBUG && ADR_AGGSYS
 using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Collections;
@@ -365,7 +365,9 @@ namespace BelzontAdr
                     AggregateNetData aggregateNetData = m_PrefabAggregateData[aggregateType];
                     Entity entity = m_CommandBuffer.CreateEntity(aggregateNetData.m_Archetype);
                     m_CommandBuffer.SetComponent(entity, new PrefabRef(aggregateType));
-                    m_CommandBuffer.AddComponent(entity, new ADRRandomizationData());
+                    var data = new ADRRandomizationData();
+                    data.Redraw();
+                    m_CommandBuffer.AddComponent(entity, data);
                     DynamicBuffer<AggregateElement> dynamicBuffer = m_CommandBuffer.SetBuffer<AggregateElement>(entity);
                     if (flag)
                     {

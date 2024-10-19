@@ -40,7 +40,7 @@ This mod may cause issues in the game due their early stage of development. This
 The most up to date information about installation and known issues and bugs is at the forum topíc.</LongDescription>
   <Thumbnail Value="Properties/Thumbnail.png" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/addresses-names-mod-for-cs2.1651551/" />
-  <ModVersion Value="0.1.2.2" />
+  <ModVersion Value="0.1.2.3" />
   <GameVersion Value="1.1.*" />
   <ChangeLog># v0.1.2r2 (24-APR-24)
 - Economy 2.0 recompilation

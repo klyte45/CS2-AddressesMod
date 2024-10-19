@@ -33,7 +33,7 @@ namespace BelzontAdr
 
         private AdrMainSystem mainSystem;
         private EntityQuery m_UnsetRandomQuery;
-        private static Unity.Mathematics.Random seedGenerator = new();
+        private static Unity.Mathematics.Random seedGenerator = Unity.Mathematics.Random.CreateFromIndex(0xf4a54);
         internal static ref Unity.Mathematics.Random SeedGenerator => ref seedGenerator;
 
         #region UI Bindings
@@ -102,7 +102,9 @@ namespace BelzontAdr
                 if (AddressesCs2Mod.TraceMode) LogUtils.DoTraceLog($"Running NamesetSystem OnUpdate for {nameLessList.Length} entities");
                 for (int i = 0; i < nameLessList.Length; i++)
                 {
-                    EntityManager.AddComponentData(nameLessList[i], new ADRRandomizationData());
+                    var data = new ADRRandomizationData();
+                    data.Redraw();
+                    EntityManager.AddComponentData(nameLessList[i], data);
                     if (!EntityManager.HasComponent<BatchesUpdated>(nameLessList[i])) EntityManager.AddComponent<BatchesUpdated>(nameLessList[i]);
                     if (!EntityManager.HasComponent<Updated>(nameLessList[i])) EntityManager.AddComponent<Updated>(nameLessList[i]);
                 }

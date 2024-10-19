@@ -7,6 +7,11 @@
     <LangVersion>10.0</LangVersion>
     <DebugType Condition="'$(Configuration)'=='Release'">None</DebugType>
     <DebugSymbols Condition="'$(Configuration)'=='Release'">False</DebugSymbols>
+    <DebugSymbols Condition="'$(Configuration)'=='Debug'">True</DebugSymbols>
+    <DebugType Condition="'$(Configuration)'=='Debug'">embedded</DebugType>
+    <Bursted Condition="'$(Configuration)'=='Release'">true</Bursted>
+    <Bursted Condition="'$(Configuration)'=='Debug'">true</Bursted>
+    <DebuggerMode Condition="'$(Configuration)'=='Debug'">true</DebuggerMode>
     <!--The folder where Cities2.exe is located. Set it only if the game is not installed in the default location, otherwise keep it empty-->
     <CustomInstallationPath></CustomInstallationPath>
 
@@ -25,12 +30,13 @@
   <!--Mod data-->
   <PropertyGroup>
     <ModId>74182</ModId>
-    <Version>0.1.2.2</Version>
+    <Version>0.1.2.3</Version>
     <GameVersion>1.1.*</GameVersion>
     <ThumbnailPath>Properties/Thumbnail.png</ThumbnailPath>
     <DisplayName>Addresses &amp; Names Mod</DisplayName>
     <ShortDescription>Extends name generation systems.</ShortDescription>
     <ForumLink>https://forum.paradoxplaza.com/forum/threads/addresses-names-mod-for-cs2.1651551/</ForumLink>
+    <GitHubLink>https://github.com/klyte45/CS2-AddressesMod </GitHubLink>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -43,16 +49,7 @@
       <DisplayName>Extra UI Screens</DisplayName>
     </Dependency>
   </ItemGroup>
-
-  <ItemGroup>
-    <AssemblyAttribute Include="Belzont.AssemblyUtility.KlyteModDescriptionAttribute">
-      <_Parameter1>$(ModId)</_Parameter1>
-      <_Parameter2>$(DisplayName)</_Parameter2>
-      <_Parameter3>$(ShortDescription)</_Parameter3>
-      <_Parameter4>$(ForumLink)</_Parameter4>
-    </AssemblyAttribute>
-  </ItemGroup>
-
+  
   <Target Name="EUIS Build" BeforeTargets="DeployWIP" AfterTargets="RunModPostProcessor">
     <Message Importance="high" Text="EUIS Build!" />
     <MSBuild Projects="../ADR_EUIS/ADR_EUIS.csproj" Targets="Build" BuildInParallel="false" />
@@ -146,6 +143,14 @@
     </Reference>
     <Reference Include="Colossal.Collections">
       <HintPath>$(K45_CS2_ALLROOT)\_Managed DLLs\Colossal.Collections.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Colossal.PSI.Common">
+      <HintPath>$(K45_CS2_ALLROOT)\_Managed DLLs\Colossal.PSI.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(K45_CS2_ALLROOT)\_Managed DLLs\UnityEngine.ImageConversionModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

@@ -424,6 +424,12 @@ namespace BelzontAdr
                 }
             }
 
+            if (data.SeedIdentifier == 0)
+            {
+                data.Redraw();
+                entityManager.SetComponentData(entity, data);
+            }
+
             return data;
         }
 

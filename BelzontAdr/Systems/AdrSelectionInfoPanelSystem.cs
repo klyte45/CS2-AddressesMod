@@ -167,6 +167,7 @@ namespace BelzontAdr
             if (EntityManager.HasComponent<ADRRandomizationData>(target))
             {
                 var data = new ADRRandomizationData();
+                data.Redraw();
                 EntityManager.SetComponentData(target, data);
                 EntityManager.AddComponent<Updated>(target);
                 return true;

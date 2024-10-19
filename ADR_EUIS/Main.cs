@@ -1,5 +1,5 @@
 ﻿#if !RELEASE
-//#define LOCAL
+#define LOCAL
 #endif
 using BelzontAdr;
 using K45EUIS_Ext;
