@@ -14,13 +14,16 @@ namespace BelzontAdr
         internal readonly Guid Id;
         public string Name;
         public ImmutableList<string> Values { get; set; }
+        public ImmutableList<string> ValuesAlternative { get; set; }
         internal Guid Checksum { get; private set; }
         public string IdString => Id.ToString();
 
         public AdrNameFile(string name, IEnumerable<string> values)
         {
             Name = name;
-            Values = new ImmutableList<string>(values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new());
+            var rawList = values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).Select(x => x.Split(";"));
+            Values = new ImmutableList<string>(rawList?.Select(x => x[0].Trim()).ToList() ?? new());
+            ValuesAlternative = new ImmutableList<string>(rawList?.Select(x => (x.Length > 1 ? x[1] : x[0]).Trim()).ToList() ?? new());
             RecalculateChecksum();
             Id = GuidUtils.Create(Checksum, name);
         }
@@ -28,11 +31,9 @@ namespace BelzontAdr
         {
             Checksum = GuidUtils.Create(default, Values.SelectMany(x => Encoding.UTF8.GetBytes(x)).ToArray());
         }
-        private AdrNameFile(Guid id, string name, IEnumerable<string> values)
+        private AdrNameFile(Guid id, string name, IEnumerable<string> values) : this(name, values)
         {
             Id = id;
-            Name = name;
-            Values = new ImmutableList<string>(values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToList() ?? new());
             RecalculateChecksum();
         }
         public static AdrNameFile FromXML(AdrNameFileXML xml)
@@ -45,7 +46,7 @@ namespace BelzontAdr
             {
                 Id = Id,
                 Name = Name,
-                Values = Values.ToList()
+                Values = Values.Select((x, i) => ValuesAlternative[i] == x ? x : $"{x};{ValuesAlternative[i]}").ToList()
             };
         }
 

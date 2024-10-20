@@ -34,6 +34,9 @@ namespace BelzontAdr
         public void SetupCallBinder(Action<string, Delegate> doBindLink)
         {
             doBindLink("main.getCurrentCitywideSettings", () => CurrentCitySettings);
+            doBindLink("main.setMaxSurnames", (int x) => { CurrentCitySettings.MaximumGeneratedSurnames = x; NotifyChanges(); return CurrentCitySettings.MaximumGeneratedSurnames; });
+            doBindLink("main.setMaxGivenNames", (int x) => { CurrentCitySettings.MaximumGeneratedGivenNames = x; NotifyChanges(); return CurrentCitySettings.MaximumGeneratedGivenNames; });
+            doBindLink("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.SurnameAtFirst = x; NotifyChanges(); });
             doBindLink("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.SurnameAtFirst = x; NotifyChanges(); });
             doBindLink("main.setCitizenMaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenMaleNameOverridesStr = x; NotifyChanges(); });
             doBindLink("main.setCitizenFemaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenFemaleNameOverridesStr = x; NotifyChanges(); });

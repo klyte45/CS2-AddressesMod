@@ -6,17 +6,17 @@ namespace BelzontAdr
 {
     public struct ADRRandomizationData : IComponentData, IQueryTypeParameter, ISerializable
     {
-        private ushort m_seedIdentifier = 0;
+        private uint m_seedIdentifier = 0;
 
-        const uint CURRENT_VERSION = 0;
+        const uint CURRENT_VERSION = 1;
 
-        public readonly ushort SeedIdentifier => m_seedIdentifier;
+        public readonly uint SeedIdentifier => m_seedIdentifier;
 
         public ADRRandomizationData() { }
 
         public void Redraw()
         {
-            m_seedIdentifier = (ushort)AdrNamesetSystem.SeedGenerator.NextUInt(ushort.MinValue, ushort.MaxValue);
+            m_seedIdentifier = AdrNamesetSystem.SeedGenerator.NextUInt();
         }
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
@@ -30,9 +30,17 @@ namespace BelzontAdr
             reader.Read(out uint version);
             if (version > CURRENT_VERSION)
             {
-                throw new Exception("Invalid version of ADRDistrictData!");
+                throw new Exception($"Invalid version of {GetType()}!");
             }
-            reader.Read(out m_seedIdentifier);
+            if (version == 0)
+            {
+                reader.Read(out ushort identifier);
+                m_seedIdentifier = identifier;
+            }
+            else
+            {
+                reader.Read(out m_seedIdentifier);
+            }
         }
 
         internal void AddDelta(int delta)

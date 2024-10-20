@@ -42,16 +42,10 @@ The most up to date information about installation and known issues and bugs is 
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/addresses-names-mod-for-cs2.1651551/" />
   <ModVersion Value="0.1.2.3" />
   <GameVersion Value="1.1.*" />
-  <ChangeLog># v0.1.2r2 (24-APR-24)
-- Economy 2.0 recompilation
-
-**Previously:  v0.1.2r1 (06-APR-24)**
-- Fixing UI error display behavior
-- New random name generation method, avoiding all new streets having same name bug
-
-**Previously:  v0.1.2r0 (25-MAR-24)**
-- Added support to configure seeds values for roads and districts in the Editor
-- Added limited support to edit names of any clickable item in the Editor</ChangeLog>
+  <ChangeLog># v0.1.2r3 (23-OCT-24)
+- Support to gendered surnames: at surnames files, write the female and male variants in the same line, separated by semicolon ";" (female first!)
+- 1.1.9 fixes
+- Fixing issue with randomizer always returning 0 on loaded saves that doesn't had the mod when saved - causing all roads to have the same name.</ChangeLog>
   <Tag Value="Code Mod" />
   <Screenshot Value="Screenshots\00_0mapEditor.jpg" />
   <Screenshot Value="Screenshots\00_namesets_manager_scr.jpg" />

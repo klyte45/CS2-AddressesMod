@@ -29,23 +29,29 @@ namespace BelzontAdr
             entityManager = world.EntityManager;
             m_EndFrameBarrier = world.GetOrCreateSystemManaged<EndFrameBarrier>();
 
-            var GetCitizenName = typeof(NameSystem).GetMethod("GetCitizenName", RedirectorUtils.allFlags);
-            AddRedirect(GetCitizenName, GetType().GetMethod("GetCitizenName", RedirectorUtils.allFlags));
+            var getCitizenName = typeof(NameSystem).GetMethod("GetCitizenName", RedirectorUtils.allFlags);
+            AddRedirect(getCitizenName, GetType().GetMethod(nameof(GetCitizenName), RedirectorUtils.allFlags));
 
-            var GetName = typeof(NameSystem).GetMethod("GetName", RedirectorUtils.allFlags);
-            AddRedirect(GetName, GetType().GetMethod("GetName", RedirectorUtils.allFlags));
+            var getName = typeof(NameSystem).GetMethod("GetName", RedirectorUtils.allFlags);
+            AddRedirect(getName, GetType().GetMethod(nameof(GetName), RedirectorUtils.allFlags));
 
-            var GetRenderedLabelName = typeof(NameSystem).GetMethod("GetRenderedLabelName", RedirectorUtils.allFlags);
-            AddRedirect(GetRenderedLabelName, GetType().GetMethod("GetRenderedLabelName", RedirectorUtils.allFlags));
+            var getRenderedLabelName = typeof(NameSystem).GetMethod("GetRenderedLabelName", RedirectorUtils.allFlags);
+            AddRedirect(getRenderedLabelName, GetType().GetMethod(nameof(GetRenderedLabelName), RedirectorUtils.allFlags));
 
-            var GetSpawnableBuildingName = typeof(NameSystem).GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags);
-            AddRedirect(GetSpawnableBuildingName, GetType().GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags));
+            var getSpawnableBuildingName = typeof(NameSystem).GetMethod("GetSpawnableBuildingName", RedirectorUtils.allFlags);
+            AddRedirect(getSpawnableBuildingName, GetType().GetMethod(nameof(GetSpawnableBuildingName), RedirectorUtils.allFlags));
 
-            var GetMarkerTransportStopName = typeof(NameSystem).GetMethod("GetMarkerTransportStopName", RedirectorUtils.allFlags);
-            AddRedirect(GetMarkerTransportStopName, GetType().GetMethod("GetMarkerTransportStopName", RedirectorUtils.allFlags));
+            var getMarkerTransportStopName = typeof(NameSystem).GetMethod("GetMarkerTransportStopName", RedirectorUtils.allFlags);
+            AddRedirect(getMarkerTransportStopName, GetType().GetMethod(nameof(GetMarkerTransportStopName), RedirectorUtils.allFlags));
 
-            var GetStaticTransportStopName = typeof(NameSystem).GetMethod("GetStaticTransportStopName", RedirectorUtils.allFlags);
-            AddRedirect(GetStaticTransportStopName, GetType().GetMethod("GetStaticTransportStopName", RedirectorUtils.allFlags));
+            var getStaticTransportStopName = typeof(NameSystem).GetMethod("GetStaticTransportStopName", RedirectorUtils.allFlags);
+            AddRedirect(getStaticTransportStopName, GetType().GetMethod(nameof(GetStaticTransportStopName), RedirectorUtils.allFlags));
+
+            var getFamilyName = typeof(NameSystem).GetMethod("GetFamilyName", RedirectorUtils.allFlags);
+            AddRedirect(getFamilyName, GetType().GetMethod(nameof(GetFamilyName), RedirectorUtils.allFlags));
+
+            var getResidentName = typeof(NameSystem).GetMethod("GetResidentName", RedirectorUtils.allFlags);
+            AddRedirect(getResidentName, GetType().GetMethod(nameof(GetResidentName), RedirectorUtils.allFlags));
         }
         private static PrefabSystem prefabSystem;
         private static EntityManager entityManager;
@@ -181,8 +187,17 @@ namespace BelzontAdr
             if (entityManager.HasComponent<Household>(entity))
             {
                 if (!adrMainSystem.TryGetSurnameList(out var surnames)) return true;
-
-                __result = NameSystem.Name.FormattedName("K45::ADR.main[localesFmt.household]", "surname", GetFromList(surnames, entity));
+                DynamicBuffer<HouseholdCitizen> buffer = entityManager.GetBuffer<HouseholdCitizen>(entity, false);
+                var hasMale = false;
+                for (int i = 0; i < buffer.Length; i++)
+                {
+                    if (entityManager.TryGetComponent((Entity)buffer[i], out Citizen citizen) && (citizen.m_State & CitizenFlags.Male) != CitizenFlags.None)
+                    {
+                        hasMale = true;
+                        break;
+                    }
+                }
+                __result = NameSystem.Name.FormattedName("K45::ADR.main[localesFmt.household]", "surname", GenerateSurname(hasMale, surnames, entity));
                 return false;
             }
             if (entityManager.HasComponent<HouseholdPet>(entity))
@@ -372,7 +387,7 @@ namespace BelzontAdr
 
             format = adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData, fullBridge).FormatPattern;
 
-            name = GetFromList(roadsNamesList, entity, true);
+            name = GetFromList(roadsNamesList, entity, allowNull: true);
             return false;
         }
 
@@ -384,13 +399,27 @@ namespace BelzontAdr
 
             format = "{name}";// adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData).FormatPattern;
 
-            name = GetFromList(districtNamesList, entity, true);
+            name = GetFromList(districtNamesList, entity, allowNull: true);
             return false;
         }
 
-        private static bool GetCitizenName(ref Name __result, ref Entity entity, ref Entity prefab)
+        private static bool GetCitizenName(ref Name __result, ref Entity entity)
         {
-            bool male = entityManager.TryGetComponent(entity, out Citizen citizen) && (citizen.m_State & CitizenFlags.Male) != CitizenFlags.None;
+            var isCitizen = entityManager.TryGetComponent(entity, out Citizen citizen);
+            if (!isCitizen) return true;
+            return CommonGetCitizenName(ref __result, entity, citizen);
+        }
+
+        private static bool GetResidentName(ref Name __result, Entity entity)
+        {
+            return !entityManager.TryGetComponent(entity, out Game.Creatures.Resident resident)
+                || !entityManager.TryGetComponent(resident.m_Citizen, out Citizen citizen)
+                || CommonGetCitizenName(ref __result, entity, citizen);
+        }
+
+        private static bool CommonGetCitizenName(ref Name __result, Entity entity, Citizen citizen)
+        {
+            bool male = (citizen.m_State & CitizenFlags.Male) != CitizenFlags.None;
             var hasListForNames = adrMainSystem.TryGetNameList(male, out var listForNames);
             var hasListForSurnames = adrMainSystem.TryGetSurnameList(out var listForSurnames);
             if (!hasListForNames && !hasListForSurnames)
@@ -400,19 +429,22 @@ namespace BelzontAdr
             string name, surname;
             if (hasListForNames)
             {
-                name = GetFromList(listForNames, entity);
+                name = GetFromList(listForNames, entity, namesToExtract: adrMainSystem.CurrentCitySettings.MaximumGeneratedGivenNames);
             }
             else
             {
                 GameManager.instance.localizationManager.activeDictionary.TryGetValue(GetId(entity, true), out name);
             }
             HouseholdMember householdMemberData = entityManager.GetComponentData<HouseholdMember>(entity);
-            surname = hasListForSurnames
-                ? GetFromList(listForSurnames, householdMemberData.m_Household)
-                : GameManager.instance.localizationManager.activeDictionary.TryGetValue(GetGenderedLastNameId(householdMemberData.m_Household, male), out surname) ? surname : "???";
+            surname = GenerateSurname(male, listForSurnames, householdMemberData.m_Household);
             __result = Name.CustomName(adrMainSystem.DoNameFormat(name, surname));
             return false;
         }
+
+        private static string GenerateSurname(bool male, AdrNameFile listForSurnames, Entity household)
+            => listForSurnames != null ? GetFromList(listForSurnames, household, namesToExtract: adrMainSystem.CurrentCitySettings.MaximumGeneratedSurnames, isAlternative: male)
+                            : GameManager.instance.localizationManager.activeDictionary.TryGetValue(GetGenderedLastNameId(household, male), out var surname) ? surname
+                            : "???";
 
         private static ADRRandomizationData? GetAdrLocData(Entity entity, bool allowNull)
         {
@@ -433,14 +465,32 @@ namespace BelzontAdr
             return data;
         }
 
-        private static string GetFromList(AdrNameFile namesFile, Entity entityRef, bool allowNull = false)
+        private static string GetFromList(AdrNameFile namesFile, Entity entityRef, int namesToExtract = 1, bool isAlternative = false, bool allowNull = false)
         {
             var adrLoc = GetAdrLocData(entityRef, allowNull);
             if (adrLoc == null) return null;
             var adrLocEnsured = adrLoc ?? throw new System.Exception("IMPUSSIBRU");
-            string name = namesFile.Values[adrLocEnsured.SeedIdentifier % namesFile.Values.Count];
-            if (BasicIMod.VerboseMode) LogUtils.DoVerboseLog($"Generated name for Entity {entityRef}: '{name}' ({adrLocEnsured.SeedIdentifier})");
-            return name;
+            var name = new HashSet<string>();
+            var currentValue = adrLocEnsured.SeedIdentifier;
+            var refList = isAlternative ? namesFile.ValuesAlternative : namesFile.Values;
+
+            var countNames = (uint)refList.Count;
+            for (int i = 0; i < namesToExtract; i++)
+            {
+                var idx = currentValue % (countNames + 1);
+                if (idx < countNames || currentValue == 0)
+                {
+                    name.Add(refList[(int)(currentValue % countNames)]);
+                }
+                else if (i == 0)
+                {
+                    i--;
+                }
+                currentValue /= countNames + 1;
+            }
+            var result = string.Join(" ", name);
+            if (BasicIMod.VerboseMode) LogUtils.DoVerboseLog($"Generated name for Entity {entityRef}: '{result}' ({adrLocEnsured.SeedIdentifier} x{namesToExtract} - ALT = {isAlternative})");
+            return result;
         }
 
         private static string GetGenderedLastNameId(Entity household, bool male)
@@ -498,5 +548,30 @@ namespace BelzontAdr
             }
             return localization.m_LocalizationID;
         }
+        private static bool GetFamilyName(ref NameSystem __instance, ref Entity household, ref Name __result)
+        {
+            if (!adrMainSystem.TryGetSurnameList(out var listForSurnames))
+            {
+                return true;
+            }
+            if (__instance.TryGetCustomName(household, out var customName))
+            {
+                __result = Name.CustomName(customName);
+                return false;
+            }
+            DynamicBuffer<HouseholdCitizen> buffer = entityManager.GetBuffer<HouseholdCitizen>(household, false);
+            var hasMale = false;
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                if (entityManager.TryGetComponent((Entity)buffer[i], out Citizen citizen) && (citizen.m_State & CitizenFlags.Male) != CitizenFlags.None)
+                {
+                    hasMale = true;
+                    break;
+                }
+            }
+            __result = Name.CustomName(GenerateSurname(hasMale, listForSurnames, household));
+            return false;
+        }
     }
+
 }

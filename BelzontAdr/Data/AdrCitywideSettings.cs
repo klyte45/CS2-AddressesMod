@@ -11,6 +11,9 @@ namespace BelzontAdr
     [XmlRoot("AdrCitywideSettings")]
     public class AdrCitywideSettings
     {
+        private int maximumGeneratedGivenNames = 1;
+        private int maximumGeneratedSurnames = 1;
+
         internal Guid CitizenMaleNameOverrides { get; private set; }
         internal Guid CitizenFemaleNameOverrides { get; private set; }
         internal Guid CitizenSurnameOverrides { get; private set; }
@@ -23,6 +26,11 @@ namespace BelzontAdr
         public bool RoadNameAsNameCargoStation { get; set; }
         [XmlAttribute("SurnameAtFirst")]
         public bool SurnameAtFirst { get; set; }
+        [XmlAttribute("MaximumGeneratedSurnames")]
+        public int MaximumGeneratedSurnames { get => maximumGeneratedSurnames; set => maximumGeneratedSurnames = Math.Clamp(value, 1, 5); }
+
+        [XmlAttribute("MaximumGeneratedGivenNames")]
+        public int MaximumGeneratedGivenNames { get => maximumGeneratedGivenNames; set => maximumGeneratedGivenNames = Math.Clamp(value, 1, 5); }
 
         [XmlAttribute("CitizenMaleNameOverrides")]
         public string CitizenMaleNameOverridesStr { get => CitizenMaleNameOverrides.ToString(); set => CitizenMaleNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
@@ -51,7 +59,6 @@ namespace BelzontAdr
     {
         public AdrRoadPrefixRule FallbackRule { get; set; } = new() { FormatPattern = "{name}" };
         public List<AdrRoadPrefixRule> AdditionalRules { get; set; } = new();
-
         public AdrRoadPrefixRule GetFirstApplicable(RoadData roadData, bool fullBridge) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(roadData, fullBridge)) ?? FallbackRule;
     }
 
