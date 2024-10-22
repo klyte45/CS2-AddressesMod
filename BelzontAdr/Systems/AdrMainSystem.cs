@@ -36,28 +36,28 @@ namespace BelzontAdr
             doBindLink("main.getCurrentCitywideSettings", () => CurrentCitySettings);
             doBindLink("main.setMaxSurnames", (int x) => { CurrentCitySettings.MaximumGeneratedSurnames = x; NotifyChanges(); return CurrentCitySettings.MaximumGeneratedSurnames; });
             doBindLink("main.setMaxGivenNames", (int x) => { CurrentCitySettings.MaximumGeneratedGivenNames = x; NotifyChanges(); return CurrentCitySettings.MaximumGeneratedGivenNames; });
-            doBindLink("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.SurnameAtFirst = x; NotifyChanges(); });
-            doBindLink("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.SurnameAtFirst = x; NotifyChanges(); });
+            doBindLink("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.surnameAtFirst = x; NotifyChanges(); });
+            doBindLink("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.surnameAtFirst = x; NotifyChanges(); });
             doBindLink("main.setCitizenMaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenMaleNameOverridesStr = x; NotifyChanges(); });
             doBindLink("main.setCitizenFemaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenFemaleNameOverridesStr = x; NotifyChanges(); });
             doBindLink("main.setCitizenSurnameOverridesStr", (string x) => { CurrentCitySettings.CitizenSurnameOverridesStr = x; NotifyChanges(); });
             doBindLink("main.setCitizenDogOverridesStr", (string x) => { CurrentCitySettings.CitizenDogOverridesStr = x; NotifyChanges(); });
             doBindLink("main.setDefaultRoadNameOverridesStr", (string x) => { CurrentCitySettings.DefaultRoadNameOverridesStr = x; MarkRoadsDirty(); NotifyChanges(); });
-            doBindLink("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.RoadPrefixSetting = x; MarkRoadsDirty(); NotifyChanges(); });
+            doBindLink("main.setAdrRoadPrefixSetting", (AdrRoadPrefixSetting x) => { CurrentCitySettings.roadPrefixSetting = x; MarkRoadsDirty(); NotifyChanges(); });
             doBindLink("main.setDefaultDistrictNameOverridesStr", (string x) => { CurrentCitySettings.DefaultDistrictNameOverridesStr = x; NotifyChanges(); MarkDistrictsDirty(); districtsSystem.OnDistrictChanged(); });
-            doBindLink("main.setRoadNameAsNameStation", (bool x) => { CurrentCitySettings.RoadNameAsNameStation = x; NotifyChanges(); });
-            doBindLink("main.setRoadNameAsNameCargoStation", (bool x) => { CurrentCitySettings.RoadNameAsNameCargoStation = x; NotifyChanges(); });
-            doBindLink("main.setDistrictNameAsNameStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameStation = x; NotifyChanges(); });
-            doBindLink("main.setDistrictNameAsNameCargoStation", (bool x) => { CurrentCitySettings.DistrictNameAsNameCargoStation = x; NotifyChanges(); });
+            doBindLink("main.setRoadNameAsNameStation", (bool x) => { CurrentCitySettings.roadNameAsNameStation = x; NotifyChanges(); });
+            doBindLink("main.setRoadNameAsNameCargoStation", (bool x) => { CurrentCitySettings.roadNameAsNameCargoStation = x; NotifyChanges(); });
+            doBindLink("main.setDistrictNameAsNameStation", (bool x) => { CurrentCitySettings.districtNameAsNameStation = x; NotifyChanges(); });
+            doBindLink("main.setDistrictNameAsNameCargoStation", (bool x) => { CurrentCitySettings.districtNameAsNameCargoStation = x; NotifyChanges(); });
             doBindLink("main.exploreToRoadPrefixRulesFileDefault", () => RemoteProcess.OpenFolder(DefaultRoadPrefixFilename));
-            doBindLink("main.saveRoadPrefixRulesFileDefault", () => File.WriteAllText(DefaultRoadPrefixFilename, XmlUtils.DefaultXmlSerialize(CurrentCitySettings.RoadPrefixSetting)));
+            doBindLink("main.saveRoadPrefixRulesFileDefault", () => File.WriteAllText(DefaultRoadPrefixFilename, XmlUtils.DefaultXmlSerialize(CurrentCitySettings.roadPrefixSetting)));
             doBindLink("main.loadRoadPrefixRulesFileDefault", () =>
             {
                 if (File.Exists(DefaultRoadPrefixFilename))
                 {
                     try
                     {
-                        CurrentCitySettings.RoadPrefixSetting = XmlUtils.DefaultXmlDeserialize<AdrRoadPrefixSetting>(File.ReadAllText(DefaultRoadPrefixFilename));
+                        CurrentCitySettings.roadPrefixSetting = XmlUtils.DefaultXmlDeserialize<AdrRoadPrefixSetting>(File.ReadAllText(DefaultRoadPrefixFilename));
                         return 1;
                     }
                     catch (Exception e)
@@ -189,7 +189,7 @@ namespace BelzontAdr
 
         internal bool TryGetSurnameList(out AdrNameFile listForSurnames) => namesetSystem.GetForGuid(CurrentCitySettings.CitizenSurnameOverrides, out listForSurnames);
 
-        internal string DoNameFormat(string name, string surname) => CurrentCitySettings.SurnameAtFirst ? $"{surname} {name}" : $"{name} {surname}";
+        internal string DoNameFormat(string name, string surname) => CurrentCitySettings.surnameAtFirst ? $"{surname} {name}" : $"{name} {surname}";
         internal bool TryGetDogsList(out AdrNameFile listForDogs) => namesetSystem.GetForGuid(CurrentCitySettings.CitizenDogOverrides, out listForDogs);
         internal bool TryGetRoadNamesList(Entity district, out AdrNameFile roadsNamesList)
             => (EntityManager.TryGetComponent<ADRDistrictData>(district, out var adrDistrict) && adrDistrict.m_roadsNamesId != Guid.Empty && namesetSystem.GetForGuid(adrDistrict.m_roadsNamesId, out roadsNamesList))
@@ -201,7 +201,7 @@ namespace BelzontAdr
 
         #region Serialization
 
-        public const int CURRENT_VERSION = 0;
+        public const int CURRENT_VERSION = 1;
 
 
         private void Deserialize<TReader>(TReader reader) where TReader : IReader
@@ -209,17 +209,32 @@ namespace BelzontAdr
             reader.Read(out uint version);
             if (version > CURRENT_VERSION)
             {
-                throw new Exception("Invalid version of XTMRouteAutoColorSystem!");
+                throw new Exception($"Invalid version of {GetType()}!");
             }
-            reader.Read(out string autoColorData);
-            try
+            if (version == 0)
             {
-                CurrentCitySettings = XmlUtils.DefaultXmlDeserialize<AdrCitywideSettings>(new string(autoColorData)) ?? new();
+
+#pragma warning disable CS0618 // O tipo ou membro é obsoleto
+#pragma warning disable CS0612 // O tipo ou membro é obsoleto
+                reader.Read(out string autoColorData);
+                try
+                {
+                    var settings = XmlUtils.DefaultXmlDeserialize<AdrCitywideSettingsLegacy>(new string(autoColorData)) ?? new();
+                    currentCitySettings = AdrCitywideSettings.FromLegacy(settings);
+                }
+                catch (Exception e)
+                {
+                    LogUtils.DoWarnLog($"AdrMainSystem: Could not load settings from the City!!!\n{e}");
+                }
+#pragma warning restore CS0612 // O tipo ou membro é obsoleto
+#pragma warning restore CS0618 // O tipo ou membro é obsoleto
             }
-            catch (Exception e)
+            else
             {
-                LogUtils.DoWarnLog($"AdrMainSystem: Could not load settings from the City!!!\n{e}");
+                currentCitySettings = new AdrCitywideSettings();
+                reader.Read(currentCitySettings);
             }
+
         }
 
         private void Serialize<TWriter>(TWriter writer) where TWriter : IWriter

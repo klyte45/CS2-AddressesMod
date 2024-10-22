@@ -110,9 +110,9 @@ namespace BelzontAdr
                 }
             }
         }
-        private readonly Dictionary<Guid, AdrNameFile> CityNamesets = new();
+        private readonly Dictionary<Colossal.Hash128, AdrNameFile> CityNamesets = new();
 
-        internal bool GetForGuid(Guid guid, out AdrNameFile file) => CityNamesets.TryGetValue(guid, out file);
+        internal bool GetForGuid(Colossal.Hash128 guid, out AdrNameFile file) => CityNamesets.TryGetValue(guid, out file);
         private void OnCityNamesetsChanged()
         {
             eventCaller.Invoke("namesets.onCityNamesetsChanged", null);

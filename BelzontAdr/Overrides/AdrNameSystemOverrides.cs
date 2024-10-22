@@ -248,8 +248,8 @@ namespace BelzontAdr
             }
             if (entityManager.TryGetComponent<Building>(entity, out var buildingData))
             {
-                if (((adrMainSystem.CurrentCitySettings.DistrictNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity))
-                    || (adrMainSystem.CurrentCitySettings.DistrictNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
+                if (((adrMainSystem.CurrentCitySettings.districtNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity))
+                    || (adrMainSystem.CurrentCitySettings.districtNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
                     && entityManager.TryGetComponent<CurrentDistrict>(entity, out var currDistrict) && currDistrict.m_District != Entity.Null)
                 {
                     if (!entityManager.TryGetComponent<ADREntityStationRef>(currDistrict.m_District, out var entityStationRef))
@@ -281,8 +281,8 @@ namespace BelzontAdr
                     }
                 }
                 if (
-                    ((adrMainSystem.CurrentCitySettings.RoadNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity))
-                    || (adrMainSystem.CurrentCitySettings.RoadNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
+                    ((adrMainSystem.CurrentCitySettings.roadNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity))
+                    || (adrMainSystem.CurrentCitySettings.roadNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
                     && entityManager.HasComponent<Aggregated>(buildingData.m_RoadEdge))
                 {
                     Entity refAggregate = GetMainReferenceAggregate(entity, buildingData);
@@ -385,7 +385,7 @@ namespace BelzontAdr
                 }
             }
 
-            format = adrMainSystem.CurrentCitySettings.RoadPrefixSetting.GetFirstApplicable(roadData, fullBridge).FormatPattern;
+            format = adrMainSystem.CurrentCitySettings.roadPrefixSetting.GetFirstApplicable(roadData, fullBridge).FormatPattern;
 
             name = GetFromList(roadsNamesList, entity, allowNull: true);
             return false;

@@ -9,10 +9,11 @@ using System.Xml.Serialization;
 namespace BelzontAdr
 {
     [XmlRoot("AdrCitywideSettings")]
-    public class AdrCitywideSettings
+    [Obsolete("Legacy pre-0.2. Now using native serialize.")]
+    public class AdrCitywideSettingsLegacy
     {
-        private int maximumGeneratedGivenNames = 1;
-        private int maximumGeneratedSurnames = 1;
+        internal int maximumGeneratedGivenNames = 1;
+        internal int maximumGeneratedSurnames = 1;
 
         internal Guid CitizenMaleNameOverrides { get; private set; }
         internal Guid CitizenFemaleNameOverrides { get; private set; }
@@ -45,7 +46,7 @@ namespace BelzontAdr
         [XmlAttribute("DefaultDistrictNameOverrides")]
         public string DefaultDistrictNameOverridesStr { get => DefaultDistrictNameOverrides.ToString(); set => DefaultDistrictNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
         [XmlElement("RoadPrefix")]
-        public AdrRoadPrefixSetting RoadPrefixSetting { get; set; } = new AdrRoadPrefixSetting();
+        public AdrRoadPrefixSettingLegacy RoadPrefixSetting { get; set; } = new AdrRoadPrefixSettingLegacy();
         [XmlAttribute("DistrictNameAsNameCargoStation")]
         public bool DistrictNameAsNameCargoStation { get; set; }
         [XmlAttribute("DistrictNameAsNameStation")]
@@ -55,15 +56,17 @@ namespace BelzontAdr
     }
 
     [XmlRoot("RoadPrefixSetting")]
-    public class AdrRoadPrefixSetting
+    [Obsolete("Legacy pre-0.2. Now using native serialize.")]
+    public class AdrRoadPrefixSettingLegacy
     {
-        public AdrRoadPrefixRule FallbackRule { get; set; } = new() { FormatPattern = "{name}" };
-        public List<AdrRoadPrefixRule> AdditionalRules { get; set; } = new();
-        public AdrRoadPrefixRule GetFirstApplicable(RoadData roadData, bool fullBridge) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(roadData, fullBridge)) ?? FallbackRule;
+        public AdrRoadPrefixRuleLegacy FallbackRule { get; set; } = new() { FormatPattern = "{name}" };
+        public List<AdrRoadPrefixRuleLegacy> AdditionalRules { get; set; } = new();
+        public AdrRoadPrefixRuleLegacy GetFirstApplicable(RoadData roadData, bool fullBridge) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(roadData, fullBridge)) ?? FallbackRule;
     }
 
     [XmlRoot("RoadPrefixRule")]
-    public class AdrRoadPrefixRule
+    [Obsolete("Legacy pre-0.2. Now using native serialize.")]
+    public class AdrRoadPrefixRuleLegacy
     {
         internal float MinSpeed { get; set; }
         internal float MaxSpeed { get; set; }
