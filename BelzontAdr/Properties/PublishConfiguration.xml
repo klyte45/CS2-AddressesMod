@@ -25,6 +25,7 @@ You can find several name files at [Addresses Files repository at GitHub](https:
   - Male cims
   - Female cims
   - Surnames (are last names as default, but may be inverted to follow oriental standard)
+	- To use gendered surnames, in the surname files add the female and male version of the surname separated by a semicolon (;)
   - Dogs (NEW)
   - Roads (Global and by district)
   - Districts
@@ -33,6 +34,8 @@ You can find several name files at [Addresses Files repository at GitHub](https:
   - Very limited options to customization at this moment, might be enhanced later
 - Use district and road names to name your public transport stations!
 
+Now it's possible to setup the mod to generate up to 5 given names and up to 5 surnames! Notice that very large names might be truncated by game limitations... This feature may receive a tunning in future releases to be more configurable.
+
 ## Experimental mod warning!
 This mod may cause issues in the game due their early stage of development. This may be updated in the future until the official platform PDXMods get done and released
 
@@ -40,13 +43,15 @@ This mod may cause issues in the game due their early stage of development. This
 The most up to date information about installation and known issues and bugs is at the forum topíc.</LongDescription>
   <Thumbnail Value="Properties/Thumbnail.png" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/addresses-names-mod-for-cs2.1651551/" />
-  <ModVersion Value="0.1.2.3" />
+  <ModVersion Value="0.1.2.4" />
   <GameVersion Value="1.1.*" />
-  <ChangeLog># v0.1.2r3 (23-OCT-24)
+  <ChangeLog># v0.1.2r4 (24-OCT-24)
 - Support to gendered surnames: at surnames files, write the female and male variants in the same line, separated by semicolon ";" (female first!)
-- 1.1.9 fixes
+- Now names can be generated with 1~5 given names and surnames (savegamewide setting)
+- 1.1.11 fixes
 - Fixing issue with randomizer always returning 0 on loaded saves that doesn't had the mod when saved - causing all roads to have the same name.</ChangeLog>
   <Tag Value="Code Mod" />
+  <Screenshot Value="Screenshots\00_0a_20241023_composeSurname.jpg" />
   <Screenshot Value="Screenshots\00_0mapEditor.jpg" />
   <Screenshot Value="Screenshots\00_namesets_manager_scr.jpg" />
   <Screenshot Value="Screenshots\01_editor.jpg" />

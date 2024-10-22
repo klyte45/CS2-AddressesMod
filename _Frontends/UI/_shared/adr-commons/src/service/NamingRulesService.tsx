@@ -47,6 +47,8 @@ export type AdrCitywideSettings = {
     RoadNameAsNameCargoStation: boolean
     DistrictNameAsNameStation: boolean
     DistrictNameAsNameCargoStation: boolean
+    MaximumGeneratedSurnames: number
+    MaximumGeneratedGivenNames: number
 }
 
 export class NamingRulesService {
@@ -67,6 +69,10 @@ export class NamingRulesService {
     static async setRoadNameAsNameCargoStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setRoadNameAsNameCargoStation", x); }
     static async setDistrictNameAsNameStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setDistrictNameAsNameStation", x); }
     static async setDistrictNameAsNameCargoStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setDistrictNameAsNameCargoStation", x); }
+
+    static async setMaxSurnames(x: number): Promise<string> { return await engine.call("k45::adr.main.setMaxSurnames", x); }
+
+    static async setMaxGivenNames(x: number): Promise<string> { return await engine.call("k45::adr.main.setMaxGivenNames", x); }
 
 
     static async exploreToRoadPrefixRulesFileDefault(): Promise<void> { await engine.call("k45::adr.main.exploreToRoadPrefixRulesFileDefault"); }
