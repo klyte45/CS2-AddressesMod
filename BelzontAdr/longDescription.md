@@ -21,6 +21,7 @@ You can find several name files at [Addresses Files repository at GitHub](https:
   - Male cims
   - Female cims
   - Surnames (are last names as default, but may be inverted to follow oriental standard)
+	- To use gendered surnames, in the surname files add the female and male version of the surname separated by a semicolon (;)
   - Dogs (NEW)
   - Roads (Global and by district)
   - Districts
@@ -28,6 +29,8 @@ You can find several name files at [Addresses Files repository at GitHub](https:
   - Use ingame UI to create several rules to differentiate streets, avenues, highways, etc by their characteristics
   - Very limited options to customization at this moment, might be enhanced later
 - Use district and road names to name your public transport stations!
+
+Now it's possible to setup the mod to generate up to 5 given names and up to 5 surnames! Notice that very large names might be truncated by game limitations... This feature may receive a tunning in future releases to be more configurable.
 
 ## Experimental mod warning!
 This mod may cause issues in the game due their early stage of development. This may be updated in the future until the official platform PDXMods get done and released

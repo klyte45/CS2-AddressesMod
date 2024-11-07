@@ -1,6 +1,6 @@
 import { DistrictListItem, DistrictRelativeService } from "@klyte45/adr-commons";
 import { AdrCitywideSettings, NamingRulesService, SimpleNameEntry } from "@klyte45/adr-commons";
-import { Cs2Checkbox, Cs2FormLine, Cs2Select, Cs2SideTabs, DefaultPanelScreen, nameToString } from "@klyte45/euis-components";
+import { Cs2Checkbox, Cs2FormLine, Cs2Select, Cs2SideTabs, DefaultPanelScreen, Input, nameToString } from "@klyte45/euis-components";
 import { Component } from "react";
 import { translate } from "#utility/translate";
 import { NamesetService } from "@klyte45/adr-commons";
@@ -102,6 +102,8 @@ export class OverrideSettingsCmp extends Component<{}, State> {
         <Cs2FormLine title={translate("overrideSettings.firstNameAtStart")}>
           <Cs2Checkbox isChecked={() => this.state.currentSettings?.SurnameAtFirst} onValueToggle={(x) => NamingRulesService.setSurnameAtFirst(x)} />
         </Cs2FormLine>
+        <Input title={translate("overrideSettings.maximumGeneratedGivenNames")} getValue={() => this.state.currentSettings.MaximumGeneratedGivenNames.toFixed(0)} maxLength={1} isValid={(x) => parseInt(x) >= 1 && parseInt(x) <= 5} onValueChanged={async (x) => NamingRulesService.setMaxGivenNames(parseInt(x))} />
+        <Input title={translate("overrideSettings.maximumGeneratedSurnames")} getValue={() => this.state.currentSettings.MaximumGeneratedSurnames.toFixed(0)} maxLength={1} isValid={(x) => parseInt(x) >= 1 && parseInt(x) <= 5} onValueChanged={async (x) => NamingRulesService.setMaxSurnames(parseInt(x))} />
         <Cs2FormLine title={translate("overrideSettings.dogsFile")}>
           <Cs2Select
             options={Object.values(this.state.simpleFiles)}
