@@ -22,10 +22,11 @@ namespace BelzontAdr
     public partial class AdrMainSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrMainSystem>
     {
         private Action<string, object[]> m_eventCaller;
-        private AdrCitywideSettings currentCitySettings = new();
         private AdrDistrictsSystem districtsSystem;
         private Queue<Action> actionsToGoOnUpdate;
         private AdrNamesetSystem namesetSystem;
+
+        public AdrCitywideSettings CurrentCitySettings { get; private set; } = new();
 
         private static string DefaultRoadPrefixFilename = Path.Combine(AddressesCs2Mod.ModSettingsRootFolder, "DefaultRoadPrefixRules.xml");
 
@@ -36,7 +37,6 @@ namespace BelzontAdr
             doBindLink("main.getCurrentCitywideSettings", () => CurrentCitySettings);
             doBindLink("main.setMaxSurnames", (int x) => { CurrentCitySettings.MaximumGeneratedSurnames = x; NotifyChanges(); return CurrentCitySettings.MaximumGeneratedSurnames; });
             doBindLink("main.setMaxGivenNames", (int x) => { CurrentCitySettings.MaximumGeneratedGivenNames = x; NotifyChanges(); return CurrentCitySettings.MaximumGeneratedGivenNames; });
-            doBindLink("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.surnameAtFirst = x; NotifyChanges(); });
             doBindLink("main.setSurnameAtFirst", (bool x) => { CurrentCitySettings.surnameAtFirst = x; NotifyChanges(); });
             doBindLink("main.setCitizenMaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenMaleNameOverridesStr = x; NotifyChanges(); });
             doBindLink("main.setCitizenFemaleNameOverridesStr", (string x) => { CurrentCitySettings.CitizenFemaleNameOverridesStr = x; NotifyChanges(); });
@@ -147,14 +147,6 @@ namespace BelzontAdr
             }
         }
 
-        public AdrCitywideSettings CurrentCitySettings
-        {
-            get => currentCitySettings; private set
-            {
-                currentCitySettings = value;
-                NotifyChanges();
-            }
-        }
 
         private void NotifyChanges()
         {
@@ -220,7 +212,7 @@ namespace BelzontAdr
                 try
                 {
                     var settings = XmlUtils.DefaultXmlDeserialize<AdrCitywideSettingsLegacy>(new string(autoColorData)) ?? new();
-                    currentCitySettings = AdrCitywideSettings.FromLegacy(settings);
+                    CurrentCitySettings = AdrCitywideSettings.FromLegacy(settings);
                 }
                 catch (Exception e)
                 {
@@ -231,8 +223,8 @@ namespace BelzontAdr
             }
             else
             {
-                currentCitySettings = new AdrCitywideSettings();
-                reader.Read(currentCitySettings);
+                CurrentCitySettings = new AdrCitywideSettings();
+                reader.Read(CurrentCitySettings);
             }
 
         }
@@ -240,7 +232,7 @@ namespace BelzontAdr
         private void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
-            writer.Write(XmlUtils.DefaultXmlSerialize(CurrentCitySettings));
+            writer.Write(CurrentCitySettings);
         }
 
         void IBelzontSerializableSingleton<AdrMainSystem>.Serialize<TWriter>(TWriter writer) => Serialize(writer);

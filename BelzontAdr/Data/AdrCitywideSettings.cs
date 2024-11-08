@@ -5,6 +5,7 @@ using Game.Prefabs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
 
 namespace BelzontAdr
 {
@@ -106,30 +107,21 @@ namespace BelzontAdr
                 roadNameAsNameStation = settings.RoadNameAsNameStation,
                 roadNameAsNameCargoStation = settings.RoadNameAsNameCargoStation,
                 surnameAtFirst = settings.SurnameAtFirst,
-                roadPrefixSetting = AdrRoadPrefixSetting.FromLegacy(settings.RoadPrefixSetting),
+                roadPrefixSetting = settings.RoadPrefixSetting,
                 districtNameAsNameCargoStation = settings.DistrictNameAsNameCargoStation,
                 districtNameAsNameStation = settings.DistrictNameAsNameStation
             };
         }
     }
 
+    [XmlRoot("RoadPrefixSetting")]
     public class AdrRoadPrefixSetting : ISerializable
     {
         private const uint CURRENT_VERSION = 0;
         public AdrRoadPrefixRule FallbackRule { get; set; } = new() { formatPattern = "{name}" };
         public List<AdrRoadPrefixRule> AdditionalRules { get; set; } = new();
         public AdrRoadPrefixRule GetFirstApplicable(RoadData roadData, bool fullBridge) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(roadData, fullBridge)) ?? FallbackRule;
-
-        [Obsolete]
-        internal static AdrRoadPrefixSetting FromLegacy(AdrRoadPrefixSettingLegacy roadPrefixSetting)
-        {
-            return new AdrRoadPrefixSetting
-            {
-                FallbackRule = AdrRoadPrefixRule.FromLegacy(roadPrefixSetting.FallbackRule),
-                AdditionalRules = roadPrefixSetting.AdditionalRules.Select(x => AdrRoadPrefixRule.FromLegacy(x)).ToList()
-            };
-        }
-
+       
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
@@ -181,15 +173,13 @@ namespace BelzontAdr
         internal FullBridgeRequirement fullBridgeRequire;
         internal string formatPattern;
 
-        public float MinSpeedKmh { get => minSpeed * 1.8f; set => minSpeed = value / 1.8f; }
+        [XmlAttribute("MinSpeedKmh")] public float MinSpeedKmh { get => minSpeed * 1.8f; set => minSpeed = value / 1.8f; }
+        [XmlAttribute("MaxSpeedKmh")] public float MaxSpeedKmh { get => maxSpeed * 1.8f; set => maxSpeed = value / 1.8f; }
+        [XmlAttribute("RequiredFlags")] public int RequiredFlagsInt { get => (int)requiredFlags; set => requiredFlags = (RoadFlags)value; }
+        [XmlAttribute("ForbiddenFlags")] public int ForbiddenFlagsInt { get => (int)forbiddenFlags; set => forbiddenFlags = (RoadFlags)value; }
+        [XmlText] public string FormatPattern { get => formatPattern; set => formatPattern = value.Contains("{name}") ? value : formatPattern; }
 
-        public float MaxSpeedKmh { get => maxSpeed * 1.8f; set => maxSpeed = value / 1.8f; }
-
-        public int RequiredFlagsInt { get => (int)requiredFlags; set => requiredFlags = (RoadFlags)value; }
-
-        public int ForbiddenFlagsInt { get => (int)forbiddenFlags; set => forbiddenFlags = (RoadFlags)value; }
-        public string FormatPattern { get => formatPattern; set => formatPattern = value.Contains("{name}") ? value : formatPattern; }
-
+        [XmlAttribute("FullBridge")]
         public int FullBridge
         {
             get => (int)fullBridgeRequire;
@@ -207,26 +197,7 @@ namespace BelzontAdr
             && (requiredFlags & roadData.m_Flags) == requiredFlags
             && (forbiddenFlags & roadData.m_Flags) == 0
             && (fullBridgeRequire == FullBridgeRequirement.Unset || fullBridgeRequire == (fullBridge ? FullBridgeRequirement.True : FullBridgeRequirement.False));
-
-        [Obsolete]
-        internal static AdrRoadPrefixRule FromLegacy(AdrRoadPrefixRuleLegacy fallbackRule)
-        {
-            return new AdrRoadPrefixRule
-            {
-                minSpeed = fallbackRule.MinSpeed,
-                maxSpeed = fallbackRule.MaxSpeed,
-                requiredFlags = fallbackRule.RequiredFlags,
-                forbiddenFlags = fallbackRule.ForbiddenFlags,
-                fullBridgeRequire = fallbackRule.FullBridgeRequire switch
-                {
-                    true => FullBridgeRequirement.True,
-                    false => FullBridgeRequirement.False,
-                    _ => FullBridgeRequirement.Unset
-                },
-                formatPattern = fallbackRule.FormatPattern,
-            };
-        }
-
+          
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);

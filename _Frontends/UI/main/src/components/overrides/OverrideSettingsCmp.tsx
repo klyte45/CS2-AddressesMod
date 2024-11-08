@@ -100,7 +100,7 @@ export class OverrideSettingsCmp extends Component<{}, State> {
           />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.firstNameAtStart")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.SurnameAtFirst} onValueToggle={(x) => NamingRulesService.setSurnameAtFirst(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.surnameAtFirst} onValueToggle={(x) => NamingRulesService.setSurnameAtFirst(x)} />
         </Cs2FormLine>
         <Input title={translate("overrideSettings.maximumGeneratedGivenNames")} getValue={() => this.state.currentSettings.MaximumGeneratedGivenNames.toFixed(0)} maxLength={1} isValid={(x) => parseInt(x) >= 1 && parseInt(x) <= 5} onValueChanged={async (x) => NamingRulesService.setMaxGivenNames(parseInt(x))} />
         <Input title={translate("overrideSettings.maximumGeneratedSurnames")} getValue={() => this.state.currentSettings.MaximumGeneratedSurnames.toFixed(0)} maxLength={1} isValid={(x) => parseInt(x) >= 1 && parseInt(x) <= 5} onValueChanged={async (x) => NamingRulesService.setMaxSurnames(parseInt(x))} />
@@ -127,10 +127,10 @@ export class OverrideSettingsCmp extends Component<{}, State> {
           />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useRoadNameAsStationName")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.roadNameAsNameStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameStation(x)} />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useRoadNameAsCargoStationName")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.RoadNameAsNameCargoStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameCargoStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.roadNameAsNameCargoStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameCargoStation(x)} />
         </Cs2FormLine>
         <h2>{translate("overrideSettings.perDistrictRoadsFile")}</h2>
         <Cs2Select
@@ -165,10 +165,10 @@ export class OverrideSettingsCmp extends Component<{}, State> {
           />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsStationName")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameStation} onValueToggle={(x) => NamingRulesService.setDistrictNameAsNameStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.districtNameAsNameStation} onValueToggle={(x) => NamingRulesService.setDistrictNameAsNameStation(x)} />
         </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsCargoStationName")}>
-          <Cs2Checkbox isChecked={() => this.state.currentSettings?.DistrictNameAsNameCargoStation} onValueToggle={(x) => NamingRulesService.setDistrictNameAsNameCargoStation(x)} />
+          <Cs2Checkbox isChecked={() => this.state.currentSettings?.districtNameAsNameCargoStation} onValueToggle={(x) => NamingRulesService.setDistrictNameAsNameCargoStation(x)} />
         </Cs2FormLine>
       </>,
     }

@@ -14,7 +14,7 @@ namespace BelzontAdr
         public static AdrNameFilesManager Instance => instance ??= new();
         private static AdrNameFilesManager instance;
 
-        internal readonly Dictionary<Guid, AdrNameFile> SimpleNamesFromFolder = new();
+        internal readonly Dictionary<Colossal.Hash128, AdrNameFile> SimpleNamesFromFolder = new();
 
 
         private AdrNameFilesManager()
@@ -27,7 +27,7 @@ namespace BelzontAdr
             LoadSimpleNamesFiles(SimpleNamesFromFolder, NamesetsFolder);
         }
 
-        private static Dictionary<Guid, AdrNameFile> LoadSimpleNamesFiles(Dictionary<Guid, AdrNameFile> result, string path)
+        private static Dictionary<Colossal.Hash128, AdrNameFile> LoadSimpleNamesFiles(Dictionary<Colossal.Hash128, AdrNameFile> result, string path)
         {
             result.Clear();
             foreach (string filename in Directory.GetFiles(path, "*.txt", SearchOption.AllDirectories))

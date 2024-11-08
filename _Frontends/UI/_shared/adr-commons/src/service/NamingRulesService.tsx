@@ -35,18 +35,18 @@ export type AdrRoadPrefixSetting = {
 }
 
 export type AdrCitywideSettings = {
-    SurnameAtFirst: boolean,
+    surnameAtFirst: boolean,
     CitizenMaleNameOverridesStr: string,
     CitizenFemaleNameOverridesStr: string,
     CitizenSurnameOverridesStr: string,
     CitizenDogOverridesStr: string
     DefaultRoadNameOverridesStr: string,
     DefaultDistrictNameOverridesStr: string,
-    RoadPrefixSetting: AdrRoadPrefixSetting
-    RoadNameAsNameStation: boolean
-    RoadNameAsNameCargoStation: boolean
-    DistrictNameAsNameStation: boolean
-    DistrictNameAsNameCargoStation: boolean
+    roadPrefixSetting: AdrRoadPrefixSetting
+    roadNameAsNameStation: boolean
+    roadNameAsNameCargoStation: boolean
+    districtNameAsNameStation: boolean
+    districtNameAsNameCargoStation: boolean
     MaximumGeneratedSurnames: number
     MaximumGeneratedGivenNames: number
 }
