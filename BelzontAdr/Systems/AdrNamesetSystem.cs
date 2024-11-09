@@ -134,7 +134,7 @@ namespace BelzontAdr
 
         private void DeleteCityNameset(string guid)
         {
-            var parsedGuid = new Guid(guid);
+            var parsedGuid = new Colossal.Hash128(guid);
             if (CityNamesets.ContainsKey(parsedGuid))
             {
                 CityNamesets.Remove(parsedGuid);
@@ -143,7 +143,7 @@ namespace BelzontAdr
         }
         private string ExportToLibrary(string guid)
         {
-            var parsedGuid = new Guid(guid);
+            var parsedGuid = new Colossal.Hash128(guid);
             if (CityNamesets.ContainsKey(parsedGuid))
             {
                 var file = CityNamesets[parsedGuid];
@@ -156,7 +156,7 @@ namespace BelzontAdr
         }
         private void UpdateCityNameset(string guid, string name, string[] names)
         {
-            var targetGuid = new Guid(guid);
+            var targetGuid = new Colossal.Hash128(guid);
             if (CityNamesets.TryGetValue(targetGuid, out var nameset))
             {
                 nameset.Name = name;

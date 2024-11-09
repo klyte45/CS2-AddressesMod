@@ -4,12 +4,11 @@ import { Cs2Checkbox, Cs2FormLine, Cs2Select, Cs2SideTabs, DefaultPanelScreen, I
 import { useEffect, useState } from "react";
 
 enum TabsNames {
-  Roads = "Roads",
+  RoadsDistricts = "RoadsDistricts",
   Citizen = "Citizen",
-  District = "District",
 }
 
-const tabsOrder: (TabsNames | undefined)[] = [TabsNames.Citizen, TabsNames.Roads, TabsNames.District]
+const tabsOrder: (TabsNames | undefined)[] = [TabsNames.Citizen, TabsNames.RoadsDistricts]
 
 const defaultSetting = { IdString: null, Values: [], Name: translate("overrideSettings.useVanillaOptionLbl") };
 const defaultSettingRoadByDistrict = { IdString: null, Values: [], Name: translate("overrideSettings.useSameAsCityOptionLbl") };
@@ -104,7 +103,17 @@ export const OverrideSettingsCmp = ({
           />
         </Cs2FormLine>
       </>,
-      [TabsNames.Roads]: <>
+      [TabsNames.RoadsDistricts]: <>
+       <Cs2FormLine title={translate("overrideSettings.districtsFile")}>
+          <Cs2Select
+            options={Object.values(simpleFiles)}
+            getOptionLabel={(x: SimpleNameEntry) => x?.Name}
+            getOptionValue={(x: SimpleNameEntry) => x?.IdString}
+            onChange={(x) => NamingRulesService.setDefaultDistrictNameOverridesStr(x.IdString)}
+            value={indexedSimpleFiles[currentSettings.DefaultDistrictNameOverridesStr]}
+            defaultValue={defaultSetting}
+          />
+        </Cs2FormLine>
         <Cs2FormLine title={translate("overrideSettings.roadsFile")}>
           <Cs2Select
             options={Object.values(simpleFiles)}
@@ -141,25 +150,7 @@ export const OverrideSettingsCmp = ({
             />
           </>
         }
-      </>,
-      [TabsNames.District]: <>
-        <Cs2FormLine title={translate("overrideSettings.districtsFile")}>
-          <Cs2Select
-            options={Object.values(simpleFiles)}
-            getOptionLabel={(x: SimpleNameEntry) => x?.Name}
-            getOptionValue={(x: SimpleNameEntry) => x?.IdString}
-            onChange={(x) => NamingRulesService.setDefaultDistrictNameOverridesStr(x.IdString)}
-            value={indexedSimpleFiles[currentSettings.DefaultDistrictNameOverridesStr]}
-            defaultValue={defaultSetting}
-          />
-        </Cs2FormLine>
-        <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsStationName")}>
-          <Cs2Checkbox isChecked={() => currentSettings?.districtNameAsNameStation} onValueToggle={(x) => NamingRulesService.setDistrictNameAsNameStation(x)} />
-        </Cs2FormLine>
-        <Cs2FormLine title={translate("overrideSettings.useDistrictNameAsCargoStationName")}>
-          <Cs2Checkbox isChecked={() => currentSettings?.districtNameAsNameCargoStation} onValueToggle={(x) => NamingRulesService.setDistrictNameAsNameCargoStation(x)} />
-        </Cs2FormLine>
-      </>,
+      </>   
     }
   }
 

@@ -26,8 +26,6 @@ namespace BelzontAdr
         public bool roadNameAsNameCargoStation;
         public bool surnameAtFirst;
         public AdrRoadPrefixSetting roadPrefixSetting = new();
-        public bool districtNameAsNameCargoStation;
-        public bool districtNameAsNameStation;
 
         #region Indirect setters & public getters
 
@@ -65,8 +63,6 @@ namespace BelzontAdr
             writer.Write(roadNameAsNameCargoStation);
             writer.Write(surnameAtFirst);
             writer.Write(roadPrefixSetting);
-            writer.Write(districtNameAsNameCargoStation);
-            writer.Write(districtNameAsNameStation);
         }
 
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
@@ -89,8 +85,6 @@ namespace BelzontAdr
             reader.Read(out surnameAtFirst);
             roadPrefixSetting = new AdrRoadPrefixSetting();
             reader.Read(roadPrefixSetting);
-            reader.Read(out districtNameAsNameCargoStation);
-            reader.Read(out districtNameAsNameStation);
         }
         [Obsolete]
         internal static AdrCitywideSettings FromLegacy(AdrCitywideSettingsLegacy settings)
@@ -109,8 +103,6 @@ namespace BelzontAdr
                 roadNameAsNameCargoStation = settings.RoadNameAsNameCargoStation,
                 surnameAtFirst = settings.SurnameAtFirst,
                 roadPrefixSetting = settings.RoadPrefixSetting,
-                districtNameAsNameCargoStation = settings.DistrictNameAsNameCargoStation,
-                districtNameAsNameStation = settings.DistrictNameAsNameStation
             };
         }
     }

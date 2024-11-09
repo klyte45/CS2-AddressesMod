@@ -2,7 +2,7 @@ import { GitHubAddressesFilesSevice, GitHubFileItem, GitHubTreeItem } from "@kly
 import { translate } from "#utility/translate";
 import { replaceArgs } from "@klyte45/euis-components";
 import { Component } from "react";
-import TreeView from "react-treeview";
+import EuisTreeView from "@klyte45/euis-components/src/components/EuisTreeView";
 
 type State = {
     showing: Record<string, boolean>;
@@ -60,12 +60,10 @@ export class NamesetGitHubCategoryCmp extends Component<Props, State> {
         if (!this.state.currentTree && !this.state.currentFiles) return <div>{translate("githubListing.noEntries")}</div>
         return <>
             {this.state.currentTree.sort((a, b) => a.path.localeCompare(b.path)).map((x, i) => {
-                return <TreeView
+                return <EuisTreeView
                     nodeLabel={x.path.split("/").reverse()[0]}
                     key={i}
-                    collapsed={!this.state.showing[x.path]}
-                    onClick={() => this.toggle(x.path)}
-                ><NamesetGitHubCategoryCmp treeUrl={x.url} doWithGitHubData={this.props.doWithGitHubData} /></TreeView>;
+                ><NamesetGitHubCategoryCmp treeUrl={x.url} doWithGitHubData={this.props.doWithGitHubData} /></EuisTreeView>;
             })}
             {this.state.currentFiles.sort((a, b) => a.path.localeCompare(b.path)).map(this.props.doWithGitHubData)}
         </>;

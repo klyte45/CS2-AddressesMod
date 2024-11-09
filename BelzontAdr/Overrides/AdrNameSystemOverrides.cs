@@ -12,6 +12,7 @@ using Game.Prefabs;
 using Game.SceneFlow;
 using Game.UI;
 using Game.UI.Localization;
+using System;
 using System.Collections.Generic;
 using Unity.Entities;
 using static Game.UI.NameSystem;
@@ -33,6 +34,7 @@ namespace BelzontAdr
             AddRedirect(getCitizenName, GetType().GetMethod(nameof(GetCitizenName), RedirectorUtils.allFlags));
 
             var getName = typeof(NameSystem).GetMethod("GetName", RedirectorUtils.allFlags);
+            AddReversePatch(getName, GetType().GetMethod(nameof(Original_GetName), RedirectorUtils.allFlags));
             AddRedirect(getName, GetType().GetMethod(nameof(GetName), RedirectorUtils.allFlags));
 
             var getRenderedLabelName = typeof(NameSystem).GetMethod("GetRenderedLabelName", RedirectorUtils.allFlags);
@@ -172,12 +174,14 @@ namespace BelzontAdr
             return null;
         }
 
+        private static Name Original_GetName(NameSystem __instance, Entity entity, bool omitBrand = false) => throw new NotImplementedException("It's a stub");
+
         private static bool GetName(ref Name __result, ref NameSystem __instance, Entity entity)
         {
-            return GetName_Internal(ref __result, ref __instance, entity, new(), entity);
+            return GetName_Internal(ref __result, ref __instance, entity);
         }
 
-        private static bool GetName_Internal(ref Name __result, ref NameSystem __instance, Entity entity, HashSet<Entity> pastEntities, Entity original)
+        private static bool GetName_Internal(ref Name __result, ref NameSystem __instance, Entity entity)
         {
             if (__instance.TryGetCustomName(entity, out string name))
             {
@@ -219,67 +223,25 @@ namespace BelzontAdr
                 var shallRunOrignal = GetAggregateName(out var pattern, out var genName, entity);
                 if (!shallRunOrignal)
                 {
-                    __result = Name.CustomName(entityManager.HasComponent<Building>(original) ? genName : pattern.Replace("{name}", genName));
+                    __result = Name.CustomName(entityManager.HasComponent<Building>(entity) ? genName : pattern.Replace("{name}", genName));
                 }
                 return shallRunOrignal;
             }
             if (entityManager.HasComponent<District>(entity))
             {
-                var shallRunOrignal = GetDistrictName(out var pattern, out var genName, entity);
-                if (!shallRunOrignal)
-                {
-                    __result = Name.CustomName(pattern.Replace("{name}", genName));
-                }
-                return shallRunOrignal;
+                return GetDistrictName(__instance, ref __result, entity);
             }
-            var wasOriginal = entity == original;
             while (entityManager.TryGetComponent<Owner>(entity, out var owner))
             {
                 entity = owner.m_Owner;
             }
             if (entityManager.TryGetComponent<ADREntityManualBuildingRef>(entity, out var manualRef) && manualRef.m_refNamedEntity != Entity.Null)
             {
-                if (pastEntities.Contains(manualRef.m_refNamedEntity))
-                {
-                    entityManager.RemoveComponent<ADREntityManualBuildingRef>(manualRef.m_refNamedEntity);
-                }
-                pastEntities.Add(entity);
-                return GetName_Internal(ref __result, ref __instance, manualRef.m_refNamedEntity, pastEntities, wasOriginal ? entity : original);
+                __result = __instance.GetName(manualRef.m_refNamedEntity);
+                return false;
             }
             if (entityManager.TryGetComponent<Building>(entity, out var buildingData))
             {
-                if (((adrMainSystem.CurrentCitySettings.districtNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity))
-                    || (adrMainSystem.CurrentCitySettings.districtNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
-                    && entityManager.TryGetComponent<CurrentDistrict>(entity, out var currDistrict) && currDistrict.m_District != Entity.Null)
-                {
-                    if (!entityManager.TryGetComponent<ADREntityStationRef>(currDistrict.m_District, out var entityStationRef))
-                    {
-                        var cmd = m_EndFrameBarrier.CreateCommandBuffer();
-                        entityStationRef = new ADREntityStationRef
-                        {
-                            m_refStationBuilding = entity
-                        };
-                        cmd.AddComponent(currDistrict.m_District, entityStationRef);
-                    }
-                    if (entityStationRef.m_refStationBuilding == Entity.Null)
-                    {
-                        var cmd = m_EndFrameBarrier.CreateCommandBuffer();
-                        entityStationRef.m_refStationBuilding = entity;
-                        cmd.SetComponent(currDistrict.m_District, entityStationRef);
-                    }
-                    var refStation = entityStationRef.m_refStationBuilding;
-                    if (refStation == entity)
-                    {
-                        if (GetDistrictName(out var pattern, out var mainName, currDistrict.m_District))
-                        {
-                            string id = GetId(entity, true);
-                            __result = Name.LocalizedName(GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id);
-                            return false;
-                        }
-                        __result = Name.CustomName(pattern.Replace("{name}", mainName));
-                        return false;
-                    }
-                }
                 if (
                     ((adrMainSystem.CurrentCitySettings.roadNameAsNameStation && entityManager.HasComponent<PublicTransportStation>(entity))
                     || (adrMainSystem.CurrentCitySettings.roadNameAsNameCargoStation && entityManager.HasComponent<CargoTransportStation>(entity)))
@@ -299,6 +261,13 @@ namespace BelzontAdr
             }
 
             return true;
+        }
+
+        private static bool GetDistrictName(NameSystem __instance, ref Name __result, Entity entity)
+        {
+            var shallRunOrignal = GetDistrictName(out var pattern, out var genName, entity);
+            __result = shallRunOrignal ? Original_GetName(__instance, entity) : Name.CustomName(pattern.Replace("{name}", genName));
+            return false;
         }
 
         internal static Entity GetMainReferenceAggregate(Entity entity, Building buildingData)

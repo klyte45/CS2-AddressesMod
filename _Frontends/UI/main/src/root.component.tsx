@@ -1,12 +1,12 @@
-import CityNamesetLibraryCmp from "#components/fileManagement/CityNamesetLibraryCmp";
+
+import { CityNamesetLibraryCmp } from "#components/fileManagement/CityNamesetLibraryCmp";
 import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
 import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import "#styles/main.scss";
 import { translate } from "#utility/translate";
-import { Component, useEffect, useState } from "react";
-import { ErrorBoundary, MainSideTabMenuComponent, MenuItem } from "@klyte45/euis-components";
-import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { AdrCitywideSettings, DistrictListItem, DistrictRelativeService, NamesetService, nameToString, NamingRulesService, SimpleNameEntry } from "@klyte45/adr-commons";
+import { ErrorBoundary, MainSideTabMenuComponent, MenuItem } from "@klyte45/euis-components";
+import { useEffect, useState } from "react";
 
 
 export default () => {
@@ -48,7 +48,7 @@ export default () => {
     {
       iconUrl: "coui://uil/Standard/NameSort.svg",
       name: translate("namesetManagement.title"),
-      panelContent: <CityNamesetLibraryCmp />,
+      panelContent: <CityNamesetLibraryCmp namesets={cityNamesets} />,
       tintedIcon: true
     },
     {

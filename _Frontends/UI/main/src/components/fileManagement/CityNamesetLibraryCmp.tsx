@@ -1,17 +1,15 @@
-import { NamesetService } from "@klyte45/adr-commons";
-import { ArrayUtils, DefaultPanelScreen, GameScrollComponent } from "@klyte45/euis-components";
-import { translate } from "#utility/translate"
-import { Component } from "react";
+import { categorizeFiles } from "#utility/categorizeFiles";
+import { translate } from "#utility/translate";
+import { ExtendedSimpleNameEntry, GitHubAddressesFilesSevice, GitHubFileItem, NamesetService, SimpleNameEntry } from "@klyte45/adr-commons";
+import { DefaultPanelScreen } from "@klyte45/euis-components";
+import { Component, useEffect, useState } from "react";
+import { NamesetCategoryCmp } from "./NamesetCategoryCmp";
 import NamesetDeletingCmp from "./NamesetDeletingCmp";
 import NamesetEditorCmp from "./NamesetEditorCmp";
-import NamesetImportingCmp from "./NamesetImportingCmp";
-import { ExtendedSimpleNameEntry } from "@klyte45/adr-commons";
-import { categorizeFiles } from "#utility/categorizeFiles";
-import { NamesetCategoryCmp } from "./NamesetCategoryCmp";
-import { NamesetLineViewer } from "./NamesetLineViewer";
-import NamesetLibrarySelectorCmp from "./NamesetLibrarySelectorCmp";
-import { GitHubAddressesFilesSevice, GitHubFileItem } from "@klyte45/adr-commons";
 import NamesetGitHubSelectorCmp from "./NamesetGitHubSelectorCmp";
+import NamesetImportingCmp from "./NamesetImportingCmp";
+import NamesetLibrarySelectorCmp from "./NamesetLibrarySelectorCmp";
+import { NamesetLineViewer } from "./NamesetLineViewer";
 
 enum Screen {
     DEFAULT,
@@ -23,168 +21,142 @@ enum Screen {
     NAMESET_IMPORT_GITHUB,
 }
 
-type State = {
-    availableNamesets: NamesetStructureTreeNode,
-    currentScreen: Screen,
-    namesetBeingImported?: ExtendedSimpleNameEntry,
-    namesetBeingDeleted?: ExtendedSimpleNameEntry,
-    namesetBeingEdited?: ExtendedSimpleNameEntry,
-    lastMessage?: string | JSX.Element,
-    isExporting?: boolean,
-    lastSourceImport: Screen
-}
-
 export type NamesetStructureTreeNode = {
     rootContent: ExtendedSimpleNameEntry[],
     subtrees: Record<string, NamesetStructureTreeNode>
 }
 
 
+export const CityNamesetLibraryCmp = ({
+    namesets
+}: {
+    namesets: SimpleNameEntry[]
+}) => {
 
-export default class CityNamesetLibraryCmp extends Component<any, State> {
+    const [availableNamesets, setAvailableNamesets] = useState({ subtrees: {}, rootContent: [] })
+    const [currentScreen, setCurrentScreen] = useState(Screen.DEFAULT)
+    const [lastSourceImport, setLastSourceImport] = useState(Screen.DEFAULT)
+    const [namesetBeingImported, setNamesetBeingImported] = useState(undefined as ExtendedSimpleNameEntry)
+    const [namesetBeingDeleted, setNamesetBeingDeleted] = useState(undefined as ExtendedSimpleNameEntry)
+    const [namesetBeingEdited, setNamesetBeingEdited] = useState(undefined as ExtendedSimpleNameEntry)
+    const [lastMessage, setLastMessage] = useState(undefined as string | JSX.Element)
+    const [isExporting, setIsExporting] = useState(undefined as boolean)
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            availableNamesets: { subtrees: {}, rootContent: [] },
-            currentScreen: Screen.DEFAULT,
-            lastSourceImport: Screen.DEFAULT
-        }
-    }
-    componentDidMount() {
-        engine.whenReady.then(async () => {
-            this.updateNamesets();
-            NamesetService.doOnCityNamesetsUpdated(() => this.updateNamesets())
-        })
-    }
-    private async updateNamesets() {
-        const namesetsSaved = await NamesetService.listCityNamesets();
-        const namesetTree = categorizeFiles(namesetsSaved)
+
+    useEffect(() => {
+        const namesetTree = categorizeFiles(namesets)
         const root = namesetTree[""]?.rootContent ?? []
         delete namesetTree[""];
-        await new Promise((res) => {
-            this.setState({
-                availableNamesets: {
-                    rootContent: root,
-                    subtrees: namesetTree
-                }
-            }, () => res(0))
-        });
-    }
+        setAvailableNamesets({
+            rootContent: root,
+            subtrees: namesetTree
+        })
+    }, [namesets]);
 
-    render() {
-        switch (this.state.currentScreen) {
-            case Screen.DEFAULT:
-                const buttonsRowContent = <>
-                    <button className="positiveBtn " onClick={() => this.setState({ currentScreen: Screen.NAMESET_IMPORT_LIB })}>{translate("cityNamesetsLibrary.importFromLibrary")}</button>
-                    <button className="positiveBtn " onClick={() => this.setState({ currentScreen: Screen.NAMESET_IMPORT_GITHUB })}>{translate("cityNamesetsLibrary.importFromGitHub")}</button>
-                    <button className="positiveBtn " onClick={() => this.goToEdit()}>{translate("cityNamesetsLibrary.createNewNameset")}</button>
-                    <div style={{ display: "flex", flex: "5 5" }}></div>
-                    <div style={{ display: "flex", alignItems: "center", paddingLeft: "10rem" }}>
-                        {this.state.lastMessage}
-                    </div>
-                </>
-                return <DefaultPanelScreen title={translate("cityNamesetsLibrary.title")} subtitle={translate("cityNamesetsLibrary.subtitle")} buttonsRowContent={buttonsRowContent} scrollable>
-                    {Object.keys(this.state?.availableNamesets.subtrees ?? {}).length == 0 && !this.state?.availableNamesets.rootContent.length
-                        ? <h2>{translate("cityNamesetsLibrary.noNamesetsMsg")} <a onClick={() => this.setState({ currentScreen: Screen.NAMESET_IMPORT_LIB })}>{translate("cityNamesetsLibrary.clickToImport")}</a> <a onClick={() => this.goToEdit()}>{translate("cityNamesetsLibrary.clickToCreate")}</a></h2>
-                        : <NamesetCategoryCmp entry={this.state?.availableNamesets} doWithNamesetData={(x, i) => <NamesetLineViewer entry={x} key={i} actionButtons={(y) => this.getActionButtons(y)} />} />}
-                </DefaultPanelScreen>
-            case Screen.NAMESET_IMPORT_LIB:
-                return <NamesetLibrarySelectorCmp onBack={() => this.setState({ currentScreen: Screen.DEFAULT })} actionButtons={(p) => <><button className="positiveBtn" onClick={() => this.goToImportDetails(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
-            case Screen.NAMESET_IMPORT_GITHUB:
-                return <NamesetGitHubSelectorCmp onBack={() => this.setState({ currentScreen: Screen.DEFAULT })} actionButtons={(p) => <><button className="positiveBtn" onClick={() => this.goToImportDetailsGitHub(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
-            case Screen.IMPORTING_NAMESET:
-                return <NamesetImportingCmp namesetData={this.state.namesetBeingImported} onBack={() => this.setState({ currentScreen: this.state.lastSourceImport })} onOk={(x) => this.doImportNameset(x)} />
-            case Screen.AWAITING_ACTION:
-                return <div>{translate("main.loadingDataPleaseWait")}</div>
-            case Screen.DELETE_CONFIRM:
-                return <NamesetDeletingCmp onBack={() => this.setState({ currentScreen: Screen.DEFAULT })} onOk={(x) => this.doDelete(x)} namesetData={this.state.namesetBeingDeleted} />
-            case Screen.EDIT_NAMESET:
-                return <NamesetEditorCmp onBack={() => this.setState({ currentScreen: Screen.DEFAULT })} onOk={(x) => this.doUpdate(x.namesetData)} entryData={this.state.namesetBeingEdited} />
-        }
-    }
-    async goToImportDetailsGitHub(p: GitHubFileItem) {
-        await new Promise((resp) => this.setState({ currentScreen: Screen.AWAITING_ACTION }, () => resp(undefined)));
+
+
+    const goToImportDetailsGitHub = async (p: GitHubFileItem) => {
+        setCurrentScreen(Screen.AWAITING_ACTION);
         const fileContents = await GitHubAddressesFilesSevice.getBlobData(p.url)
-        this.setState({
-            namesetBeingImported: {
-                IdString: null,
-                Name: `Downloads/${p.path.split("/").reverse()[0].replace(".txt", "")}`,
-                Values: fileContents.split("\n").map(x => x.replace("{0}", "").trim())
-            },
-            currentScreen: Screen.IMPORTING_NAMESET,
-            lastSourceImport: Screen.NAMESET_IMPORT_GITHUB
-        });
-    }
-    getActionButtons(x: ExtendedSimpleNameEntry): JSX.Element {
+
+        setNamesetBeingImported({
+            IdString: null,
+            Name: `Downloads/${p.path.split("/").reverse()[0].replace(".txt", "")}`,
+            Values: fileContents.split("\n").map(x => x.replace("{0}", "").trim())
+        }),
+            setCurrentScreen(Screen.IMPORTING_NAMESET),
+            setLastSourceImport(Screen.NAMESET_IMPORT_GITHUB)
+    };
+
+    const getActionButtons = (x: ExtendedSimpleNameEntry): JSX.Element => {
         return <>
-            <button className="negativeBtn" onClick={() => this.goToDelete(x)}>{translate("cityNamesetsLibrary.deleteNameset")}</button>
-            <button className="neutralBtn" onClick={() => this.goToEdit(x)}>{translate("cityNamesetsLibrary.editNameset")}</button>
-            <button className="neutralBtn" disabled={this.state.isExporting} onClick={() => this.doExport(x)}>{translate("cityNamesetsLibrary.exportNameset")}</button>
+            <button className="negativeBtn" onClick={() => goToDelete(x)}>{translate("cityNamesetsLibrary.deleteNameset")}</button>
+            <button className="neutralBtn" onClick={() => goToEdit(x)}>{translate("cityNamesetsLibrary.editNameset")}</button>
+            <button className="neutralBtn" disabled={isExporting} onClick={() => doExport(x)}>{translate("cityNamesetsLibrary.exportNameset")}</button>
         </>
     }
-    goToEdit(x?: ExtendedSimpleNameEntry): void {
-        this.setState({
-            namesetBeingEdited: x ?? { Values: [], Name: "<?>", IdString: null },
-            currentScreen: Screen.EDIT_NAMESET
-        })
+    const goToEdit = (x?: ExtendedSimpleNameEntry): void => {
+        setNamesetBeingEdited(x ?? { Values: [], Name: "<?>", IdString: null })
+        setCurrentScreen(Screen.EDIT_NAMESET)
+
     }
-    goToDelete(x: ExtendedSimpleNameEntry): void {
-        this.setState({
-            namesetBeingDeleted: x,
-            currentScreen: Screen.DELETE_CONFIRM
-        });
+    const goToDelete = (x: ExtendedSimpleNameEntry): void => {
+        setNamesetBeingDeleted(x)
+        setCurrentScreen(Screen.DELETE_CONFIRM)
     }
 
-    async doDelete(x: ExtendedSimpleNameEntry) {
-        await new Promise((resp) => this.setState({ currentScreen: Screen.AWAITING_ACTION }, () => resp(undefined)));
+    const doDelete = async (x: ExtendedSimpleNameEntry) => {
+        setCurrentScreen(Screen.AWAITING_ACTION);
         await NamesetService.deleteNamesetFromCity(x.IdString);
-        this.setState({ currentScreen: Screen.DEFAULT });
+        setCurrentScreen(Screen.DEFAULT);
     }
 
-    async doExport(x: ExtendedSimpleNameEntry) {
-        await new Promise((resp) => this.setState({ isExporting: true }, () => resp(undefined)));
+    const doExport = async (x: ExtendedSimpleNameEntry) => {
+        setIsExporting(true)
         const exportResult = await NamesetService.exportFromCityToLibrary(x.IdString);
         if (exportResult == null) {
-            this.setState({
-                isExporting: false,
-                lastMessage: <div style={{ color: "var(--warningColor)" }}>{translate("cityNamesetsLibrary.anErrorHasOccurredOnExporting")}</div>
-            }, () => setTimeout(() => this.setState({ lastMessage: null }), 7000))
+            setIsExporting(false)
+            setLastMessage(<div style={{ color: "var(--warningColor)" }}>{translate("cityNamesetsLibrary.anErrorHasOccurredOnExporting")}</div>)
+            setTimeout(() => setLastMessage(null), 7000);
         } else {
-            await this.updateNamesets();
-            this.setState({
-                isExporting: false,
-                lastMessage: <div>{translate("cityNamesetsLibrary.fileExportedToLocation")}<br
-                /><div style={{ color: "var(--positiveColor)" }}>{exportResult}</div></div>
-            }, () => setTimeout(() => this.setState({ lastMessage: null }), 7000))
-
+            setIsExporting(false)
+            setLastMessage(<div>{translate("cityNamesetsLibrary.fileExportedToLocation")}<br /><div style={{ color: "var(--positiveColor)" }}>{exportResult}</div></div>);
+            setTimeout(() => setLastMessage(null), 7000);
         }
-
     }
 
-    async doImportNameset({ namesetData, namesetNameImport }: { namesetData: ExtendedSimpleNameEntry; namesetNameImport: string; }) {
-        await new Promise((resp) => this.setState({ currentScreen: Screen.AWAITING_ACTION }, () => resp(undefined)));
+    const doImportNameset = async ({ namesetData, namesetNameImport }: { namesetData: ExtendedSimpleNameEntry; namesetNameImport: string; }) => {
+        setCurrentScreen(Screen.AWAITING_ACTION);
         await NamesetService.sendNamesetForCity(namesetNameImport, namesetData.Values);
-        this.setState({ currentScreen: Screen.DEFAULT });
+        setCurrentScreen(Screen.DEFAULT);
     }
 
-    async doUpdate(namesetData: Omit<ExtendedSimpleNameEntry, "ChecksumString">) {
-        await new Promise((resp) => this.setState({ currentScreen: Screen.AWAITING_ACTION }, () => resp(undefined)));
+    const doUpdate = async (namesetData: Omit<ExtendedSimpleNameEntry, "ChecksumString">) => {
+        setCurrentScreen(Screen.AWAITING_ACTION);
         if (namesetData.IdString) {
             await NamesetService.updateNameset(namesetData.IdString, namesetData.Name, namesetData.Values);
         } else {
             await NamesetService.sendNamesetForCity(namesetData.Name, namesetData.Values)
         }
-        this.setState({ currentScreen: Screen.DEFAULT });
+        setCurrentScreen(Screen.DEFAULT);
     }
-    goToImportDetails(p: ExtendedSimpleNameEntry): void {
-        this.setState({
-            namesetBeingImported: p,
-            currentScreen: Screen.IMPORTING_NAMESET,
-            lastSourceImport: Screen.NAMESET_IMPORT_LIB,
-        });
+    const goToImportDetails = (p: ExtendedSimpleNameEntry): void => {
+        setNamesetBeingImported(p)
+        setCurrentScreen(Screen.IMPORTING_NAMESET)
+        setLastSourceImport(Screen.NAMESET_IMPORT_LIB)
+    }
 
+
+    switch (currentScreen) {
+        case Screen.DEFAULT:
+            const buttonsRowContent = <>
+                <button className="positiveBtn " onClick={() => setCurrentScreen(Screen.NAMESET_IMPORT_LIB)}>{translate("cityNamesetsLibrary.importFromLibrary")}</button>
+                <button className="positiveBtn " onClick={() => setCurrentScreen(Screen.NAMESET_IMPORT_GITHUB)}>{translate("cityNamesetsLibrary.importFromGitHub")}</button>
+                <button className="positiveBtn " onClick={() => goToEdit()}>{translate("cityNamesetsLibrary.createNewNameset")}</button>
+                <div style={{ display: "flex", flex: "5 5" }}></div>
+                <div style={{ display: "flex", alignItems: "center", paddingLeft: "10rem" }}>
+                    {lastMessage}
+                </div>
+            </>
+            return <DefaultPanelScreen title={translate("cityNamesetsLibrary.title")} subtitle={translate("cityNamesetsLibrary.subtitle")} buttonsRowContent={buttonsRowContent} scrollable>
+                {Object.keys(availableNamesets.subtrees ?? {}).length == 0 && !availableNamesets.rootContent.length
+                    ? <h2>{translate("cityNamesetsLibrary.noNamesetsMsg")} <a onClick={() => setCurrentScreen(Screen.NAMESET_IMPORT_LIB)}>{translate("cityNamesetsLibrary.clickToImport")}</a> <a onClick={() => goToEdit()}>{translate("cityNamesetsLibrary.clickToCreate")}</a></h2>
+                    : <NamesetCategoryCmp entry={availableNamesets} doWithNamesetData={(x, i) => <NamesetLineViewer entry={x} key={i} actionButtons={(y) => getActionButtons(y)} />} />}
+            </DefaultPanelScreen>
+        case Screen.NAMESET_IMPORT_LIB:
+            return <NamesetLibrarySelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <><button className="positiveBtn" onClick={() => goToImportDetails(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
+        case Screen.NAMESET_IMPORT_GITHUB:
+            return <NamesetGitHubSelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <><button className="positiveBtn" onClick={() => goToImportDetailsGitHub(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
+        case Screen.IMPORTING_NAMESET:
+            return <NamesetImportingCmp namesetData={namesetBeingImported} onBack={() => setCurrentScreen(lastSourceImport)} onOk={(x) => doImportNameset(x)} />
+        case Screen.AWAITING_ACTION:
+            return <div>{translate("main.loadingDataPleaseWait")}</div>
+        case Screen.DELETE_CONFIRM:
+            return <NamesetDeletingCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} onOk={(x) => doDelete(x)} namesetData={namesetBeingDeleted} />
+        case Screen.EDIT_NAMESET:
+            return <NamesetEditorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} onOk={(x) => doUpdate(x.namesetData)} entryData={namesetBeingEdited} />
     }
+
 }
 
 
