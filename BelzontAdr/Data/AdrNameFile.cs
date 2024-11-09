@@ -1,4 +1,5 @@
-﻿using Colossal;
+﻿using Belzont.Utils;
+using Colossal;
 using Colossal.OdinSerializer.Utilities;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace BelzontAdr
     public class AdrNameFile
     {
 
-        internal readonly Guid Id;
+        internal readonly Hash128 Id;
         public string Name;
         public ImmutableList<string> Values { get; set; }
         public ImmutableList<string> ValuesAlternative { get; set; }
@@ -44,7 +45,7 @@ namespace BelzontAdr
         {
             return new AdrNameFileXML()
             {
-                Id = Id,
+                Id = Id.ToGuid(),
                 Name = Name,
                 Values = Values.Select((x, i) => ValuesAlternative[i] == x ? x : $"{x};{ValuesAlternative[i]}").ToList()
             };

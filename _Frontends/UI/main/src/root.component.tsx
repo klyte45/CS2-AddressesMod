@@ -3,12 +3,47 @@ import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
 import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import "#styles/main.scss";
 import { translate } from "#utility/translate";
-import { Component } from "react";
+import { Component, useEffect, useState } from "react";
 import { ErrorBoundary, MainSideTabMenuComponent, MenuItem } from "@klyte45/euis-components";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
+import { AdrCitywideSettings, DistrictListItem, DistrictRelativeService, NamesetService, nameToString, NamingRulesService, SimpleNameEntry } from "@klyte45/adr-commons";
 
 
 export default () => {
+
+  useEffect(() => {
+    getSettings();
+    NamingRulesService.onCityDataReloaded(() => { getSettings(); });
+    listDistricts();
+    DistrictRelativeService.onDistrictChanged(() => listDistricts());
+    listCityNamesets();
+    NamesetService.doOnCityNamesetsUpdated(() => listCityNamesets());
+
+    return () => {
+      DistrictRelativeService.offDistrictChanged();
+      NamingRulesService.offCityDataReloaded();
+      NamesetService.offCityNamesetsUpdated();
+    }
+  }, []);
+
+  const [currentSettings, setCurrentSettings] = useState({} as AdrCitywideSettings);
+  const [districts, setDistricts] = useState([] as DistrictListItem[])
+  const [cityNamesets, setCityNamesets] = useState([] as SimpleNameEntry[])
+
+  const getSettings = async () => {
+    setCurrentSettings(await NamingRulesService.getCurrentCitywideSettings());
+  }
+
+  const listDistricts = async () => {
+    const districtNames = (await DistrictRelativeService.listAllDistricts())?.sort((a, b) => nameToString(a.Name).localeCompare(nameToString(b.Name), undefined, { sensitivity: "base" }))
+    setDistricts(districtNames);
+  }
+
+  const listCityNamesets = async () => {
+    setCityNamesets(await NamesetService.listCityNamesets());
+  }
+
+
   const menus: MenuItem[] = [
     {
       iconUrl: "coui://uil/Standard/NameSort.svg",
@@ -19,12 +54,12 @@ export default () => {
     {
       iconUrl: "coui://uil/Standard/Tools.svg",
       name: translate("overrideSettings.title"),
-      panelContent: <OverrideSettingsCmp />
+      panelContent: <OverrideSettingsCmp currentSettings={currentSettings} districts={districts} cityNamesets={cityNamesets}/>
     },
     {
       iconUrl: "coui://uil/Standard/Highway.svg",
       name: translate("roadPrefixSettings.title"),
-      panelContent: <RoadPrefixCmp />
+      panelContent: <RoadPrefixCmp currentSettings={currentSettings} />
     }
   ]
   return <>

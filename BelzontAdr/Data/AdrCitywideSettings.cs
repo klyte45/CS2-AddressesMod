@@ -4,6 +4,7 @@ using Colossal.Serialization.Entities;
 using Game.Prefabs;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Xml.Serialization;
 
@@ -38,12 +39,12 @@ namespace BelzontAdr
         internal Colossal.Hash128 DefaultDistrictNameOverrides => defaultDistrictNameOverrides;
         public int MaximumGeneratedSurnames { get => maximumGeneratedSurnames; set => maximumGeneratedSurnames = Math.Clamp(value, 1, 5); }
         public int MaximumGeneratedGivenNames { get => maximumGeneratedGivenNames; set => maximumGeneratedGivenNames = Math.Clamp(value, 1, 5); }
-        public string CitizenMaleNameOverridesStr { get => CitizenMaleNameOverrides.ToString(); set => citizenMaleNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
-        public string CitizenFemaleNameOverridesStr { get => CitizenFemaleNameOverrides.ToString(); set => citizenFemaleNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
-        public string CitizenSurnameOverridesStr { get => CitizenSurnameOverrides.ToString(); set => citizenSurnameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
-        public string CitizenDogOverridesStr { get => CitizenDogOverrides.ToString(); set => citizenDogOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
-        public string DefaultRoadNameOverridesStr { get => DefaultRoadNameOverrides.ToString(); set => defaultRoadNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
-        public string DefaultDistrictNameOverridesStr { get => DefaultDistrictNameOverrides.ToString(); set => defaultDistrictNameOverrides = Guid.TryParse(value ?? "", out var guid) ? guid : default; }
+        public string CitizenMaleNameOverridesStr { get => CitizenMaleNameOverrides.ToString(); set => citizenMaleNameOverrides = Colossal.Hash128.TryParse(value ?? "", out var guid) ? guid : default; }
+        public string CitizenFemaleNameOverridesStr { get => CitizenFemaleNameOverrides.ToString(); set => citizenFemaleNameOverrides = Colossal.Hash128.TryParse(value ?? "", out var guid) ? guid : default; }
+        public string CitizenSurnameOverridesStr { get => CitizenSurnameOverrides.ToString(); set => citizenSurnameOverrides = Colossal.Hash128.TryParse(value ?? "", out var guid) ? guid : default; }
+        public string CitizenDogOverridesStr { get => CitizenDogOverrides.ToString(); set => citizenDogOverrides = Colossal.Hash128.TryParse(value ?? "", out var guid) ? guid : default; }
+        public string DefaultRoadNameOverridesStr { get => DefaultRoadNameOverrides.ToString(); set => defaultRoadNameOverrides = Colossal.Hash128.TryParse(value ?? "", out var guid) ? guid : default; }
+        public string DefaultDistrictNameOverridesStr { get => DefaultDistrictNameOverrides.ToString(); set => defaultDistrictNameOverrides = Colossal.Hash128.TryParse(value ?? "", out var guid) ? guid : default; }
 
         #endregion
 
@@ -121,7 +122,7 @@ namespace BelzontAdr
         public AdrRoadPrefixRule FallbackRule { get; set; } = new() { formatPattern = "{name}" };
         public List<AdrRoadPrefixRule> AdditionalRules { get; set; } = new();
         public AdrRoadPrefixRule GetFirstApplicable(RoadData roadData, bool fullBridge) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(roadData, fullBridge)) ?? FallbackRule;
-       
+
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
@@ -173,13 +174,13 @@ namespace BelzontAdr
         internal FullBridgeRequirement fullBridgeRequire;
         internal string formatPattern;
 
-        [XmlAttribute("MinSpeedKmh")] public float MinSpeedKmh { get => minSpeed * 1.8f; set => minSpeed = value / 1.8f; }
-        [XmlAttribute("MaxSpeedKmh")] public float MaxSpeedKmh { get => maxSpeed * 1.8f; set => maxSpeed = value / 1.8f; }
-        [XmlAttribute("RequiredFlags")] public int RequiredFlagsInt { get => (int)requiredFlags; set => requiredFlags = (RoadFlags)value; }
-        [XmlAttribute("ForbiddenFlags")] public int ForbiddenFlagsInt { get => (int)forbiddenFlags; set => forbiddenFlags = (RoadFlags)value; }
+        [DefaultValue(0)][XmlAttribute("MinSpeedKmh")] public float MinSpeedKmh { get => minSpeed * 1.8f; set => minSpeed = value / 1.8f; }
+        [DefaultValue(0)][XmlAttribute("MaxSpeedKmh")] public float MaxSpeedKmh { get => maxSpeed * 1.8f; set => maxSpeed = value / 1.8f; }
+        [DefaultValue(0)][XmlAttribute("RequiredFlags")] public int RequiredFlagsInt { get => (int)requiredFlags; set => requiredFlags = (RoadFlags)value; }
+        [DefaultValue(0)][XmlAttribute("ForbiddenFlags")] public int ForbiddenFlagsInt { get => (int)forbiddenFlags; set => forbiddenFlags = (RoadFlags)value; }
         [XmlText] public string FormatPattern { get => formatPattern; set => formatPattern = value.Contains("{name}") ? value : formatPattern; }
 
-        [XmlAttribute("FullBridge")]
+        [DefaultValue(0)][XmlAttribute("FullBridge")]
         public int FullBridge
         {
             get => (int)fullBridgeRequire;
@@ -197,7 +198,7 @@ namespace BelzontAdr
             && (requiredFlags & roadData.m_Flags) == requiredFlags
             && (forbiddenFlags & roadData.m_Flags) == 0
             && (fullBridgeRequire == FullBridgeRequirement.Unset || fullBridgeRequire == (fullBridge ? FullBridgeRequirement.True : FullBridgeRequirement.False));
-          
+
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);

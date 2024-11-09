@@ -1,6 +1,6 @@
 import "#styles/roadPrefixRuleEditor.scss";
 import { translate } from "#utility/translate";
-import { AdrRoadPrefixRule, AdrRoadPrefixSetting, NamingRulesService, RoadFlags } from "@klyte45/adr-commons";
+import { AdrCitywideSettings, AdrRoadPrefixRule, AdrRoadPrefixSetting, NamingRulesService, RoadFlags } from "@klyte45/adr-commons";
 import { DefaultPanelScreen, Cs2FormLine, SimpleInput, Cs2TriCheckbox } from "@klyte45/euis-components";
 import { useEffect, useState } from "react";
 
@@ -18,25 +18,20 @@ const basicObj: AdrRoadPrefixSetting = {
   FallbackRule: basicRule
 }
 
-export const RoadPrefixCmp = () => {
+export const RoadPrefixCmp = ({
+  currentSettings: currentSettingsCity
+}: {
+  currentSettings: AdrCitywideSettings
+}) => {
   const [currentEditingRule, setCurrentEditingRule] = useState(-1);
   const [saveButtonState, setSaveButtonState] = useState(0);
   const [loadButtonState, setLoadButtonState] = useState(0);
   const [currentSettings, setCurrentSettings] = useState(basicObj);
 
   useEffect(() => {
-    getSettings();
-    NamingRulesService.onCityDataReloaded(() => {
-      return getSettings();
-    });
-    return () => { NamingRulesService.offCityDataReloaded(); }
-  }, [])
+    setCurrentSettings(currentSettingsCity.roadPrefixSetting || basicObj)
+  }, [currentSettingsCity.roadPrefixSetting])
 
-  const getSettings = async () => {
-    var result = (await NamingRulesService.getCurrentCitywideSettings()).roadPrefixSetting;
-    console.log("getter", result)
-    setCurrentSettings(result ?? basicObj);
-  }
   const doSave = async () => {
     setSaveButtonState(1);
     await NamingRulesService.saveRoadPrefixRulesFileDefault();
@@ -49,7 +44,6 @@ export const RoadPrefixCmp = () => {
     setLoadButtonState(result)
     setCurrentEditingRule(-1)
     setTimeout(() => setLoadButtonState(0), 3000)
-    getSettings();
   }
   if (!currentSettings) return null;
   const buttonRow = <>

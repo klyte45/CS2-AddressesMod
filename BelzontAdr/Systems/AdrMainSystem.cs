@@ -58,6 +58,7 @@ namespace BelzontAdr
                     try
                     {
                         CurrentCitySettings.roadPrefixSetting = XmlUtils.DefaultXmlDeserialize<AdrRoadPrefixSetting>(File.ReadAllText(DefaultRoadPrefixFilename));
+                        NotifyChanges();
                         return 1;
                     }
                     catch (Exception e)

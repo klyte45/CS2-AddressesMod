@@ -4,6 +4,7 @@ import { SimpleNameEntry } from "./NamingRulesService";
 export class NamesetService {
 
     static doOnCityNamesetsUpdated(event: () => void) { engine.on("k45::adr.namesets.onCityNamesetsChanged", event); }
+    static offCityNamesetsUpdated() { engine.off("k45::adr.namesets.onCityNamesetsChanged"); }
 
     static async goToDiskSimpleNamesFolder(): Promise<void> { return await engine.call("k45::adr.namesets.goToSimpleNamesFolder"); }
     static async updateNameset(IdString: string, Name: string, Values: string[]) { await engine.call("k45::adr.namesets.updateForCity", IdString, Name, Values); }
