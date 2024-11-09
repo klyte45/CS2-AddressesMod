@@ -1,7 +1,6 @@
-import { GitHubFileItem } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate";
+import { GitHubFileItem } from "@klyte45/adr-commons";
 import { Cs2FormLine, replaceArgs, setupSignificance } from "@klyte45/euis-components";
-import { Component } from "react";
 
 
 type Props = {
@@ -9,18 +8,14 @@ type Props = {
     actionButtons?: (nameset: GitHubFileItem) => JSX.Element;
 };
 
-export class NamesetGitHubLineViewer extends Component<Props> {
-    render() {
-        return <div>
-            <Cs2FormLine compact={true} title={<>
-                <div>{this.props.entry.path.split("/").reverse()[0].replace(".txt", "")}</div>
-                <div style={{ fontSize: "75%" }}>{`${translate("namesetLine.fileSize")} ${this.props.entry.size} (${replaceArgs(translate("namesetLine.approximateLinesText"), { min: setupSignificance(this.props.entry.size / 17, 2), max: setupSignificance(this.props.entry.size / 7, 2) })})`}</div>
-            </>}>
-                {this.props.actionButtons &&
-                    <div className="w20" style={{ flexDirection: "row-reverse", alignSelf: "center", display: "flex" }}>
-                        {this.props.actionButtons(this.props.entry)}
-                    </div>}
-            </Cs2FormLine>
-        </div>;
-    }
-}
+export const NamesetGitHubLineViewer = ({ entry, actionButtons }: Props) => <div>
+    <Cs2FormLine compact={true} title={<>
+        <div>{entry.path.split("/").reverse()[0].replace(".txt", "")}</div>
+        <div style={{ fontSize: "75%" }}>{`${translate("namesetLine.fileSize")} ${entry.size} (${replaceArgs(translate("namesetLine.approximateLinesText"), { min: setupSignificance(entry.size / 17, 2), max: setupSignificance(entry.size / 7, 2) })})`}</div>
+    </>}>
+        {actionButtons &&
+            <div className="w20" style={{ flexDirection: "row-reverse", alignSelf: "center", display: "flex" }}>
+                {actionButtons(entry)}
+            </div>}
+    </Cs2FormLine>
+</div>

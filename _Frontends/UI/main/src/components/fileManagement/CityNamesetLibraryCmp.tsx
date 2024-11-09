@@ -2,13 +2,13 @@ import { categorizeFiles } from "#utility/categorizeFiles";
 import { translate } from "#utility/translate";
 import { ExtendedSimpleNameEntry, GitHubAddressesFilesSevice, GitHubFileItem, NamesetService, SimpleNameEntry } from "@klyte45/adr-commons";
 import { DefaultPanelScreen } from "@klyte45/euis-components";
-import { Component, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { NamesetCategoryCmp } from "./NamesetCategoryCmp";
-import NamesetDeletingCmp from "./NamesetDeletingCmp";
-import NamesetEditorCmp from "./NamesetEditorCmp";
-import NamesetGitHubSelectorCmp from "./NamesetGitHubSelectorCmp";
-import NamesetImportingCmp from "./NamesetImportingCmp";
-import NamesetLibrarySelectorCmp from "./NamesetLibrarySelectorCmp";
+import { NamesetDeletingCmp } from "./NamesetDeletingCmp";
+import { NamesetEditorCmp } from "./NamesetEditorCmp";
+import { NamesetGitHubSelectorCmp } from "./NamesetGitHubSelectorCmp";
+import { NamesetImportingCmp } from "./NamesetImportingCmp";
+import { NamesetLibrarySelectorCmp } from "./NamesetLibrarySelectorCmp";
 import { NamesetLineViewer } from "./NamesetLineViewer";
 
 enum Screen {
@@ -105,7 +105,7 @@ export const CityNamesetLibraryCmp = ({
         }
     }
 
-    const doImportNameset = async ({ namesetData, namesetNameImport }: { namesetData: ExtendedSimpleNameEntry; namesetNameImport: string; }) => {
+    const doImportNameset = async (namesetData: ExtendedSimpleNameEntry, namesetNameImport: string) => {
         setCurrentScreen(Screen.AWAITING_ACTION);
         await NamesetService.sendNamesetForCity(namesetNameImport, namesetData.Values);
         setCurrentScreen(Screen.DEFAULT);
@@ -148,13 +148,13 @@ export const CityNamesetLibraryCmp = ({
         case Screen.NAMESET_IMPORT_GITHUB:
             return <NamesetGitHubSelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <><button className="positiveBtn" onClick={() => goToImportDetailsGitHub(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
         case Screen.IMPORTING_NAMESET:
-            return <NamesetImportingCmp namesetData={namesetBeingImported} onBack={() => setCurrentScreen(lastSourceImport)} onOk={(x) => doImportNameset(x)} />
+            return <NamesetImportingCmp namesetData={namesetBeingImported} onBack={() => setCurrentScreen(lastSourceImport)} onOk={(x, y) => doImportNameset(x, y)} />
         case Screen.AWAITING_ACTION:
             return <div>{translate("main.loadingDataPleaseWait")}</div>
         case Screen.DELETE_CONFIRM:
             return <NamesetDeletingCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} onOk={(x) => doDelete(x)} namesetData={namesetBeingDeleted} />
         case Screen.EDIT_NAMESET:
-            return <NamesetEditorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} onOk={(x) => doUpdate(x.namesetData)} entryData={namesetBeingEdited} />
+            return <NamesetEditorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} onOk={(x) => doUpdate(x)} entryData={namesetBeingEdited} />
     }
 
 }

@@ -1,75 +1,53 @@
-import { GitHubAddressesFilesSevice, GitHubFileItem, GitHubTreeItem } from "@klyte45/adr-commons";
 import { translate } from "#utility/translate";
+import { GitHubAddressesFilesSevice, GitHubFileItem, GitHubTreeItem } from "@klyte45/adr-commons";
 import { replaceArgs } from "@klyte45/euis-components";
-import { Component } from "react";
 import EuisTreeView from "@klyte45/euis-components/src/components/EuisTreeView";
-
-type State = {
-    showing: Record<string, boolean>;
-    currentTree?: GitHubTreeItem[];
-    currentFiles?: GitHubFileItem[];
-    loaded?: boolean;
-    error?: boolean;
-    resetDate?: Date
-};
+import { useEffect, useState } from "react";
 
 type Props = {
     treeUrl: string | null;
     doWithGitHubData: (x: GitHubFileItem, i: number) => JSX.Element;
 };
 
-export class NamesetGitHubCategoryCmp extends Component<Props, State> {
+export const NamesetGitHubCategoryCmp = ({ treeUrl, doWithGitHubData }: Props) => {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            showing: {},
-            currentTree: null,
-            currentFiles: null,
-        };
-        this.loadUrl()
-    }
-    async loadUrl() {
+    const [currentTree, setCurrentTree] = useState(null as GitHubTreeItem[]);
+    const [currentFiles, setCurrentFiles] = useState(null as GitHubFileItem[]);
+    const [loaded, setLoaded] = useState(undefined as boolean);
+    const [error, setError] = useState(undefined as boolean);
+    const [resetDate, setResetDate] = useState(undefined as Date);
+
+
+    const loadUrl = async () => {
         try {
-            const treeData = await GitHubAddressesFilesSevice.listAtTreePoint(this.props.treeUrl)
+            const treeData = await GitHubAddressesFilesSevice.listAtTreePoint(treeUrl)
             if (treeData.success) {
-                this.setState({
-                    currentTree: treeData.data.filter(x => x.type == "tree") as GitHubTreeItem[],
-                    currentFiles: treeData.data.filter(x => x.type == "blob") as GitHubFileItem[],
-                    loaded: true
-                })
+                setCurrentTree(treeData.data.filter(x => x.type == "tree") as GitHubTreeItem[])
+                setCurrentFiles(treeData.data.filter(x => x.type == "blob") as GitHubFileItem[])
+                setLoaded(true)
             } else {
-                this.setState({
-                    error: true,
-                    resetDate: treeData.resetTime ? new Date(treeData.resetTime) : null
-                })
+                setError(true)
+                setResetDate(treeData.resetTime ? new Date(treeData.resetTime) : null)
             }
         } catch {
-            this.setState({
-                error: true,
-                resetDate: null
-            })
+            setError(true)
+            setResetDate(null)
         }
     }
+    useEffect(() => { loadUrl() }, [])
 
 
+    if (error) return <div>{resetDate ? replaceArgs(translate("githubListing.errorLoadingRateLimit"), { formattedTime: resetDate.toString() }) : translate("githubListing.errorLoadingMsg")}</div>
+    if (!loaded) return <div>{translate("githubListing.loading")}</div>
+    if (!currentTree && !currentFiles) return <div>{translate("githubListing.noEntries")}</div>
+    return <>
+        {currentTree.sort((a, b) => a.path.localeCompare(b.path)).map((x, i) => {
+            return <EuisTreeView
+                nodeLabel={x.path.split("/").reverse()[0]}
+                key={i}
+            ><NamesetGitHubCategoryCmp treeUrl={x.url} doWithGitHubData={doWithGitHubData} /></EuisTreeView>;
+        })}
+        {currentFiles.sort((a, b) => a.path.localeCompare(b.path)).map(doWithGitHubData)}
+    </>;
 
-    render() {
-        if (this.state.error) return <div>{this.state.resetDate ? replaceArgs(translate("githubListing.errorLoadingRateLimit"), { formattedTime: this.state.resetDate.toString() }) : translate("githubListing.errorLoadingMsg")}</div>
-        if (!this.state.loaded) return <div>{translate("githubListing.loading")}</div>
-        if (!this.state.currentTree && !this.state.currentFiles) return <div>{translate("githubListing.noEntries")}</div>
-        return <>
-            {this.state.currentTree.sort((a, b) => a.path.localeCompare(b.path)).map((x, i) => {
-                return <EuisTreeView
-                    nodeLabel={x.path.split("/").reverse()[0]}
-                    key={i}
-                ><NamesetGitHubCategoryCmp treeUrl={x.url} doWithGitHubData={this.props.doWithGitHubData} /></EuisTreeView>;
-            })}
-            {this.state.currentFiles.sort((a, b) => a.path.localeCompare(b.path)).map(this.props.doWithGitHubData)}
-        </>;
-    }
-    toggle(item: string): void {
-        this.state.showing[item] = !this.state.showing[item];
-        this.setState(this.state);
-    }
 }
