@@ -34,6 +34,7 @@ namespace BelzontAdr
             updateSystem.UpdateAfter<AdrMainSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAfter<AdrEditorUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<AdrNamesetSystem>(SystemUpdatePhase.Modification2B);
+            updateSystem.UpdateAt<AdrVehicleSystem>(SystemUpdatePhase.ModificationEnd);
 #if DEBUG && ADR_AGGSYS
             updateSystem.UpdateAt<AdrAggregationSystem>(SystemUpdatePhase.Modification2B);
 #endif
