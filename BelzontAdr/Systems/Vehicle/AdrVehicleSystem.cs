@@ -1,6 +1,8 @@
 ﻿using Belzont.Interfaces;
 using Belzont.Serialization;
+using Belzont.Utils;
 using Colossal;
+using Colossal.Entities;
 using Colossal.Serialization.Entities;
 using Game;
 using Game.Common;
@@ -9,6 +11,8 @@ using Game.Simulation;
 using Game.Tools;
 using Game.Vehicles;
 using System;
+using System.Linq;
+using System.Reflection;
 using Unity.Burst;
 using Unity.Burst.Intrinsics;
 using Unity.Entities;
@@ -18,6 +22,8 @@ namespace BelzontAdr
 {
     public partial class AdrVehicleSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrVehicleSystem>
     {
+        private const uint CURRENT_VERSION = 0;
+
         #region Controller endpoints
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
@@ -41,6 +47,11 @@ namespace BelzontAdr
         private EntityQuery m_unregisteredVehiclesQuery;
 
         private ulong currentSerialNumber;
+
+        private VehiclePlateSettings roadVehiclesPlatesSettings;
+        private VehiclePlateSettings airVehiclesPlatesSettings;
+        private VehiclePlateSettings waterVehiclesPlatesSettings;
+
         protected override void OnCreate()
         {
             m_Barrier = World.GetOrCreateSystemManaged<ModificationEndBarrier>();
@@ -64,6 +75,23 @@ namespace BelzontAdr
         }
 
 
+        private bool weInitialized = false;
+        protected override void OnStartRunning()
+        {
+            base.OnStartRunning();
+            if (!weInitialized)
+            {
+                weInitialized = true;
+                if (AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == "BelzontWE") is Assembly weAssembly
+                    && weAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == "WEVehicleFn") is Type t
+                    && t.GetField("GetVehiclePlate_binding", RedirectorUtils.allFlags) is FieldInfo vehiclePlateField)
+                {
+                    var originalValue = vehiclePlateField.GetValue(null) as Func<Entity, string>;
+                    vehiclePlateField.SetValue(null, (Entity e) => EntityManager.TryGetComponent(e, out ADRVehicleData vehicleData) ? vehicleData.calculatedPlate.ToString() : originalValue(e));
+                }
+            }
+        }
+
         protected unsafe override void OnUpdate()
         {
             if (GameManager.instance.isGameLoading || GameManager.instance.isLoading) return;
@@ -76,7 +104,8 @@ namespace BelzontAdr
                     m_entityHdl = GetEntityTypeHandle(),
                     m_refDateTime = m_timeSystem.GetCurrentDateTime().Ticks,
                     m_serialNumber = counter.ToConcurrent(),
-                    refSerialNumber = currentSerialNumber
+                    refSerialNumber = currentSerialNumber,
+                    roadPlateSettings = roadVehiclesPlatesSettings
                 };
                 Dependency = job.ScheduleParallel(m_unregisteredVehiclesQuery, Dependency);
                 Dependency.GetAwaiter().OnCompleted(() =>
@@ -95,6 +124,8 @@ namespace BelzontAdr
             public EntityCommandBuffer.ParallelWriter m_cmdBuffer;
             public ulong refSerialNumber;
             public long m_refDateTime;
+            public VehiclePlateSettings roadPlateSettings;
+
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
@@ -103,14 +134,17 @@ namespace BelzontAdr
                 //   Debug.Log($"Chunk #{unfilteredChunkIndex} size: {length}");
                 for (int i = 0; i < length; i++)
                 {
+                    var serialNumber = refSerialNumber + (uint)m_serialNumber.Increment();
                     var newItem = new ADRVehicleData
                     {
-                        serialNumber = refSerialNumber + (uint)m_serialNumber.Increment(),
+                        serialNumber = serialNumber,
                         manifactureTicks = m_refDateTime,
+                        calculatedPlate = roadPlateSettings.GetPlateFor(0, serialNumber),
+                        checksumRule = roadPlateSettings.Checksum,
                     };
                     m_cmdBuffer.AddComponent(unfilteredChunkIndex, entites[i], newItem);
 #if DEBUG
-                    if (newItem.serialNumber % 5 == 0) UnityEngine.Debug.Log($"Added serial nº: {newItem.serialNumber}");
+                    if (newItem.serialNumber % 5 == 0) UnityEngine.Debug.Log($"Added serial nº: {newItem.serialNumber} => {newItem.calculatedPlate}");
 #endif
                 }
 
@@ -121,6 +155,11 @@ namespace BelzontAdr
         World IBelzontSerializableSingleton<AdrVehicleSystem>.World => World;
         void IBelzontSerializableSingleton<AdrVehicleSystem>.Deserialize<TReader>(TReader reader)
         {
+            reader.Read(out uint version);
+            if (version > CURRENT_VERSION)
+            {
+                throw new Exception($"Invalid version of {GetType()}!");
+            }
         }
 
         void IBelzontSerializableSingleton<AdrVehicleSystem>.Serialize<TWriter>(TWriter writer)
@@ -130,9 +169,15 @@ namespace BelzontAdr
         JobHandle IJobSerializable.SetDefaults(Context context)
         {
             currentSerialNumber = 0;
+            roadVehiclesPlatesSettings = VehiclePlateSettings.CreateRoadVehicleDefault();
+            airVehiclesPlatesSettings = VehiclePlateSettings.CreateAirVehicleDefault();
+            waterVehiclesPlatesSettings = VehiclePlateSettings.CreateWaterVehicleDefault();
             return default;
         }
+
         #endregion
     }
+
+
 }
 
