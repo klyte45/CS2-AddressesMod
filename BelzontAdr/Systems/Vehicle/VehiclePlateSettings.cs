@@ -22,17 +22,46 @@ namespace BelzontAdr
             private NativeList<NativeArray<ushort>> m_lettersAllowed;
             private uint m_flagsLocal;
             private uint m_randomSeed;
-
+            private uint m_flagsRandomized;
+            private int m_monthsFromEpochOffset;
+            private uint m_serialIncrementEachMonth;
             private Hash128 checksum;
-            private NativeList<NativeArray<ushort>> m_lettersAllowedRandomized;
+            private NativeList<NativeArray<ushort>> m_lettersAllowedProcessed;
 
 
+            public bool IsDirty { get; private set; }
+            public void Clear() => IsDirty = false;
+
+            public int MonthsFromEpochOffset
+            {
+                readonly get => m_monthsFromEpochOffset; set
+                {
+                    m_monthsFromEpochOffset = value;
+                    IsDirty = true;
+                }
+            }
+            public uint SerialIncrementEachMonth
+            {
+                readonly get => m_serialIncrementEachMonth; set
+                {
+                    m_serialIncrementEachMonth = value;
+                    IsDirty = true;
+                }
+            }
 
             public uint FlagsLocal
             {
                 readonly get => m_flagsLocal; set
                 {
                     m_flagsLocal = value;
+                    UpdateChecksum();
+                }
+            }
+            public uint FlagsRandomized
+            {
+                readonly get => m_flagsRandomized; set
+                {
+                    m_flagsRandomized = value;
                     UpdateChecksum();
                 }
             }
@@ -45,20 +74,28 @@ namespace BelzontAdr
             {
                 var listArr = m_lettersAllowed.ToArray(Allocator.Temp);
                 checksum = GuidUtils.Create(default, listArr.ToArray().SelectMany(x => x.SelectMany(y => y.ToBytes())).Union(m_flagsLocal.ToBytes()).Union(m_randomSeed.ToBytes()).ToArray());
-                if (m_lettersAllowedRandomized.IsCreated)
+                if (m_lettersAllowedProcessed.IsCreated)
                 {
-                    for (int i = 0; i < m_lettersAllowedRandomized.Length; i++)
+                    for (int i = 0; i < m_lettersAllowedProcessed.Length; i++)
                     {
-                        m_lettersAllowedRandomized[i].Dispose();
+                        m_lettersAllowedProcessed[i].Dispose();
                     }
-                    m_lettersAllowedRandomized.Dispose();
+                    m_lettersAllowedProcessed.Dispose();
                 }
-                m_lettersAllowedRandomized = new NativeList<NativeArray<ushort>>(Allocator.Persistent);
+                m_lettersAllowedProcessed = new NativeList<NativeArray<ushort>>(Allocator.Persistent);
                 for (int i = 0; i < m_lettersAllowed.Length; i++)
                 {
-                    m_lettersAllowedRandomized.Add(new NativeArray<ushort>(Shuffle(m_lettersAllowed[i].ToArray(), m_randomSeed + (uint)i), Allocator.Persistent));
+                    if (((1 << i) & m_flagsRandomized) != 0)
+                    {
+                        m_lettersAllowedProcessed.Add(new NativeArray<ushort>(Shuffle(m_lettersAllowed[i].ToArray(), m_randomSeed + (uint)i), Allocator.Persistent));
+                    }
+                    else
+                    {
+                        m_lettersAllowedProcessed.Add(m_lettersAllowed[i]);
+                    }
                 }
                 listArr.Dispose();
+                IsDirty = true;
             }
 
             public int SetDigitsQuantity(int quantity)
@@ -102,14 +139,18 @@ namespace BelzontAdr
                 UpdateChecksum();
             }
 
-            public FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial)
+            public FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch)
             {
                 var output = new NativeArray<Unicode.Rune>(m_lettersAllowed.Length, Allocator.Temp);
                 uint currentFlag = 1;
                 int currentIdx = m_lettersAllowed.Length - 1;
+                unchecked
+                {
+                    localSerial += (ulong)((monthsFromEpoch - m_monthsFromEpochOffset) * m_serialIncrementEachMonth);
+                }
                 do
                 {
-                    var currentArr = m_lettersAllowedRandomized[currentIdx];
+                    var currentArr = m_lettersAllowedProcessed[currentIdx];
                     if ((m_flagsLocal & currentFlag) != 0)
                     {
                         output[currentIdx] = new Unicode.Rune(currentArr[(int)(localSerial % (ulong)currentArr.Length)]);
@@ -203,7 +244,10 @@ namespace BelzontAdr
                     throw new Exception($"Invalid version of {GetType()}!");
                 }
                 reader.Read(out m_flagsLocal);
+                reader.Read(out m_flagsRandomized);
                 reader.Read(out m_randomSeed);
+                reader.Read(out m_monthsFromEpochOffset);
+                reader.Read(out m_serialIncrementEachMonth);
                 reader.Read(out int length);
                 if (m_lettersAllowed.IsCreated) m_lettersAllowed.Dispose();
                 m_lettersAllowed = new(length, Allocator.Persistent);
@@ -220,7 +264,10 @@ namespace BelzontAdr
             {
                 writer.Write(CURRENT_VERSION);
                 writer.Write(m_flagsLocal);
+                writer.Write(m_flagsRandomized);
                 writer.Write(m_randomSeed);
+                writer.Write(m_monthsFromEpochOffset);
+                writer.Write(m_serialIncrementEachMonth);
                 writer.Write(m_lettersAllowed.Length);
                 for (int i = 0; i < m_lettersAllowed.Length; i++)
                 {
