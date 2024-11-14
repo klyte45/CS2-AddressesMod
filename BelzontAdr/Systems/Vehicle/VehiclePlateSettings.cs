@@ -21,6 +21,7 @@ namespace BelzontAdr
             private const uint CURRENT_VERSION = 0;
             private NativeList<NativeArray<ushort>> m_lettersAllowed;
             private uint m_flagsLocal;
+            private uint m_flagsCarNumber;
             private uint m_randomSeed;
             private uint m_flagsRandomized;
             private int m_monthsFromEpochOffset;
@@ -57,6 +58,14 @@ namespace BelzontAdr
                     UpdateChecksum();
                 }
             }
+            public uint FlagsCarNumber
+            {
+                readonly get => m_flagsCarNumber; set
+                {
+                    m_flagsCarNumber = value;
+                    UpdateChecksum();
+                }
+            }
             public uint FlagsRandomized
             {
                 readonly get => m_flagsRandomized; set
@@ -73,7 +82,7 @@ namespace BelzontAdr
             private void UpdateChecksum()
             {
                 var listArr = m_lettersAllowed.ToArray(Allocator.Temp);
-                checksum = GuidUtils.Create(default, listArr.ToArray().SelectMany(x => x.SelectMany(y => y.ToBytes())).Union(m_flagsLocal.ToBytes()).Union(m_randomSeed.ToBytes()).ToArray());
+                checksum = GuidUtils.Create(default, listArr.ToArray().SelectMany(x => x.SelectMany(y => y.ToBytes())).Union(m_flagsLocal.ToBytes()).Union(m_flagsCarNumber.ToBytes()).Union(m_randomSeed.ToBytes()).ToArray());
                 if (m_lettersAllowedProcessed.IsCreated)
                 {
                     for (int i = 0; i < m_lettersAllowedProcessed.Length; i++)
@@ -139,7 +148,7 @@ namespace BelzontAdr
                 UpdateChecksum();
             }
 
-            public FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch)
+            public FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch, int compositionNumber = 0)
             {
                 var output = new NativeArray<Unicode.Rune>(m_lettersAllowed.Length, Allocator.Temp);
                 uint currentFlag = 1;
@@ -151,7 +160,12 @@ namespace BelzontAdr
                 do
                 {
                     var currentArr = m_lettersAllowedProcessed[currentIdx];
-                    if ((m_flagsLocal & currentFlag) != 0)
+                    if ((m_flagsCarNumber & currentFlag) != 0)
+                    {
+                        output[currentIdx] = new Unicode.Rune(currentArr[compositionNumber % currentArr.Length]);
+                        compositionNumber /= currentArr.Length;
+                    }
+                    else if ((m_flagsLocal & currentFlag) != 0)
                     {
                         output[currentIdx] = new Unicode.Rune(currentArr[(int)(localSerial % (ulong)currentArr.Length)]);
                         localSerial /= (ulong)currentArr.Length;
@@ -235,6 +249,23 @@ namespace BelzontAdr
                 result.UpdateChecksum();
                 return result;
             }
+            public static VehiclePlateSettings CreateRailVehicleDefault()
+            {
+                var alpha = ALPHA.ToUshortNativeArray();
+                var alphaNum = ALPHA_NUM.ToUshortNativeArray();
+                var result = new VehiclePlateSettings
+                {
+                    m_lettersAllowed = new NativeList<NativeArray<ushort>>(7, Allocator.Persistent)
+                    {
+                        alpha,alphaNum,alphaNum,alphaNum,"-".ToUshortNativeArray(),alphaNum
+                    },
+                    m_flagsLocal = 0b11100,
+                    m_flagsCarNumber = 0b1,
+                    m_randomSeed = (uint)new Random().Next()
+                };
+                result.UpdateChecksum();
+                return result;
+            }
 
             public void Deserialize<TReader>(TReader reader) where TReader : IReader
             {
@@ -244,6 +275,7 @@ namespace BelzontAdr
                     throw new Exception($"Invalid version of {GetType()}!");
                 }
                 reader.Read(out m_flagsLocal);
+                reader.Read(out m_flagsCarNumber);
                 reader.Read(out m_flagsRandomized);
                 reader.Read(out m_randomSeed);
                 reader.Read(out m_monthsFromEpochOffset);
@@ -264,6 +296,7 @@ namespace BelzontAdr
             {
                 writer.Write(CURRENT_VERSION);
                 writer.Write(m_flagsLocal);
+                writer.Write(m_flagsCarNumber);
                 writer.Write(m_flagsRandomized);
                 writer.Write(m_randomSeed);
                 writer.Write(m_monthsFromEpochOffset);

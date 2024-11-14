@@ -13,8 +13,6 @@ using Game.Vehicles;
 using System;
 using System.Linq;
 using System.Reflection;
-using Unity.Burst;
-using Unity.Burst.Intrinsics;
 using Unity.Entities;
 using Unity.Jobs;
 
@@ -27,7 +25,7 @@ namespace BelzontAdr
         #region Controller endpoints
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
-
+            eventCaller("vehicles.getAdrData", GetVehicleData);
         }
 
         private Action<string, object[]> eventCaller;
@@ -40,6 +38,11 @@ namespace BelzontAdr
         public void SetupEventBinder(Action<string, Delegate> eventCaller)
         {
         }
+
+        private ADRVehicleData GetVehicleData(Entity e)
+        {
+            return EntityManager.TryGetComponent<ADRVehicleData>(e, out var result) ? result : default;
+        }
         #endregion
 
         private ModificationEndBarrier m_Barrier;
@@ -50,6 +53,7 @@ namespace BelzontAdr
         private ulong currentSerialNumber;
 
         private VehiclePlateSettings roadVehiclesPlatesSettings;
+        private VehiclePlateSettings railVehiclesPlatesSettings;
         private VehiclePlateSettings airVehiclesPlatesSettings;
         private VehiclePlateSettings waterVehiclesPlatesSettings;
 
@@ -127,7 +131,13 @@ namespace BelzontAdr
                     airPlatesSettings = airVehiclesPlatesSettings,
                     waterPlatesSettings = waterVehiclesPlatesSettings,
                     m_aircraftLkp = GetComponentLookup<Aircraft>(),
-                    m_watercraftLkp = GetComponentLookup<Watercraft>()
+                    m_watercraftLkp = GetComponentLookup<Watercraft>(),
+                    m_trainLkp = GetComponentLookup<Train>(),
+                    railVehiclesPlatesSettings = railVehiclesPlatesSettings,
+                    m_adrVehicleDataLkp = GetComponentLookup<ADRVehicleData>(),
+                    m_adrVehiclePlateDataLkp = GetComponentLookup<ADRVehiclePlateDataDirty>(),
+                    m_controllerLkp = GetComponentLookup<Controller>(),
+                    m_layoutElementLkp = GetBufferLookup<LayoutElement>(),
                 };
                 Dependency = job.ScheduleParallel(m_unregisteredVehiclesQuery, Dependency);
                 Dependency.GetAwaiter().OnCompleted(() =>
@@ -145,94 +155,17 @@ namespace BelzontAdr
                     roadPlateSettings = roadVehiclesPlatesSettings,
                     airPlatesSettings = airVehiclesPlatesSettings,
                     waterPlatesSettings = waterVehiclesPlatesSettings,
+                    railVehiclesPlatesSettings = railVehiclesPlatesSettings,
+                    m_trainLkp = GetComponentLookup<Train>(),
                     m_aircraftLkp = GetComponentLookup<Aircraft>(),
                     m_watercraftLkp = GetComponentLookup<Watercraft>(),
-                    m_vehicleHdl = GetComponentTypeHandle<ADRVehicleData>()
+                    m_vehicleHdl = GetComponentTypeHandle<ADRVehicleData>(),
+                    m_adrVehicleDataLkp = GetComponentLookup<ADRVehicleData>(),
+                    m_adrVehiclePlateDataLkp = GetComponentLookup<ADRVehiclePlateDataDirty>(),
+                    m_controllerLkp = GetComponentLookup<Controller>(),
+                    m_layoutElementLkp = GetBufferLookup<LayoutElement>()
                 };
                 Dependency = job.ScheduleParallel(m_dirtyVehiclesPlateQuery, Dependency);
-            }
-        }
-
-        [BurstCompile]
-        private unsafe struct ADRRegisterVehicles : IJobChunk
-        {
-            public EntityTypeHandle m_entityHdl;
-            public NativeCounter.Concurrent m_serialNumber;
-            public EntityCommandBuffer.ParallelWriter m_cmdBuffer;
-            public ComponentLookup<Aircraft> m_aircraftLkp;
-            public ComponentLookup<Watercraft> m_watercraftLkp;
-            public ulong refSerialNumber;
-            public int m_refDateTime;
-            public VehiclePlateSettings roadPlateSettings;
-            public VehiclePlateSettings airPlatesSettings;
-            public VehiclePlateSettings waterPlatesSettings;
-
-
-            public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
-            {
-                var entites = chunk.GetNativeArray(m_entityHdl);
-                var length = entites.Length;
-                //   Debug.Log($"Chunk #{unfilteredChunkIndex} size: {length}");
-                for (int i = 0; i < length; i++)
-                {
-                    var settingEffective =
-                        m_aircraftLkp.HasComponent(entites[i]) ? airPlatesSettings
-                        : m_watercraftLkp.HasComponent(entites[i]) ? waterPlatesSettings
-                        : roadPlateSettings;
-
-                    var serialNumber = refSerialNumber + (uint)m_serialNumber.Increment();
-                    var newItem = new ADRVehicleData
-                    {
-                        serialNumber = serialNumber,
-                        manufactureMonthsFromEpoch = m_refDateTime,
-                        calculatedPlate = settingEffective.GetPlateFor(0, serialNumber, m_refDateTime),
-                        checksumRule = settingEffective.Checksum,
-                    };
-                    m_cmdBuffer.AddComponent(unfilteredChunkIndex, entites[i], newItem);
-#if DEBUG
-                    if (newItem.serialNumber % 5 == 0) UnityEngine.Debug.Log($"Added serial nº: {newItem.serialNumber} => {newItem.calculatedPlate}");
-#endif
-                }
-
-            }
-        }
-
-        [BurstCompile]
-        private unsafe struct ADRUpdateVehiclesPlates : IJobChunk
-        {
-            public EntityTypeHandle m_entityHdl;
-            public ComponentTypeHandle<ADRVehicleData> m_vehicleHdl;
-            public EntityCommandBuffer.ParallelWriter m_cmdBuffer;
-            public ComponentLookup<Aircraft> m_aircraftLkp;
-            public ComponentLookup<Watercraft> m_watercraftLkp;
-            public VehiclePlateSettings roadPlateSettings;
-            public VehiclePlateSettings airPlatesSettings;
-            public VehiclePlateSettings waterPlatesSettings;
-
-
-            public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
-            {
-                var entites = chunk.GetNativeArray(m_entityHdl);
-                var vehicles = chunk.GetNativeArray(ref m_vehicleHdl);
-                var length = entites.Length;
-
-                for (int i = 0; i < length; i++)
-                {
-                    var vehicleData = vehicles[i];
-                    var settingEffective =
-                        m_aircraftLkp.HasComponent(entites[i]) ? airPlatesSettings
-                        : m_watercraftLkp.HasComponent(entites[i]) ? waterPlatesSettings
-                        : roadPlateSettings;
-
-                    var serialNumber = vehicleData.serialNumber;
-
-                    vehicleData.calculatedPlate = settingEffective.GetPlateFor(0, serialNumber, vehicleData.manufactureMonthsFromEpoch);
-                    vehicleData.checksumRule = settingEffective.Checksum;
-
-                    m_cmdBuffer.SetComponent(unfilteredChunkIndex, entites[i], vehicleData);
-                    m_cmdBuffer.RemoveComponent<ADRVehiclePlateDataDirty>(unfilteredChunkIndex, entites[i]);
-                }
-
             }
         }
 
@@ -248,6 +181,7 @@ namespace BelzontAdr
             reader.Read(out roadVehiclesPlatesSettings);
             reader.Read(out waterVehiclesPlatesSettings);
             reader.Read(out airVehiclesPlatesSettings);
+            reader.Read(out railVehiclesPlatesSettings);
 
         }
 
@@ -257,6 +191,7 @@ namespace BelzontAdr
             writer.Write(roadVehiclesPlatesSettings);
             writer.Write(waterVehiclesPlatesSettings);
             writer.Write(airVehiclesPlatesSettings);
+            writer.Write(railVehiclesPlatesSettings);
         }
 
         JobHandle IJobSerializable.SetDefaults(Context context)
@@ -265,6 +200,7 @@ namespace BelzontAdr
             roadVehiclesPlatesSettings = VehiclePlateSettings.CreateRoadVehicleDefault();
             airVehiclesPlatesSettings = VehiclePlateSettings.CreateAirVehicleDefault();
             waterVehiclesPlatesSettings = VehiclePlateSettings.CreateWaterVehicleDefault();
+            railVehiclesPlatesSettings = VehiclePlateSettings.CreateRailVehicleDefault();
             return default;
         }
 

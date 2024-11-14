@@ -1,26 +1,9 @@
-﻿#if BEPINEX_CS2
-using AddressesCS2;
-using BepInEx;
-#endif
-using Belzont.Interfaces;
+﻿using Belzont.Interfaces;
 using Game;
 using Game.Modding;
 
 namespace BelzontAdr
 {
-#if BEPINEX_CS2
-    [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-    public class EUIBepinexPlugin : BaseUnityPlugin
-    {
-        public void Awake()
-        {
-            LogUtils.LogsEnabled = false;
-            LogUtils.Logger = Logger;
-            LogUtils.DoInfoLog($"STARTING MOD!");
-            Redirector.PatchAll();
-        }
-    }
-#endif
     public class AddressesCs2Mod : BasicIMod, IMod
     {
         public static new AddressesCs2Mod Instance => (AddressesCs2Mod)BasicIMod.Instance;

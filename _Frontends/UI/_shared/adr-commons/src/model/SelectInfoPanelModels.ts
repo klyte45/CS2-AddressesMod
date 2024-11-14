@@ -21,10 +21,18 @@ export enum AdrEntityType {
     PublicTransportStation,
     CargoTransportStation,
     RoadAggregation,
-    District
+    District,
+    Vehicle
 }
 export type EntityOption = {
     entity: Entity
     name: ValuableName
 
+}
+
+export type ADRVehicleData = {
+    cityOrigin: Entity;
+    serialNumber: number;
+    calculatedPlate: string;
+    manufactureMonthsFromEpoch: number;
 }

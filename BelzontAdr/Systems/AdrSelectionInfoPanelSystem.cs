@@ -52,6 +52,11 @@ namespace BelzontAdr
         private AdrEntityData GetEntityOptions(Entity e)
         {
             var result = new AdrEntityData();
+            if (EntityManager.HasComponent<ADRVehicleData>(e))
+            {
+                result.type = AdrEntityType.Vehicle;
+                return result;
+            }
             if (EntityManager.HasComponent<CustomName>(e))
             {
                 if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} uses custom name");
@@ -246,7 +251,8 @@ namespace BelzontAdr
             PublicTransportStation,
             CargoTransportStation,
             RoadAggregation,
-            District
+            District,
+            Vehicle
 
         }
 

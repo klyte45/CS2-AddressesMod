@@ -8,8 +8,17 @@ namespace BelzontAdr
 {
     public struct ADRVehicleData : IComponentData, IQueryTypeParameter, ISerializable
     {
+        public enum VehiclePlateCategory
+        {
+            Road,
+            Air,
+            Water,
+            Rail
+        }
+
         private const uint CURRENT_VERSION = 0;
 
+        public VehiclePlateCategory plateCategory;
         public Entity cityOrigin;
         public Colossal.Hash128 checksumRule;
         public ulong serialNumber;
@@ -24,6 +33,8 @@ namespace BelzontAdr
             {
                 throw new Exception($"Invalid version of {GetType()}!");
             }
+            reader.Read(out int pc);
+            plateCategory = (VehiclePlateCategory)pc;
             reader.Read(out cityOrigin);
             reader.Read(out checksumRule);
             reader.Read(out serialNumber);
@@ -34,6 +45,7 @@ namespace BelzontAdr
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
+            writer.Write((int)plateCategory);
             writer.Write(cityOrigin);
             writer.Write(checksumRule);
             writer.Write(serialNumber);

@@ -1,5 +1,3 @@
-import { Entity } from "../../";
-
 export type SimpleNameEntry = {
     IdString: string,
     Name: string,
