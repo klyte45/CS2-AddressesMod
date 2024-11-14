@@ -49,20 +49,13 @@ namespace BelzontAdr
                         {
                             continue;
                         }
-                        var carNumber = 0;
-                        for (; carNumber < layoutData.Length; carNumber++)
-                        {
-                            if (layoutData[carNumber].m_Vehicle == entity)
-                            {
-                                break;
-                            }
-                        }
+                        int carNumber = CalculateTrainCarNumber(entity, refEntity, layoutData);
                         var newItem = new ADRVehicleData
                         {
                             plateCategory = ADRVehicleData.VehiclePlateCategory.Rail,
                             serialNumber = serialNumber,
                             manufactureMonthsFromEpoch = m_refDateTime,
-                            calculatedPlate = railVehiclesPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, m_refDateTime, layoutData[0].m_Vehicle == refEntity ? carNumber : layoutData.Length - carNumber - 1),
+                            calculatedPlate = railVehiclesPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, m_refDateTime, carNumber),
                             checksumRule = railVehiclesPlatesSettings.Checksum,
                         };
                         m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);
@@ -94,6 +87,20 @@ namespace BelzontAdr
                     }
                 }
 
+            }
+
+            private static int CalculateTrainCarNumber(Entity entity, Entity refEntity, DynamicBuffer<LayoutElement> layoutData)
+            {
+                var carNumber = 0;
+                for (; carNumber < layoutData.Length; carNumber++)
+                {
+                    if (layoutData[carNumber].m_Vehicle == entity)
+                    {
+                        break;
+                    }
+                }
+                carNumber = layoutData[0].m_Vehicle == refEntity ? carNumber + 1 : layoutData.Length - carNumber;
+                return carNumber;
             }
         }
 

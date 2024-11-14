@@ -9,6 +9,7 @@ export * from "./src/service/NamesetService"
 export * from "./src/service/NamingRulesService"
 export * from "./src/service/SelectInfoPanelService"
 export * from "./src/service/EditorUISystemService"
+export * from "./src/service/VehicleService"
 
 export * from "../../_replacements/euis-components/src/utility/Entity"
 export * from "../../_replacements/euis-components/src/utility/name.utils" 

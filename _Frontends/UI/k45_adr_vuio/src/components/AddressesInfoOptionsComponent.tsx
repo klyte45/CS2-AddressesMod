@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { translate } from "utility/translate";
 import { SeedManagementOptionsComponent } from "./SeedManagementOptions";
 import { StationBuildingOptionsComponent } from "./StationBuildingOptions";
+import { VehicleDataDetailSection } from "./VehicleDataDetailSection";
 
 type Props = { entity: ValueBinding<Entity>, entityRef?: any, isEditor?: boolean, onChange?: () => any };
 
@@ -15,7 +16,7 @@ export const AddressesInfoOptionsComponent = ({ entity, entityRef, onChange }: P
 
     useEffect(() => {
         loadOptions(entity.value)
-    }, [entityRef,entity.value])
+    }, [entityRef, entity.value])
 
     const loadOptions = async (entity: Entity) => {
         if (!entity) {
@@ -42,8 +43,7 @@ export const AddressesInfoOptionsComponent = ({ entity, entityRef, onChange }: P
             case AdrEntityType.District:
                 return <SeedManagementOptionsComponent onChanged={() => onValueChanged()} entity={toEntityTyped(entity.value)} response={optionsResult} />
             case AdrEntityType.Vehicle:
-                return <>
-                </>
+                return <VehicleDataDetailSection entity={toEntityTyped(entity.value)} />
             default:
                 return <></>
         }

@@ -47,14 +47,7 @@ namespace BelzontAdr
                         {
                             continue;
                         }
-                        var carNumber = 1;
-                        for (; carNumber < layoutData.Length; carNumber++)
-                        {
-                            if (layoutData[carNumber].m_Vehicle == entity)
-                            {
-                                break;
-                            }
-                        }
+                        var carNumber = ADRRegisterVehicles.CalculateTrainCarNumber(entity, refEntity, layoutData);
                         vehicleData.calculatedPlate = railVehiclesPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, vehicleData.manufactureMonthsFromEpoch, carNumber);
                         vehicleData.checksumRule = railVehiclesPlatesSettings.Checksum;
                     }

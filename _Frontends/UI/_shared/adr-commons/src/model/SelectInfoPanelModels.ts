@@ -31,8 +31,17 @@ export type EntityOption = {
 }
 
 export type ADRVehicleData = {
+    plateCategory: EnumValueType<VehiclePlateCategory>
     cityOrigin: Entity;
     serialNumber: number;
     calculatedPlate: string;
     manufactureMonthsFromEpoch: number;
+}
+
+export enum VehiclePlateCategory
+{
+    Road,
+    Air,
+    Water,
+    Rail
 }

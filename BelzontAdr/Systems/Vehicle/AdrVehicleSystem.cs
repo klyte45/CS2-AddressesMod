@@ -39,10 +39,7 @@ namespace BelzontAdr
         {
         }
 
-        private ADRVehicleData GetVehicleData(Entity e)
-        {
-            return EntityManager.TryGetComponent<ADRVehicleData>(e, out var result) ? result : default;
-        }
+        private ADRVehicleData.CohtmlSafe GetVehicleData(Entity e) => ADRVehicleData.CohtmlSafe.From(EntityManager.TryGetComponent<ADRVehicleData>(e, out var result) ? result : default);
         #endregion
 
         private ModificationEndBarrier m_Barrier;

@@ -6,7 +6,7 @@ namespace BelzontAdr
     {
         public static int ToMonthsEpoch(this DateTime dt)
         {
-            return (dt.Year * 12) + dt.Month;
+            return (dt.Year * 12) + dt.DayOfYear - 1;
         }
 
     }

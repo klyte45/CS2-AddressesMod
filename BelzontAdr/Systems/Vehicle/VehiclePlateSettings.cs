@@ -148,7 +148,7 @@ namespace BelzontAdr
                 UpdateChecksum();
             }
 
-            public FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch, int compositionNumber = 0)
+            public FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch, int compositionNumber = 1)
             {
                 var output = new NativeArray<Unicode.Rune>(m_lettersAllowed.Length, Allocator.Temp);
                 uint currentFlag = 1;

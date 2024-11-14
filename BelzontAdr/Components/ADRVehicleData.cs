@@ -8,6 +8,29 @@ namespace BelzontAdr
 {
     public struct ADRVehicleData : IComponentData, IQueryTypeParameter, ISerializable
     {
+        public class CohtmlSafe
+        {
+            public VehiclePlateCategory plateCategory;
+            public Entity cityOrigin;
+            public ulong serialNumber;
+            public string calculatedPlate;
+            public int manufactureMonthsFromEpoch;
+
+            private CohtmlSafe() { }
+
+            public static CohtmlSafe From(ADRVehicleData data)
+            {
+                return new CohtmlSafe
+                {
+                    plateCategory = data.plateCategory,
+                    cityOrigin = data.cityOrigin,
+                    calculatedPlate = data.calculatedPlate.ToString(),
+                    manufactureMonthsFromEpoch = data.manufactureMonthsFromEpoch,
+                    serialNumber = data.serialNumber
+                };
+            }
+        }
+
         public enum VehiclePlateCategory
         {
             Road,
