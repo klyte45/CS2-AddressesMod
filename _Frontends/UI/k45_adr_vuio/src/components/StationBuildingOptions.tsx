@@ -4,7 +4,6 @@ import { Component, useState } from "react";
 import { translate } from "utility/translate";
 
 type Props = { entity: Entity, response: SelectedInfoOptions, onChanged: () => Promise<any> };
-type State = { loading: boolean }
 
 export const StationBuildingOptionsComponent = ({ entity, onChanged, response }: Props) => {
 

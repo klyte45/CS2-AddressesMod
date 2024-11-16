@@ -54,6 +54,64 @@ namespace BelzontAdr
         private VehiclePlateSettings airVehiclesPlatesSettings;
         private VehiclePlateSettings waterVehiclesPlatesSettings;
 
+
+
+        public VehiclePlateSettings RoadVehiclesPlatesSettings
+        {
+            get => roadVehiclesPlatesSettings; set
+            {
+                roadVehiclesPlatesSettings = value;
+                MarkEntitiesPlateDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+
+        private void MarkEntitiesPlateDirty(ComponentType specificType)
+        {
+            EntityManager.AddComponent<ADRVehiclePlateDataDirty>(GetEntityQuery(new EntityQueryDesc[]
+                 {
+                    new ()
+                    {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Vehicle>(),
+                            ComponentType.ReadOnly<ADRVehicleData>(),
+                            specificType
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+             }));
+        }
+
+        public VehiclePlateSettings RailVehiclesPlatesSettings
+        {
+            get => railVehiclesPlatesSettings; set
+            {
+                railVehiclesPlatesSettings = value;
+                MarkEntitiesPlateDirty(ComponentType.ReadOnly<Train>());
+            }
+        }
+        public VehiclePlateSettings AirVehiclesPlatesSettings
+        {
+            get => airVehiclesPlatesSettings; set
+            {
+                airVehiclesPlatesSettings = value;
+
+                MarkEntitiesPlateDirty(ComponentType.ReadOnly<Aircraft>());
+            }
+        }
+        public VehiclePlateSettings WaterVehiclesPlatesSettings
+        {
+            get => waterVehiclesPlatesSettings; set
+            {
+                waterVehiclesPlatesSettings = value;
+                MarkEntitiesPlateDirty(ComponentType.ReadOnly<Watercraft>());
+            }
+        }
+
         protected override void OnCreate()
         {
             m_Barrier = World.GetOrCreateSystemManaged<ModificationEndBarrier>();
@@ -168,6 +226,7 @@ namespace BelzontAdr
 
         #region Serialization
         World IBelzontSerializableSingleton<AdrVehicleSystem>.World => World;
+
         void IBelzontSerializableSingleton<AdrVehicleSystem>.Deserialize<TReader>(TReader reader)
         {
             reader.Read(out uint version);
@@ -203,7 +262,5 @@ namespace BelzontAdr
 
         #endregion
     }
-
-
 }
 

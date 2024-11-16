@@ -89,7 +89,7 @@ namespace BelzontAdr
 
             }
 
-            private static int CalculateTrainCarNumber(Entity entity, Entity refEntity, DynamicBuffer<LayoutElement> layoutData)
+            public static int CalculateTrainCarNumber(Entity entity, Entity refEntity, DynamicBuffer<LayoutElement> layoutData)
             {
                 var carNumber = 0;
                 for (; carNumber < layoutData.Length; carNumber++)
