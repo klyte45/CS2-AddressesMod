@@ -23,10 +23,10 @@ namespace BelzontAdr
             public BufferLookup<LayoutElement> m_layoutElementLkp;
             public ulong refSerialNumber;
             public int m_refDateTime;
-            public VehiclePlateSettings roadPlateSettings;
-            public VehiclePlateSettings airPlatesSettings;
-            public VehiclePlateSettings waterPlatesSettings;
-            public VehiclePlateSettings railVehiclesPlatesSettings;
+            public VehiclePlateSettings.SafeStruct roadPlatesSettings;
+            public VehiclePlateSettings.SafeStruct airPlatesSettings;
+            public VehiclePlateSettings.SafeStruct waterPlatesSettings;
+            public VehiclePlateSettings.SafeStruct railPlatesSettings;
 
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
@@ -55,18 +55,18 @@ namespace BelzontAdr
                             plateCategory = ADRVehicleData.VehiclePlateCategory.Rail,
                             serialNumber = serialNumber,
                             manufactureMonthsFromEpoch = m_refDateTime,
-                            calculatedPlate = railVehiclesPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, m_refDateTime, carNumber),
-                            checksumRule = railVehiclesPlatesSettings.Checksum,
+                            calculatedPlate = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, m_refDateTime, carNumber),
+                            checksumRule = railPlatesSettings.Checksum,
                         };
                         m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);
                     }
                     else
                     {
                         var settingEffective =
-                            isTrain ? railVehiclesPlatesSettings
+                            isTrain ? railPlatesSettings
                             : m_aircraftLkp.HasComponent(entity) ? airPlatesSettings
                             : m_watercraftLkp.HasComponent(entity) ? waterPlatesSettings
-                            : roadPlateSettings;
+                            : roadPlatesSettings;
                         var plateCategory =
                             isTrain ? ADRVehicleData.VehiclePlateCategory.Rail
                             : m_aircraftLkp.HasComponent(entity) ? ADRVehicleData.VehiclePlateCategory.Air

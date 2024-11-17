@@ -45,7 +45,7 @@ export const OverrideSettingsCmp = ({
     TabsNames.AirPlates,
   ]
 
-  const [currentTab, setCurrentTab] = useState(tabsOrder[0] as TabsNames);
+  const [currentTab, setCurrentTab] = useState(TabsNames.RoadPlates ?? tabsOrder[0] as TabsNames);
   const [simpleFiles, setSimpleFiles] = useState([] as SimpleNameEntry[]);
   const [innerContextSimpleFiles, setInnerContextSimpleFiles] = useState([] as SimpleNameEntry[]);
   const [indexedSimpleFiles, setIndexedSimpleFiles] = useState({} as Record<string, SimpleNameEntry>);
@@ -72,10 +72,10 @@ export const OverrideSettingsCmp = ({
         currentSettings={currentSettings}
         innerContextSimpleFiles={innerContextSimpleFiles}
         districts={districts} />,
-      [TabsNames.RoadPlates]: <VehiclePlateControllerComponent prefix="k45::adr.vehiclePlate.road" />,
-      [TabsNames.WaterPlates]: <VehiclePlateControllerComponent prefix="k45::adr.vehiclePlate.water" />,
-      [TabsNames.AirPlates]: <VehiclePlateControllerComponent prefix="k45::adr.vehiclePlate.air" />,
-      [TabsNames.RailPlates]: <VehiclePlateControllerComponent prefix="k45::adr.vehiclePlate.rail" />
+      [TabsNames.RoadPlates]: <VehiclePlateControllerComponent type="road" />,
+      [TabsNames.WaterPlates]: <VehiclePlateControllerComponent type="water" />,
+      [TabsNames.AirPlates]: <VehiclePlateControllerComponent type="air" />,
+      [TabsNames.RailPlates]: <VehiclePlateControllerComponent type="rail" />
     }
   }
 

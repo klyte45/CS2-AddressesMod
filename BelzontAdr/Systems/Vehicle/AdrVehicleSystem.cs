@@ -49,10 +49,10 @@ namespace BelzontAdr
 
         private ulong currentSerialNumber;
 
-        private VehiclePlateSettings roadVehiclesPlatesSettings;
-        private VehiclePlateSettings railVehiclesPlatesSettings;
-        private VehiclePlateSettings airVehiclesPlatesSettings;
-        private VehiclePlateSettings waterVehiclesPlatesSettings;
+        private VehiclePlateSettings roadVehiclesPlatesSettings = new();
+        private VehiclePlateSettings railVehiclesPlatesSettings = new();
+        private VehiclePlateSettings airVehiclesPlatesSettings = new();
+        private VehiclePlateSettings waterVehiclesPlatesSettings = new();
 
 
 
@@ -169,12 +169,24 @@ namespace BelzontAdr
             }
         }
 
+
         protected unsafe override void OnUpdate()
         {
-            if (GameManager.instance.isGameLoading || GameManager.instance.isLoading) return;
+            if (GameManager.instance.isGameLoading || GameManager.instance.isLoading)
+            {
+                roadVehiclesPlatesSettings ??= VehiclePlateSettings.CreateRoadVehicleDefault(m_timeSystem);
+                airVehiclesPlatesSettings ??= VehiclePlateSettings.CreateAirVehicleDefault(m_timeSystem);
+                waterVehiclesPlatesSettings ??= VehiclePlateSettings.CreateWaterVehicleDefault(m_timeSystem);
+                railVehiclesPlatesSettings ??= VehiclePlateSettings.CreateRailVehicleDefault(m_timeSystem);
+                return;
+            }
             if (!m_unregisteredVehiclesQuery.IsEmptyIgnoreFilter)
             {
                 var counter = new NativeCounter(Unity.Collections.Allocator.Temp);
+                var roadPlatesSettings = roadVehiclesPlatesSettings.ForBurstJob;
+                var airPlatesSettings = airVehiclesPlatesSettings.ForBurstJob;
+                var waterPlatesSettings = waterVehiclesPlatesSettings.ForBurstJob;
+                var railPlatesSettings = railVehiclesPlatesSettings.ForBurstJob;
                 var job = new ADRRegisterVehicles
                 {
                     m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
@@ -182,13 +194,13 @@ namespace BelzontAdr
                     m_refDateTime = m_timeSystem.GetCurrentDateTime().ToMonthsEpoch(),
                     m_serialNumber = counter.ToConcurrent(),
                     refSerialNumber = currentSerialNumber,
-                    roadPlateSettings = roadVehiclesPlatesSettings,
-                    airPlatesSettings = airVehiclesPlatesSettings,
-                    waterPlatesSettings = waterVehiclesPlatesSettings,
+                    roadPlatesSettings = roadPlatesSettings,
+                    airPlatesSettings = airPlatesSettings,
+                    waterPlatesSettings = waterPlatesSettings,
+                    railPlatesSettings = railPlatesSettings,
                     m_aircraftLkp = GetComponentLookup<Aircraft>(),
                     m_watercraftLkp = GetComponentLookup<Watercraft>(),
                     m_trainLkp = GetComponentLookup<Train>(),
-                    railVehiclesPlatesSettings = railVehiclesPlatesSettings,
                     m_adrVehicleDataLkp = GetComponentLookup<ADRVehicleData>(),
                     m_adrVehiclePlateDataLkp = GetComponentLookup<ADRVehiclePlateDataDirty>(),
                     m_controllerLkp = GetComponentLookup<Controller>(),
@@ -200,17 +212,25 @@ namespace BelzontAdr
                     currentSerialNumber += (uint)counter.Count;
                     counter.Dispose();
                 });
+                roadPlatesSettings.Dispose(Dependency);
+                airPlatesSettings.Dispose(Dependency);
+                waterPlatesSettings.Dispose(Dependency);
+                railPlatesSettings.Dispose(Dependency);
             }
             if (!m_dirtyVehiclesPlateQuery.IsEmptyIgnoreFilter)
             {
+                var roadPlatesSettings = roadVehiclesPlatesSettings.ForBurstJob;
+                var airPlatesSettings = airVehiclesPlatesSettings.ForBurstJob;
+                var waterPlatesSettings = waterVehiclesPlatesSettings.ForBurstJob;
+                var railPlatesSettings = railVehiclesPlatesSettings.ForBurstJob;
                 var job = new ADRUpdateVehiclesPlates
                 {
                     m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
                     m_entityHdl = GetEntityTypeHandle(),
-                    roadPlateSettings = roadVehiclesPlatesSettings,
-                    airPlatesSettings = airVehiclesPlatesSettings,
-                    waterPlatesSettings = waterVehiclesPlatesSettings,
-                    railVehiclesPlatesSettings = railVehiclesPlatesSettings,
+                    roadPlatesSettings = roadPlatesSettings,
+                    airPlatesSettings = airPlatesSettings,
+                    waterPlatesSettings = waterPlatesSettings,
+                    railPlatesSettings = railPlatesSettings,
                     m_trainLkp = GetComponentLookup<Train>(),
                     m_aircraftLkp = GetComponentLookup<Aircraft>(),
                     m_watercraftLkp = GetComponentLookup<Watercraft>(),
@@ -221,6 +241,11 @@ namespace BelzontAdr
                     m_layoutElementLkp = GetBufferLookup<LayoutElement>()
                 };
                 Dependency = job.ScheduleParallel(m_dirtyVehiclesPlateQuery, Dependency);
+
+                roadPlatesSettings.Dispose(Dependency);
+                airPlatesSettings.Dispose(Dependency);
+                waterPlatesSettings.Dispose(Dependency);
+                railPlatesSettings.Dispose(Dependency);
             }
         }
 
@@ -229,15 +254,21 @@ namespace BelzontAdr
 
         void IBelzontSerializableSingleton<AdrVehicleSystem>.Deserialize<TReader>(TReader reader)
         {
+
             reader.Read(out uint version);
             if (version > CURRENT_VERSION)
             {
                 throw new Exception($"Invalid version of {GetType()}!");
             }
-            reader.Read(out roadVehiclesPlatesSettings);
-            reader.Read(out waterVehiclesPlatesSettings);
-            reader.Read(out airVehiclesPlatesSettings);
-            reader.Read(out railVehiclesPlatesSettings);
+            roadVehiclesPlatesSettings = new();
+            waterVehiclesPlatesSettings = new();
+            airVehiclesPlatesSettings = new();
+            railVehiclesPlatesSettings = new();
+
+            reader.Read(roadVehiclesPlatesSettings);
+            reader.Read(waterVehiclesPlatesSettings);
+            reader.Read(airVehiclesPlatesSettings);
+            reader.Read(railVehiclesPlatesSettings);
 
         }
 
@@ -253,10 +284,11 @@ namespace BelzontAdr
         JobHandle IJobSerializable.SetDefaults(Context context)
         {
             currentSerialNumber = 0;
-            roadVehiclesPlatesSettings = VehiclePlateSettings.CreateRoadVehicleDefault();
-            airVehiclesPlatesSettings = VehiclePlateSettings.CreateAirVehicleDefault();
-            waterVehiclesPlatesSettings = VehiclePlateSettings.CreateWaterVehicleDefault();
-            railVehiclesPlatesSettings = VehiclePlateSettings.CreateRailVehicleDefault();
+
+            roadVehiclesPlatesSettings = null;
+            airVehiclesPlatesSettings = null;
+            waterVehiclesPlatesSettings = null;
+            railVehiclesPlatesSettings = null;
             return default;
         }
 

@@ -7,7 +7,7 @@ type Props = {
   simpleFiles: SimpleNameEntry[], indexedSimpleFiles: Record<string, SimpleNameEntry>, currentSettings: AdrCitywideSettings
 }
 
-export const OverrideCitizenTab = ({ simpleFiles, indexedSimpleFiles, currentSettings }): JSX.Element => {
+export const OverrideCitizenTab = ({ simpleFiles, indexedSimpleFiles, currentSettings }: Props): JSX.Element => {
   return <>
     <Cs2FormLine title={translate("overrideSettings.maleNamesFile")}>
       <Cs2Select
@@ -16,7 +16,7 @@ export const OverrideCitizenTab = ({ simpleFiles, indexedSimpleFiles, currentSet
         getOptionValue={(x: SimpleNameEntry) => x?.IdString}
         onChange={(x) => NamingRulesService.setCitizenMaleNameOverridesStr(x.IdString)}
         value={indexedSimpleFiles[currentSettings.CitizenMaleNameOverridesStr]}
-        defaultValue={defaultSetting} />
+        defaultValue={defaultSetting()} />
     </Cs2FormLine>
     <Cs2FormLine title={translate("overrideSettings.femaleNamesFile")}>
       <Cs2Select
@@ -25,7 +25,7 @@ export const OverrideCitizenTab = ({ simpleFiles, indexedSimpleFiles, currentSet
         getOptionValue={(x: SimpleNameEntry) => x?.IdString}
         onChange={(x) => NamingRulesService.setCitizenFemaleNameOverridesStr(x.IdString)}
         value={indexedSimpleFiles[currentSettings.CitizenFemaleNameOverridesStr]}
-        defaultValue={defaultSetting} />
+        defaultValue={defaultSetting()} />
     </Cs2FormLine>
     <Cs2FormLine title={translate("overrideSettings.surnamesFile")}>
       <Cs2Select
@@ -34,7 +34,7 @@ export const OverrideCitizenTab = ({ simpleFiles, indexedSimpleFiles, currentSet
         getOptionValue={(x: SimpleNameEntry) => x?.IdString}
         onChange={(x) => NamingRulesService.setCitizenSurnameOverridesStr(x.IdString)}
         value={indexedSimpleFiles[currentSettings.CitizenSurnameOverridesStr]}
-        defaultValue={defaultSetting} />
+        defaultValue={defaultSetting()} />
     </Cs2FormLine>
     <Cs2FormLine title={translate("overrideSettings.firstNameAtStart")}>
       <Cs2Checkbox isChecked={() => currentSettings?.surnameAtFirst} onValueToggle={(x) => NamingRulesService.setSurnameAtFirst(x)} />
@@ -48,7 +48,7 @@ export const OverrideCitizenTab = ({ simpleFiles, indexedSimpleFiles, currentSet
         getOptionValue={(x: SimpleNameEntry) => x?.IdString}
         onChange={(x) => NamingRulesService.setCitizenDogOverridesStr(x.IdString)}
         value={indexedSimpleFiles[currentSettings.CitizenDogOverridesStr]}
-        defaultValue={defaultSetting} />
+        defaultValue={defaultSetting()} />
     </Cs2FormLine>
   </>;
 }

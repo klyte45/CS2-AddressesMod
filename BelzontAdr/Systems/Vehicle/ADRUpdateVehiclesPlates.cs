@@ -15,10 +15,10 @@ namespace BelzontAdr
             public EntityCommandBuffer.ParallelWriter m_cmdBuffer;
             public ComponentLookup<Aircraft> m_aircraftLkp;
             public ComponentLookup<Watercraft> m_watercraftLkp;
-            public VehiclePlateSettings roadPlateSettings;
-            public VehiclePlateSettings airPlatesSettings;
-            public VehiclePlateSettings waterPlatesSettings;
-            public VehiclePlateSettings railVehiclesPlatesSettings;
+            public VehiclePlateSettings.SafeStruct roadPlatesSettings;
+            public VehiclePlateSettings.SafeStruct airPlatesSettings;
+            public VehiclePlateSettings.SafeStruct waterPlatesSettings;
+            public VehiclePlateSettings.SafeStruct railPlatesSettings;
             public ComponentLookup<Train> m_trainLkp;
             public ComponentLookup<Controller> m_controllerLkp;
             public ComponentLookup<ADRVehicleData> m_adrVehicleDataLkp;
@@ -48,16 +48,16 @@ namespace BelzontAdr
                             continue;
                         }
                         var carNumber = ADRRegisterVehicles.CalculateTrainCarNumber(entity, refEntity, layoutData);
-                        vehicleData.calculatedPlate = railVehiclesPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, vehicleData.manufactureMonthsFromEpoch, carNumber);
-                        vehicleData.checksumRule = railVehiclesPlatesSettings.Checksum;
+                        vehicleData.calculatedPlate = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, vehicleData.manufactureMonthsFromEpoch, carNumber);
+                        vehicleData.checksumRule = railPlatesSettings.Checksum;
                     }
                     else
                     {
                         var settingEffective =
-                            isTrain ? railVehiclesPlatesSettings
+                            isTrain ? railPlatesSettings
                             : m_aircraftLkp.HasComponent(entity) ? airPlatesSettings
                             : m_watercraftLkp.HasComponent(entity) ? waterPlatesSettings
-                            : roadPlateSettings;
+                            : roadPlatesSettings;
 
                         var serialNumber = vehicleData.serialNumber;
 

@@ -23,10 +23,12 @@ export const VehicleDataDetailSection = ({ entity }: Props) => {
     const VR = VanillaComponentResolver.instance;
     if (!VR || !currentData) return <></>
 
+    var refMonth = currentData.manufactureMonthsFromEpoch;
+
     return <>
         <VR.InfoRow left={<>{translate(`vehicleDataVuio.vehiclePlateTitle.${VehiclePlateCategory[currentData.plateCategory.value__]}`)}</>} right={currentData.calculatedPlate} />
         <VR.InfoRow subRow={true} left={<>{translate("vehicleDataVuio.serialNumber")}</>} right={currentData.serialNumber} />
-        <VR.InfoRow subRow={true} left={<>{translate("vehicleDataVuio.manufactureMonthsFromEpoch")}</>} right={engine.translate("Common.MONTH_SHORT:" + (currentData.manufactureMonthsFromEpoch % 12 )) + " " + Math.floor(currentData.manufactureMonthsFromEpoch / 12)} />
+        <VR.InfoRow subRow={true} left={<>{translate("vehicleDataVuio.manufactureMonthsFromEpoch")}</>} right={engine.translate("Common.MONTH_SHORT:" + (refMonth % 12)) + " " + Math.floor(refMonth / 12)} />
     </>
 
 

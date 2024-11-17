@@ -46,15 +46,15 @@ export default () => {
 
   const menus: MenuItem[] = [
     {
+      iconUrl: "coui://uil/Standard/Tools.svg",
+      name: translate("overrideSettings.title"),
+      panelContent: <OverrideSettingsCmp currentSettings={currentSettings} districts={districts} cityNamesets={cityNamesets}/>
+    },
+    {
       iconUrl: "coui://uil/Standard/NameSort.svg",
       name: translate("namesetManagement.title"),
       panelContent: <CityNamesetLibraryCmp namesets={cityNamesets} />,
       tintedIcon: true
-    },
-    {
-      iconUrl: "coui://uil/Standard/Tools.svg",
-      name: translate("overrideSettings.title"),
-      panelContent: <OverrideSettingsCmp currentSettings={currentSettings} districts={districts} cityNamesets={cityNamesets}/>
     },
     {
       iconUrl: "coui://uil/Standard/Highway.svg",
