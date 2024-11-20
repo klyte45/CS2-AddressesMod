@@ -93,14 +93,9 @@ namespace BelzontAdr
             m_lettersAllowedProcessed = new string[m_lettersAllowed.Length];
             for (int i = 0; i < m_lettersAllowed.Length; i++)
             {
-                if (((1 << i) & m_flagsRandomized) != 0)
-                {
-                    m_lettersAllowedProcessed[i] = string.Join("", Shuffle(m_lettersAllowed[i].Split(""), m_randomSeed + (uint)i));
-                }
-                else
-                {
-                    m_lettersAllowedProcessed[i] = m_lettersAllowed[i];
-                }
+                m_lettersAllowedProcessed[i] = ((1 << i) & m_flagsRandomized) != 0
+                    ? string.Join("", Shuffle(m_lettersAllowed[i].SplitIntoCharacters().ToArray(), m_randomSeed + (uint)i))
+                    : m_lettersAllowed[i];
             }
             IsDirty = true;
         }
