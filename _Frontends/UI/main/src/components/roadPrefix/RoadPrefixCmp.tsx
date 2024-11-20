@@ -18,19 +18,24 @@ const basicObj: AdrRoadPrefixSetting = {
   FallbackRule: basicRule
 }
 
-export const RoadPrefixCmp = ({
-  currentSettings: currentSettingsCity
-}: {
-  currentSettings: AdrCitywideSettings
-}) => {
+export const RoadPrefixCmp = ({ }) => {
   const [currentEditingRule, setCurrentEditingRule] = useState(-1);
   const [saveButtonState, setSaveButtonState] = useState(0);
   const [loadButtonState, setLoadButtonState] = useState(0);
   const [currentSettings, setCurrentSettings] = useState(basicObj);
 
+  const getSettings = async () => {
+    setCurrentSettings((await NamingRulesService.getCurrentCitywideSettings()).roadPrefixSetting);
+  }
+  
   useEffect(() => {
-    setCurrentSettings(currentSettingsCity.roadPrefixSetting || basicObj)
-  }, [currentSettingsCity.roadPrefixSetting])
+    getSettings();
+    NamingRulesService.onCityDataReloaded(() => { getSettings(); });
+
+    return () => {
+      NamingRulesService.offCityDataReloaded();
+    }
+  }, []);
 
   const doSave = async () => {
     setSaveButtonState(1);

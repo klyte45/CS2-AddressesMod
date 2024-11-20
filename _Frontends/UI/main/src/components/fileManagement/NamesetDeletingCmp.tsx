@@ -15,6 +15,6 @@ export const NamesetDeletingCmp = ({ namesetData, onBack, onOk }: Props) =>
             <button className="negativeBtn" onClick={() => onOk(namesetData)}>{translate("namesetDelete.yes")}</button>
             <button className="darkestBtn" onClick={onBack}>{translate("namesetDelete.no")}</button>
         </>}>
-            <NamesetWordsContainer values={namesetData.Values} />
+            <NamesetWordsContainer values={namesetData.Values}  valuesAlternative={namesetData.ValuesAlternative}/>
         </DefaultPanelScreen>
     </>

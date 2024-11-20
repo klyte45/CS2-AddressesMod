@@ -8,9 +8,28 @@
         padding-left: 10rem;
         padding-right: 10rem;
         white-space: nowrap;
-        background-color: var(--selectedColorDark);
         margin: 5rem 4rem;
+        background-color: var(--selectedColorDark);
         position: relative;
+
+        &.double{
+            background-color: #7a2727;
+        }
+
+        .value {
+            display: flex;
+
+            .alt {
+                display: flex;
+                background-color: var(--accentColorDarker-hover);
+                margin-left: 5rem;
+                border-top-right-radius: 10rem 10rem;
+                border-bottom-right-radius: 10rem 10rem;
+                padding-right: 12rem;
+                padding-left: 5rem;
+                margin-right: -12rem;
+            }
+        }
 
         .quantity {
             position: absolute;
@@ -18,7 +37,7 @@
             top: -10rem;
             right: -10rem;
             border-radius: 999rem;
-            background-color: var(--accentColorDark);
+            background-color: var(--dialogButtonNoColor);
             height: 20.000000rem;
             width: 20.000000rem;
             text-align: center;

@@ -11,55 +11,24 @@ import { useEffect, useState } from "react";
 
 export default () => {
 
-  useEffect(() => {
-    getSettings();
-    NamingRulesService.onCityDataReloaded(() => { getSettings(); });
-    listDistricts();
-    DistrictRelativeService.onDistrictChanged(() => listDistricts());
-    listCityNamesets();
-    NamesetService.doOnCityNamesetsUpdated(() => listCityNamesets());
-
-    return () => {
-      DistrictRelativeService.offDistrictChanged();
-      NamingRulesService.offCityDataReloaded();
-      NamesetService.offCityNamesetsUpdated();
-    }
-  }, []);
-
-  const [currentSettings, setCurrentSettings] = useState({} as AdrCitywideSettings);
-  const [districts, setDistricts] = useState([] as DistrictListItem[])
-  const [cityNamesets, setCityNamesets] = useState([] as SimpleNameEntry[])
-
-  const getSettings = async () => {
-    setCurrentSettings(await NamingRulesService.getCurrentCitywideSettings());
-  }
-
-  const listDistricts = async () => {
-    const districtNames = (await DistrictRelativeService.listAllDistricts())?.sort((a, b) => nameToString(a.Name).localeCompare(nameToString(b.Name), undefined, { sensitivity: "base" }))
-    setDistricts(districtNames);
-  }
-
-  const listCityNamesets = async () => {
-    setCityNamesets(await NamesetService.listCityNamesets());
-  }
 
 
   const menus: MenuItem[] = [
     {
-      iconUrl: "coui://uil/Standard/Tools.svg",
-      name: translate("overrideSettings.title"),
-      panelContent: <OverrideSettingsCmp currentSettings={currentSettings} districts={districts} cityNamesets={cityNamesets}/>
-    },
-    {
       iconUrl: "coui://uil/Standard/NameSort.svg",
       name: translate("namesetManagement.title"),
-      panelContent: <CityNamesetLibraryCmp namesets={cityNamesets} />,
+      panelContent: <CityNamesetLibraryCmp/>,
       tintedIcon: true
+    },
+    {
+      iconUrl: "coui://uil/Standard/Tools.svg",
+      name: translate("overrideSettings.title"),
+      panelContent: <OverrideSettingsCmp />
     },
     {
       iconUrl: "coui://uil/Standard/Highway.svg",
       name: translate("roadPrefixSettings.title"),
-      panelContent: <RoadPrefixCmp currentSettings={currentSettings} />
+      panelContent: <RoadPrefixCmp />
     }
   ]
   return <>

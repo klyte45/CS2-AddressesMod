@@ -22,9 +22,17 @@ namespace BelzontAdr
         public AdrNameFile(string name, IEnumerable<string> values)
         {
             Name = name;
-            var rawList = values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).Select(x => x.Split(";"));
+            var rawList = values?.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).Select(x => x.Split(";").Where(x => !x.IsNullOrWhitespace()).ToArray());
             Values = new ImmutableList<string>(rawList?.Select(x => x[0].Trim()).ToList() ?? new());
             ValuesAlternative = new ImmutableList<string>(rawList?.Select(x => (x.Length > 1 ? x[1] : x[0]).Trim()).ToList() ?? new());
+            RecalculateChecksum();
+            Id = GuidUtils.Create(Checksum, name);
+        }
+        public AdrNameFile(string name, IEnumerable<string> values, IEnumerable<string> valuesAlternative)
+        {
+            Name = name;            
+            Values = new ImmutableList<string>(values.ToList());
+            ValuesAlternative = new ImmutableList<string>(valuesAlternative.ToList());
             RecalculateChecksum();
             Id = GuidUtils.Create(Checksum, name);
         }

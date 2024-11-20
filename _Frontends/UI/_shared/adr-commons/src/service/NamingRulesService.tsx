@@ -2,6 +2,7 @@ export type SimpleNameEntry = {
     IdString: string,
     Name: string,
     Values: string[]
+    ValuesAlternative: string[]
     _CurrName?: string
 }
 export type ExtendedSimpleNameEntry = SimpleNameEntry & {

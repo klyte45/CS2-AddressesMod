@@ -7,13 +7,16 @@ import { useState } from "react";
 
 type Props = {
   values: string[];
+  valuesAlternative: string[];
 };
 
-export const NamesetWordsContainer = ({ values }: Props) => {
+export const NamesetWordsContainer = ({ values, valuesAlternative }: Props) => {
 
   const [sortedValues, setSortedValues] = useState([] as string[])
 
-  const groupedValues = values.reduce((p, n) => {
+  const targetValues = values.map((x, i) => x == valuesAlternative[i] ? x : `${x}|${valuesAlternative[i]}`)
+
+  const groupedValues = targetValues.reduce((p, n) => {
     p[n] = (p[n] ?? 0) + 1;
     return p;
   }, {} as Record<string, number>);
@@ -24,8 +27,9 @@ export const NamesetWordsContainer = ({ values }: Props) => {
   return <>
     <GameScrollComponent contentClass="wordsContainer">{sortedValues.sort((a, b) => groupedValues[b] - groupedValues[a]).map((y, i) => {
       const x = groupedValues[y];
-      return <div className="nameToken" key={i}>
-        <div className="value">{y}</div>
+      const valueArr = y.split("|");
+      return <div className={["nameToken", valueArr.length > 1 && "double"].join(" ")} key={i}>
+        {valueArr.length == 1 ? <div className="value">{y}</div> : <div className="value">{valueArr[0]}<div className='alt'>{valueArr[1]}</div></div>}
         {x > 1 && <div className="quantity">{x}</div>}
       </div>;
     })}</GameScrollComponent>

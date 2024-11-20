@@ -1,5 +1,5 @@
 import { translate } from "#utility/translate";
-import { AdrCitywideSettings, DistrictListItem, NamesetService, SimpleNameEntry } from "@klyte45/adr-commons";
+import { AdrCitywideSettings, DistrictListItem, DistrictRelativeService, NamesetService, nameToString, NamingRulesService, SimpleNameEntry } from "@klyte45/adr-commons";
 import { BindingClassObj, Cs2SideTabs, DefaultPanelScreen } from "@klyte45/euis-components";
 import { useEffect, useState } from "react";
 import { OverrideCitizenTab } from "./OverrideCitizenTab";
@@ -17,23 +17,43 @@ enum TabsNames {
 
 
 
-export const defaultSetting = () => { return { IdString: null, Values: [], Name: translate("overrideSettings.useVanillaOptionLbl") }; }
-export const defaultSettingRoadByDistrict = () => { return { IdString: null, Values: [], Name: translate("overrideSettings.useSameAsCityOptionLbl") }; }
+export const defaultSetting = () => { return { IdString: null, Values: [], ValuesAlternative: [], Name: translate("overrideSettings.useVanillaOptionLbl") }; }
+export const defaultSettingRoadByDistrict = () => { return { IdString: null, Values: [], ValuesAlternative: [], Name: translate("overrideSettings.useSameAsCityOptionLbl") }; }
 
-type Props = {
-  currentSettings: AdrCitywideSettings;
-  districts: DistrictListItem[];
-  cityNamesets: SimpleNameEntry[];
-};
 
-export const OverrideSettingsCmp = ({
-  currentSettings,
-  districts,
-  cityNamesets
-}: Props) => {
+export const OverrideSettingsCmp = ({ }) => {
+  NamesetService.doOnCityNamesetsUpdated(() => NamesetService.listCityNamesets().then(x => listFiles(x)));
+
   useEffect(() => {
-    listFiles()
-  }, [cityNamesets])
+    NamesetService.listCityNamesets().then(x => listFiles(x))
+    return () => NamesetService.offCityNamesetsUpdated();
+  }, [])
+
+
+  useEffect(() => {
+    getSettings();
+    NamingRulesService.onCityDataReloaded(() => { getSettings(); });
+    listDistricts();
+    DistrictRelativeService.onDistrictChanged(() => listDistricts());
+
+    return () => {
+      DistrictRelativeService.offDistrictChanged();
+      NamingRulesService.offCityDataReloaded();
+    }
+  }, []);
+
+  const [currentSettings, setCurrentSettings] = useState({} as AdrCitywideSettings);
+  
+  const getSettings = async () => {
+    setCurrentSettings(await NamingRulesService.getCurrentCitywideSettings());
+  }
+  
+  const [districts, setDistricts] = useState([] as DistrictListItem[])
+  const listDistricts = async () => {
+    const districtNames = (await DistrictRelativeService.listAllDistricts())?.sort((a, b) => nameToString(a.Name).localeCompare(nameToString(b.Name), undefined, { sensitivity: "base" }))
+    setDistricts(districtNames);
+  }
+
 
   const tabsOrder: Parameters<typeof Cs2SideTabs<TabsNames>>[0]['tabsOrder'] = [
     TabsNames.Citizen,
@@ -50,7 +70,7 @@ export const OverrideSettingsCmp = ({
   const [innerContextSimpleFiles, setInnerContextSimpleFiles] = useState([] as SimpleNameEntry[]);
   const [indexedSimpleFiles, setIndexedSimpleFiles] = useState({} as Record<string, SimpleNameEntry>);
 
-  const listFiles = async () => {
+  const listFiles = async (cityNamesets: SimpleNameEntry[]) => {
     const simpleFiles = cityNamesets.map(x => { x.Values = []; return x; }).sort((a, b) => a.Name.localeCompare(b.Name, undefined, { sensitivity: "base" }))
     const generalSimpleFiles = [defaultSetting()].concat(simpleFiles)
     const indexedSimpleFiles = generalSimpleFiles.reduce((p, n) => {

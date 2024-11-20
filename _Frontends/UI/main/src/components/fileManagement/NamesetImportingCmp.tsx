@@ -4,11 +4,6 @@ import { DefaultPanelScreen, Input } from "@klyte45/euis-components";
 import { useState } from "react";
 import { NamesetWordsContainer } from './NamesetWordsContainer';
 
-type State = {
-
-}
-
-
 type Props = {
     namesetData: ExtendedSimpleNameEntry
     onBack: () => void,
@@ -30,7 +25,7 @@ export const NamesetImportingCmp = ({ namesetData, onBack, onOk }: Props) => {
             <div>
                 <Input title={translate("namesetsImport.cityImportName")} getValue={() => namesetNameImport} onValueChanged={(x) => { setNamesetNameImport(x); return x; }} />
             </div>
-            <NamesetWordsContainer values={namesetData.Values} />
+            <NamesetWordsContainer values={namesetData.Values} valuesAlternative={namesetData.ValuesAlternative}/>
         </DefaultPanelScreen>
     </>;
 

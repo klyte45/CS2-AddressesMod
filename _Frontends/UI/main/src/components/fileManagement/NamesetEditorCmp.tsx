@@ -17,6 +17,10 @@ export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
 
 
 
+    const onEditDone = (x: { target: { value: string; }; }) => {
+        const newValues = x.target.value.split("\n").map(z => z.split(";").map(y => y.trim()).filter((x: any) => x))
+        return setNamesetData(Object.assign(namesetData, { Values: newValues.map(y => y[0]), ValuesAlternative: newValues.map(y => y[1] || y[0]) }));
+    };
     return <DefaultPanelScreen title={translate("namesetEditor.title")} subtitle={translate("namesetEditor.subtitle")} buttonsRowContent={<>
         <button className="negativeBtn " onClick={onBack}>{translate("namesetEditor.cancel")}</button>
         <button className="positiveBtn " onClick={() => onOk(namesetData)}>{translate("namesetEditor.save")}</button>
@@ -28,9 +32,9 @@ export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
         </div>
         <GameScrollComponent>
             <textarea
-                onBlur={(x) => setNamesetData(Object.assign(namesetData, { Values: x.target.value.split("\n").map(x => x.trim()) }))}
+                onBlur={onEditDone}
                 style={{ width: "100%", height: Math.max(40, 1.315 * namesetData.Values.length) + "em", minHeight: "100%" }}
-                defaultValue={namesetData.Values.join("\n")}
+                defaultValue={namesetData.Values.map((x, i) => namesetData.ValuesAlternative[i] && namesetData.ValuesAlternative[i] != x ? `${x};${namesetData.ValuesAlternative[i]}` : x).join("\n")}
             />
         </GameScrollComponent>
     </DefaultPanelScreen>;

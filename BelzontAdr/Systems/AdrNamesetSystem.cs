@@ -125,9 +125,9 @@ namespace BelzontAdr
         private List<AdrNameFile> ListCityNamesets() => CityNamesets.Values.ToList();
         private List<AdrNameFile> ListLibraryNamesets() => AdrNameFilesManager.Instance.SimpleNamesFromFolder.Values.ToList();
 
-        private void AddCityNameset(string name, string[] names)
+        private void AddCityNameset(string name, string[] names, string[] namesAlternative)
         {
-            var effectiveNewNameset = new AdrNameFile(name, names);
+            var effectiveNewNameset = new AdrNameFile(name, names, namesAlternative);
             CityNamesets[effectiveNewNameset.Id] = effectiveNewNameset;
             OnCityNamesetsChanged();
         }
@@ -154,13 +154,14 @@ namespace BelzontAdr
             }
             return null;
         }
-        private void UpdateCityNameset(string guid, string name, string[] names)
+        private void UpdateCityNameset(string guid, string name, string[] names, string[] namesAlternative)
         {
             var targetGuid = new Colossal.Hash128(guid);
             if (CityNamesets.TryGetValue(targetGuid, out var nameset))
             {
                 nameset.Name = name;
-                nameset.Values = new ImmutableList<string>(names.Where(x => !x.IsNullOrWhitespace()).ToList());
+                nameset.Values = new ImmutableList<string>(names);
+                nameset.ValuesAlternative = new ImmutableList<string>(namesAlternative);
                 OnCityNamesetsChanged();
             }
             else

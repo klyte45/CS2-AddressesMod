@@ -10,6 +10,7 @@ import { NamesetGitHubSelectorCmp } from "./NamesetGitHubSelectorCmp";
 import { NamesetImportingCmp } from "./NamesetImportingCmp";
 import { NamesetLibrarySelectorCmp } from "./NamesetLibrarySelectorCmp";
 import { NamesetLineViewer } from "./NamesetLineViewer";
+import { NamesetViewingCmp } from "./NamesetViewingCmp";
 
 enum Screen {
     DEFAULT,
@@ -19,6 +20,7 @@ enum Screen {
     DELETE_CONFIRM,
     EDIT_NAMESET,
     NAMESET_IMPORT_GITHUB,
+    VIEWING_NAMESET,
 }
 
 export type NamesetStructureTreeNode = {
@@ -27,11 +29,7 @@ export type NamesetStructureTreeNode = {
 }
 
 
-export const CityNamesetLibraryCmp = ({
-    namesets
-}: {
-    namesets: SimpleNameEntry[]
-}) => {
+export const CityNamesetLibraryCmp = () => {
 
     const [availableNamesets, setAvailableNamesets] = useState({ subtrees: {}, rootContent: [] })
     const [currentScreen, setCurrentScreen] = useState(Screen.DEFAULT)
@@ -42,27 +40,35 @@ export const CityNamesetLibraryCmp = ({
     const [lastMessage, setLastMessage] = useState(undefined as string | JSX.Element)
     const [isExporting, setIsExporting] = useState(undefined as boolean)
 
+    NamesetService.doOnCityNamesetsUpdated(() => updateNamesets());
 
-    useEffect(() => {
-        const namesetTree = categorizeFiles(namesets)
-        const root = namesetTree[""]?.rootContent ?? []
-        delete namesetTree[""];
-        setAvailableNamesets({
-            rootContent: root,
-            subtrees: namesetTree
-        })
-    }, [namesets]);
+    const updateNamesets = () => {
+        NamesetService.listCityNamesets().then(namesets => {
+            const namesetTree = categorizeFiles(namesets);
+            const root = namesetTree[""]?.rootContent ?? [];
+            delete namesetTree[""];
+            setAvailableNamesets({
+                rootContent: root,
+                subtrees: namesetTree
+            });
+        });
+        return () => NamesetService.offCityNamesetsUpdated();
+    };
+    useEffect(updateNamesets, []);
 
 
 
     const goToImportDetailsGitHub = async (p: GitHubFileItem) => {
         setCurrentScreen(Screen.AWAITING_ACTION);
         const fileContents = await GitHubAddressesFilesSevice.getBlobData(p.url)
+        const lines = fileContents.split("\n").map(x => x.split(";")).map(x => x[1] ??= x[0]);
+
 
         setNamesetBeingImported({
             IdString: null,
             Name: `Downloads/${p.path.split("/").reverse()[0].replace(".txt", "")}`,
-            Values: fileContents.split("\n").map(x => x.replace("{0}", "").trim())
+            Values: lines.map(x => x[0].replace("{0}", "").trim()),
+            ValuesAlternative: lines.map(x => x[1].replace("{0}", "").trim())
         }),
             setCurrentScreen(Screen.IMPORTING_NAMESET),
             setLastSourceImport(Screen.NAMESET_IMPORT_GITHUB)
@@ -72,13 +78,17 @@ export const CityNamesetLibraryCmp = ({
         return <>
             <button className="negativeBtn" onClick={() => goToDelete(x)}>{translate("cityNamesetsLibrary.deleteNameset")}</button>
             <button className="neutralBtn" onClick={() => goToEdit(x)}>{translate("cityNamesetsLibrary.editNameset")}</button>
+            <button className="neutralBtn" onClick={() => goToView(x)}>{translate("cityNamesetsLibrary.viewNameset")}</button>
             <button className="neutralBtn" disabled={isExporting} onClick={() => doExport(x)}>{translate("cityNamesetsLibrary.exportNameset")}</button>
         </>
     }
     const goToEdit = (x?: ExtendedSimpleNameEntry): void => {
-        setNamesetBeingEdited(x ?? { Values: [], Name: "<?>", IdString: null })
+        setNamesetBeingEdited(x ?? { ValuesAlternative: [], Values: [], Name: "<?>", IdString: null })
         setCurrentScreen(Screen.EDIT_NAMESET)
-
+    }
+    const goToView = (x?: ExtendedSimpleNameEntry): void => {
+        setNamesetBeingEdited(x ?? { ValuesAlternative: [], Values: [], Name: "<?>", IdString: null })
+        setCurrentScreen(Screen.VIEWING_NAMESET)
     }
     const goToDelete = (x: ExtendedSimpleNameEntry): void => {
         setNamesetBeingDeleted(x)
@@ -107,16 +117,16 @@ export const CityNamesetLibraryCmp = ({
 
     const doImportNameset = async (namesetData: ExtendedSimpleNameEntry, namesetNameImport: string) => {
         setCurrentScreen(Screen.AWAITING_ACTION);
-        await NamesetService.sendNamesetForCity(namesetNameImport, namesetData.Values);
+        await NamesetService.sendNamesetForCity(namesetNameImport, namesetData.Values, namesetData.ValuesAlternative);
         setCurrentScreen(Screen.DEFAULT);
     }
 
     const doUpdate = async (namesetData: Omit<ExtendedSimpleNameEntry, "ChecksumString">) => {
         setCurrentScreen(Screen.AWAITING_ACTION);
         if (namesetData.IdString) {
-            await NamesetService.updateNameset(namesetData.IdString, namesetData.Name, namesetData.Values);
+            await NamesetService.updateNameset(namesetData.IdString, namesetData.Name, namesetData.Values, namesetData.ValuesAlternative);
         } else {
-            await NamesetService.sendNamesetForCity(namesetData.Name, namesetData.Values)
+            await NamesetService.sendNamesetForCity(namesetData.Name, namesetData.Values, namesetData.ValuesAlternative)
         }
         setCurrentScreen(Screen.DEFAULT);
     }
@@ -149,6 +159,8 @@ export const CityNamesetLibraryCmp = ({
             return <NamesetGitHubSelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <><button className="positiveBtn" onClick={() => goToImportDetailsGitHub(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
         case Screen.IMPORTING_NAMESET:
             return <NamesetImportingCmp namesetData={namesetBeingImported} onBack={() => setCurrentScreen(lastSourceImport)} onOk={(x, y) => doImportNameset(x, y)} />
+        case Screen.VIEWING_NAMESET:
+            return <NamesetViewingCmp namesetData={namesetBeingEdited} onBack={() => setCurrentScreen(Screen.DEFAULT)} />
         case Screen.AWAITING_ACTION:
             return <div>{translate("main.loadingDataPleaseWait")}</div>
         case Screen.DELETE_CONFIRM:
