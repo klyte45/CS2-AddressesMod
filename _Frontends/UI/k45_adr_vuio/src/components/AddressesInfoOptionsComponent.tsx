@@ -14,6 +14,7 @@ export const AddressesInfoOptionsComponent = ({ entity, entityRef, onChange }: P
 
     const [optionsResult, setOptionsResult] = useState(undefined as SelectedInfoOptions | undefined);
 
+
     useEffect(() => {
         loadOptions(entity.value)
     }, [entityRef, entity.value])
@@ -38,7 +39,7 @@ export const AddressesInfoOptionsComponent = ({ entity, entityRef, onChange }: P
         switch (optionsResult?.type?.value__) {
             case AdrEntityType.PublicTransportStation:
             case AdrEntityType.CargoTransportStation:
-                return <StationBuildingOptionsComponent onChanged={() => onValueChanged()} entity={toEntityTyped(entity.value)} response={optionsResult} />
+                return <StationBuildingOptionsComponent onChanged={() => onValueChanged()} entityOrigin={toEntityTyped(entity.value)} response={optionsResult} />
             case AdrEntityType.RoadAggregation:
             case AdrEntityType.District:
                 return <SeedManagementOptionsComponent onChanged={() => onValueChanged()} entity={toEntityTyped(entity.value)} response={optionsResult} />

@@ -181,7 +181,7 @@ namespace BelzontAdr
             return GetName_Internal(ref __result, ref __instance, entity);
         }
 
-        private static bool GetName_Internal(ref Name __result, ref NameSystem __instance, Entity entity)
+        private static bool GetName_Internal(ref Name __result, ref NameSystem __instance, Entity entity, bool omitAddressQualifier = false)
         {
             if (__instance.TryGetCustomName(entity, out string name))
             {
@@ -223,7 +223,7 @@ namespace BelzontAdr
                 var shallRunOrignal = GetAggregateName(out var pattern, out var genName, entity);
                 if (!shallRunOrignal)
                 {
-                    __result = Name.CustomName(entityManager.HasComponent<Building>(entity) ? genName : pattern.Replace("{name}", genName));
+                    __result = Name.CustomName(entityManager.HasComponent<Building>(entity) || omitAddressQualifier ? genName : pattern.Replace("{name}", genName));
                 }
                 return shallRunOrignal;
             }
@@ -231,13 +231,18 @@ namespace BelzontAdr
             {
                 return GetDistrictName(__instance, ref __result, entity);
             }
+            var original = entity;
             while (entityManager.TryGetComponent<Owner>(entity, out var owner))
             {
                 entity = owner.m_Owner;
             }
             if (entityManager.TryGetComponent<ADREntityManualBuildingRef>(entity, out var manualRef) && manualRef.m_refNamedEntity != Entity.Null)
             {
-                __result = __instance.GetName(manualRef.m_refNamedEntity);
+                GetName_Internal(ref __result, ref __instance, manualRef.m_refNamedEntity, true);
+                if (original != entity && !entityManager.HasComponent<Game.Routes.TransportStop>(original))
+                {
+                    __result = Name.CustomName($"{Original_GetName(__instance, original).Translate()} ({__result.Translate()})");
+                }
                 return false;
             }
             if (entityManager.TryGetComponent<Building>(entity, out var buildingData))
@@ -256,6 +261,11 @@ namespace BelzontAdr
                     __result = __instance.TryGetCustomName(refAggregate, out name) ? Name.CustomName(name)
                         : GetAggregateName(out _, out string roadName, refAggregate) ? __instance.GetName(refAggregate)
                         : Name.CustomName(roadName);
+
+                    if (original != entity && !entityManager.HasComponent<Game.Routes.TransportStop>(original))
+                    {
+                        __result = Name.CustomName($"{Original_GetName(__instance, original).Translate()} ({__result.Translate()})");
+                    }
                     return false;
                 }
             }

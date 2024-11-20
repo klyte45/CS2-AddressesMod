@@ -51,7 +51,10 @@ namespace BelzontAdr
 
         private AdrEntityData GetEntityOptions(Entity e)
         {
-            var result = new AdrEntityData();
+            var result = new AdrEntityData
+            {
+                targetEntityToName = e
+            };
             if (EntityManager.HasComponent<ADRVehicleData>(e))
             {
                 result.type = AdrEntityType.Vehicle;
@@ -68,6 +71,10 @@ namespace BelzontAdr
                 if (EntityManager.HasComponent<PublicTransportStation>(e))
                 {
                     if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have building and PublicTransportStation");
+                    if (EntityManager.TryGetComponent<Owner>(e, out var owner))
+                    {
+                        return GetEntityOptions(owner.m_Owner);
+                    }
                     result.type = AdrEntityType.PublicTransportStation;
                     StationRefFill(e, result, building);
                 }
@@ -143,14 +150,14 @@ namespace BelzontAdr
                 result.districtRef = currDistrict.m_District;
             }
             if (result.entityValue == Entity.Null) result.entityValue = AdrNameSystemOverrides.GetMainReferenceAggregate(e, building);
-            result.roadAggegateOptions.AddRange(GetRoadOptionsForBuildingEntity(building).Select(x => new EntityOption
+            result.roadAggegateOptions.AddRange(GetRoadOptionsForBuildingEntity(building)?.Select(x => new EntityOption
             {
                 entity = x,
                 name = new ValuableName(nameSystem.GetName(x))
             }));
         }
 
-        private bool SetEntityRoadReference(Entity target, Entity reference)
+        private bool SetEntityRoadReference(Entity target, Entity reference, Entity namingUiSource)
         {
             if (EntityManager.TryGetComponent<ADREntityManualBuildingRef>(target, out var refComp))
             {
@@ -164,6 +171,7 @@ namespace BelzontAdr
                 EntityManager.AddComponentData(target, refComp);
             }
             EntityManager.AddComponent<Updated>(target);
+            EntityManager.AddComponent<Updated>(namingUiSource);
             return true;
         }
 
@@ -234,6 +242,7 @@ namespace BelzontAdr
 
         private class AdrEntityData
         {
+            public Entity targetEntityToName;
             public AdrEntityType type = AdrEntityType.None;
             public Entity entityValue;
             public readonly List<EntityOption> buildingsOptions = new();

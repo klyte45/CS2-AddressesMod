@@ -5,6 +5,7 @@ export type EnumValueType<E> = {
 }
 
 export type SelectedInfoOptions = {
+    targetEntityToName: Entity
     type: EnumValueType<AdrEntityType>
     entityValue: Entity
     buildingsOptions: EntityOption[]

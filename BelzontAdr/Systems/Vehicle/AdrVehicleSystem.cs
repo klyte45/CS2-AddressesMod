@@ -5,7 +5,10 @@ using Colossal;
 using Colossal.Entities;
 using Colossal.Serialization.Entities;
 using Game;
+using Game.Buildings;
 using Game.Common;
+using Game.Companies;
+using Game.Objects;
 using Game.SceneFlow;
 using Game.Simulation;
 using Game.Tools;
@@ -46,8 +49,9 @@ namespace BelzontAdr
         private TimeSystem m_timeSystem;
         private EntityQuery m_unregisteredVehiclesQuery;
         private EntityQuery m_dirtyVehiclesPlateQuery;
-
-        private ulong currentSerialNumber;
+        private EntityQuery m_unregisteredVehicleSpawnerQuery;
+        private ulong currentSerialNumberVehicles;
+        private uint currentSerialNumberVehicleSources;
 
         private VehiclePlateSettings roadVehiclesPlatesSettings = new();
         private VehiclePlateSettings railVehiclesPlatesSettings = new();
@@ -149,6 +153,34 @@ namespace BelzontAdr
                         }
                     }
              });
+
+            m_unregisteredVehicleSpawnerQuery = GetEntityQuery(new EntityQueryDesc[]
+            {
+                new ()
+                    {
+                        Any = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<PoliceStation>(),
+                            ComponentType.ReadOnly<Hospital>(),
+                            ComponentType.ReadOnly<DeathcareFacility>(),
+                            ComponentType.ReadOnly<FireStation>(),
+                            ComponentType.ReadOnly<GarbageFacility>(),
+                            ComponentType.ReadOnly<TransportDepot>(),
+                            ComponentType.ReadOnly<CargoTransportStation>(),
+                            ComponentType.ReadOnly<MaintenanceDepot>(),
+                            ComponentType.ReadOnly<PostFacility>(),
+                            ComponentType.ReadOnly<TransportCompany>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ADRVehicleSourceData>(),
+                            ComponentType.ReadOnly<Owner>(),
+                            ComponentType.ReadOnly<OutsideConnection>(),
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+            });
         }
 
 
@@ -193,7 +225,7 @@ namespace BelzontAdr
                     m_entityHdl = GetEntityTypeHandle(),
                     m_refDateTime = m_timeSystem.GetCurrentDateTime().ToMonthsEpoch(),
                     m_serialNumber = counter.ToConcurrent(),
-                    refSerialNumber = currentSerialNumber,
+                    refSerialNumber = currentSerialNumberVehicles,
                     roadPlatesSettings = roadPlatesSettings,
                     airPlatesSettings = airPlatesSettings,
                     waterPlatesSettings = waterPlatesSettings,
@@ -209,7 +241,7 @@ namespace BelzontAdr
                 Dependency = job.ScheduleParallel(m_unregisteredVehiclesQuery, Dependency);
                 Dependency.GetAwaiter().OnCompleted(() =>
                 {
-                    currentSerialNumber += (uint)counter.Count;
+                    currentSerialNumberVehicles += (uint)counter.Count;
                     counter.Dispose();
                 });
                 roadPlatesSettings.Dispose(Dependency);
@@ -247,7 +279,40 @@ namespace BelzontAdr
                 waterPlatesSettings.Dispose(Dependency);
                 railPlatesSettings.Dispose(Dependency);
             }
+
+#if DEBUG
+            if (!m_unregisteredVehicleSpawnerQuery.IsEmptyIgnoreFilter)
+            {
+                var counter = new NativeCounter(Unity.Collections.Allocator.Temp);
+                var job = new ADRRegisterVehicleSources
+                {
+                    m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
+                    m_entityHdl = GetEntityTypeHandle(),
+                    m_serialNumberCounter = counter.ToConcurrent(),
+                    refSerialNumber = currentSerialNumberVehicleSources,
+                    m_policeStation = GetComponentLookup<PoliceStation>(),
+                    m_hospital = GetComponentLookup<Hospital>(),
+                    m_deathcareFacility = GetComponentLookup<DeathcareFacility>(),
+                    m_fireStation = GetComponentLookup<FireStation>(),
+                    m_garbageFacility = GetComponentLookup<GarbageFacility>(),
+                    m_transportDepot = GetComponentLookup<TransportDepot>(),
+                    m_cargoTransportStation = GetComponentLookup<CargoTransportStation>(),
+                    m_maintenanceDepot = GetComponentLookup<MaintenanceDepot>(),
+                    m_postFacility = GetComponentLookup<PostFacility>(),
+                    m_transportCompany = GetComponentLookup<TransportCompany>(),
+                    m_industrialCompany = GetComponentLookup<IndustrialCompany>(),
+                    m_commercialCompany = GetComponentLookup<CommercialCompany>(),
+                };
+                Dependency = job.ScheduleParallel(m_unregisteredVehicleSpawnerQuery, Dependency);
+                Dependency.GetAwaiter().OnCompleted(() =>
+                {
+                    currentSerialNumberVehicleSources += (uint)counter.Count;
+                    counter.Dispose();
+                });
+            }
+#endif
         }
+
 
         #region Serialization
         World IBelzontSerializableSingleton<AdrVehicleSystem>.World => World;
@@ -269,6 +334,8 @@ namespace BelzontAdr
             reader.Read(waterVehiclesPlatesSettings);
             reader.Read(airVehiclesPlatesSettings);
             reader.Read(railVehiclesPlatesSettings);
+            reader.Read(out currentSerialNumberVehicleSources);
+            reader.Read(out currentSerialNumberVehicles);
 
         }
 
@@ -279,11 +346,14 @@ namespace BelzontAdr
             writer.Write(waterVehiclesPlatesSettings);
             writer.Write(airVehiclesPlatesSettings);
             writer.Write(railVehiclesPlatesSettings);
+            writer.Write(currentSerialNumberVehicleSources);
+            writer.Write(currentSerialNumberVehicles);
         }
 
         JobHandle IJobSerializable.SetDefaults(Context context)
         {
-            currentSerialNumber = 0;
+            currentSerialNumberVehicles = 0;
+            currentSerialNumberVehicleSources = 0;
 
             roadVehiclesPlatesSettings = null;
             airVehiclesPlatesSettings = null;
