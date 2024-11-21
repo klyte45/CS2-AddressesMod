@@ -5,3 +5,6 @@
 - Now it shows the building name along the ADR generated name for sub-buildings selected information panel
 - Fixing support to gender-flexible entries in the ingame nameset editors/viewers
 - Fixed issues related to shared data between screens in EUIS views
+- Fixed blank name on station buildings after a district/road manually setted up for the name reference got deleted
+- Hiding district option for station buildings if the station isn't inside a district
+- Adding default behavior option to "unselect" any manual setup for naming reference for a station

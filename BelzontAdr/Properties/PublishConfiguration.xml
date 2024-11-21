@@ -49,7 +49,9 @@ The most up to date information about installation and known issues and bugs is 
 - Removed feature to autoname based on districts - use manual selection instead!
 - Merged Districts and Road override settings
 - Fixed behavior of naming based on districts when the vanilla generator is being used
-- Now it shows the building name along the ADR generated name for sub-buildings selected information panel</ChangeLog>
+- Now it shows the building name along the ADR generated name for sub-buildings selected information panel
+- Fixing support to gender-flexible entries in the ingame nameset editors/viewers
+- Fixed issues related to shared data between screens in EUIS views</ChangeLog>
   <ExternalLink Type="github" Url="https://github.com/klyte45/CS2-AddressesMod " />
   <ExternalLink Type="youtube" Url="https://www.youtube.com/Klyte45" />
   <ExternalLink Type="kofi" Url="https://ko-fi.com/klyte45" />

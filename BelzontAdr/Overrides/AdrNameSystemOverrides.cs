@@ -28,6 +28,7 @@ namespace BelzontAdr
             prefabSystem = world.GetExistingSystemManaged<PrefabSystem>();
             adrMainSystem = world.GetOrCreateSystemManaged<AdrMainSystem>();
             entityManager = world.EntityManager;
+            entityExists = entityManager.UniversalQuery.GetEntityQueryMask();
             m_EndFrameBarrier = world.GetOrCreateSystemManaged<EndFrameBarrier>();
 
             var getCitizenName = typeof(NameSystem).GetMethod("GetCitizenName", RedirectorUtils.allFlags);
@@ -59,6 +60,7 @@ namespace BelzontAdr
         private static EntityManager entityManager;
         private static EndFrameBarrier m_EndFrameBarrier;
         private static AdrMainSystem adrMainSystem;
+        private static EntityQueryMask entityExists;
 
 
         public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
@@ -236,7 +238,7 @@ namespace BelzontAdr
             {
                 entity = owner.m_Owner;
             }
-            if (entityManager.TryGetComponent<ADREntityManualBuildingRef>(entity, out var manualRef) && manualRef.m_refNamedEntity != Entity.Null)
+            if (entityManager.TryGetComponent<ADREntityManualBuildingRef>(entity, out var manualRef) && entityExists.MatchesIgnoreFilter(manualRef.m_refNamedEntity))
             {
                 GetName_Internal(ref __result, ref __instance, manualRef.m_refNamedEntity, true);
                 if (original != entity && !entityManager.HasComponent<Game.Routes.TransportStop>(original))

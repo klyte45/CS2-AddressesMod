@@ -26,6 +26,7 @@ namespace BelzontAdr
             eventCaller("selectionPanel.setEntityRoadReference", SetEntityRoadReference);
             eventCaller("selectionPanel.redrawSeed", ResetEntityAdrSeed);
             eventCaller("selectionPanel.changeSeedByDelta", ChangeEntityAdrSeedByDelta);
+
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -40,12 +41,15 @@ namespace BelzontAdr
 
         private NameSystem nameSystem;
         private AdrMainSystem mainSystem;
+        private EntityQueryMask entityExistsQuery;
 
         protected override void OnCreate()
         {
             base.OnCreate();
             nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
             mainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
+
+            entityExistsQuery = EntityManager.UniversalQuery.GetEntityQueryMask();
         }
         protected override void OnUpdate() { }
 
@@ -149,7 +153,7 @@ namespace BelzontAdr
                 }
                 result.districtRef = currDistrict.m_District;
             }
-            if (result.entityValue == Entity.Null) result.entityValue = AdrNameSystemOverrides.GetMainReferenceAggregate(e, building);
+            if (!entityExistsQuery.MatchesIgnoreFilter(result.entityValue)) result.entityValue = Entity.Null;
             result.roadAggegateOptions.AddRange(GetRoadOptionsForBuildingEntity(building)?.Select(x => new EntityOption
             {
                 entity = x,

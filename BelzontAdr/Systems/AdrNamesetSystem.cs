@@ -51,9 +51,9 @@ namespace BelzontAdr
                 AdrNameFilesManager.Instance.ReloadNameFiles();
                 return AdrNameFilesManager.Instance.SimpleNamesFromFolder.Values.ToArray();
             });
-            eventCaller("namesets.goToSimpleNamesFolder", () => { RemoteProcess.OpenFolder(AdrNameFilesManager.NamesetsFolder); });
+            eventCaller("namesets.goToSimpleNamesFolder", () => RemoteProcess.OpenFolder(AdrNameFilesManager.NamesetsFolder));
             eventCaller("namesets.sortValues", SortValues);
-            eventCaller("namesets.goToGitHubRepo", () => { Application.OpenURL("https://github.com/klyte45/AddressesFiles"); });
+            eventCaller("namesets.goToGitHubRepo", () => Application.OpenURL("https://github.com/klyte45/AddressesFiles"));
         }
 
         private Action<string, object[]> eventCaller;
