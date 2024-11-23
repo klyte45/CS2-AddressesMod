@@ -1,23 +1,25 @@
 
 import { CityNamesetLibraryCmp } from "#components/fileManagement/CityNamesetLibraryCmp";
 import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
+import { RegionEditor } from "#components/region/RegionEditor";
 import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import "#styles/main.scss";
 import { translate } from "#utility/translate";
-import { AdrCitywideSettings, DistrictListItem, DistrictRelativeService, NamesetService, nameToString, NamingRulesService, SimpleNameEntry } from "@klyte45/adr-commons";
 import { ErrorBoundary, MainSideTabMenuComponent, MenuItem } from "@klyte45/euis-components";
-import { useEffect, useState } from "react";
 
 
 export default () => {
 
-
-
   const menus: MenuItem[] = [
+    {
+      iconUrl: "coui://adr.k45/UI/images/outsideConnections.svg",
+      name: translate("regionSettings.title"),
+      panelContent: <RegionEditor />
+    },
     {
       iconUrl: "coui://uil/Standard/NameSort.svg",
       name: translate("namesetManagement.title"),
-      panelContent: <CityNamesetLibraryCmp/>,
+      panelContent: <CityNamesetLibraryCmp />,
       tintedIcon: true
     },
     {
@@ -29,10 +31,9 @@ export default () => {
       iconUrl: "coui://uil/Standard/Highway.svg",
       name: translate("roadPrefixSettings.title"),
       panelContent: <RoadPrefixCmp />
-    }
+    },
   ]
   return <>
-    {/* <button style={{ position: "fixed", right: 0, top: 0, zIndex: 999 }} onClick={() => location.reload()}>RELOAD!!!</button> */}
     <ErrorBoundary>
       <MainSideTabMenuComponent
         items={menus}

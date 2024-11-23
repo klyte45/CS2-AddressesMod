@@ -1,0 +1,70 @@
+.mapSide {
+    position: relative;
+    width: 75%;
+    height: 100%;
+
+    .cityMapTopographic {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+
+        .outsideConnectionPoint {
+            position: absolute;
+            width: 6rem;
+            height: 6rem;
+            transform: translate(-50%, 50%);
+            border-top-left-radius: 50px 50px;
+            border-top-right-radius: 50px 50px;
+            border-bottom-left-radius: 50px 50px;
+            border-bottom-right-radius: 50px 50px;
+            border: 1px solid  var(--modalColorDark);
+            background-color: var(--modalColor);
+
+            .name {
+                position: absolute;
+                left: 150%;
+                font-size: 70%;
+                white-space: nowrap;
+                overflow-x: hidden;
+                max-width: 120rem;
+
+                &.leftName {
+                    left: auto;
+                    right: 150%;
+
+                }
+            }
+
+            &.Road {
+                --modalColor: #0000bd;
+                --modalColorDark: #000042;
+            }
+
+            &.Rail {
+                --modalColor: #00bd00;
+                --modalColorDark: #004200;
+            }
+
+            &.Pipe {
+                --modalColor: #bd3200;
+                --modalColorDark: #802200;
+            }
+
+            &.Waterway {
+                --modalColor: #bda000;
+                --modalColorDark: #423800;
+            }
+
+            &.Electricity {
+                --modalColor: #bd3600;
+                --modalColorDark: #420000;
+            }
+
+            &.Airway {
+                --modalColor: #bd00bd;
+                --modalColorDark: #420042;
+            }
+        }
+    }
+}

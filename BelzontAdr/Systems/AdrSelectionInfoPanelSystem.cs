@@ -170,8 +170,10 @@ namespace BelzontAdr
             }
             else
             {
-                refComp = new();
-                refComp.m_refNamedEntity = reference;
+                refComp = new()
+                {
+                    m_refNamedEntity = reference
+                };
                 EntityManager.AddComponentData(target, refComp);
             }
             EntityManager.AddComponent<Updated>(target);

@@ -1,0 +1,19 @@
+.cityMapTopographic {
+    display: flex;
+    position: relative;
+    background-image: url(coui://adr.k45/img/cityTerrain.png);
+    width: 800rem;
+    height: 800rem;
+    background-size: cover;
+
+    .waterLayer {
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        background-image: url(coui://adr.k45/img/cityWater.png);
+        background-size: cover;
+        filter: brightness(50.3%) sepia(0.9) hue-rotate(148.5deg) contrast(2.3);
+    }
+}

@@ -23,7 +23,7 @@ export const StationBuildingOptionsComponent = ({ entityOrigin, onChanged, respo
     const rowTheme = [VR.themeToggleLine?.focusableToggle, VR.themeToggleLine?.row, VR.themeToggleLine?.spaceBetween].join(" ");
     const currentVal = response.entityValue;
     const focusKey = VR.FOCUS_DISABLED;
-    return <>
+    return <> 
         <VR.InfoRow subRow={true} className={rowTheme} left={<><VR.RadioToggle onChange={() => setReference(response.targetEntityToName, { Index: 0, Version: 0 })} focusKey={focusKey} className={VR.themeToggleLine.toggle} checked={currentVal.Index == 0} />{translate("StationBuildingOptions.UseDefault")}</>} />
         {response.districtRef.Index > 0 && <VR.InfoRow subRow={true} className={rowTheme} left={<><VR.RadioToggle onChange={() => setReference(response.targetEntityToName, response.districtRef)} focusKey={focusKey} className={VR.themeToggleLine.toggle} checked={isDistrictSelected} />{translate("StationBuildingOptions.UseDistrictOpt")}</>} />}
         {

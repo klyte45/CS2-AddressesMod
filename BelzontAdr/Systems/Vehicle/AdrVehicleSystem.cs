@@ -21,6 +21,7 @@ using Unity.Jobs;
 
 namespace BelzontAdr
 {
+
     public partial class AdrVehicleSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrVehicleSystem>
     {
         private const uint CURRENT_VERSION = 0;
@@ -181,6 +182,11 @@ namespace BelzontAdr
                         }
                     }
             });
+            RequireAnyForUpdate(m_unregisteredVehiclesQuery, m_dirtyVehiclesPlateQuery
+#if DEBUG
+         , m_unregisteredVehicleSpawnerQuery
+#endif
+                );
         }
 
 
