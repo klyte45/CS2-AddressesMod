@@ -2,7 +2,9 @@
 using Belzont.Utils;
 using Colossal.Entities;
 using Game;
+using Game.Buildings;
 using Game.Common;
+using Game.Net;
 using Game.Objects;
 using Game.Routes;
 using Game.Simulation;
@@ -21,12 +23,18 @@ namespace BelzontAdr
         private NameSystem m_nameSystem;
         private TerrainSystem m_terrainSystem;
         private EntityQuery m_outsideConnectionsObject;
+        private EntityQuery m_highwaysQuery;
+        private EntityQuery m_urbanRoadsQuery;
+        private EntityQuery m_railroadsQuery;
 
         #region bindings
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
             eventCaller("regions.listOutsideConnections", ListOutsideConnections);
             eventCaller("regions.getCityBounds", GetCityBounds);
+            eventCaller("regions.listHighways", ListHighways);
+            eventCaller("regions.listTrainTracks", ListTrainTracks);
+            eventCaller("regions.listUrbanRoads", ListUrbanRoads);
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -92,6 +100,39 @@ namespace BelzontAdr
 
             }).ToArray();
         }
+
+
+
+        private struct AggregationData
+        {
+            public Entity entity;
+            public string name;
+            public float[][][] curves;
+            public Entity[] nodes;
+        }
+
+        private AggregationData[] ListHighways() => ListFromQuery(m_highwaysQuery);
+        private AggregationData[] ListTrainTracks() => ListFromQuery(m_railroadsQuery);
+        private AggregationData[] ListUrbanRoads() => ListFromQuery(m_urbanRoadsQuery);
+        private AggregationData[] ListFromQuery(EntityQuery query)
+        {
+            using var list = query.ToEntityArray(Allocator.Temp);
+            using var listEdge = query.ToComponentDataArray<Edge>(Allocator.Temp);
+            using var listCurve = query.ToComponentDataArray<Curve>(Allocator.Temp);
+            using var listAggregated = query.ToComponentDataArray<Aggregated>(Allocator.Temp);
+            return list.ToArray().Select((x, i) => (x, i)).GroupBy(x => listAggregated[x.i].m_Aggregate)
+                .Select(x => new AggregationData
+                {
+                    entity = x.Key,
+                    name = m_nameSystem.GetName(x.Key).Translate(),
+                    curves = x.Select(x =>
+                    {
+                        var bez = listCurve[x.i].m_Bezier;
+                        return new[] { bez.a.ToArray(), bez.b.ToArray(), bez.c.ToArray(), bez.d.ToArray() };
+                    }).ToArray(),
+                    nodes = x.SelectMany(x => new[] { listEdge[x.i].m_Start, listEdge[x.i].m_End }).ToHashSet().ToArray(),
+                }).ToArray();
+        }
         #endregion
 
         protected override void OnCreate()
@@ -110,6 +151,60 @@ namespace BelzontAdr
                         },
                         None = new ComponentType[]
                         {
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+              });
+            m_highwaysQuery = GetEntityQuery(new EntityQueryDesc[]
+              {
+                    new() {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Edge>(),
+                            ComponentType.ReadOnly<Curve>(),
+                            ComponentType.ReadOnly<Road>(),
+                            ComponentType.ReadOnly<Aggregated>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ConnectedBuilding>(),
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+              });
+            m_urbanRoadsQuery = GetEntityQuery(new EntityQueryDesc[]
+              {
+                    new() {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Edge>(),
+                            ComponentType.ReadOnly<Curve>(),
+                            ComponentType.ReadOnly<Road>(),
+                            ComponentType.ReadOnly<Aggregated>(),
+                            ComponentType.ReadOnly<ConnectedBuilding>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+              });
+            m_railroadsQuery = GetEntityQuery(new EntityQueryDesc[]
+              {
+                    new() {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Edge>(),
+                            ComponentType.ReadOnly<Curve>(),
+                            ComponentType.ReadOnly<TrainTrack>(),
+                            ComponentType.ReadOnly<Aggregated>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ConnectedBuilding>(),
                             ComponentType.ReadOnly<Temp>(),
                             ComponentType.ReadOnly<Deleted>(),
                         }

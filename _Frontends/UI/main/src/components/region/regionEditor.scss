@@ -1,70 +1,116 @@
-.mapSide {
-    position: relative;
-    width: 75%;
+.regionEditor {
+    display: flex;
+    flex-direction: row;
     height: 100%;
+    width: 100%;
 
-    .cityMapTopographic {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+    .mapSide {
+        display: flex;
+        position: relative;
+        width: 100vh;
+        height: 100%;
+        overflow: hidden;
 
-        .outsideConnectionPoint {
+        .cityMapTopographic {
             position: absolute;
-            width: 6rem;
-            height: 6rem;
-            transform: translate(-50%, 50%);
-            border-top-left-radius: 50px 50px;
-            border-top-right-radius: 50px 50px;
-            border-bottom-left-radius: 50px 50px;
-            border-bottom-right-radius: 50px 50px;
-            border: 1px solid  var(--modalColorDark);
-            background-color: var(--modalColor);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
 
-            .name {
+            .pathsOverlay {
                 position: absolute;
-                left: 150%;
-                font-size: 70%;
-                white-space: nowrap;
-                overflow-x: hidden;
-                max-width: 120rem;
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                background-color: rgba($color: #0f90a0, $alpha: 0.3);
+                transform: scale(1, -1);
 
-                &.leftName {
-                    left: auto;
-                    right: 150%;
+                .mapHighway {
+                    stroke-width: 15;
+                    stroke: #284f74;
+                    fill: transparent;
+                }
 
+                .mapUrbanRoads {
+                    stroke-width: 6;
+                    stroke: rgba(31, 32, 32, .4);
+                    fill: transparent;
+                }
+
+                .mapTrainTrack {
+                    stroke-width: 10;
+                    stroke: #9b371e;
+                    fill: transparent;
                 }
             }
 
-            &.Road {
-                --modalColor: #0000bd;
-                --modalColorDark: #000042;
-            }
+            .outsideConnectionPoint {
+                position: absolute;
+                width: 6rem;
+                height: 6rem;
+                transform: translate(-50%, 50%);
+                border-top-left-radius: 50px 50px;
+                border-top-right-radius: 50px 50px;
+                border-bottom-left-radius: 50px 50px;
+                border-bottom-right-radius: 50px 50px;
+                border: 1px solid wheat;
+                border-left-color: var(--modalColorDark);
+                border-top-color: var(--modalColorDark);
+                border-bottom-color: var(--modalColorDark);
+                border-right-color: var(--modalColorDark);
+                background-color: var(--modalColor);
 
-            &.Rail {
-                --modalColor: #00bd00;
-                --modalColorDark: #004200;
-            }
+                .name {
+                    position: absolute;
+                    left: 150%;
+                    font-size: 70%;
+                    white-space: nowrap;
+                    overflow-x: hidden;
+                    max-width: 120rem;
 
-            &.Pipe {
-                --modalColor: #bd3200;
-                --modalColorDark: #802200;
-            }
+                    &.leftName {
+                        left: auto;
+                        right: 150%;
 
-            &.Waterway {
-                --modalColor: #bda000;
-                --modalColorDark: #423800;
-            }
+                    }
+                }
 
-            &.Electricity {
-                --modalColor: #bd3600;
-                --modalColorDark: #420000;
-            }
+                &.Road {
+                    --modalColor: #6868a8;
+                    --modalColorDark: #000040;
+                }
 
-            &.Airway {
-                --modalColor: #bd00bd;
-                --modalColorDark: #420042;
+                &.Pipe {
+                    --modalColor: #66bff3;
+                    --modalColorDark: #051e4d;
+                }
+
+                &.Rail {
+                    --modalColor: #bd3200;
+                    --modalColorDark: #802200;
+                }
+
+                &.Waterway {
+                    --modalColor: #bda000;
+                    --modalColorDark: #423800;
+                }
+
+                &.Electricity {
+                    --modalColor: #bd3600;
+                    --modalColorDark: #420000;
+                }
+
+                &.Airway {
+                    --modalColor: #bd00bd;
+                    --modalColorDark: #420042;
+                }
             }
         }
+    }
+
+    .dataSide {
+        flex-grow: 1;
+        background-color: #000040;
     }
 }
