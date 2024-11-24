@@ -30,7 +30,7 @@ namespace BelzontAdr
 {
     public partial class AdrNamesetSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrNamesetSystem>
     {
-        const int CURRENT_VERSION = 0;
+        const uint CURRENT_VERSION = 0;
 
         private AdrMainSystem mainSystem;
         private EntityQuery m_UnsetRandomQuery;
@@ -219,11 +219,7 @@ namespace BelzontAdr
 
         void IBelzontSerializableSingleton<AdrNamesetSystem>.Deserialize<TReader>(TReader reader)
         {
-            reader.Read(out int version);
-            if (version > CURRENT_VERSION)
-            {
-                throw new Exception("Invalid version of AdrNamesetsystem!");
-            }
+            ((IBelzontSerializableSingleton<AdrNamesetSystem>)this).CheckVersion(reader, CURRENT_VERSION);
             string namesetData;
 
             reader.Read(out int size);

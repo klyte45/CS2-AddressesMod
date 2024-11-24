@@ -1,6 +1,8 @@
 ﻿using Belzont.Interfaces;
+using Belzont.Serialization;
 using Belzont.Utils;
 using Colossal.Entities;
+using Colossal.Serialization.Entities;
 using Game;
 using Game.Buildings;
 using Game.Common;
@@ -14,13 +16,15 @@ using System;
 using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 using UnityEngine;
 using static BelzontAdr.ADRMapUtils;
+using Color = UnityEngine.Color;
 using Transform = Game.Objects.Transform;
 
 namespace BelzontAdr
 {
-    public partial class AdrRegionsSystem : GameSystemBase, IBelzontBindable
+    public partial class AdrRegionsSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrRegionsSystem>
     {
         private NameSystem m_nameSystem;
         private TerrainSystem m_terrainSystem;
@@ -39,17 +43,12 @@ namespace BelzontAdr
             eventCaller("regions.listTrainTracks", ListTrainTracks);
             eventCaller("regions.listUrbanRoads", ListUrbanRoads);
 
-
-
             eventCaller("regions.getCityTerrain", () => EncodeToBase64(RenderTextureTo2D(m_terrainSystem.heightmap as RenderTexture, x => x.r, MapType.Topographic)));
             eventCaller("regions.getCityWater", () => EncodeToBase64(RenderTextureTo2D(m_waterSystem.WaterTexture, x => x.r, MapType.Transparency)));
             eventCaller("regions.getCityWaterPollution", () => EncodeToBase64(RenderTextureTo2D(m_waterSystem.WaterTexture, x => x.a, MapType.Transparency)));
         }
 
-        private object EncodeToBase64(Texture2D texture2D)
-        {
-            return $"data:image/png;base64,{Convert.ToBase64String(texture2D.EncodeToPNG())}";
-        }
+        private object EncodeToBase64(Texture2D texture2D) => $"data:image/png;base64,{Convert.ToBase64String(texture2D.EncodeToPNG())}";
 
         public void SetupCaller(Action<string, object[]> eventCaller)
         {
@@ -231,6 +230,52 @@ namespace BelzontAdr
         {
 
         }
+
+        public struct RegionCity
+        {
+            public FixedString64Bytes name;
+            public ushort azimuthAngle;
+            public ushort azimuthCwWidth;
+            public ushort azimuthCcwWidth;
+            public Color mapColor;
+
+            public readonly bool IsInside(ushort angleAzimuth)
+            {
+                unchecked
+                {
+                    var min = azimuthAngle - azimuthCcwWidth;
+                    var max = azimuthAngle + azimuthCwWidth;
+                    return min > max ? min >= angleAzimuth || angleAzimuth >= max : min <= angleAzimuth && angleAzimuth <= max;
+                }
+            }
+
+            public static float ToDegreeAngle(ushort azimuthValue) => 360f / ushort.MaxValue * azimuthValue;
+            public static ushort ToAzimuthValue(float angle) => (ushort)(angle * 1f / 360f % 1 * ushort.MaxValue);
+        }
+
+        public RegionCity[] regionCities;
+
+
+        #region Serialization
+        private const uint CURRENT_VERSION = 0;
+
+        public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
+        {
+            writer.Write(CURRENT_VERSION);
+        }
+
+        public void Deserialize<TReader>(TReader reader) where TReader : IReader
+        {
+            ((IBelzontSerializableSingleton<AdrRegionsSystem>)this).CheckVersion(reader, CURRENT_VERSION);
+
+        }
+
+        public JobHandle SetDefaults(Context context)
+        {
+
+            return Dependency;
+        }
+        #endregion
     }
 }
 
