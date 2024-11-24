@@ -8,6 +8,9 @@ const getCityBounds = () => engine.call("k45::adr.regions.getCityBounds");
 const listHighways = () => engine.call("k45::adr.regions.listHighways");
 const listTrainTracks = () => engine.call("k45::adr.regions.listTrainTracks");
 const listUrbanRoads = () => engine.call("k45::adr.regions.listUrbanRoads");
+const getCityTerrain = (): Promise<string> => engine.call("k45::adr.regions.getCityTerrain");
+const getCityWater = (): Promise<string> => engine.call("k45::adr.regions.getCityWater");
+const getCityWaterPollution = (): Promise<string> => engine.call("k45::adr.regions.getCityWaterPollution");
 
 enum OutsideConnectionType {
     Road,
@@ -43,6 +46,8 @@ export const RegionEditor = () => {
     const [highways, setHighways] = useState([] as AggregationData[]);
     const [trainTracks, setTrainTracks] = useState([] as AggregationData[]);
     const [urbanRoads, setUrbanRoads] = useState([] as AggregationData[]);
+    const [terrainMap, setTerrainMap] = useState(null as string);
+    const [waterMap, setWaterMap] = useState(null as string);
 
     const [zoom, setZoom] = useState(1);
     const [position, setPostion] = useState([0, 0]);
@@ -56,6 +61,8 @@ export const RegionEditor = () => {
         listTrainTracks().then(setTrainTracks);
         listUrbanRoads().then(setUrbanRoads);
         listOutsideConnections().then(setOutsideConnections);
+        getCityTerrain().then(setTerrainMap)
+        getCityWater().then(setWaterMap)
     }, [])
 
 
@@ -75,8 +82,10 @@ export const RegionEditor = () => {
     }
 
     return <div className="regionEditor">
-        <div className="mapSide" onWheel={doOnWheel} onMouseMove={doOnMouseMove} style={{ ["--currentZoom"]: zoom } as any}>
-            <MapDiv style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${position[0] / mapSize[0] * 100}%, ${position[1] / mapSize[2] * 100}%)` }}>
+        <div className="mapSide" onWheel={doOnWheel} onMouseMove={doOnMouseMove} style={{ ["--currentZoom"]: .6666 + zoom / 1.5 } as any}>
+            <MapDiv waterMap={waterMap} cityMap={terrainMap}
+                style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${position[0] / mapSize[0] * 100}%, ${position[1] / mapSize[2] * 100}%)` }}
+            >
                 <svg viewBox={[mapOffset[0], mapOffset[2], mapSize[0], mapSize[2]].join(" ")} className="pathsOverlay" width="100%" height="100%" >
                     {urbanRoads.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className="mapUrbanRoads" id={`rd_${x.entity.Index}_${x.entity.Version}`} />)}
                     {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className="mapTrainTrack" id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}

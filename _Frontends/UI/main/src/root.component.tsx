@@ -5,10 +5,23 @@ import { RegionEditor } from "#components/region/RegionEditor";
 import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import "#styles/main.scss";
 import { translate } from "#utility/translate";
+import { AdrMainService } from "@klyte45/adr-commons";
 import { ErrorBoundary, MainSideTabMenuComponent, MenuItem } from "@klyte45/euis-components";
+import { useEffect, useState } from "react";
 
 
 export default () => {
+
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    AdrMainService.isCityOrEditorLoaded().then(setIsReady);
+  }, [])
+
+  if (!isReady)
+    return <>
+      <h2 style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "center", fontSize: "300%" }}>{translate("loadACityWarningH2")}</h2>
+    </>
 
   const menus: MenuItem[] = [
     {

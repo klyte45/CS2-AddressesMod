@@ -14,6 +14,8 @@ using System;
 using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
+using static BelzontAdr.ADRMapUtils;
 using Transform = Game.Objects.Transform;
 
 namespace BelzontAdr
@@ -22,6 +24,7 @@ namespace BelzontAdr
     {
         private NameSystem m_nameSystem;
         private TerrainSystem m_terrainSystem;
+        private WaterSystem m_waterSystem;
         private EntityQuery m_outsideConnectionsObject;
         private EntityQuery m_highwaysQuery;
         private EntityQuery m_urbanRoadsQuery;
@@ -35,6 +38,17 @@ namespace BelzontAdr
             eventCaller("regions.listHighways", ListHighways);
             eventCaller("regions.listTrainTracks", ListTrainTracks);
             eventCaller("regions.listUrbanRoads", ListUrbanRoads);
+
+
+
+            eventCaller("regions.getCityTerrain", () => EncodeToBase64(RenderTextureTo2D(m_terrainSystem.heightmap as RenderTexture, x => x.r, MapType.Topographic)));
+            eventCaller("regions.getCityWater", () => EncodeToBase64(RenderTextureTo2D(m_waterSystem.WaterTexture, x => x.r, MapType.Transparency)));
+            eventCaller("regions.getCityWaterPollution", () => EncodeToBase64(RenderTextureTo2D(m_waterSystem.WaterTexture, x => x.a, MapType.Transparency)));
+        }
+
+        private object EncodeToBase64(Texture2D texture2D)
+        {
+            return $"data:image/png;base64,{Convert.ToBase64String(texture2D.EncodeToPNG())}";
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -140,6 +154,7 @@ namespace BelzontAdr
             base.OnCreate();
             m_nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
             m_terrainSystem = World.GetExistingSystemManaged<TerrainSystem>();
+            m_waterSystem = World.GetExistingSystemManaged<WaterSystem>();
             m_outsideConnectionsObject = GetEntityQuery(new EntityQueryDesc[]
               {
                     new() {

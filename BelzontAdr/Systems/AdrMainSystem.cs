@@ -68,6 +68,7 @@ namespace BelzontAdr
                 return -1;
             });
             doBindLink("main.atob", (string x) => Encoding.UTF8.GetString(Convert.FromBase64String(x)));
+            doBindLink("main.isCityOrEditorLoaded", () => GameManager.instance.gameMode.IsGameOrEditor());
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
