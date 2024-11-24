@@ -44,6 +44,9 @@ export const RegionEditor = () => {
     const [trainTracks, setTrainTracks] = useState([] as AggregationData[]);
     const [urbanRoads, setUrbanRoads] = useState([] as AggregationData[]);
 
+    const [zoom, setZoom] = useState(1);
+    const [position, setPostion] = useState([0, 0]);
+
     useEffect(() => {
         getCityBounds().then((x) => {
             setMapSize([x[3] - x[0], x[4] - x[1], x[5] - x[2]])
@@ -54,9 +57,26 @@ export const RegionEditor = () => {
         listUrbanRoads().then(setUrbanRoads);
         listOutsideConnections().then(setOutsideConnections);
     }, [])
+
+
+    const doOnWheel = (x) => {
+        setZoom(Math.max(1, Math.min(20, zoom - x.deltaY * .01)))
+    }
+    const doOnMouseMove = (x) => {
+        if (!x.buttons || (!x.movementY && !x.movementX)) return;
+        if (x.buttons == 1) {
+            setPostion(
+                [
+                    Math.max(mapOffset[0], Math.min(mapSize[0] + mapOffset[0], position[0] + x.movementX * (mapSize[0] / x.currentTarget.offsetWidth) / zoom)),
+                    Math.max(mapOffset[2], Math.min(mapSize[2] + mapOffset[2], position[1] + x.movementY * (mapSize[2] / x.currentTarget.offsetHeight) / zoom))
+                ]
+            )
+        }
+    }
+
     return <div className="regionEditor">
-        <div className="mapSide">{/*translate(-50%, -50%) scale(10) translate(-21%, 23%)*/}
-            <MapDiv>
+        <div className="mapSide" onWheel={doOnWheel} onMouseMove={doOnMouseMove} style={{ ["--currentZoom"]: zoom } as any}>
+            <MapDiv style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${position[0] / mapSize[0] * 100}%, ${position[1] / mapSize[2] * 100}%)` }}>
                 <svg viewBox={[mapOffset[0], mapOffset[2], mapSize[0], mapSize[2]].join(" ")} className="pathsOverlay" width="100%" height="100%" >
                     {urbanRoads.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className="mapUrbanRoads" id={`rd_${x.entity.Index}_${x.entity.Version}`} />)}
                     {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className="mapTrainTrack" id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}

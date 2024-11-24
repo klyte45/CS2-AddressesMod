@@ -47,8 +47,8 @@
 
             .outsideConnectionPoint {
                 position: absolute;
-                width: 6rem;
-                height: 6rem;
+                width: calc(120rem / var(--currentZoom));
+                height: calc(120rem / var(--currentZoom));
                 transform: translate(-50%, 50%);
                 border-top-left-radius: 50px 50px;
                 border-top-right-radius: 50px 50px;
@@ -64,10 +64,10 @@
                 .name {
                     position: absolute;
                     left: 150%;
-                    font-size: 70%;
+                    font-size: calc(1600% / var(--currentZoom));
                     white-space: nowrap;
                     overflow-x: hidden;
-                    max-width: 120rem;
+                    max-width: calc(2400rem / var(--currentZoom));
 
                     &.leftName {
                         left: auto;
