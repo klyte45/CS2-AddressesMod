@@ -65,32 +65,13 @@ namespace BelzontAdr
 
         public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
         {
-            string pattern = null;
-            if (entityManager.HasComponent<Aggregate>(entity))
+            Name n = default;
+            if (GetName_Internal(ref n, ref __instance, entity))
             {
-                if (__instance.TryGetCustomName(entity, out __result)) return false;
-                if (GetAggregateName(out pattern, out __result, entity))
-                {
-                    string id = GetId(entity, true);
-                    __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
-                    return false;
-                }
-                __result = pattern.Replace("{name}", __result);
-                return false;
+                return true;
             }
-            else if (entityManager.HasComponent<District>(entity))
-            {
-                if (__instance.TryGetCustomName(entity, out __result)) return false;
-                if (GetDistrictName(out pattern, out __result, entity))
-                {
-                    string id = GetId(entity, true);
-                    __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
-                    return false;
-                }
-                __result = pattern.Replace("{name}", __result);
-                return false;
-            }
-            return true;
+            __result = n.Translate();
+            return false;
         }
         private static bool GetMarkerTransportStopName(ref Name __result, ref NameSystem __instance, ref Entity stop)
         {
