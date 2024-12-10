@@ -61,7 +61,8 @@ namespace BelzontAdr
             {
                 Entity prefab = prefabRef.m_Prefab;
                 FilterSelection(ref entity, ref prefab);
-                if (SelectedInfoUISystem.TryGetPosition(entity, EntityManager, out Entity entity2, out float3 selectedPosition, out Bounds3 bounds, out quaternion quaternion, false) || EntityManager.HasComponent<Household>(entity))
+                int elIdx = 0;
+                if (SelectedInfoUISystem.TryGetPosition(entity, EntityManager, ref elIdx, out Entity entity2, out float3 selectedPosition, out Bounds3 bounds, out quaternion quaternion, false) || EntityManager.HasComponent<Household>(entity))
                 {
                     selectedPosition.y = MathUtils.Center(bounds.y);
                     m_SelectedEntity = entity;
