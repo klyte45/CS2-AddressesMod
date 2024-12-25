@@ -1,9 +1,8 @@
 import { translate } from "#utility/translate";
-import { SimpleNameEntry, NamingRulesService, replaceArgs } from "@klyte45/adr-commons";
-import { MultiUIValueBinding, ConstructorObjectToInstancesObject, InitializeBindings, Cs2FormLine, Cs2Select, SimpleInput, Input, Cs2Checkbox, Cs2CheckboxWithLine } from "@klyte45/euis-components";
-import { useState, useEffect, useRef, MutableRefObject } from "react";
-import { defaultSetting } from "./OverrideSettingsCmp";
-import "./vehiclePlateController.scss"
+import { replaceArgs } from "@klyte45/adr-commons";
+import { ConstructorObjectToInstancesObject, Cs2CheckboxWithLine, Cs2Select, InitializeBindings, Input, MultiUIValueBinding } from "@klyte45/euis-components";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
+import "./vehiclePlateController.scss";
 
 const BasePlatesController = {
   LettersAllowed: (MultiUIValueBinding<string[]>),
@@ -80,7 +79,8 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
               value={{ v: (controllerData.FlagsLocal.value & (1 << digitFlagId) ? 1 : controllerData.FlagsCarNumber.value & (1 << digitFlagId) ? 2 : 0) }}
               onChange={x => setDigitSource(digitFlagId, x.v)} />
             <CharsAllowedInput controllerData={controllerData} i={i} />
-            <Cs2CheckboxWithLine title={translate("vehiclePlate.allowRandomizeDigitLabel")} isChecked={() => (controllerData.FlagsRandomized.value & (1 << i)) != 0} onValueToggle={(x) => controllerData.FlagsRandomized.set(controllerData.FlagsRandomized.value & ~(x ? 0 : 1 << i) | (x ? 1 << i : 0))} />
+            <Cs2CheckboxWithLine title={translate("vehiclePlate.allowRandomizeDigitLabel")} isChecked={() => (controllerData.FlagsRandomized.value & (1 << i)) != 0} 
+            onValueToggle={(x) => controllerData.FlagsRandomized.set(controllerData.FlagsRandomized.value & ~(x ? 0 : 1 << i) | (x ? 1 << i : 0))} />
           </div>;
         }
         )

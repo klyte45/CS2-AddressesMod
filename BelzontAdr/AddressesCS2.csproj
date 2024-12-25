@@ -24,9 +24,9 @@
   <Import Project="$(K45_CS2_ALLROOT)\_Shared\belzont.targets" />
 
   <!--Mod data-->
-  <PropertyGroup>
+  <PropertyGroup> 
     <ModId>74182</ModId>
-    <Version>0.1.3.1</Version>
+    <Version>0.1.3.2</Version>
     <GameVersion>1.2.*</GameVersion>
     <ThumbnailPath>Properties/Thumbnail.png</ThumbnailPath>
     <DisplayName>Addresses &amp; Names Mod</DisplayName>

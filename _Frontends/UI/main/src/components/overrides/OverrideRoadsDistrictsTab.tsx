@@ -1,8 +1,8 @@
 import { translate } from "#utility/translate";
-import { SimpleNameEntry, AdrCitywideSettings, DistrictListItem, NamingRulesService, nameToString, DistrictRelativeService } from "@klyte45/adr-commons";
-import { Cs2FormLine, Cs2Select, Cs2Checkbox } from "@klyte45/euis-components";
-import { defaultSetting, defaultSettingRoadByDistrict } from "./OverrideSettingsCmp";
+import { AdrCitywideSettings, DistrictListItem, DistrictRelativeService, NamingRulesService, SimpleNameEntry, nameToString } from "@klyte45/adr-commons";
+import { Cs2CheckboxWithLine, Cs2FormLine, Cs2Select } from "@klyte45/euis-components";
 import { useEffect, useState } from "react";
+import { defaultSetting, defaultSettingRoadByDistrict } from "./OverrideSettingsCmp";
 
 type Props = {
   simpleFiles: SimpleNameEntry[];
@@ -37,12 +37,8 @@ export const OverrideRoadsDistrictsTab = ({ simpleFiles, indexedSimpleFiles, cur
         value={indexedSimpleFiles[currentSettings.DefaultRoadNameOverridesStr]}
         defaultValue={defaultSetting()} />
     </Cs2FormLine>
-    <Cs2FormLine title={translate("overrideSettings.useRoadNameAsStationName")}>
-      <Cs2Checkbox isChecked={() => currentSettings?.roadNameAsNameStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameStation(x)} />
-    </Cs2FormLine>
-    <Cs2FormLine title={translate("overrideSettings.useRoadNameAsCargoStationName")}>
-      <Cs2Checkbox isChecked={() => currentSettings?.roadNameAsNameCargoStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameCargoStation(x)} />
-    </Cs2FormLine>
+    <Cs2CheckboxWithLine title={translate("overrideSettings.useRoadNameAsStationName")} isChecked={() => currentSettings?.roadNameAsNameStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameStation(x)} />
+    <Cs2CheckboxWithLine title={translate("overrideSettings.useRoadNameAsCargoStationName")} isChecked={() => currentSettings?.roadNameAsNameCargoStation} onValueToggle={(x) => NamingRulesService.setRoadNameAsNameCargoStation(x)} />
     <h2>{translate("overrideSettings.perDistrictRoadsFile")}</h2>
     <Cs2Select
       options={districts}
