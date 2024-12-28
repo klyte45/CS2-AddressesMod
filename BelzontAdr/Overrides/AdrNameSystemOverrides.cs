@@ -218,6 +218,11 @@ namespace BelzontAdr
             while (entityManager.TryGetComponent<Owner>(entity, out var owner))
             {
                 entity = owner.m_Owner;
+                if (__instance.TryGetCustomName(entity, out name))
+                {
+                    __result = NameSystem.Name.CustomName(name);
+                    return false;
+                }
             }
             if (entityManager.TryGetComponent<ADREntityManualBuildingRef>(entity, out var manualRef) && entityExists.MatchesIgnoreFilter(manualRef.m_refNamedEntity))
             {
