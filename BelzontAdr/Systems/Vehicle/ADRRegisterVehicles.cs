@@ -82,7 +82,7 @@ namespace BelzontAdr
                         };
                         m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);
 #if DEBUG
-                        if (newItem.serialNumber % 5 == 0) UnityEngine.Debug.Log($"Added serial nº: {newItem.serialNumber} => {newItem.calculatedPlate}");
+                 //       if (newItem.serialNumber % 5 == 0) UnityEngine.Debug.Log($"Added serial nº: {newItem.serialNumber} => {newItem.calculatedPlate}");
 #endif
                     }
                 }

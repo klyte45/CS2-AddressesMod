@@ -264,7 +264,7 @@ namespace BelzontAdr
             public NativeArray<int> m_charZeroPos;
 
             public Hash128 Checksum;
-            public FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch, int compositionNumber = 1)
+            public readonly FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch, int compositionNumber = 1)
             {
                 var output = new NativeArray<Unicode.Rune>(m_charZeroPos.Length, Allocator.Temp);
                 uint currentFlag = 1;

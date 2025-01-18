@@ -400,7 +400,9 @@ namespace BelzontAdr
             }
             else
             {
-                GameManager.instance.localizationManager.activeDictionary.TryGetValue(GetId(entity, true), out name);
+                var id = GetId(entity, true);
+                if (id is null) return true;
+                GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out name);
             }
             HouseholdMember householdMemberData = entityManager.GetComponentData<HouseholdMember>(entity);
             surname = GenerateSurname(male, listForSurnames, householdMemberData.m_Household);
