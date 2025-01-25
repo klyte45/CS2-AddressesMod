@@ -1,6 +1,7 @@
 ﻿using Belzont.Interfaces;
 using Game;
 using Game.Modding;
+using System.Collections.Generic;
 
 namespace BelzontAdr
 {
@@ -41,5 +42,16 @@ namespace BelzontAdr
             return new AdrModData(this);
         }
 
+#if LOCAL
+        private string BaseUrlApps => "http://localhost:8715";
+#else
+        private string BaseUrlApps => $"coui://{CouiHost}/UI";
+#endif
+        protected override bool EuisIsMandatory => true;
+        protected override bool UseEuisRegister => true;
+        protected override Dictionary<string, EuisAppRegister> EuisApps => new()
+        {
+            ["main"] = new("Addresses Mod for CS2", $"{BaseUrlApps}/k45-adr-main.js", $"{BaseUrlApps}/k45-adr-main.css", $"coui://{CouiHost}/UI/images/ADR.svg")
+        };
     }
 }
