@@ -27,6 +27,7 @@ namespace BelzontAdr
         {
             prefabSystem = world.GetExistingSystemManaged<PrefabSystem>();
             adrMainSystem = world.GetOrCreateSystemManaged<AdrMainSystem>();
+            m_nameSystem = world.GetOrCreateSystemManaged<NameSystem>();
             entityManager = world.EntityManager;
             entityExists = entityManager.UniversalQuery.GetEntityQueryMask();
             m_EndFrameBarrier = world.GetOrCreateSystemManaged<EndFrameBarrier>();
@@ -61,6 +62,7 @@ namespace BelzontAdr
         private static EndFrameBarrier m_EndFrameBarrier;
         private static AdrMainSystem adrMainSystem;
         private static EntityQueryMask entityExists;
+        private static NameSystem m_nameSystem;
 
 
         public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
@@ -338,6 +340,7 @@ namespace BelzontAdr
         private static bool GetAggregateName(out string format, out string name, Entity entity)
         {
             name = format = null;
+            if (m_nameSystem.TryGetCustomName(entity, out _)) return true;
             if (!adrMainSystem.FindReferenceRoad(entity, out DynamicBuffer<AggregateElement> elements, out Entity refRoad)) return true;
             if (!adrMainSystem.GetRoadNameList(refRoad, out var roadsNamesList)) return true;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;

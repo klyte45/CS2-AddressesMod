@@ -1,3 +1,3 @@
-# v0.1.3r6 (25-JAN-25)
-- Updating to be compatible with EUIS 0.2
-- Fixing mod section not appearing when selecting an object
+# v0.1.3r8 (28-JAN-25)
+- Fixing issue with district-based road name settings not working
+- Fixing addresses from companies not using road custom name if it was set by the player

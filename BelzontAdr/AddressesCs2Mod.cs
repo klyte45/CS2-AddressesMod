@@ -1,4 +1,7 @@
-﻿using Belzont.Interfaces;
+﻿#if !RELEASE
+#define LOCAL
+#endif
+using Belzont.Interfaces;
 using Game;
 using Game.Modding;
 using System.Collections.Generic;
@@ -14,8 +17,8 @@ namespace BelzontAdr
         public override void DoOnCreateWorld(UpdateSystem updateSystem)
         {
             AdrNameFilesManager.Instance.ReloadNameFiles();
-            updateSystem.UpdateAfter<AdrDistrictsSystem>(SystemUpdatePhase.ModificationEnd);
-            updateSystem.UpdateAfter<AdrMainSystem>(SystemUpdatePhase.ModificationEnd);
+            updateSystem.UpdateAfter<AdrDistrictsSystem>(SystemUpdatePhase.UIUpdate);
+            updateSystem.UpdateAfter<AdrMainSystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAfter<AdrEditorUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<AdrNamesetSystem>(SystemUpdatePhase.Modification2B);
             updateSystem.UpdateAt<AdrVehicleSystem>(SystemUpdatePhase.UIUpdate);
