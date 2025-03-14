@@ -2,12 +2,14 @@
 #define LOCAL
 #endif
 using Belzont.Interfaces;
+using Colossal.IO.AssetDatabase;
 using Game;
 using Game.Modding;
 using System.Collections.Generic;
 
 namespace BelzontAdr
 {
+    [FileLocation("K45_ADR_settings")]
     public class AddressesCs2Mod : BasicIMod, IMod
     {
         public static new AddressesCs2Mod Instance => (AddressesCs2Mod)BasicIMod.Instance;

@@ -43,11 +43,10 @@ This mod may cause issues in the game due their early stage of development. This
 The most up to date information about installation and known issues and bugs is at the forum topíc.</LongDescription>
   <Thumbnail Value="Properties/Thumbnail.png" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/addresses-names-mod-for-cs2.1651551/" />
-  <ModVersion Value="0.1.3.8" />
+  <ModVersion Value="0.1.3.9" />
   <GameVersion Value="1.2.*" />
-  <ChangeLog># v0.1.3r8 (28-JAN-25)
-- Fixing issue with district-based road name settings not working
-- Fixing addresses from companies not using road custom name if it was set by the player</ChangeLog>
+  <ChangeLog># v0.1.3r9 (18-MAR-25)
+- Fixes for 1.2.5 (CS1 10th anniversary) patch</ChangeLog>
   <Tag Value="Code Mod" />
   <Screenshot Value="Screenshots\00_identifierEditor.jpg" />
   <Screenshot Value="Screenshots\01_GHImport.jpg" />
