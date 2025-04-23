@@ -24,7 +24,7 @@
   <PropertyGroup>
     <ModId>74182</ModId>
     <Version>0.1.3.9</Version>
-    <GameVersion>1.2.*</GameVersion>
+    <GameVersion>1.3.*</GameVersion>
     <ThumbnailPath>Properties/Thumbnail.png</ThumbnailPath>
     <DisplayName>Addresses &amp; Names Mod</DisplayName>
     <ShortDescription>Extends name generation systems.</ShortDescription>

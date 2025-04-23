@@ -204,7 +204,7 @@ namespace BelzontAdr
 
         protected unsafe override void OnUpdate()
         {
-            if (GameManager.instance.isGameLoading || GameManager.instance.isLoading)
+            if (GameManager.instance.isGameLoading)
             {
                 roadVehiclesPlatesSettings ??= VehiclePlateSettings.CreateRoadVehicleDefault(m_timeSystem);
                 airVehiclesPlatesSettings ??= VehiclePlateSettings.CreateAirVehicleDefault(m_timeSystem);
