@@ -1,0 +1,70 @@
+﻿using Belzont.Utils;
+using Colossal.Entities;
+using Game.Buildings;
+using Game.Common;
+using Game.Objects;
+using Game.Tools;
+using Game.UI;
+using Game.UI.Tooltip;
+using Unity.Collections;
+using Unity.Entities;
+
+namespace BelzontAdr
+{
+    public partial class TempRoadMarkerTooltip : TooltipSystemBase
+    {
+
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+            m_nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
+            m_TempQuery = GetEntityQuery(new ComponentType[]
+            {
+                ComponentType.ReadOnly<ADRHighwayPassingThroughMarkerData>(),
+                ComponentType.ReadOnly<Attached>(),
+                ComponentType.ReadOnly<Temp>(),
+                ComponentType.Exclude<Deleted>()
+            });
+            m_Location = new StringTooltip
+            {
+                icon = "coui://adr.k45/UI/images/ADR.svg",
+            };
+            RequireForUpdate(m_TempQuery);
+        }
+
+        protected override void OnUpdate()
+        {
+            base.CompleteDependency();
+            using NativeArray<ArchetypeChunk> nativeArray = m_TempQuery.ToArchetypeChunkArray(Allocator.TempJob);
+            var entitiesHandle = GetEntityTypeHandle();
+            foreach (var archetypeChunk in nativeArray)
+            {
+                foreach (var tempEntity in archetypeChunk.GetNativeArray(entitiesHandle))
+                {
+                    Entity road = default;
+                    int number = default;
+                    if (EntityManager.TryGetComponent<Attached>(tempEntity, out var component2))
+                    {
+                        var parent = component2.m_Parent;
+
+                        if (EntityManager.TryGetComponent<Temp>(parent, out var tempData))
+                        {
+                            parent = tempData.m_Original;
+                        }
+
+                        if (BuildingUtils.GetAddress(EntityManager, tempEntity, parent, component2.m_CurvePosition, out road, out number))
+                        {
+                            m_Location.value = $"{m_nameSystem.GetName(road).Translate()} @ {number}";
+                            AddMouseTooltip(m_Location);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        private EntityQuery m_TempQuery;
+        private StringTooltip m_Location;
+        private NameSystem m_nameSystem;
+    }
+}

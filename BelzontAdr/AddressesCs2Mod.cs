@@ -1,19 +1,11 @@
 ﻿#if !RELEASE
 #define LOCAL
 #endif
-using AddressesCS2.Prefabs;
 using Belzont.Interfaces;
-using Belzont.Utils;
-using Colossal;
 using Colossal.IO.AssetDatabase;
 using Game;
 using Game.Modding;
-using Game.Prefabs;
-using Game.SceneFlow;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using Unity.Entities;
 
 namespace BelzontAdr
 {
@@ -37,6 +29,7 @@ namespace BelzontAdr
             updateSystem.UpdateAt<RailVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<WaterVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<AirVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
+            updateSystem.UpdateAt<TempRoadMarkerTooltip>(SystemUpdatePhase.UITooltip);
 #if DEBUG && ADR_AGGSYS
             updateSystem.UpdateAt<AdrAggregationSystem>(SystemUpdatePhase.Modification2B);
 #endif
