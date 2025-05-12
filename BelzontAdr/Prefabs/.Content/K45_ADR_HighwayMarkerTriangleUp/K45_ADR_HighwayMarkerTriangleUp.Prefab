@@ -1,7 +1,7 @@
 {
     "$id": 0,
     "$type": "0|Game.Prefabs.StaticObjectPrefab, Game",
-    "name": "K45_ADR_RoadMarker",
+    "name": "K45_ADR_HighwayMarkerTriangleUp",
     "active": true,
     "components": {
         "$id": 1,
@@ -19,9 +19,9 @@
                 "$type": "4|Game.Prefabs.UIObject, Game",
                 "name": "UIObject",
                 "active": true,
-                "m_Group": null,
-                "m_Priority": 1,
-                "m_Icon": "assetdb://global/a65d6aa76b2ff16a1b20a52e08f085f6",
+                "m_Group": $fstrref:"UnityGUID:7284210a233d52947afe9dd82d4402bd",
+                "m_Priority": 1000,
+                "m_Icon": "assetdb://global/50feeb96c74942dd9ff2f0dcdffa671f",
                 "m_IsDebugObject": false
             },
             {
@@ -78,7 +78,7 @@
                 "active": true,
                 "m_TransportType": 18446744073709551615,
                 "m_AccessConnectionType": 0,
-                "m_RouteConnectionType": 1,
+                "m_RouteConnectionType": 0,
                 "m_AccessTrackType": 0,
                 "m_RouteTrackType": 0,
                 "m_AccessRoadType": 0,
@@ -102,7 +102,7 @@
             {
                 "$id": 10,
                 "$type": "11|Game.Prefabs.ObjectMeshInfo, Game",
-                "m_Mesh": $fstrref:"UnityGUID:501aed85a24bb66498351c96fdc0bd75",
+                "m_Mesh": $fstrref:"UnityGUID:c44e17922d9cf7d4fb165d70183f7e41",
                 "m_Position": {
                     "$type": 3,
                     "x": 0,
@@ -124,3 +124,4 @@
         ]
     },
     "m_Circular": false
+}
