@@ -6,11 +6,11 @@
     "components": {
         "$id": 1,
         "$type": "1|System.Collections.Generic.List`1[[Game.Prefabs.ComponentBase, Game]], mscorlib",
-        "$rlength": 7,
+        "$rlength": 6,
         "$rcontent": [
             { 
-                "$id": 10,
-                "$type": "14|BelzontAdr.ADRHighwayPassingThroughMarker, AddressesCS2",
+                "$id": 8,
+                "$type": "9|BelzontAdr.ADRHighwayPassingThroughMarker, AddressesCS2",
                 "name": "ADRHighwayPassingThroughMarkerBase",
                 "active": true,
             },
@@ -70,27 +70,6 @@
                 "m_TrackPassThrough": 0,
                 "m_NodeOffset": 0,
                 "m_Attached": false
-            },
-            {
-                "$id": 8,
-                "$type": "9|Game.Prefabs.TransportStop, Game",
-                "name": "TransportStop",
-                "active": true,
-                "m_TransportType": 18446744073709551615,
-                "m_AccessConnectionType": 0,
-                "m_RouteConnectionType": 0,
-                "m_AccessTrackType": 0,
-                "m_RouteTrackType": 0,
-                "m_AccessRoadType": 0,
-                "m_RouteRoadType": 1,
-                "m_EnterDistance": 0,
-                "m_ExitDistance": 0,
-                "m_AccessDistance": 0,
-                "m_BoardingTime": 0,
-                "m_ComfortFactor": 0,
-                "m_LoadingFactor": 0,
-                "m_PassengerTransport": false,
-                "m_CargoTransport": false
             }
         ]
     },
