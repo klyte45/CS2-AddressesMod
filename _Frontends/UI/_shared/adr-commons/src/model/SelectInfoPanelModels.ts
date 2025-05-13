@@ -23,7 +23,8 @@ export enum AdrEntityType {
     CargoTransportStation,
     RoadAggregation,
     District,
-    Vehicle
+    Vehicle,
+    RoadMark
 }
 export type EntityOption = {
     entity: Entity
