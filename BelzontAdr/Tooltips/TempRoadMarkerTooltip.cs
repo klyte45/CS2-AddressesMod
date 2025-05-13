@@ -20,7 +20,7 @@ namespace BelzontAdr
             m_nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
             m_TempQuery = GetEntityQuery(new ComponentType[]
             {
-                ComponentType.ReadOnly<ADRHighwayPassingThroughMarkerData>(),
+                ComponentType.ReadOnly<ADRHighwayMarkerData>(),
                 ComponentType.ReadOnly<Attached>(),
                 ComponentType.ReadOnly<Temp>(),
                 ComponentType.Exclude<Deleted>()

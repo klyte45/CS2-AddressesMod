@@ -5,15 +5,15 @@ using Unity.Entities;
 
 namespace BelzontAdr
 {
-    [ComponentMenu("Addresses/", new Type[]
-{
+    [ComponentMenu("Addresses/", new Type[]{
     typeof(StaticObjectPrefab)
 })]
     public class ADRHighwayPassingThroughMarker : ComponentBase
     {
         public override void GetArchetypeComponents(HashSet<ComponentType> components)
         {
-            components.Add(ComponentType.ReadWrite<ADRHighwayPassingThroughMarkerData>());
+            components.Add(ComponentType.ReadWrite<ADRHighwayMarkerData>());
+            components.Add(ComponentType.ReadWrite<ADRHighwayMarkerDataDirty>());
         }
 
         public override void GetPrefabComponents(HashSet<ComponentType> components)

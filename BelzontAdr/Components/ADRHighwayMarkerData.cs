@@ -5,12 +5,11 @@ using Unity.Entities;
 
 namespace BelzontAdr
 {
-    public struct ADRHighwayPassingThroughMarkerData : IComponentData, ISerializable
+    public struct ADRHighwayMarkerData : IComponentData, ISerializable
     {
         const uint CURRENT_VERSION = 0;
 
-        public FixedString32Bytes prefix;
-        public FixedString32Bytes suffix;
+        public Colossal.Hash128 routeDataIndex;
 
         public RouteDirection routeDirection;
         public DisplayInformation displayInformation;
@@ -20,6 +19,20 @@ namespace BelzontAdr
         public bool overrideMileage;
         public float newMileage;
         public bool reverseMileageCounting;
+
+        private bool initialized;
+
+        public bool Initialized
+        {
+            readonly get => initialized;
+            set
+            {
+                if (value)
+                {
+                    initialized = value;
+                }
+            }
+        }
 
 
 
@@ -41,7 +54,7 @@ namespace BelzontAdr
         public enum DisplayInformation
         {
             ROUTE_SHIELD,
-            MILEAGE_KM,
+            MILEAGE_VALUE,
             EXIT_NUMBER,
             CUSTOM_1,
             CUSTOM_2,
@@ -53,9 +66,8 @@ namespace BelzontAdr
 
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
         {
-            reader.CheckVersionK45(CURRENT_VERSION, typeof(ADRHighwayPassingThroughMarkerData));
-            reader.Read(out prefix);
-            reader.Read(out suffix);
+            reader.CheckVersionK45(CURRENT_VERSION, typeof(ADRHighwayMarkerData));
+            reader.Read(out routeDataIndex);
             reader.Read(out routeDirection);
             reader.Read(out displayInformation);
             reader.Read(out numericCustomParam1);
@@ -63,13 +75,13 @@ namespace BelzontAdr
             reader.Read(out overrideMileage);
             reader.Read(out newMileage);
             reader.Read(out reverseMileageCounting);
+            Initialized = true;
         }
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
-            writer.Write(prefix);
-            writer.Write(suffix);
+            writer.Write(routeDataIndex);
             writer.Write(routeDirection);
             writer.Write(displayInformation);
             writer.Write(numericCustomParam1);

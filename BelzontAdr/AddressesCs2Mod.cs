@@ -30,6 +30,7 @@ namespace BelzontAdr
             updateSystem.UpdateAt<WaterVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<AirVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<TempRoadMarkerTooltip>(SystemUpdatePhase.UITooltip);
+            updateSystem.UpdateAt<AdrHighwayRoutesSystem>(SystemUpdatePhase.ModificationEnd);
 #if DEBUG && ADR_AGGSYS
             updateSystem.UpdateAt<AdrAggregationSystem>(SystemUpdatePhase.Modification2B);
 #endif
