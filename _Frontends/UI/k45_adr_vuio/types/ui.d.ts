@@ -96,7 +96,7 @@ declare module "cs2/ui" {
   }
   export const FOCUS_DISABLED: unique symbol;
   export const FOCUS_AUTO: unique symbol;
-  export type FocusKey = typeof FOCUS_DISABLED | typeof FOCUS_AUTO | UniqueFocusKey;
+  export type FocusKey = typeof FOCUS_DISABLED | typeof FOCUS_AUTO | UniqueFocusKey | any;
   export type UniqueFocusKey = FocusSymbol | string | number;
   export class FocusSymbol {
   	readonly debugName: string;

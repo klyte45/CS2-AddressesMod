@@ -8,7 +8,7 @@ namespace BelzontAdr
     [ComponentMenu("Addresses/", new Type[]{
     typeof(StaticObjectPrefab)
 })]
-    public class ADRHighwayPassingThroughMarker : ComponentBase
+    public class ADRRoadMarkerObject : ComponentBase
     {
         public override void GetArchetypeComponents(HashSet<ComponentType> components)
         {

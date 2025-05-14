@@ -74,7 +74,12 @@ namespace BelzontAdr
             Tool_NewMileage = new(default, $"{PREFIX}{nameof(Tool_NewMileage)}", EventCaller, CallBinder);
             Tool_OverrideMileage = new(default, $"{PREFIX}{nameof(Tool_OverrideMileage)}", EventCaller, CallBinder);
             Tool_ReverseMileageCounting = new(default, $"{PREFIX}{nameof(Tool_ReverseMileageCounting)}", EventCaller, CallBinder);
+
+            CallBinder($"{PREFIX}isCurrentPrefabRoadMarker", IsCurrentPrefabRoadMarker);
         }
+
+        private bool IsCurrentPrefabRoadMarker() => m_toolSystem.activeTool is ObjectToolSystem && m_toolSystem.activePrefab.Has<ADRRoadMarkerObject>();
+
         #endregion
 
 
@@ -153,13 +158,14 @@ namespace BelzontAdr
 
         private EntityQuery m_DirtyMarkerData;
         private ModificationEndBarrier m_modificationEndBarrier;
+        private ToolSystem m_toolSystem;
 
         protected override void OnCreate()
         {
             base.OnCreate();
 
             m_modificationEndBarrier = World.GetOrCreateSystemManaged<ModificationEndBarrier>();
-
+            m_toolSystem = World.GetExistingSystemManaged<ToolSystem>();
             m_DirtyMarkerData = GetEntityQuery(new EntityQueryDesc[]
             {
                 new()
@@ -208,7 +214,7 @@ namespace BelzontAdr
                     },
                     m_CommandBuffer = m_modificationEndBarrier.CreateCommandBuffer().AsParallelWriter(),
                     m_EntityType = GetEntityTypeHandle(),
-                    m_markerData = GetComponentTypeHandle<ADRHighwayMarkerData>()                    
+                    m_markerData = GetComponentTypeHandle<ADRHighwayMarkerData>()
                 };
                 updater.ScheduleParallel(m_DirtyMarkerData, Dependency).Complete();
             }

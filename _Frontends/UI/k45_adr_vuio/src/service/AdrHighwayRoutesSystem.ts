@@ -20,4 +20,51 @@ const AdrHighwayRoutesSystem = {
     InfoPanel_ReverseMileageCounting: MultiUIValueBinding<boolean>,
 }
 
-export default MultiUIValueBindingTools.InitializeBindings(AdrHighwayRoutesSystem);
+export default {
+    ...MultiUIValueBindingTools.InitializeBindings(AdrHighwayRoutesSystem),
+    async isCurrentPrefabRoadMarker(): Promise<boolean> { return await engine.call(AdrHighwayRoutesSystem._prefix + ".isCurrentPrefabRoadMarker"); }
+}
+
+export enum RouteDirection {
+    UNDEFINED,
+    NORTH,
+    NORTHEAST,
+    EAST,
+    SOUTHEAST,
+    SOUTH,
+    SOUTHWEST,
+    WEST,
+    NORTHWEST,
+    INTERNAL,
+    EXTERNAL
+}
+
+export enum DisplayInformation {
+    ROUTE_SHIELD,
+    MILEAGE_VALUE,
+    EXIT_NUMBER,
+    CUSTOM_1,
+    CUSTOM_2,
+    CUSTOM_3,
+    CUSTOM_4,
+    CUSTOM_5
+}
+
+export type RouteItem = {
+    name: string,
+    id: string
+}
+
+export const LocalizationStrings = {
+    routeIdentifier: "RoadMarkSettings.RouteIdentifier",
+    routeDirection: "RoadMarkSettings.RouteDirection",
+    overrideMileage: "RoadMarkSettings.OverrideMileage",
+    overrideMileageShort: "RoadMarkSettings.OverrideMileageShort",
+    overrideMileageToggleButton: "RoadMarkSettings.OverrideMileageToggleButton",
+    newMileage: "RoadMarkSettings.NewMileage",
+    reverseMileageCounting: "RoadMarkSettings.ReverseMileageCounting",
+    displayInformation: "RoadMarkSettings.DisplayInformation",
+    customParam1: "RoadMarkSettings.CustomParam1",
+    customParams: "RoadMarkSettings.CustomParams",
+    customParam2: "RoadMarkSettings.CustomParam2"
+}

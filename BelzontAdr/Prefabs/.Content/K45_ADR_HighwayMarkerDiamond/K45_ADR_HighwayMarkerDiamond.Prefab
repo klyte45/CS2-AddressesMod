@@ -10,8 +10,8 @@
         "$rcontent": [
             { 
                 "$id": 8,
-                "$type": "9|BelzontAdr.ADRHighwayPassingThroughMarker, AddressesCS2",
-                "name": "ADRHighwayPassingThroughMarkerBase",
+                "$type": "9|BelzontAdr.ADRRoadMarkerObject, AddressesCS2",
+                "name": "ADRRoadMarkerObject",
                 "active": true,
             },
             {

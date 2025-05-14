@@ -2,5 +2,5 @@
 
 namespace BelzontAdr
 {
-    public struct ADRHighwayMarkerDataDirty : IComponentData, ICleanupComponentData { }
+    public struct ADRHighwayMarkerDataDirty : IComponentData { }
 }
