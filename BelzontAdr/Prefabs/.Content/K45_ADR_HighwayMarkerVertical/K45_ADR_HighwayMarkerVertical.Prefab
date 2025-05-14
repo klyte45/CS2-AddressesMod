@@ -81,7 +81,7 @@
             {
                 "$id": 10,
                 "$type": "11|Game.Prefabs.ObjectMeshInfo, Game",
-                "m_Mesh": $fstrref:"UnityGUID:6dec601efd32e8241add143ac92df73a",
+                "m_Mesh": $fstrref:"UnityGUID:ed2dbd8b19ff1ed42af9e3f40f337573",
                 "m_Position": {
                     "$type": 3,
                     "x": 0,

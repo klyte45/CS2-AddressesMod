@@ -49,37 +49,37 @@ export const RoadMarkSettings = () => {
             onChange={x => routesSystem.InfoPanel_RouteDirection.set(x).then(x => setBuildIdx(buildIdx + 1))}
             value={routesSystem.InfoPanel_RouteDirection.value}
         /></div>} />
-        <VR.InfoRow left={<>{replaceArgs(LocalizationStrings.overrideMileage, [useFormattedLargeNumber(1 * mileageMultiplier) + (localization.unitSettings.unitSystem ? " mi" : " km")])}</>} right={<div><VW.Checkbox
+        <VR.InfoRow left={<>{replaceArgs(translate(LocalizationStrings.overrideMileage), [useFormattedLargeNumber(1 * mileageMultiplier) + (localization.unitSettings.unitSystem ? " mi" : " km")])}</>} right={<div><VW.Checkbox
             onChange={x => routesSystem.InfoPanel_OverrideMileage.set(x).then(x => setBuildIdx(buildIdx + 1))}
             checked={routesSystem.InfoPanel_OverrideMileage.value}
         /></div>} />
         {routesSystem.InfoPanel_OverrideMileage.value &&
             <VR.InfoSection>
-                <VR.InfoRow left={<>{replaceArgs(LocalizationStrings.newMileage, [localization.unitSettings.unitSystem ? "mi" : "km"])}</>} right={<VW.FloatInputStandalone className={editorModule.input}
+                <VR.InfoRow left={<>{replaceArgs(translate(LocalizationStrings.newMileage), [localization.unitSettings.unitSystem ? "mi" : "km"])}</>} right={<VW.FloatInputStandalone className={editorModule.input}
                     onChange={x => routesSystem.InfoPanel_NewMileage.set(x * mileageMultiplier).then(x => setBuildIdx(buildIdx + 1))}
                     value={routesSystem.InfoPanel_NewMileage.value / mileageMultiplier}
                     style={{ maxWidth: "150rem", textAlign: "right" }}
                 />} />
-                <VR.InfoRow left={<>{LocalizationStrings.reverseMileageCounting}</>} right={<div><VW.Checkbox
+                <VR.InfoRow left={<>{translate(LocalizationStrings.reverseMileageCounting)}</>} right={<div><VW.Checkbox
                     onChange={x => routesSystem.InfoPanel_ReverseMileageCounting.set(x).then(x => setBuildIdx(buildIdx + 1))}
                     checked={routesSystem.InfoPanel_ReverseMileageCounting.value}
                 /></div>} />
 
             </VR.InfoSection>
         }
-        <VR.InfoRow left={<>{LocalizationStrings.displayInformation}</>} right={<div><NumberDD
+        <VR.InfoRow left={<>{translate(LocalizationStrings.displayInformation)}</>} right={<div><NumberDD
             items={ObjectTyped.entries(DisplayInformation).filter(x => typeof x[1] == 'number').map((x: [string, number]) => ({ value: x[1], displayName: { __Type: LocElementType.String, value: translate("DisplayInformation." + x[0]) } }))}
             onChange={x => routesSystem.InfoPanel_DisplayInformation.set(x).then(x => setBuildIdx(buildIdx + 1))}
             value={routesSystem.InfoPanel_DisplayInformation.value}
         /></div>} />
         {routesSystem.InfoPanel_DisplayInformation.value >= DisplayInformation.CUSTOM_1 && routesSystem.InfoPanel_DisplayInformation.value <= DisplayInformation.CUSTOM_5 &&
             <VR.InfoSection>
-                <VR.InfoRow left={<>{LocalizationStrings.customParam1}</>} right={<VW.IntInputStandalone className={editorModule.input}
+                <VR.InfoRow left={<>{translate(LocalizationStrings.customParam1)}</>} right={<VW.IntInputStandalone className={editorModule.input}
                     onChange={x => routesSystem.InfoPanel_NumericCustomParam1.set(x).then(x => setBuildIdx(buildIdx + 1))}
                     value={routesSystem.InfoPanel_NumericCustomParam1.value}
                     style={{ maxWidth: "150rem", textAlign: "right" }}
                 />} />
-                <VR.InfoRow left={<>{LocalizationStrings.customParam2}</>} right={<VW.IntInputStandalone className={editorModule.input}
+                <VR.InfoRow left={<>{translate(LocalizationStrings.customParam2)}</>} right={<VW.IntInputStandalone className={editorModule.input}
                     onChange={x => routesSystem.InfoPanel_NumericCustomParam2.set(x).then(x => setBuildIdx(buildIdx + 1))}
                     value={routesSystem.InfoPanel_NumericCustomParam2.value}
                     style={{ maxWidth: "150rem", textAlign: "right" }}

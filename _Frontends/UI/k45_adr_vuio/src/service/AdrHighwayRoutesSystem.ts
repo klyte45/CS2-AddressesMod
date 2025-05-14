@@ -40,14 +40,14 @@ export enum RouteDirection {
 }
 
 export enum DisplayInformation {
-    ROUTE_SHIELD,
-    MILEAGE_VALUE,
-    EXIT_NUMBER,
+    ORIGINAL,
     CUSTOM_1,
     CUSTOM_2,
     CUSTOM_3,
     CUSTOM_4,
-    CUSTOM_5
+    CUSTOM_5,
+    CUSTOM_6,
+    CUSTOM_7
 }
 
 export type RouteItem = {

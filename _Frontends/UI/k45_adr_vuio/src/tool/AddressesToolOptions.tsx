@@ -1,6 +1,7 @@
-import { VanillaComponentResolver, LocElementType, VanillaWidgets } from "@klyte45/vuio-commons";
+import { VanillaComponentResolver, LocElementType, VanillaWidgets, replaceArgs } from "@klyte45/vuio-commons";
 import { DropdownItem, toolbar } from "cs2/bindings";
 import { FocusDisabled } from "cs2/input";
+import { useLocalization } from "cs2/l10n";
 import { ModuleRegistryExtend } from "cs2/modding";
 import { ObjectTyped } from "object-typed";
 import { useState, useEffect } from "react";
@@ -41,6 +42,9 @@ const AdrRoadMarkerToolOptions = () => {
     const NumberDD = VW.DropdownField<number>();
     const [routesRegistered, setRoutesRegistered] = useState<RouteItem[]>([])
 
+    const localization = useLocalization();
+    const mileageMultiplier = localization.unitSettings.unitSystem ? 1.609 : 1
+
     const editorModule = VanillaWidgets.instance.editorItemModule;
     const routeList = [
         { value: "0".repeat(32), displayName: { __Type: LocElementType.String, value: translate("HighwayRoutes.NoRoute") } }
@@ -69,9 +73,12 @@ const AdrRoadMarkerToolOptions = () => {
             </FocusDisabled>
         </VCR.Section>
         {routesSystem.Tool_OverrideMileage.value &&
-            <VCR.Section title={translate(LocalizationStrings.newMileage)}>
+            <VCR.Section title={replaceArgs(translate(LocalizationStrings.newMileage), [localization.unitSettings.unitSystem ? "mi" : "km"])}>
                 <FocusDisabled>
-                    <VCR.FloatInput style={{ flexShrink: 4, width: "auto", flexGrow: 2, textAlign: "right", marginRight: "7rem" }} className={editorModule.input} value={routesSystem.Tool_NewMileage.value} onChange={(x) => routesSystem.Tool_NewMileage.set(x).then(x => setBuildIdx(buildIdx + 1))} />
+                    <VCR.FloatInput
+                        style={{ flexShrink: 4, width: "auto", flexGrow: 2, textAlign: "right", marginRight: "7rem" }} className={editorModule.input}
+                        onChange={x => routesSystem.Tool_NewMileage.set(x * mileageMultiplier).then(x => setBuildIdx(buildIdx + 1))}
+                        value={routesSystem.Tool_NewMileage.value / mileageMultiplier} />
                     <VanillaComponentResolver.instance.ToolButton selected={routesSystem.Tool_ReverseMileageCounting.value} onSelect={() => routesSystem.Tool_ReverseMileageCounting.set(!routesSystem.Tool_ReverseMileageCounting.value).then(x => setBuildIdx(buildIdx + 1))} src={i_OverrideMileage} className={VanillaComponentResolver.instance.toolButtonTheme.button} tooltip={translate(LocalizationStrings.reverseMileageCounting)}></VanillaComponentResolver.instance.ToolButton>
                 </FocusDisabled>
             </VCR.Section>
@@ -83,7 +90,7 @@ const AdrRoadMarkerToolOptions = () => {
                 value={routesSystem.Tool_DisplayInformation.value}
             />
         </VCR.Section>
-        {routesSystem.Tool_DisplayInformation.value >= DisplayInformation.CUSTOM_1 && routesSystem.Tool_DisplayInformation.value <= DisplayInformation.CUSTOM_5 &&
+        {routesSystem.Tool_DisplayInformation.value >= DisplayInformation.CUSTOM_1 && routesSystem.Tool_DisplayInformation.value <= DisplayInformation.CUSTOM_7 &&
             <VCR.Section title={translate(LocalizationStrings.customParams)}>
                 <FocusDisabled>
                     <VW.IntInputStandalone style={{ flexShrink: 4, textAlign: "right", maxWidth: "105rem", width: "auto", flexGrow: 2, marginRight: "7rem" }} className={editorModule.input}
@@ -96,52 +103,3 @@ const AdrRoadMarkerToolOptions = () => {
     </>
 
 }
-
-/*
-<VR.InfoRow left={<>{translate("RoadMarkSettings.RouteIdentifier")}</>} right={<div><StringDD
-            onChange={x => routesSystem.Tool_RouteId.set(x).then(x => setBuildIdx(buildIdx + 1))}
-            items={x}
-            value={routesSystem.Tool_RouteId.value}
-        /></div>} />
-        <VR.InfoRow left={<>{translate("RoadMarkSettings.RouteDirection")}</>} right={<div><NumberDD
-            items={ObjectTyped.entries(RouteDirection).filter(x => typeof x[1] == 'number').map((x: [string, number]) => ({ value: x[1], displayName: { __Type: LocElementType.String, value: translate("RouteDirection." + x[0]) } }))}
-            onChange={x => routesSystem.Tool_RouteDirection.set(x).then(x => setBuildIdx(buildIdx + 1))}
-            value={routesSystem.Tool_RouteDirection.value}
-        /></div>} />
-        <VR.InfoRow left={<>{replaceArgs(translate("RoadMarkSettings.OverrideMileage"), [useFormattedLargeNumber(1 * mileageMultiplier) + (localization.unitSettings.unitSystem ? " mi" : " km")])}</>} right={<div><VW.Checkbox
-            onChange={x => routesSystem.Tool_OverrideMileage.set(x).then(x => setBuildIdx(buildIdx + 1))}
-            checked={routesSystem.Tool_OverrideMileage.value}
-        /></div>} />
-        {routesSystem.Tool_OverrideMileage.value &&
-            <VR.InfoSection>
-                <VR.InfoRow left={<>{replaceArgs(translate("RoadMarkSettings.NewMileage"), [localization.unitSettings.unitSystem ? "mi" : "km"])}</>} right={<VW.FloatInputStandalone className={editorModule.input}
-                    onChange={x => routesSystem.Tool_NewMileage.set(x * mileageMultiplier).then(x => setBuildIdx(buildIdx + 1))}
-                    value={routesSystem.Tool_NewMileage.value / mileageMultiplier}
-                    style={{ maxWidth: "150rem", textAlign: "right" }}
-                />} />
-                <VR.InfoRow left={<>{translate("RoadMarkSettings.ReverseMileageCounting")}</>} right={<div><VW.Checkbox
-                    onChange={x => routesSystem.Tool_ReverseMileageCounting.set(x).then(x => setBuildIdx(buildIdx + 1))}
-                    checked={routesSystem.Tool_ReverseMileageCounting.value}
-                /></div>} />
-
-            </VR.InfoSection>
-        }
-        <VR.InfoRow left={<>{translate("RoadMarkSettings.DisplayInformation")}</>} right={<div><NumberDD
-            items={ObjectTyped.entries(DisplayInformation).filter(x => typeof x[1] == 'number').map((x: [string, number]) => ({ value: x[1], displayName: { __Type: LocElementType.String, value: translate("DisplayInformation." + x[0]) } }))}
-            onChange={x => routesSystem.Tool_DisplayInformation.set(x).then(x => setBuildIdx(buildIdx + 1))}
-            value={routesSystem.Tool_DisplayInformation.value}
-        /></div>} />
-        {routesSystem.Tool_DisplayInformation.value >= DisplayInformation.CUSTOM_1 && routesSystem.Tool_DisplayInformation.value <= DisplayInformation.CUSTOM_5 &&
-            <VR.InfoSection>
-                <VR.InfoRow left={<>{translate("RoadMarkSettings.CustomParam1")}</>} right={<VW.IntInputStandalone className={editorModule.input}
-                    onChange={x => routesSystem.Tool_NumericCustomParam1.set(x).then(x => setBuildIdx(buildIdx + 1))}
-                    value={routesSystem.Tool_NumericCustomParam1.value}
-                    style={{ maxWidth: "150rem", textAlign: "right" }}
-                />} />
-                <VR.InfoRow left={<>{translate("RoadMarkSettings.CustomParam2")}</>} right={<VW.IntInputStandalone className={editorModule.input}
-                    onChange={x => routesSystem.Tool_NumericCustomParam2.set(x).then(x => setBuildIdx(buildIdx + 1))}
-                    value={routesSystem.Tool_NumericCustomParam2.value}
-                    style={{ maxWidth: "150rem", textAlign: "right" }}
-                />} />
-            </VR.InfoSection>
-        }*/
