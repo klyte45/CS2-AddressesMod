@@ -165,12 +165,6 @@
   <ItemGroup>
     <None Include="$(ModPropsFile)" Link="Properties\Mod.props" />
     <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
-    <None Include="Prefabs\.Content\K45_ADR_Marker\K45_ADR_Marker.Prefab" />
-    <None Include="Prefabs\.Content\K45_ADR_Marker\K45_ADR_Marker.Prefab.cid" />
-    <None Include="Prefabs\.Content\K45_ADR_Marker\K45_ADR_Marker_en-US.loc" />
-    <None Include="Prefabs\.Content\K45_ADR_Marker\K45_ADR_Marker_en-US.loc.cid" />
-    <None Include="Prefabs\.Content\K45_ADR_Marker\StaticObjectPrefab.png" />
-    <None Include="Prefabs\.Content\K45_ADR_Marker\StaticObjectPrefab.png.cid" />
   </ItemGroup>
 
   <ItemGroup>
@@ -188,6 +182,9 @@
     <Content Include="Prefabs\.Content\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="WriteEverywhere\.Resources\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Update="i18n\i18n.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -202,5 +199,6 @@
   <ItemGroup>
     <EmbeddedResource Include="changelog.md" />
   </ItemGroup>
+
 
 </Project>

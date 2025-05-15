@@ -72,7 +72,7 @@ export const RoadMarkSettings = () => {
             onChange={x => routesSystem.InfoPanel_DisplayInformation.set(x).then(x => setBuildIdx(buildIdx + 1))}
             value={routesSystem.InfoPanel_DisplayInformation.value}
         /></div>} />
-        {routesSystem.InfoPanel_DisplayInformation.value >= DisplayInformation.CUSTOM_1 && routesSystem.InfoPanel_DisplayInformation.value <= DisplayInformation.CUSTOM_5 &&
+        {routesSystem.InfoPanel_DisplayInformation.value >= DisplayInformation.CUSTOM_1 && routesSystem.InfoPanel_DisplayInformation.value <= DisplayInformation.CUSTOM_7 &&
             <VR.InfoSection>
                 <VR.InfoRow left={<>{translate(LocalizationStrings.customParam1)}</>} right={<VW.IntInputStandalone className={editorModule.input}
                     onChange={x => routesSystem.InfoPanel_NumericCustomParam1.set(x).then(x => setBuildIdx(buildIdx + 1))}

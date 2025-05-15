@@ -6,6 +6,7 @@ using Colossal.IO.AssetDatabase;
 using Game;
 using Game.Modding;
 using System.Collections.Generic;
+using Unity.Entities;
 
 namespace BelzontAdr
 {
@@ -34,6 +35,12 @@ namespace BelzontAdr
 #if DEBUG && ADR_AGGSYS
             updateSystem.UpdateAt<AdrAggregationSystem>(SystemUpdatePhase.Modification2B);
 #endif
+        }
+
+        protected override void AfterRegisterAssets()
+        {
+            base.AfterRegisterAssets();
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<Adr_WEIntegrationSystem>().IntializeWE();
         }
 
         public override void OnDispose()

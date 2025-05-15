@@ -198,20 +198,32 @@ namespace BelzontAdr
             }
             if (!m_DirtyMarkerData.IsEmpty)
             {
+                var currentToolData = new ADRHighwayMarkerData
+                {
+                    routeDataIndex = Tool_RouteId.Value,
+                    routeDirection = Tool_RouteDirection.Value,
+                    displayInformation = Tool_DisplayInformation.Value,
+                    numericCustomParam1 = Tool_NumericCustomParam1.Value,
+                    numericCustomParam2 = Tool_NumericCustomParam2.Value,
+                    newMileage = Tool_NewMileage.Value,
+                    overrideMileage = Tool_OverrideMileage.Value,
+                    reverseMileageCounting = Tool_ReverseMileageCounting.Value,
+                    Initialized = true
+                };
+
+                LogUtils.DoInfoLog($"routeDataIndex = {currentToolData.routeDataIndex}");
+                LogUtils.DoInfoLog($"routeDirection  = {currentToolData.routeDirection}");
+                LogUtils.DoInfoLog($"displayInformation  = {currentToolData.displayInformation}");
+                LogUtils.DoInfoLog($"numericCustomParam1  = {currentToolData.numericCustomParam1}");
+                LogUtils.DoInfoLog($"numericCustomParam2  = {currentToolData.numericCustomParam2}");
+                LogUtils.DoInfoLog($"newMileage  = {currentToolData.newMileage}");
+                LogUtils.DoInfoLog($"overrideMileage  = {currentToolData.overrideMileage}");
+                LogUtils.DoInfoLog($"reverseMileageCounting  = {currentToolData.reverseMileageCounting}");
+                LogUtils.DoInfoLog($"-------------------------------------------------------------");
+
                 var updater = new HighwayDataUpdater
                 {
-                    m_currentToolData = new ADRHighwayMarkerData
-                    {
-                        routeDataIndex = Tool_RouteId.Value,
-                        routeDirection = Tool_RouteDirection.Value,
-                        displayInformation = Tool_DisplayInformation.Value,
-                        numericCustomParam1 = Tool_NumericCustomParam1.Value,
-                        numericCustomParam2 = Tool_NumericCustomParam2.Value,
-                        newMileage = Tool_NewMileage.Value,
-                        overrideMileage = Tool_OverrideMileage.Value,
-                        reverseMileageCounting = Tool_ReverseMileageCounting.Value,
-                        Initialized = true
-                    },
+                    m_currentToolData = currentToolData,
                     m_CommandBuffer = m_modificationEndBarrier.CreateCommandBuffer().AsParallelWriter(),
                     m_EntityType = GetEntityTypeHandle(),
                     m_markerData = GetComponentTypeHandle<ADRHighwayMarkerData>()
