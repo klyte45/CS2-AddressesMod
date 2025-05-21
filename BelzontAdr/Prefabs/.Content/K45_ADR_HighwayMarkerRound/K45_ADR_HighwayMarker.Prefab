@@ -1,7 +1,7 @@
 {
     "$id": 0,
     "$type": "0|Game.Prefabs.StaticObjectPrefab, Game",
-    "name": "K45_ADR_HighwayMarkerVertical",
+    "name": "K45_ADR_HighwayMarker",
     "active": true,
     "components": {
         "$id": 1,
@@ -21,7 +21,7 @@
                 "active": true,
                 "m_Group": $fstrref:"UnityGUID:7284210a233d52947afe9dd82d4402bd",
                 "m_Priority": 1000,
-                "m_Icon": "assetdb://global/60f5ed489d3c47458cedbb4f3eafd87f",
+                "m_Icon": "assetdb://global/08773288798a4928a5afe8b923bd573e",
                 "m_IsDebugObject": false
             },
             {
@@ -81,7 +81,7 @@
             {
                 "$id": 10,
                 "$type": "11|Game.Prefabs.ObjectMeshInfo, Game",
-                "m_Mesh": $fstrref:"UnityGUID:ed2dbd8b19ff1ed42af9e3f40f337573",
+                "m_Mesh": $fstrref:"UnityGUID:b5e87539dd470f34aa8711414475b1a1",
                 "m_Position": {
                     "$type": 3,
                     "x": 0,
