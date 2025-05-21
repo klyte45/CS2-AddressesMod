@@ -86,17 +86,17 @@ namespace BelzontAdr
                 var atlases = Directory.GetDirectories(imagesDirectory, "*", SearchOption.TopDirectoryOnly);
                 foreach (var atlasFolder in atlases)
                 {
-                    WEImageManagementBridge.RegisterImageAtlas(typeof(Mod).Assembly, Path.GetFileName(atlasFolder), Directory.GetFiles(atlasFolder, "*.png"));
+                    WEImageManagementBridge.RegisterImageAtlas(typeof(AddressesCs2Mod).Assembly, Path.GetFileName(atlasFolder), Directory.GetFiles(atlasFolder, "*.png"));
                 }
             }
 
             var layoutsDirectory = Path.Combine(modDir, "layouts");
-            LogUtils.DoInfoLog($"RegisterCustomTemplates = {WETemplatesManagementBridge.RegisterCustomTemplates(typeof(Mod).Assembly, layoutsDirectory)}");
-            WETemplatesManagementBridge.RegisterLoadableTemplatesFolder(typeof(Mod).Assembly, layoutsDirectory);
+            LogUtils.DoInfoLog($"RegisterCustomTemplates = {WETemplatesManagementBridge.RegisterCustomTemplates(typeof(AddressesCs2Mod).Assembly, layoutsDirectory)}");
+            WETemplatesManagementBridge.RegisterLoadableTemplatesFolder(typeof(AddressesCs2Mod).Assembly, layoutsDirectory);
 
 
             var fontsDirectory = Path.Combine(modDir, "fonts");
-            WEFontManagementBridge.RegisterModFonts(typeof(Mod).Assembly, fontsDirectory);
+            WEFontManagementBridge.RegisterModFonts(typeof(AddressesCs2Mod).Assembly, fontsDirectory);
         }
 
         protected override void OnUpdate()

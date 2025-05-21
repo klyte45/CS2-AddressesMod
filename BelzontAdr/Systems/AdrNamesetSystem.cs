@@ -10,7 +10,6 @@ using Game.Citizens;
 using Game.Common;
 using Game.Net;
 using Game.Tools;
-using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -24,7 +23,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 using static BelzontAdr.AdrNameFile;
-using Hash128 = Colossal.Hash128;
 
 namespace BelzontAdr
 {
@@ -234,7 +232,10 @@ namespace BelzontAdr
 
             var Namesets = XmlUtils.DefaultXmlDeserialize<AdrNamesetSystemXML>(namesetData);
             CityNamesets.Clear();
-            CityNamesets.AddRange(Namesets.CityNamesets.ToDictionary(x => (Hash128)x.Id, x => AdrNameFile.FromXML(x)));
+            foreach (var item in Namesets.CityNamesets)
+            {
+                CityNamesets[item.Id] = FromXML(item);
+            }
             seedGenerator.state = Namesets.seedId == 0 ? (uint)new System.Random().Next() : Namesets.seedId;
             OnCityNamesetsChanged();
         }

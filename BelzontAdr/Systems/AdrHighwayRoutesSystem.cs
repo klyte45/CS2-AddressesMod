@@ -8,19 +8,14 @@ using Game.Tools;
 using Game.UI.InGame;
 using System;
 using System.Collections.Generic;
+using Unity.Burst.Intrinsics;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using static BelzontAdr.ADRHighwayMarkerData;
-using Unity.Burst.Intrinsics;
-
-
-
-
 #if BURST
 using Unity.Burst;
-#else
 #endif
-
 namespace BelzontAdr
 {
     public partial class AdrHighwayRoutesSystem : SystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrNamesetSystem>
@@ -39,6 +34,7 @@ namespace BelzontAdr
         public virtual void SetupEventBinder(Action<string, Delegate> eventBinder)
         {
         }
+
 
         public void SetupCaller(Action<string, object[]> eventCaller)
         {
@@ -64,18 +60,37 @@ namespace BelzontAdr
         public MultiUIValueBinding<bool> Tool_OverrideMileage { get; private set; }
         public MultiUIValueBinding<bool> Tool_ReverseMileageCounting { get; private set; }
 
+        private ADRHighwayMarkerData m_dataForNewItem = new ADRHighwayMarkerData
+        {
+            Initialized = true
+        };
+
         private void DoInitValueBindings_Tool(Action<string, object[]> EventCaller, Action<string, Delegate> CallBinder)
         {
-            Tool_RouteId = new(default, $"{PREFIX}{nameof(Tool_RouteId)}", EventCaller, CallBinder, (x, _) => x.ToString(), (x, _) => Colossal.Hash128.Parse(x));
-            Tool_RouteDirection = new(default, $"{PREFIX}{nameof(Tool_RouteDirection)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (RouteDirection)x);
-            Tool_DisplayInformation = new(default, $"{PREFIX}{nameof(Tool_DisplayInformation)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (DisplayInformation)x);
-            Tool_NumericCustomParam1 = new(default, $"{PREFIX}{nameof(Tool_NumericCustomParam1)}", EventCaller, CallBinder);
-            Tool_NumericCustomParam2 = new(default, $"{PREFIX}{nameof(Tool_NumericCustomParam2)}", EventCaller, CallBinder);
-            Tool_NewMileage = new(default, $"{PREFIX}{nameof(Tool_NewMileage)}", EventCaller, CallBinder);
-            Tool_OverrideMileage = new(default, $"{PREFIX}{nameof(Tool_OverrideMileage)}", EventCaller, CallBinder);
-            Tool_ReverseMileageCounting = new(default, $"{PREFIX}{nameof(Tool_ReverseMileageCounting)}", EventCaller, CallBinder);
+            Tool_RouteId = new(m_dataForNewItem.routeDataIndex, $"{PREFIX}{nameof(Tool_RouteId)}", EventCaller, CallBinder, (x, _) => x.ToString(), (x, _) => Colossal.Hash128.Parse(x));
+            Tool_RouteDirection = new(m_dataForNewItem.routeDirection, $"{PREFIX}{nameof(Tool_RouteDirection)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (RouteDirection)x);
+            Tool_DisplayInformation = new(m_dataForNewItem.displayInformation, $"{PREFIX}{nameof(Tool_DisplayInformation)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (DisplayInformation)x);
+            Tool_NumericCustomParam1 = new(m_dataForNewItem.numericCustomParam1, $"{PREFIX}{nameof(Tool_NumericCustomParam1)}", EventCaller, CallBinder);
+            Tool_NumericCustomParam2 = new(m_dataForNewItem.numericCustomParam2, $"{PREFIX}{nameof(Tool_NumericCustomParam2)}", EventCaller, CallBinder);
+            Tool_NewMileage = new(m_dataForNewItem.newMileage, $"{PREFIX}{nameof(Tool_NewMileage)}", EventCaller, CallBinder);
+            Tool_OverrideMileage = new(m_dataForNewItem.overrideMileage, $"{PREFIX}{nameof(Tool_OverrideMileage)}", EventCaller, CallBinder);
+            Tool_ReverseMileageCounting = new(m_dataForNewItem.reverseMileageCounting, $"{PREFIX}{nameof(Tool_ReverseMileageCounting)}", EventCaller, CallBinder);
 
             CallBinder($"{PREFIX}isCurrentPrefabRoadMarker", IsCurrentPrefabRoadMarker);
+
+            Tool_RouteId.OnScreenValueChanged += (x) => { m_dataForNewItem.routeDataIndex = x; MarkTempMarksDirty(); };
+            Tool_RouteDirection.OnScreenValueChanged += (x) => { m_dataForNewItem.routeDirection = x; MarkTempMarksDirty(); };
+            Tool_DisplayInformation.OnScreenValueChanged += (x) => { m_dataForNewItem.displayInformation = x; MarkTempMarksDirty(); };
+            Tool_NumericCustomParam1.OnScreenValueChanged += (x) => { m_dataForNewItem.numericCustomParam1 = x; MarkTempMarksDirty(); };
+            Tool_NumericCustomParam2.OnScreenValueChanged += (x) => { m_dataForNewItem.numericCustomParam2 = x; MarkTempMarksDirty(); };
+            Tool_NewMileage.OnScreenValueChanged += (x) => { m_dataForNewItem.newMileage = x; MarkTempMarksDirty(); };
+            Tool_OverrideMileage.OnScreenValueChanged += (x) => { m_dataForNewItem.overrideMileage = x; MarkTempMarksDirty(); };
+            Tool_ReverseMileageCounting.OnScreenValueChanged += (x) => { m_dataForNewItem.reverseMileageCounting = x; MarkTempMarksDirty(); };
+        }
+
+        private void MarkTempMarksDirty()
+        {
+            m_executionQueue.Enqueue(() => m_modificationEndBarrier.CreateCommandBuffer().AddComponent<ADRHighwayMarkerDataDirty>(m_markTempDirtyTargets, EntityQueryCaptureMode.AtPlayback));
         }
 
         private bool IsCurrentPrefabRoadMarker() => m_toolSystem.activeTool is ObjectToolSystem && m_toolSystem.activePrefab.Has<ADRRoadMarkerObject>();
@@ -95,6 +110,7 @@ namespace BelzontAdr
         public MultiUIValueBinding<float> InfoPanel_NewMileage { get; private set; }
         public MultiUIValueBinding<bool> InfoPanel_OverrideMileage { get; private set; }
         public MultiUIValueBinding<bool> InfoPanel_ReverseMileageCounting { get; private set; }
+
 
         private void DoInitValueBindings_InfoPanel(Action<string, object[]> EventCaller, Action<string, Delegate> CallBinder)
         {
@@ -157,13 +173,14 @@ namespace BelzontAdr
         #region System part
 
         private EntityQuery m_DirtyMarkerData;
+        private EntityQuery m_DirtyMarkerDataTemp;
+        private EntityQuery m_markTempDirtyTargets;
         private ModificationEndBarrier m_modificationEndBarrier;
         private ToolSystem m_toolSystem;
 
         protected override void OnCreate()
         {
             base.OnCreate();
-
             m_modificationEndBarrier = World.GetOrCreateSystemManaged<ModificationEndBarrier>();
             m_toolSystem = World.GetExistingSystemManaged<ToolSystem>();
             m_DirtyMarkerData = GetEntityQuery(new EntityQueryDesc[]
@@ -181,7 +198,36 @@ namespace BelzontAdr
                     }
                 }
             });
-
+            m_DirtyMarkerDataTemp = GetEntityQuery(new EntityQueryDesc[]
+            {
+                new()
+                {
+                    All = new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<ADRHighwayMarkerData>(),
+                        ComponentType.ReadOnly<ADRHighwayMarkerDataDirty>(),
+                        ComponentType.ReadOnly<Temp>()
+                    },
+                    None = new ComponentType[] {
+                        ComponentType.ReadOnly<Deleted>()
+                    }
+                }
+            });
+            m_markTempDirtyTargets = GetEntityQuery(new EntityQueryDesc[]
+            {
+                new()
+                {
+                    All = new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<ADRHighwayMarkerData>(),
+                        ComponentType.ReadOnly<Temp>()
+                    },
+                    None = new ComponentType[] {
+                        ComponentType.ReadOnly<ADRHighwayMarkerDataDirty>(),
+                        ComponentType.ReadOnly<Deleted>()
+                    }
+                }
+            });
         }
 
         protected override void OnDestroy()
@@ -198,37 +244,24 @@ namespace BelzontAdr
             }
             if (!m_DirtyMarkerData.IsEmpty)
             {
-                var currentToolData = new ADRHighwayMarkerData
-                {
-                    routeDataIndex = Tool_RouteId.Value,
-                    routeDirection = Tool_RouteDirection.Value,
-                    displayInformation = Tool_DisplayInformation.Value,
-                    numericCustomParam1 = Tool_NumericCustomParam1.Value,
-                    numericCustomParam2 = Tool_NumericCustomParam2.Value,
-                    newMileage = Tool_NewMileage.Value,
-                    overrideMileage = Tool_OverrideMileage.Value,
-                    reverseMileageCounting = Tool_ReverseMileageCounting.Value,
-                    Initialized = true
-                };
-
-                LogUtils.DoInfoLog($"routeDataIndex = {currentToolData.routeDataIndex}");
-                LogUtils.DoInfoLog($"routeDirection  = {currentToolData.routeDirection}");
-                LogUtils.DoInfoLog($"displayInformation  = {currentToolData.displayInformation}");
-                LogUtils.DoInfoLog($"numericCustomParam1  = {currentToolData.numericCustomParam1}");
-                LogUtils.DoInfoLog($"numericCustomParam2  = {currentToolData.numericCustomParam2}");
-                LogUtils.DoInfoLog($"newMileage  = {currentToolData.newMileage}");
-                LogUtils.DoInfoLog($"overrideMileage  = {currentToolData.overrideMileage}");
-                LogUtils.DoInfoLog($"reverseMileageCounting  = {currentToolData.reverseMileageCounting}");
-                LogUtils.DoInfoLog($"-------------------------------------------------------------");
-
                 var updater = new HighwayDataUpdater
                 {
-                    m_currentToolData = currentToolData,
+                    m_currentToolData = m_dataForNewItem,
                     m_CommandBuffer = m_modificationEndBarrier.CreateCommandBuffer().AsParallelWriter(),
                     m_EntityType = GetEntityTypeHandle(),
-                    m_markerData = GetComponentTypeHandle<ADRHighwayMarkerData>()
+                    m_markerData = GetComponentTypeHandle<ADRHighwayMarkerData>(),
+                    m_tempLookup = GetComponentLookup<Temp>()
                 };
                 updater.ScheduleParallel(m_DirtyMarkerData, Dependency).Complete();
+            }
+            if (!m_DirtyMarkerDataTemp.IsEmpty)
+            {
+                using var entities = m_DirtyMarkerDataTemp.ToEntityArray(Allocator.Temp);
+                for (var i = 0; i < entities.Length; i++)
+                {
+                    EntityManager.SetComponentData(entities[i], m_dataForNewItem);
+                    EntityManager.RemoveComponent<ADRHighwayMarkerDataDirty>(entities[i]);
+                }
             }
         }
 #if BURST
@@ -238,6 +271,7 @@ namespace BelzontAdr
         {
             public EntityCommandBuffer.ParallelWriter m_CommandBuffer;
             public ComponentTypeHandle<ADRHighwayMarkerData> m_markerData;
+            public ComponentLookup<Temp> m_tempLookup;
             public ADRHighwayMarkerData m_currentToolData;
             public EntityTypeHandle m_EntityType;
 
@@ -249,9 +283,9 @@ namespace BelzontAdr
                 {
                     var entity = entities[i];
                     var currentMarkData = markDatas[i];
-                    if (!currentMarkData.Initialized)
+                    if (!currentMarkData.Initialized || m_tempLookup.HasComponent(entity))
                     {
-                        m_CommandBuffer.SetComponent<ADRHighwayMarkerData>(unfilteredChunkIndex, entity, m_currentToolData);
+                        m_CommandBuffer.SetComponent(unfilteredChunkIndex, entity, m_currentToolData);
                     }
                     m_CommandBuffer.RemoveComponent<ADRHighwayMarkerDataDirty>(unfilteredChunkIndex, entity);
                 }

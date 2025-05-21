@@ -12,7 +12,7 @@
                 "$id": 8,
                 "$type": "9|BelzontAdr.ADRRoadMarkerObject, AddressesCS2",
                 "name": "ADRRoadMarkerObject",
-                "active": true,
+                "active": true
             },
             {
                 "$id": 3,
