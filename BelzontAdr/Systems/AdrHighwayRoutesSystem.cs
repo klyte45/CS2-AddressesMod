@@ -13,6 +13,15 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using static BelzontAdr.ADRHighwayMarkerData;
+using BridgeWE;
+using System.Linq;
+using Game.UI;
+using static Belzont.Utils.NameSystemExtensions;
+
+
+
+
+
 #if BURST
 using Unity.Burst;
 #endif
@@ -29,6 +38,11 @@ namespace BelzontAdr
         public void SetupCallBinder(Action<string, Delegate> callBinder)
         {
             CallBinder = callBinder;
+
+            callBinder($"{PREFIX}getOptionsMetadataFromCurrentLayout", GetOptionsMetadataFromCurrentLayout);
+            callBinder($"{PREFIX}getOptionsNamesFromMetadata", GetOptionsNamesFromMetadata);
+            callBinder($"{PREFIX}getOptionsMetadataFromLayout", GetOptionsMetadataFromLayout);
+
             if (EventCaller != null) InitValueBindings();
         }
         public virtual void SetupEventBinder(Action<string, Delegate> eventBinder)
@@ -48,6 +62,34 @@ namespace BelzontAdr
             DoInitValueBindings_InfoPanel(EventCaller, CallBinder);
             CallBinder = null;
             EventCaller = null;
+        }
+
+        private string GetOptionsMetadataFromCurrentLayout()
+            => !m_adrWeIntegrationSystem.WeAvailable || m_dataForNewItem.displayInformation == DisplayInformation.ORIGINAL ? null
+                : WETemplatesManagementBridge.GetMetadatasFromReplacement(GetType().Assembly, m_dataForNewItem.displayInformation.ToString()) is not Dictionary<string, string> metadata ? null
+                : metadata.TryGetValue("RoadMarker_ExtraFields", out var result) ? result
+                : null;
+
+        private string GetOptionsMetadataFromLayout(int diplayInformation)
+            => !m_adrWeIntegrationSystem.WeAvailable || !Enum.TryParse<DisplayInformation>(diplayInformation.ToString(), out var enumValue) ? null
+                : WETemplatesManagementBridge.GetMetadatasFromReplacement(GetType().Assembly, enumValue.ToString()) is not Dictionary<string, string> metadata ? null
+                : metadata.TryGetValue("RoadMarker_ExtraFields", out var result) ? result
+                : null;
+        private string[] GetOptionsNamesFromMetadata()
+        {
+            return !m_adrWeIntegrationSystem.WeAvailable
+                ? new string[0]
+                : new DisplayInformation[] {
+                DisplayInformation.CUSTOM_1,
+                DisplayInformation.CUSTOM_2,
+                DisplayInformation.CUSTOM_3,
+                DisplayInformation.CUSTOM_4,
+                DisplayInformation.CUSTOM_5,
+                DisplayInformation.CUSTOM_6,
+                DisplayInformation.CUSTOM_7,
+               }.Select(x => WETemplatesManagementBridge.GetMetadatasFromReplacement(GetType().Assembly, x.ToString()) is Dictionary<string, string> metadata && metadata.TryGetValue("RoadMarker_OptionName", out var result)
+                       ? NameSystem.Name.LocalizedName(result).Translate()
+                       : NameSystem.Name.LocalizedName($"K45::ADR.vuio[DisplayInformation.{x}]").Translate()).ToArray();
         }
 
         #region Tool controller part
@@ -177,11 +219,12 @@ namespace BelzontAdr
         private EntityQuery m_markTempDirtyTargets;
         private ModificationEndBarrier m_modificationEndBarrier;
         private ToolSystem m_toolSystem;
-
+        private Adr_WEIntegrationSystem m_adrWeIntegrationSystem;
         protected override void OnCreate()
         {
             base.OnCreate();
             m_modificationEndBarrier = World.GetOrCreateSystemManaged<ModificationEndBarrier>();
+            m_adrWeIntegrationSystem = World.GetOrCreateSystemManaged<Adr_WEIntegrationSystem>();
             m_toolSystem = World.GetExistingSystemManaged<ToolSystem>();
             m_DirtyMarkerData = GetEntityQuery(new EntityQueryDesc[]
             {

@@ -1,7 +1,6 @@
 ﻿using Belzont.Interfaces;
 using Belzont.Utils;
 using BridgeWE;
-using Colossal.PSI.Common;
 using Game;
 using Game.SceneFlow;
 using HarmonyLib;
@@ -16,7 +15,8 @@ namespace BelzontAdr
     public partial class Adr_WEIntegrationSystem : GameSystemBase, IBelzontBindable
     {
         private bool weInitialized;
-        private bool weAvailable;
+
+        public bool WeAvailable { get; private set; }
 
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
@@ -66,9 +66,9 @@ namespace BelzontAdr
                         }
                     }
                     RegisterModFiles();
-                    weAvailable = true;
+                    WeAvailable = true;
                 }
-                if (!weAvailable)
+                if (!WeAvailable)
                 {
                     Enabled = false;
                 }
