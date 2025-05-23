@@ -1,4 +1,4 @@
-﻿#if !RELEASE
+﻿#if !RELEASE && false
 #define LOCAL
 #endif
 using Belzont.Interfaces;

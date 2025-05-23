@@ -27,7 +27,7 @@ using Unity.Burst;
 #endif
 namespace BelzontAdr
 {
-    public partial class AdrHighwayRoutesSystem : SystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrNamesetSystem>
+    public partial class AdrHighwayRoutesSystem : SystemBase, IBelzontBindable, IDefaultSerializable
     {
 
         private const string PREFIX = "highwayRoutes.";
@@ -348,9 +348,8 @@ namespace BelzontAdr
             writer.Write(CURRENT_VERSION);
         }
 
-        public JobHandle SetDefaults(Context context)
+        public void SetDefaults(Context context)
         {
-            return Dependency;
         }
         #endregion
     }
