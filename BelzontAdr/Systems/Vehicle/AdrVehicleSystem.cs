@@ -1,5 +1,4 @@
 ﻿using Belzont.Interfaces;
-using Belzont.Serialization;
 using Belzont.Utils;
 using Colossal;
 using Colossal.Entities;
@@ -22,7 +21,7 @@ using Unity.Jobs;
 namespace BelzontAdr
 {
 
-    public partial class AdrVehicleSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrVehicleSystem>
+    public partial class AdrVehicleSystem : GameSystemBase, IBelzontBindable, IDefaultSerializable
     {
         private const uint CURRENT_VERSION = 0;
 
@@ -212,10 +211,6 @@ namespace BelzontAdr
         {
             if (GameManager.instance.isGameLoading || GameManager.instance.isLoading)
             {
-                roadVehiclesPlatesSettings ??= VehiclePlateSettings.CreateRoadVehicleDefault(m_timeSystem);
-                airVehiclesPlatesSettings ??= VehiclePlateSettings.CreateAirVehicleDefault(m_timeSystem);
-                waterVehiclesPlatesSettings ??= VehiclePlateSettings.CreateWaterVehicleDefault(m_timeSystem);
-                railVehiclesPlatesSettings ??= VehiclePlateSettings.CreateRailVehicleDefault(m_timeSystem);
                 return;
             }
             if (!m_unregisteredVehiclesQuery.IsEmptyIgnoreFilter)
@@ -321,16 +316,12 @@ namespace BelzontAdr
 
 
         #region Serialization
-        World IBelzontSerializableSingleton<AdrVehicleSystem>.World => World;
 
-        void IBelzontSerializableSingleton<AdrVehicleSystem>.Deserialize<TReader>(TReader reader)
+
+        public void Deserialize<R>(R reader) where R : IReader
         {
 
-            reader.Read(out uint version);
-            if (version > CURRENT_VERSION)
-            {
-                throw new Exception($"Invalid version of {GetType()}!");
-            }
+            reader.CheckVersionK45(CURRENT_VERSION, GetType());
             roadVehiclesPlatesSettings = new();
             waterVehiclesPlatesSettings = new();
             airVehiclesPlatesSettings = new();
@@ -345,7 +336,7 @@ namespace BelzontAdr
 
         }
 
-        void IBelzontSerializableSingleton<AdrVehicleSystem>.Serialize<TWriter>(TWriter writer)
+        public void Serialize<W>(W writer) where W : IWriter
         {
             writer.Write(CURRENT_VERSION);
             writer.Write(roadVehiclesPlatesSettings);
@@ -356,16 +347,14 @@ namespace BelzontAdr
             writer.Write(currentSerialNumberVehicles);
         }
 
-        JobHandle IJobSerializable.SetDefaults(Context context)
+        public void SetDefaults(Context context)
         {
             currentSerialNumberVehicles = 0;
             currentSerialNumberVehicleSources = 0;
-
-            roadVehiclesPlatesSettings = null;
-            airVehiclesPlatesSettings = null;
-            waterVehiclesPlatesSettings = null;
-            railVehiclesPlatesSettings = null;
-            return default;
+            roadVehiclesPlatesSettings = VehiclePlateSettings.CreateRoadVehicleDefault(m_timeSystem);
+            airVehiclesPlatesSettings = VehiclePlateSettings.CreateAirVehicleDefault(m_timeSystem);
+            waterVehiclesPlatesSettings = VehiclePlateSettings.CreateWaterVehicleDefault(m_timeSystem);
+            railVehiclesPlatesSettings = VehiclePlateSettings.CreateRailVehicleDefault(m_timeSystem);
         }
 
         #endregion

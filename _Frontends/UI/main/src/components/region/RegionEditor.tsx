@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import { MapDiv } from "./MapDiv"
 import './regionEditor.scss'
 import { Entity, EnumValueType } from "@klyte45/adr-commons";
+import { DefaultPanelScreen, GameScrollComponent, MenuItem } from "@klyte45/euis-components";
+import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
+import { CityNamesetLibraryCmp } from "#components/fileManagement/CityNamesetLibraryCmp";
+import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
+import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
+import { translate } from "#utility/translate";
 
 const listOutsideConnections = () => engine.call("k45::adr.regions.listOutsideConnections");
 const getCityBounds = () => engine.call("k45::adr.regions.getCityBounds");
@@ -40,6 +46,8 @@ interface AggregationData {
 
 export const RegionEditor = () => {
 
+    const [buildIdx, setBuildIdx] = useState(0)
+    const [isLoading, setIsLoading] = useState(false)
     const [mapSize, setMapSize] = useState([] as number[]);
     const [mapOffset, setMapOffset] = useState([] as number[]);
     const [outsideConnections, setOutsideConnections] = useState([] as ObjectOutsideConnectionResponse[]);
@@ -53,17 +61,22 @@ export const RegionEditor = () => {
     const [position, setPostion] = useState([0, 0]);
 
     useEffect(() => {
-        getCityBounds().then((x) => {
+        if (buildIdx == 0) return;
+        setIsLoading(true);
+        Promise.all([getCityBounds().then((x) => {
             setMapSize([x[3] - x[0], x[4] - x[1], x[5] - x[2]])
             setMapOffset([x[0], x[1], x[2]])
-        });
-        listHighways().then(setHighways);
-        listTrainTracks().then(setTrainTracks);
-        listUrbanRoads().then(setUrbanRoads);
-        listOutsideConnections().then(setOutsideConnections);
-        getCityTerrain().then(setTerrainMap)
-        getCityWater().then(setWaterMap)
-    }, [])
+        }),
+        listHighways().then(setHighways),
+        listTrainTracks().then(setTrainTracks),
+        listUrbanRoads().then(setUrbanRoads),
+        listOutsideConnections().then(setOutsideConnections),
+        getCityTerrain().then(setTerrainMap),
+        getCityWater().then(setWaterMap)]).then(() => {
+            setBuildIdx(buildIdx + 1)
+            setIsLoading(false);
+        })
+    }, [buildIdx == 0])
 
 
     const doOnWheel = (x) => {
@@ -79,6 +92,10 @@ export const RegionEditor = () => {
                 ]
             )
         }
+    }
+    if (buildIdx < 2 || isLoading) {
+        if (buildIdx == 0) setTimeout(() => setBuildIdx(buildIdx + 1), 500);
+        return <div>Loading...</div>;
     }
 
     return <div className="regionEditor">
@@ -112,7 +129,42 @@ export const RegionEditor = () => {
             </MapDiv>
         </div>
         <div className="dataSide">
-
+            <DefaultPanelScreen title={translate("regionSettings.title")} subtitle={translate("regionSettings.subtitle")} scrollable={false}>
+                <RegionalEditorContent />
+            </DefaultPanelScreen>
         </div>
     </div>
+}
+
+function RegionalEditorContent() {
+
+    const menus: Omit<MenuItem, 'iconUrl'>[] = [
+        {
+            name: translate("regionSettings.title"),
+            panelContent: <div />
+        },
+        {
+            name: translate("namesetManagement.title"),
+            panelContent: <div />,
+            tintedIcon: true
+        },
+        {
+            name: translate("overrideSettings.title"),
+            panelContent: <div />
+        },
+        {
+            name: translate("roadPrefixSettings.title"),
+            panelContent: <div />
+        },
+    ]
+
+    return <Tabs className="tabsContainer">
+        <TabList className="horizontalTabStrip">
+            {menus.map((x, i) =>
+                <Tab key={i} className="horizontalTabStripTab">
+                    {x.name}
+                </Tab>)}
+        </TabList>
+        {menus.map((x, i) => <TabPanel className="tabContent" key={i}>{x.panelContent}</TabPanel>)}
+    </Tabs>;
 }
