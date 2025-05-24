@@ -1,4 +1,4 @@
-import { VanillaComponentResolver, LocElementType, VanillaWidgets, replaceArgs } from "@klyte45/vuio-commons";
+import { VanillaComponentResolver, LocElementType, VanillaWidgets, replaceArgs, VectorSectionEditable } from "@klyte45/vuio-commons";
 import { DropdownItem, LocElement, toolbar } from "cs2/bindings";
 import { FocusDisabled } from "cs2/input";
 import { useLocalization } from "cs2/l10n";
@@ -31,8 +31,10 @@ export const AddressesToolOptions: ModuleRegistryExtend = (Component: any) => {
 
 
 
-const i_OverrideMileage = "coui://uil/Standard/BoxTop.svg";
-const i_ReverseMileage = "coui://uil/Standard/BoxTop.svg";
+const i_OverrideMileageOn = "coui://uil/Standard/Checkmark.svg";
+const i_OverrideMileageOff = "coui://uil/Standard/XClose.svg";
+const i_ReverseMileageOn = "coui://uil/Standard/ArrowSortHighDown.svg";
+const i_ReverseMileageOff = "coui://uil/Standard/ArrowSortLowDown.svg";
 
 const AdrRoadMarkerToolOptions = () => {
     const [buildIdx, setBuildIdx] = useState(0)
@@ -82,26 +84,27 @@ const AdrRoadMarkerToolOptions = () => {
         </VCR.Section>
         <VCR.Section title={translate(LocalizationStrings.overrideMileageShort)}>
             <FocusDisabled>
-                <VanillaComponentResolver.instance.ToolButton selected={routesSystem.Tool_OverrideMileage.value} onSelect={() => routesSystem.Tool_OverrideMileage.set(!routesSystem.Tool_OverrideMileage.value).then(x => setBuildIdx(buildIdx + 1))} src={i_OverrideMileage} className={VanillaComponentResolver.instance.toolButtonTheme.button}></VanillaComponentResolver.instance.ToolButton>
+                <VanillaComponentResolver.instance.ToolButton selected={routesSystem.Tool_OverrideMileage.value} onSelect={() => routesSystem.Tool_OverrideMileage.set(!routesSystem.Tool_OverrideMileage.value).then(x => setBuildIdx(buildIdx + 1))} src={routesSystem.Tool_OverrideMileage.value ? i_OverrideMileageOn : i_OverrideMileageOff} className={VanillaComponentResolver.instance.toolButtonTheme.button}></VanillaComponentResolver.instance.ToolButton>
             </FocusDisabled>
         </VCR.Section>
         {routesSystem.Tool_OverrideMileage.value &&
-            <VCR.Section title={replaceArgs(translate(LocalizationStrings.newMileage), [localization.unitSettings.unitSystem ? "mi" : "km"])}>
-                <FocusDisabled>
-                    <VCR.FloatInput
-                        style={{ flexShrink: 4, width: "auto", flexGrow: 2, textAlign: "right", marginRight: "7rem" }} className={editorModule.input}
-                        onChange={x => routesSystem.Tool_NewMileage.set(x * mileageMultiplier).then(x => setBuildIdx(buildIdx + 1))}
-                        value={routesSystem.Tool_NewMileage.value / mileageMultiplier} />
-                    <VanillaComponentResolver.instance.ToolButton selected={routesSystem.Tool_ReverseMileageCounting.value} onSelect={() => routesSystem.Tool_ReverseMileageCounting.set(!routesSystem.Tool_ReverseMileageCounting.value).then(x => setBuildIdx(buildIdx + 1))} src={i_OverrideMileage} className={VanillaComponentResolver.instance.toolButtonTheme.button} tooltip={translate(LocalizationStrings.reverseMileageCounting)}></VanillaComponentResolver.instance.ToolButton>
-                </FocusDisabled>
-            </VCR.Section>
+            <>
+                <VectorSectionEditable title={translate(LocalizationStrings.newMileage)}
+                    valueGetter={() => [routesSystem.Tool_NewMileage.value.toFixed(3)]}
+                    valueGetterFormatted={() => [routesSystem.Tool_NewMileage.value.toFixed(3) + (localization.unitSettings.unitSystem ? "mi" : "km")]}
+                    onValueChanged={(i, x) => {
+                        const newVal = parseFloat(x.replaceAll(",", "."));
+                        if (isNaN(newVal)) return;
+                        routesSystem.Tool_NewMileage.set(newVal * mileageMultiplier).then(x => setBuildIdx(buildIdx + 1))
+                    }} extraContent={<VanillaComponentResolver.instance.ToolButton selected={routesSystem.Tool_ReverseMileageCounting.value} onSelect={() => routesSystem.Tool_ReverseMileageCounting.set(!routesSystem.Tool_ReverseMileageCounting.value).then(x => setBuildIdx(buildIdx + 1))} src={routesSystem.Tool_ReverseMileageCounting.value ? i_ReverseMileageOn : i_ReverseMileageOff} className={VanillaComponentResolver.instance.toolButtonTheme.button} tooltip={translate(LocalizationStrings.reverseMileageCounting)}></VanillaComponentResolver.instance.ToolButton>} />
+            </>
         }
         <VCR.Section title={translate(LocalizationStrings.displayInformation)}>
             <NumberDD
                 items={[{ value: 0, displayName: { __Type: LocElementType.String, value: translate("DisplayInformation." + DisplayInformation[DisplayInformation.ORIGINAL]) } as LocElement }].concat(
                     displayNameTypes.map((x, i) => ({
                         value: i + 1,
-                        displayName: { __Type: LocElementType.String, value: x } as LocElement 
+                        displayName: { __Type: LocElementType.String, value: x } as LocElement
                     })))}
                 onChange={x => routesSystem.Tool_DisplayInformation.set(x).then(x => setBuildIdx(buildIdx + 1))}
                 value={routesSystem.Tool_DisplayInformation.value}

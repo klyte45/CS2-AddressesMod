@@ -36,34 +36,48 @@ namespace BelzontAdr
         protected override void OnUpdate()
         {
             base.CompleteDependency();
-            using NativeArray<ArchetypeChunk> nativeArray = m_TempQuery.ToArchetypeChunkArray(Allocator.TempJob);
+
+            using NativeArray<ArchetypeChunk> nativeArray = m_TempQuery.ToArchetypeChunkArray(Allocator.Temp);
             var entitiesHandle = GetEntityTypeHandle();
+            bool anyValidResult = false;
             foreach (var archetypeChunk in nativeArray)
             {
                 foreach (var tempEntity in archetypeChunk.GetNativeArray(entitiesHandle))
                 {
-                    Entity road = default;
-                    int number = default;
-                    if (EntityManager.TryGetComponent<Attached>(tempEntity, out var component2))
+                    bool thisResult = anyValidResult |= DrawTooltip(tempEntity, out var isTemp, out var tempData);
+                    if (isTemp && tempData.m_Original == Entity.Null)
                     {
-                        var parent = component2.m_Parent;
-
-                        if (EntityManager.TryGetComponent<Temp>(parent, out var tempData))
-                        {
-                            parent = tempData.m_Original;
-                        }
-
-                        if (BuildingUtils.GetAddress(EntityManager, tempEntity, parent, component2.m_CurvePosition, out road, out number))
-                        {
-                            var lengthStr = GameManager.instance.settings.userInterface.unitSystem == Game.Settings.InterfaceSettings.UnitSystem.Freedom ? $"{number * 3:#,##0}ft, {number:#,##0}yd, {number / 1760f:#,##0.00}mi" : $"{number:#,##0.000}m, {number / 1000f:#,##0.00}km";
-
-                            m_Location.value = $"{m_nameSystem.GetName(road).Translate()} @ {lengthStr}";
-                            AddMouseTooltip(m_Location);
-                            return;
-                        }
+                        anyValidResult = thisResult;
+                        goto end;
                     }
                 }
             }
+        end:
+            if (anyValidResult) AddMouseTooltip(m_Location);
+        }
+
+        private bool DrawTooltip(Entity tempEntity, out bool isTemp, out Temp tempData)
+        {
+            if (EntityManager.TryGetComponent<Attached>(tempEntity, out var component2))
+            {
+                var parent = component2.m_Parent;
+
+                if (isTemp = EntityManager.TryGetComponent(parent, out tempData))
+                {
+                    parent = tempData.m_Original;
+                }
+
+                if (BuildingUtils.GetAddress(EntityManager, tempEntity, parent, component2.m_CurvePosition, out Entity road, out int number))
+                {
+                    var lengthStr = GameManager.instance.settings.userInterface.unitSystem == Game.Settings.InterfaceSettings.UnitSystem.Freedom ? $"{number * 3:#,##0}ft, {number:#,##0}yd, {number / 1760f:#,##0.00}mi" : $"{number:#,##0}m, {number / 1000f:#,##0.00}km";
+
+                    m_Location.value = $"{m_nameSystem.GetName(road).Translate()} @ {lengthStr}";
+                    return true;
+                }
+            }
+            isTemp = false;
+            tempData = default;
+            return false;
         }
 
         private EntityQuery m_TempQuery;
