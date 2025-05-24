@@ -7,6 +7,7 @@ import { translate } from "utility/translate";
 import { SeedManagementOptionsComponent } from "./SeedManagementOptions";
 import { StationBuildingOptionsComponent } from "./StationBuildingOptions";
 import { VehicleDataDetailSection } from "./VehicleDataDetailSection";
+import { RoadMarkSettings } from "./RoadMarkSettings";
 
 type Props = { entity: ValueBinding<Entity>, entityRef?: any, isEditor?: boolean, onChange?: () => any };
 
@@ -45,8 +46,21 @@ export const AddressesInfoOptionsComponent = ({ entity, entityRef, onChange }: P
                 return <SeedManagementOptionsComponent onChanged={() => onValueChanged()} entity={toEntityTyped(entity.value)} response={optionsResult} />
             case AdrEntityType.Vehicle:
                 return <VehicleDataDetailSection entity={toEntityTyped(entity.value)} />
+            case AdrEntityType.RoadMark:
+                return <RoadMarkSettings />
             default:
                 return <></>
+        }
+    }
+
+    const getLeftColumnText = () => {
+        switch (optionsResult?.type?.value__) {
+            case AdrEntityType.Vehicle:
+                return translate("AddressesInfoOptions.ExtraDataInformationFor");
+            case AdrEntityType.RoadMark:
+                return translate("AddressesInfoOptions.SettingsFor");
+            default:
+                return translate("AddressesInfoOptions.NamingReference");
         }
     }
 
@@ -55,7 +69,10 @@ export const AddressesInfoOptionsComponent = ({ entity, entityRef, onChange }: P
     const valueType = AdrEntityType[optionsResult?.type?.value__];
     const VR = VanillaComponentResolver.instance;
     return <VR.InfoSection disableFocus={true}  >
-        <VR.InfoRow uppercase={true} icon="coui://adr.k45/UI/images/ADR.svg" left={<>{translate("AddressesInfoOptions.NamingReference")}</>} right={<div style={{ whiteSpace: "pre-wrap" }}>{translate("AdrEntityType." + valueType, valueType)}</div>} tooltip={<>{translate("AddressesInfoOptions.Tooltip." + valueType)}</>} />
+        <VR.InfoRow uppercase={true} icon="coui://adr.k45/UI/images/ADR.svg"
+            left={<>{getLeftColumnText()}</>}
+            right={<div style={{ whiteSpace: "pre-wrap" }}>{translate("AdrEntityType." + valueType)}</div>}
+            tooltip={<>{translate("AddressesInfoOptions.Tooltip." + valueType)}</>} />
         {getSubRows()}
     </VR.InfoSection>
 

@@ -1,0 +1,23 @@
+﻿using Game.Prefabs;
+using System;
+using System.Collections.Generic;
+using Unity.Entities;
+
+namespace BelzontAdr
+{
+    [ComponentMenu("Addresses/", new Type[]{
+    typeof(StaticObjectPrefab)
+})]
+    public class ADRRoadMarkerObject : ComponentBase
+    {
+        public override void GetArchetypeComponents(HashSet<ComponentType> components)
+        {
+            components.Add(ComponentType.ReadWrite<ADRHighwayMarkerData>());
+            components.Add(ComponentType.ReadWrite<ADRHighwayMarkerDataDirty>());
+        }
+
+        public override void GetPrefabComponents(HashSet<ComponentType> components)
+        {
+        }
+    }
+}

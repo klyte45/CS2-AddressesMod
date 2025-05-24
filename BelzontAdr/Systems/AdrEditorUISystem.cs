@@ -25,8 +25,6 @@ namespace BelzontAdr
         private ToolSystem m_ToolSystem;
         private NameSystem m_NameSystem;
         private Entity m_SelectedEntity;
-        private Entity m_SelectedPrefab;
-        private float3 m_SelectedPosition;
 
         public override GameMode gameMode
         {
@@ -61,18 +59,15 @@ namespace BelzontAdr
             {
                 Entity prefab = prefabRef.m_Prefab;
                 FilterSelection(ref entity, ref prefab);
-                if (SelectedInfoUISystem.TryGetPosition(entity, EntityManager, out Entity entity2, out float3 selectedPosition, out Bounds3 bounds, out quaternion quaternion, false) || EntityManager.HasComponent<Household>(entity))
+                int elIdx = 0;
+                if (SelectedInfoUISystem.TryGetPosition(entity, EntityManager, ref elIdx, out Entity entity2, out float3 selectedPosition, out Bounds3 bounds, out quaternion quaternion, false) || EntityManager.HasComponent<Household>(entity))
                 {
                     selectedPosition.y = MathUtils.Center(bounds.y);
                     m_SelectedEntity = entity;
-                    m_SelectedPrefab = prefab;
-                    m_SelectedPosition = selectedPosition;
                     return;
                 }
             }
             m_SelectedEntity = Entity.Null;
-            m_SelectedPrefab = Entity.Null;
-            m_SelectedPosition = float3.zero;
         }
 
         private void FilterSelection(ref Entity entity, ref Entity prefab)

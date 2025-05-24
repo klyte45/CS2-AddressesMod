@@ -30,7 +30,4 @@ export const VehicleDataDetailSection = ({ entity }: Props) => {
         <VR.InfoRow subRow={true} left={<>{translate("vehicleDataVuio.serialNumber")}</>} right={currentData.serialNumber} />
         <VR.InfoRow subRow={true} left={<>{translate("vehicleDataVuio.manufactureMonthsFromEpoch")}</>} right={engine.translate("Common.MONTH_SHORT:" + (refMonth % 12)) + " " + Math.floor(refMonth / 12)} />
     </>
-
-
-
 }

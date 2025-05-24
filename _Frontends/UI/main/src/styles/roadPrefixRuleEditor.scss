@@ -41,15 +41,15 @@
                 }
 
                 .moveItemDown {
-                    mask-image: url(coui://gameui/Media/Glyphs/StrokeArrowDown.svg);
+                    mask-image: url(assetdb://gameui/Media/Glyphs/StrokeArrowDown.svg);
                 }
 
                 .moveItemUp {
-                    mask-image: url(coui://gameui/Media/Glyphs/StrokeArrowUp.svg);
+                    mask-image: url(assetdb://gameui/Media/Glyphs/StrokeArrowUp.svg);
                 }
 
                 .removeItem {
-                    mask-image: url(coui://gameui/Media/Glyphs/plus.svg);
+                    mask-image: url(assetdb://gameui/Media/Glyphs/plus.svg);
                     transform: rotateZ(45deg);
                 }
             }

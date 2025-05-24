@@ -59,6 +59,11 @@ namespace BelzontAdr
             {
                 targetEntityToName = e
             };
+            if (EntityManager.HasComponent<ADRHighwayMarkerData>(e))
+            {
+                result.type = AdrEntityType.RoadMark;
+                return result;
+            }
             if (EntityManager.HasComponent<ADRVehicleData>(e))
             {
                 result.type = AdrEntityType.Vehicle;
@@ -267,7 +272,8 @@ namespace BelzontAdr
             CargoTransportStation,
             RoadAggregation,
             District,
-            Vehicle
+            Vehicle,
+            RoadMark
 
         }
 

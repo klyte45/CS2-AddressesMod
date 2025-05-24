@@ -4,13 +4,11 @@ using Belzont.Utils;
 using Colossal;
 using Colossal.OdinSerializer.Utilities;
 using Colossal.Serialization.Entities;
-using Game;
 using Game.Areas;
 using Game.Citizens;
 using Game.Common;
 using Game.Net;
 using Game.Tools;
-using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -24,13 +22,12 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 using static BelzontAdr.AdrNameFile;
-using Hash128 = Colossal.Hash128;
 
 namespace BelzontAdr
 {
-    public partial class AdrNamesetSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrNamesetSystem>
+    public partial class AdrNamesetSystem : SystemBase, IBelzontBindable, IDefaultSerializable
     {
-        const uint CURRENT_VERSION = 0;
+        const uint CURRENT_VERSION = 1;
 
         private AdrMainSystem mainSystem;
         private EntityQuery m_UnsetRandomQuery;
@@ -111,7 +108,7 @@ namespace BelzontAdr
                 }
             }
         }
-        private readonly Dictionary<Colossal.Hash128, AdrNameFile> CityNamesets = new();
+        private Dictionary<Colossal.Hash128, AdrNameFile> CityNamesets = new();
 
         internal bool GetForGuid(Colossal.Hash128 guid, out AdrNameFile file) => CityNamesets.TryGetValue(guid, out file);
         private void OnCityNamesetsChanged()
@@ -196,30 +193,9 @@ namespace BelzontAdr
 
         #region Serialization
 
-        private AdrNamesetSystemXML ToXml()
+        #region legacy
+        private void LegacyDeserialize(IReader reader)
         {
-            var xml = new AdrNamesetSystemXML
-            {
-                CityNamesets = CityNamesets.Values.Select(x => x.ToXML()).ToList(),
-                seedId = seedGenerator.state
-            };
-            return xml;
-        }
-
-
-        void IBelzontSerializableSingleton<AdrNamesetSystem>.Serialize<TWriter>(TWriter writer)
-        {
-            var xml = XmlUtils.DefaultXmlSerialize(ToXml());
-            writer.Write(CURRENT_VERSION);
-            var arraySave = new NativeArray<byte>(ZipUtils.Zip(xml), Allocator.Temp);
-            writer.Write(arraySave.Length);
-            writer.Write(arraySave);
-            arraySave.Dispose();
-        }
-
-        void IBelzontSerializableSingleton<AdrNamesetSystem>.Deserialize<TReader>(TReader reader)
-        {
-            ((IBelzontSerializableSingleton<AdrNamesetSystem>)this).CheckVersion(reader, CURRENT_VERSION);
             string namesetData;
 
             reader.Read(out int size);
@@ -230,16 +206,55 @@ namespace BelzontAdr
 
             var Namesets = XmlUtils.DefaultXmlDeserialize<AdrNamesetSystemXML>(namesetData);
             CityNamesets.Clear();
-            CityNamesets.AddRange(Namesets.CityNamesets.ToDictionary(x => (Hash128)x.Id, x => AdrNameFile.FromXML(x)));
+            foreach (var item in Namesets.CityNamesets)
+            {
+                var id = item.Id;
+                var xml = FromXML(item);
+
+                CityNamesets[item.Id] = xml;
+            }
             seedGenerator.state = Namesets.seedId == 0 ? (uint)new System.Random().Next() : Namesets.seedId;
             OnCityNamesetsChanged();
         }
 
-        JobHandle IJobSerializable.SetDefaults(Context context)
+        #endregion
+
+
+        void ISerializable.Serialize<TWriter>(TWriter writer)
+        {
+            writer.Write(CURRENT_VERSION);
+            writer.Write(CityNamesets.Count);
+            foreach (var entry in CityNamesets.Values)
+            {
+                writer.WriteNullCheck(entry);
+            }
+            writer.Write(seedGenerator.state);
+        }
+
+        void ISerializable.Deserialize<TReader>(TReader reader)
+        {
+            ((IBelzontSerializableSingleton<AdrNamesetSystem>)this).CheckVersion(reader, CURRENT_VERSION);
+            if (version == 0)
+            {
+                LegacyDeserialize(reader);
+                return;
+            }
+            CityNamesets.Clear();
+            reader.Read(out int count);
+            for (int i = 0; i < count; i++)
+            {
+                reader.ReadNullCheck(out AdrNameFile item);
+                CityNamesets[item.Id] = item;
+            }
+            reader.Read(out uint seedId);
+            seedGenerator.state = seedId;
+            OnCityNamesetsChanged();
+
+        }
+        public void SetDefaults(Context context)
         {
             CityNamesets.Clear();
-            OnCityNamesetsChanged();
-            return default;
+            seedGenerator = new Unity.Mathematics.Random();
         }
 
         private bool isDirty;

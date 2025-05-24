@@ -75,5 +75,18 @@ namespace BelzontAdr
             writer.Write(calculatedPlate);
             writer.Write(manufactureMonthsFromEpoch);
         }
+
+#if DEBUG
+        public readonly string ToDebugString()
+        {
+            return $"CURRENT_VERSION = {CURRENT_VERSION} | " +
+            $"plateCategory = {plateCategory} | " +
+            $"cityOrigin = {cityOrigin} | " +
+            $"checksumRule = {checksumRule} | " +
+            $"serialNumber = {serialNumber} | " +
+            $"calculatedPlate = {calculatedPlate} | " +
+            $"manufactureMonthsFromEpoch = {manufactureMonthsFromEpoch} | ";
+        }
+#endif
     }
 }

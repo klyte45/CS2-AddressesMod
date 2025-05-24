@@ -6,13 +6,13 @@ namespace BelzontAdr
 {
     public struct ADRDistrictData : IComponentData, IQueryTypeParameter, ISerializable
     {
-        public Guid m_roadsNamesId;
+        public Colossal.Hash128 m_roadsNamesId;
 
-        const uint CURRENT_VERSION = 0;
+        const uint CURRENT_VERSION = 1;
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
-            writer.Write(m_roadsNamesId.ToString());
+            writer.Write(m_roadsNamesId);
         }
 
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
@@ -22,8 +22,12 @@ namespace BelzontAdr
             {
                 throw new Exception("Invalid version of ADRDistrictData!");
             }
-            reader.Read(out string roadsGuid);
-            Guid.TryParse(roadsGuid, out m_roadsNamesId);
+            if (version == 0)
+            {
+                reader.Read(out string _);
+                return;
+            }
+            reader.Read(out m_roadsNamesId);
         }
     }
 }

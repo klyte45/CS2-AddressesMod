@@ -24,6 +24,7 @@ namespace BelzontAdr
         private AdrMainSystem mainSystem;
         private AdrNamesetSystem namesetSystem;
         private bool dirtyDistricts;
+        private EndFrameBarrier m_barrier;
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
             eventCaller("district.listAllDistricts", ListAllDistricts);
@@ -89,6 +90,7 @@ namespace BelzontAdr
             nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
             mainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
             namesetSystem = World.GetOrCreateSystemManaged<AdrNamesetSystem>();
+            m_barrier = World.GetOrCreateSystemManaged<EndFrameBarrier>();
         }
         private struct DistrictListItem
         {
@@ -136,21 +138,29 @@ namespace BelzontAdr
 
                         dirtyDistricts = true;
                     }
+                    return;
                 }
-                else if (Guid.TryParse(fileGuid, out var guid) && namesetSystem.GetForGuid(guid, out _))
+                var guid = new Colossal.Hash128(fileGuid);
+                if (namesetSystem.GetForGuid(guid, out _))
                 {
-
-                    var hasComponent = EntityManager.TryGetComponent<ADRDistrictData>(district, out var adrDistrict);
-                    adrDistrict.m_roadsNamesId = guid;
-                    if (hasComponent)
+                    if (EntityManager.TryGetComponent<ADRDistrictData>(district, out var adrDistrict))
                     {
+                        adrDistrict.m_roadsNamesId = guid;
                         EntityManager.SetComponentData(district, adrDistrict);
                     }
                     else
                     {
-                        EntityManager.AddComponentData(district, adrDistrict);
+                        adrDistrict = new ADRDistrictData
+                        {
+                            m_roadsNamesId = guid
+                        };
+                        m_barrier.CreateCommandBuffer().AddComponent(district, adrDistrict);
                     }
                     dirtyDistricts = true;
+                }
+                else
+                {
+                    LogUtils.DoWarnLog("Invalid name file GUID for settings");
                 }
             }
         }

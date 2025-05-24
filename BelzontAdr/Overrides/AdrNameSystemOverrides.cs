@@ -27,6 +27,7 @@ namespace BelzontAdr
         {
             prefabSystem = world.GetExistingSystemManaged<PrefabSystem>();
             adrMainSystem = world.GetOrCreateSystemManaged<AdrMainSystem>();
+            m_nameSystem = world.GetOrCreateSystemManaged<NameSystem>();
             entityManager = world.EntityManager;
             entityExists = entityManager.UniversalQuery.GetEntityQueryMask();
             m_EndFrameBarrier = world.GetOrCreateSystemManaged<EndFrameBarrier>();
@@ -61,36 +62,18 @@ namespace BelzontAdr
         private static EndFrameBarrier m_EndFrameBarrier;
         private static AdrMainSystem adrMainSystem;
         private static EntityQueryMask entityExists;
+        private static NameSystem m_nameSystem;
 
 
         public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
         {
-            string pattern = null;
-            if (entityManager.HasComponent<Aggregate>(entity))
+            Name n = default;
+            if (GetName_Internal(ref n, ref __instance, entity))
             {
-                if (__instance.TryGetCustomName(entity, out __result)) return false;
-                if (GetAggregateName(out pattern, out __result, entity))
-                {
-                    string id = GetId(entity, true);
-                    __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
-                    return false;
-                }
-                __result = pattern.Replace("{name}", __result);
-                return false;
+                return true;
             }
-            else if (entityManager.HasComponent<District>(entity))
-            {
-                if (__instance.TryGetCustomName(entity, out __result)) return false;
-                if (GetDistrictName(out pattern, out __result, entity))
-                {
-                    string id = GetId(entity, true);
-                    __result = GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out string result2) ? result2 : id;
-                    return false;
-                }
-                __result = pattern.Replace("{name}", __result);
-                return false;
-            }
-            return true;
+            __result = n.Translate();
+            return false;
         }
         private static bool GetMarkerTransportStopName(ref Name __result, ref NameSystem __instance, ref Entity stop)
         {
@@ -237,6 +220,11 @@ namespace BelzontAdr
             while (entityManager.TryGetComponent<Owner>(entity, out var owner))
             {
                 entity = owner.m_Owner;
+                if (__instance.TryGetCustomName(entity, out name))
+                {
+                    __result = NameSystem.Name.CustomName(name);
+                    return false;
+                }
             }
             if (entityManager.TryGetComponent<ADREntityManualBuildingRef>(entity, out var manualRef) && entityExists.MatchesIgnoreFilter(manualRef.m_refNamedEntity))
             {
@@ -352,6 +340,7 @@ namespace BelzontAdr
         private static bool GetAggregateName(out string format, out string name, Entity entity)
         {
             name = format = null;
+            if (m_nameSystem.TryGetCustomName(entity, out _)) return true;
             if (!adrMainSystem.FindReferenceRoad(entity, out DynamicBuffer<AggregateElement> elements, out Entity refRoad)) return true;
             if (!adrMainSystem.GetRoadNameList(refRoad, out var roadsNamesList)) return true;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;
@@ -414,7 +403,9 @@ namespace BelzontAdr
             }
             else
             {
-                GameManager.instance.localizationManager.activeDictionary.TryGetValue(GetId(entity, true), out name);
+                var id = GetId(entity, true);
+                if (id is null) return true;
+                GameManager.instance.localizationManager.activeDictionary.TryGetValue(id, out name);
             }
             HouseholdMember householdMemberData = entityManager.GetComponentData<HouseholdMember>(entity);
             surname = GenerateSurname(male, listForSurnames, householdMemberData.m_Household);

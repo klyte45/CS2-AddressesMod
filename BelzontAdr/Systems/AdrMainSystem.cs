@@ -1,5 +1,4 @@
 ﻿using Belzont.Interfaces;
-using Belzont.Serialization;
 using Belzont.Utils;
 using Colossal;
 using Colossal.Entities;
@@ -14,12 +13,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace BelzontAdr
 {
-    public partial class AdrMainSystem : GameSystemBase, IBelzontBindable, IBelzontSerializableSingleton<AdrMainSystem>
+    public partial class AdrMainSystem : GameSystemBase, IBelzontBindable, IDefaultSerializable
     {
         private Action<string, object[]> m_eventCaller;
         private AdrDistrictsSystem districtsSystem;
@@ -29,8 +27,6 @@ namespace BelzontAdr
         public AdrCitywideSettings CurrentCitySettings { get; private set; } = new();
 
         private static string DefaultRoadPrefixFilename = Path.Combine(AddressesCs2Mod.ModSettingsRootFolder, "DefaultRoadPrefixRules.xml");
-
-        World IBelzontSerializableSingleton<AdrMainSystem>.World => World;
 
         public void SetupCallBinder(Action<string, Delegate> doBindLink)
         {
@@ -196,7 +192,7 @@ namespace BelzontAdr
         public const int CURRENT_VERSION = 1;
 
 
-        private void Deserialize<TReader>(TReader reader) where TReader : IReader
+        public void Deserialize<TReader>(TReader reader) where TReader : IReader
         {
             reader.Read(out uint version);
             if (version > CURRENT_VERSION)
@@ -229,18 +225,15 @@ namespace BelzontAdr
 
         }
 
-        private void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
+        public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
             writer.Write(CurrentCitySettings);
         }
 
-        void IBelzontSerializableSingleton<AdrMainSystem>.Serialize<TWriter>(TWriter writer) => Serialize(writer);
-        void IBelzontSerializableSingleton<AdrMainSystem>.Deserialize<TReader>(TReader reader) => Deserialize(reader);
-        JobHandle IJobSerializable.SetDefaults(Context context)
+        public void SetDefaults(Context context)
         {
             CurrentCitySettings = new();
-            return default;
         }
         #endregion
     }

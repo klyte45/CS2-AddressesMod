@@ -46,7 +46,7 @@ namespace BelzontAdr
         private ADRVehicleData.CohtmlSafe GetVehicleData(Entity e) => ADRVehicleData.CohtmlSafe.From(EntityManager.TryGetComponent<ADRVehicleData>(e, out var result) ? result : default);
         #endregion
 
-        private ModificationEndBarrier m_Barrier;
+        private EndFrameBarrier m_Barrier;
         private TimeSystem m_timeSystem;
         private EntityQuery m_unregisteredVehiclesQuery;
         private EntityQuery m_dirtyVehiclesPlateQuery;
@@ -119,7 +119,7 @@ namespace BelzontAdr
 
         protected override void OnCreate()
         {
-            m_Barrier = World.GetOrCreateSystemManaged<ModificationEndBarrier>();
+            m_Barrier = World.GetOrCreateSystemManaged<EndFrameBarrier>();
             m_timeSystem = World.GetOrCreateSystemManaged<TimeSystem>();
             m_unregisteredVehiclesQuery = GetEntityQuery(new EntityQueryDesc[]
              {
