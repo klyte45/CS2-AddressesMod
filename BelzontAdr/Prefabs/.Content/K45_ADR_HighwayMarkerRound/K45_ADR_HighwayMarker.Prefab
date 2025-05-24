@@ -21,7 +21,7 @@
                 "active": true,
                 "m_Group": $fstrref:"UnityGUID:7284210a233d52947afe9dd82d4402bd",
                 "m_Priority": 1000,
-                "m_Icon": "assetdb://global/08773288798a4928a5afe8b923bd573e",
+                "m_Icon": "coui://adr.k45/UI/images/ACircle.svg",
                 "m_IsDebugObject": false
             },
             {

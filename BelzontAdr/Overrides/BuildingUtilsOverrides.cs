@@ -3,8 +3,9 @@ using Colossal.Entities;
 using Colossal.Mathematics;
 using Game.Buildings;
 using Game.Net;
-using Game.Prefabs;
-using Game.Zones;
+using Game.Objects;
+using Game.SceneFlow;
+using Game.Tools;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -26,63 +27,93 @@ namespace BelzontAdr
                 typeof(Entity).MakeByRefType(),
                 typeof(int).MakeByRefType()
             }, null);
-            AddRedirect(GetAddress, GetType().GetMethod("GetAddress", RedirectorUtils.allFlags));
+            AddRedirect(GetAddress, GetType().GetMethod(nameof(GetAddress_Override), RedirectorUtils.allFlags));
         }
 
-        private static bool GetAddress(ref bool __result, ref EntityManager entityManager, ref Entity entity, ref Entity edge, ref float curvePos, ref Entity road, ref int number)
+        private static bool GetAddress_Override(ref bool __result, EntityManager entityManager, Entity entity, Entity edge, float curvePos, ref Entity road, ref int number)
         {
-            if (entityManager.TryGetComponent(edge, out Aggregated aggregated) && entityManager.TryGetBuffer(aggregated.m_Aggregate, true, out DynamicBuffer<AggregateElement> dynamicBuffer))
+            if (entityManager.TryGetComponent<Temp>(edge, out var temp) && temp.m_Original != Entity.Null)
             {
-                float num = 0f;
-                if (entityManager.TryGetComponent(dynamicBuffer[0].m_Edge, out Curve e0)) return true;
-                if (entityManager.TryGetComponent(dynamicBuffer[^1].m_Edge, out Curve e1)) return true;
+                edge = temp.m_Original;
+                curvePos = temp.m_CurvePosition;
+            }
+
+            if (entityManager.TryGetComponent(edge, out Aggregated aggregated) && entityManager.TryGetBuffer(aggregated.m_Aggregate, true, out DynamicBuffer<AggregateElement> aggregationBuffer))
+            {
+                float currentDistance = 0f;
+                if (!entityManager.TryGetComponent(aggregationBuffer[0].m_Edge, out Curve e0) || !entityManager.TryGetComponent(aggregationBuffer[^1].m_Edge, out Curve e1)) return true;
                 var zeroMarker = adrMainSystem.GetZeroMarkerPosition();
-                bool isInverse = e0.m_Bezier.a.SqrDistance(zeroMarker) > e1.m_Bezier.a.SqrDistance(zeroMarker);
-                for (int i = isInverse ? dynamicBuffer.Length - 1 : 0;
-                     isInverse ? i >= 0 : i < dynamicBuffer.Length;
-                    i += isInverse ? -1 : 1)
+                bool isInverseAggregate = e0.m_Bezier.a.SqrDistance(zeroMarker) > e1.m_Bezier.a.SqrDistance(zeroMarker);
+
+                float lastOverrideNumber = 0f;
+                float overridedTo = 0f;
+                bool isInverseOverride = false;
+
+                for (int i = isInverseAggregate ? aggregationBuffer.Length - 1 : 0;
+                     isInverseAggregate ? i >= 0 : i < aggregationBuffer.Length;
+                    i += isInverseAggregate ? -1 : 1)
                 {
-                    AggregateElement aggregateElement = dynamicBuffer[i];
-                    float num2 = num;
-                    if (entityManager.TryGetComponent(aggregateElement.m_Edge, out Curve curve)
-                        && entityManager.TryGetComponent(aggregateElement.m_Edge, out Composition composition)
-                        && entityManager.TryGetComponent(composition.m_Edge, out NetCompositionData netCompositionData))
+                    AggregateElement aggregateElement = aggregationBuffer[i];
+                    float newDistance = currentDistance;
+
+                    if (entityManager.TryGetComponent(aggregateElement.m_Edge, out Curve curve))
                     {
-                        float2 x = math.normalizesafe(MathUtils.StartTangent(curve.m_Bezier).xz, default);
-                        float2 y = math.normalizesafe(MathUtils.EndTangent(curve.m_Bezier).xz, default);
-                        float num3 = ZoneUtils.GetCellWidth(netCompositionData.m_Width);
-                        float num4 = math.acos(math.clamp(math.dot(x, y), -1f, 1f));
-                        num2 += curve.m_Length + (num3 * num4 * 0.5f);
+                        newDistance += curve.m_Length;
                     }
-                    if (aggregateElement.m_Edge == edge)
+
+
+                    if (entityManager.TryGetBuffer<Game.Objects.SubObject>(aggregateElement.m_Edge, true, out var items) && items.Length > 0)
                     {
-                        bool flag = false;
-                        if (i > 0)
+                        bool? isReversedSegment = null;
+                        float overridePosition = -1;
+                        float targetNewNumber = 0f;
+                        float maxTarget = 1;
+                        if (aggregateElement.m_Edge == edge)
                         {
-                            if (entityManager.TryGetComponent(aggregateElement.m_Edge, out Edge edge2)
-                                && entityManager.TryGetComponent(dynamicBuffer[i - 1].m_Edge, out Edge edge3)
-                                && (edge2.m_End == edge3.m_Start || edge2.m_End == edge3.m_End))
+                            isReversedSegment ??= CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
+                            maxTarget = isReversedSegment.Value ? 1 - curvePos : curvePos;
+                        }
+                        for (int j = 0; j < items.Length; j++)
+                        {
+                            if (entityManager.TryGetComponent<Attached>(items[j].m_SubObject, out var attachmentData)
+                                && entityManager.TryGetComponent<ADRHighwayMarkerData>(items[j].m_SubObject, out var markerData)
+                                && markerData.overrideMileage)
                             {
-                                flag = true;
+                                isReversedSegment ??= CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
+                                var thisPosition = isReversedSegment.Value ? 1 - attachmentData.m_CurvePosition : attachmentData.m_CurvePosition;
+                                if (thisPosition > overridePosition && thisPosition <= maxTarget)
+                                {
+                                    overridePosition = thisPosition;
+                                    targetNewNumber = markerData.newMileage;
+                                    isInverseOverride = markerData.reverseMileageCounting;
+                                }
                             }
                         }
-                        else if (i < dynamicBuffer.Length - 1
-                            && entityManager.TryGetComponent(aggregateElement.m_Edge, out Edge edge4)
-                            && entityManager.TryGetComponent(dynamicBuffer[i + 1].m_Edge, out Edge edge5)
-                            && (edge4.m_Start == edge5.m_Start || edge4.m_Start == edge5.m_End))
+                        if (overridePosition >= 0)
                         {
-                            flag = true;
+                            var t = new Bounds1(isReversedSegment.Value ? overridePosition : 0f, isReversedSegment.Value ? 1f : overridePosition);
+                            float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
+                            lastOverrideNumber = math.lerp(currentDistance, newDistance, s);
+                            overridedTo = targetNewNumber;
                         }
-                        Bounds1 t = new Bounds1(flag ? curvePos : 0f, flag ? 1f : curvePos);
+                    }
+
+                    if (aggregateElement.m_Edge == edge)
+                    {
+                        bool isReversedSegment = CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
+
+                        var t = new Bounds1(isReversedSegment ? curvePos : 0f, isReversedSegment ? 1f : curvePos);
                         float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
                         road = aggregated.m_Aggregate;
-                        number = Mathf.RoundToInt(math.lerp(num, num2, s) / 8f) * 2 + 1;
-                        Game.Objects.Transform transform;
-                        if (entityManager.TryGetComponent(entity, out transform))
+                        var unitMultiplier = GameManager.instance.settings.userInterface.unitSystem == Game.Settings.InterfaceSettings.UnitSystem.Freedom ? 1.09361329f : 1f; //yd or m
+                        number = (Mathf.RoundToInt(((overridedTo * 500) + ((isInverseOverride ? -.5f : .5f) * (math.lerp(currentDistance, newDistance, s) - lastOverrideNumber))) * unitMultiplier) * 2) + 1;
+
+                        //Check road side
+                        if (entityManager.TryGetComponent(entity, out Game.Objects.Transform transform))
                         {
                             float2 x2 = transform.m_Position.xz - MathUtils.Position(curve.m_Bezier, curvePos).xz;
                             float2 y2 = MathUtils.Right(MathUtils.Tangent(curve.m_Bezier, curvePos).xz);
-                            if (math.dot(x2, y2) > 0f != flag)
+                            if ((math.dot(x2, y2) > 0f) != isReversedSegment)
                             {
                                 number++;
                             }
@@ -90,12 +121,35 @@ namespace BelzontAdr
                         __result = true;
                         return false;
                     }
-                    num = num2;
+                    currentDistance = newDistance;
                 }
             }
 
             __result = false;
             return false;
+        }
+
+        private static bool CheckSegmentReversion(EntityManager entityManager, DynamicBuffer<AggregateElement> dynamicBuffer, bool isInverseAggregate, int i, AggregateElement aggregateElement)
+        {
+            bool isReversedSegment = false;
+            if (i > 0)
+            {
+                if (entityManager.TryGetComponent(aggregateElement.m_Edge, out Edge edge2)
+                    && entityManager.TryGetComponent(dynamicBuffer[i - 1].m_Edge, out Edge edge3)
+                    && (edge2.m_End == edge3.m_Start || edge2.m_End == edge3.m_End))
+                {
+                    isReversedSegment = true;
+                }
+            }
+            else if (i < dynamicBuffer.Length - 1
+                && entityManager.TryGetComponent(aggregateElement.m_Edge, out Edge edge4)
+                && entityManager.TryGetComponent(dynamicBuffer[i + 1].m_Edge, out Edge edge5)
+                && (edge4.m_Start == edge5.m_Start || edge4.m_Start == edge5.m_End))
+            {
+                isReversedSegment = true;
+            }
+            if (isInverseAggregate) isReversedSegment = !isReversedSegment;
+            return isReversedSegment;
         }
 
         private static AdrMainSystem adrMainSystem;

@@ -1,5 +1,4 @@
 using Belzont.Interfaces;
-using Belzont.Serialization;
 using Belzont.Utils;
 using Colossal.Entities;
 using Colossal.Serialization.Entities;
@@ -135,7 +134,7 @@ namespace BelzontAdr
             m_executionQueue.Enqueue(() => m_modificationEndBarrier.CreateCommandBuffer().AddComponent<ADRHighwayMarkerDataDirty>(m_markTempDirtyTargets, EntityQueryCaptureMode.AtPlayback));
         }
 
-        private bool IsCurrentPrefabRoadMarker() => m_toolSystem.activeTool is ObjectToolSystem && m_toolSystem.activePrefab.Has<ADRRoadMarkerObject>();
+        private bool IsCurrentPrefabRoadMarker() => m_toolSystem.activeTool is ObjectToolSystem && (m_toolSystem.activePrefab?.Has<ADRRoadMarkerObject>() ?? false);
 
         #endregion
 

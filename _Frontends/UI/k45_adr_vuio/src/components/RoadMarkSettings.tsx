@@ -1,7 +1,7 @@
 
 import { replaceArgs } from "@klyte45/adr-commons";
 import { LocElementType, VanillaComponentResolver, VanillaWidgets } from "@klyte45/vuio-commons";
-import { DropdownItem, LocElement } from "cs2/bindings";
+import { DropdownItem, LocElement, selectedInfo } from "cs2/bindings";
 import { useLocalization } from "cs2/l10n";
 import { useFormattedLargeNumber } from "cs2/utils";
 import { ObjectTyped } from "object-typed";
@@ -28,7 +28,7 @@ export const RoadMarkSettings = () => {
     const [displayNameTypes, setDisplayNameTypes] = useState<string[]>([])
     useEffect(() => {
         AdrHighwayRoutesSystem.getOptionsNamesFromMetadata().then(setDisplayNameTypes)
-    }, [])
+    }, [buildIdx])
     useEffect(() => {
         AdrHighwayRoutesSystem.getOptionsMetadataFromLayout(routesSystem.InfoPanel_DisplayInformation.value).then((x) => {
             const data = x && JSON.parse(x);
@@ -36,6 +36,10 @@ export const RoadMarkSettings = () => {
             setMetadata(validatedData)
         });
     }, [routesSystem.InfoPanel_DisplayInformation.value])
+
+    useEffect(() => {
+        selectedInfo.selectedEntity$.subscribe(() => setBuildIdx(buildIdx + 1));        
+    }, [])
 
     //
     /*

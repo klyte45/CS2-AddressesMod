@@ -3,6 +3,7 @@ using Colossal.Entities;
 using Game.Buildings;
 using Game.Common;
 using Game.Objects;
+using Game.SceneFlow;
 using Game.Tools;
 using Game.UI;
 using Game.UI.Tooltip;
@@ -54,7 +55,9 @@ namespace BelzontAdr
 
                         if (BuildingUtils.GetAddress(EntityManager, tempEntity, parent, component2.m_CurvePosition, out road, out number))
                         {
-                            m_Location.value = $"{m_nameSystem.GetName(road).Translate()} @ {number}";
+                            var lengthStr = GameManager.instance.settings.userInterface.unitSystem == Game.Settings.InterfaceSettings.UnitSystem.Freedom ? $"{number * 3:#,##0}ft, {number:#,##0}yd, {number / 1760f:#,##0.00}mi" : $"{number:#,##0.000}m, {number / 1000f:#,##0.00}km";
+
+                            m_Location.value = $"{m_nameSystem.GetName(road).Translate()} @ {lengthStr}";
                             AddMouseTooltip(m_Location);
                             return;
                         }
