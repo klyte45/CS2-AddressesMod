@@ -19,7 +19,6 @@ using System.Text;
 using System.Xml.Serialization;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using UnityEngine;
 using static BelzontAdr.AdrNameFile;
 
@@ -233,7 +232,7 @@ namespace BelzontAdr
 
         void ISerializable.Deserialize<TReader>(TReader reader)
         {
-            ((IBelzontSerializableSingleton<AdrNamesetSystem>)this).CheckVersion(reader, CURRENT_VERSION);
+            var version = reader.CheckVersionK45(CURRENT_VERSION, GetType());
             if (version == 0)
             {
                 LegacyDeserialize(reader);
