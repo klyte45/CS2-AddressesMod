@@ -106,6 +106,15 @@
                 }
             }
         }
+
+        .hoverPositionBox{
+            z-index: 99999;
+            background-color: var(--menuPanel1);
+            position: absolute;
+            bottom: 10rem;
+            right: 10rem;
+            padding: 4rem;
+        }
     }
 
     .dataSide {

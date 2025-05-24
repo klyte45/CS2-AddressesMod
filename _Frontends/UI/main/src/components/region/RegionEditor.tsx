@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MapDiv } from "./MapDiv"
 import './regionEditor.scss'
 import { Entity, EnumValueType } from "@klyte45/adr-commons";
@@ -60,6 +60,9 @@ export const RegionEditor = () => {
     const [zoom, setZoom] = useState(1);
     const [position, setPostion] = useState([0, 0]);
 
+    const [mouseInfo, setMouseInfo] = useState<any>()
+    const refDiv = useRef<HTMLDivElement>()
+
     useEffect(() => {
         if (buildIdx == 0) return;
         setIsLoading(true);
@@ -83,6 +86,7 @@ export const RegionEditor = () => {
         setZoom(Math.max(1, Math.min(20, zoom - x.deltaY * .01)))
     }
     const doOnMouseMove = (x) => {
+        setMouseInfo(x);
         if (!x.buttons || (!x.movementY && !x.movementX)) return;
         if (x.buttons == 1) {
             setPostion(
@@ -93,13 +97,31 @@ export const RegionEditor = () => {
             )
         }
     }
+
+    const getCurrentMouseHoverPosition = useCallback(() => {
+        if (refDiv.current && mouseInfo) {
+            const currentHoverPosition = { x: 0, y: 0 }
+            const bounds = refDiv.current.getBoundingClientRect();
+            const posX = (mouseInfo.clientX - bounds.x - bounds.width * .5);
+            const posY = (mouseInfo.clientY - bounds.y - bounds.height * .5);
+            currentHoverPosition.x = posX / 800 / zoom * mapSize[0] - position[0];//(mouseInfo.clientX - bounds.x - bounds.width * .5 + position[0]) * (mapSize[0] / bounds.width) / zoomValue
+            currentHoverPosition.y = posY / 800 / zoom * mapSize[2] - position[1];//(mouseInfo.clientY - bounds.y - bounds.height * .5 + position[1]) * (mapSize[2] / bounds.height) / zoomValue
+            return currentHoverPosition;
+        }
+        return null;
+    }, [mouseInfo, refDiv.current])
+
+
     if (buildIdx < 2 || isLoading) {
         if (buildIdx == 0) setTimeout(() => setBuildIdx(buildIdx + 1), 500);
         return <div>Loading...</div>;
     }
 
+
+
+
     return <div className="regionEditor">
-        <div className="mapSide" onWheel={doOnWheel} onMouseMove={doOnMouseMove} style={{ ["--currentZoom"]: .6666 + zoom / 1.5 } as any}>
+        <div className="mapSide" onWheel={doOnWheel} onMouseOut={() => setMouseInfo(undefined)} onMouseMove={doOnMouseMove} style={{ ["--currentZoom"]: .6666 + zoom / 1.5 } as any} ref={refDiv}>
             <MapDiv waterMap={waterMap} cityMap={terrainMap}
                 style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${position[0] / mapSize[0] * 100}%, ${position[1] / mapSize[2] * 100}%)` }}
             >
@@ -127,6 +149,7 @@ export const RegionEditor = () => {
                     </div>
                 })}
             </MapDiv>
+            {getCurrentMouseHoverPosition() && <div className="hoverPositionBox">{`(${getCurrentMouseHoverPosition().x.toFixed(1)} ; ${getCurrentMouseHoverPosition().y.toFixed(1)})`}</div>}
         </div>
         <div className="dataSide">
             <DefaultPanelScreen title={translate("regionSettings.title")} subtitle={translate("regionSettings.subtitle")} scrollable={false}>
