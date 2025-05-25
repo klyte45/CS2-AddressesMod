@@ -8,6 +8,7 @@ import { CityNamesetLibraryCmp } from "#components/fileManagement/CityNamesetLib
 import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
 import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import { translate } from "#utility/translate";
+import { HighwayListingTab } from "./HighwayListingTab";
 
 const listOutsideConnections = () => engine.call("k45::adr.regions.listOutsideConnections");
 const getCityBounds = () => engine.call("k45::adr.regions.getCityBounds");
@@ -66,16 +67,18 @@ export const RegionEditor = () => {
     useEffect(() => {
         if (buildIdx == 0) return;
         setIsLoading(true);
-        Promise.all([getCityBounds().then((x) => {
-            setMapSize([x[3] - x[0], x[4] - x[1], x[5] - x[2]])
-            setMapOffset([x[0], x[1], x[2]])
-        }),
-        listHighways().then(setHighways),
-        listTrainTracks().then(setTrainTracks),
-        listUrbanRoads().then(setUrbanRoads),
-        listOutsideConnections().then(setOutsideConnections),
-        getCityTerrain().then(setTerrainMap),
-        getCityWater().then(setWaterMap)]).then(() => {
+        Promise.all([
+            // getCityBounds().then((x) => {
+            //     setMapSize([x[3] - x[0], x[4] - x[1], x[5] - x[2]])
+            //     setMapOffset([x[0], x[1], x[2]])
+            // }),
+            // listHighways().then(setHighways),
+            // listTrainTracks().then(setTrainTracks),
+            // listUrbanRoads().then(setUrbanRoads),
+            // listOutsideConnections().then(setOutsideConnections),
+            // getCityTerrain().then(setTerrainMap),
+            // getCityWater().then(setWaterMap)
+        ]).then(() => {
             setBuildIdx(buildIdx + 1)
             setIsLoading(false);
         })
@@ -163,22 +166,10 @@ function RegionalEditorContent() {
 
     const menus: Omit<MenuItem, 'iconUrl'>[] = [
         {
-            name: translate("regionSettings.title"),
-            panelContent: <div />
+            name: translate("highwayRegisterEditor.tabTitle"),
+            panelContent: <HighwayListingTab />
         },
-        {
-            name: translate("namesetManagement.title"),
-            panelContent: <div />,
-            tintedIcon: true
-        },
-        {
-            name: translate("overrideSettings.title"),
-            panelContent: <div />
-        },
-        {
-            name: translate("roadPrefixSettings.title"),
-            panelContent: <div />
-        },
+
     ]
 
     return <Tabs className="tabsContainer">

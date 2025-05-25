@@ -11,6 +11,7 @@ export * from "./src/service/SelectInfoPanelService"
 export * from "./src/service/EditorUISystemService"
 export * from "./src/service/VehicleService"
 export * from "./src/service/AdrMainService"
+export * from "./src/service/HighwayRoutesService"
 
 export * from "../../_replacements/euis-components/src/utility/Entity"
 export * from "../../_replacements/euis-components/src/utility/name.utils" 

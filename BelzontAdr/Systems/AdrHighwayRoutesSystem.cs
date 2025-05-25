@@ -16,9 +16,8 @@ using BridgeWE;
 using System.Linq;
 using Game.UI;
 using static Belzont.Utils.NameSystemExtensions;
-
-
-
+using Belzont.Serialization;
+using Unity.Mathematics;
 
 
 #if BURST
@@ -28,7 +27,7 @@ namespace BelzontAdr
 {
     public partial class AdrHighwayRoutesSystem : SystemBase, IBelzontBindable, IDefaultSerializable
     {
-
+        #region Endpoints general
         private const string PREFIX = "highwayRoutes.";
 
         private Action<string, object[]> EventCaller { get; set; }
@@ -41,6 +40,8 @@ namespace BelzontAdr
             callBinder($"{PREFIX}getOptionsMetadataFromCurrentLayout", GetOptionsMetadataFromCurrentLayout);
             callBinder($"{PREFIX}getOptionsNamesFromMetadata", GetOptionsNamesFromMetadata);
             callBinder($"{PREFIX}getOptionsMetadataFromLayout", GetOptionsMetadataFromLayout);
+            callBinder($"{PREFIX}listHighwaysRegistered", ListHighwaysRegistered);
+            callBinder($"{PREFIX}saveHighwayData", SaveHighwayData);
 
             if (EventCaller != null) InitValueBindings();
         }
@@ -90,6 +91,7 @@ namespace BelzontAdr
                        ? NameSystem.Name.LocalizedName(result).Translate()
                        : NameSystem.Name.LocalizedName($"K45::ADR.vuio[DisplayInformation.{x}]").Translate()).ToArray();
         }
+        #endregion
 
         #region Tool controller part
         public MultiUIValueBinding<Colossal.Hash128, string> Tool_RouteId { get; private set; }
@@ -137,7 +139,6 @@ namespace BelzontAdr
         private bool IsCurrentPrefabRoadMarker() => m_toolSystem.activeTool is ObjectToolSystem && (m_toolSystem.activePrefab?.Has<ADRRoadMarkerObject>() ?? false);
 
         #endregion
-
 
         #region Info panel controller part
 
@@ -209,7 +210,6 @@ namespace BelzontAdr
 
         }
         #endregion
-
 
         #region System part
 
@@ -334,23 +334,121 @@ namespace BelzontAdr
             }
         }
         #endregion
+
+        #region Highways data part
+
+        private readonly Dictionary<Colossal.Hash128, HighwayData> highwaysDataRegistry = new();
+
+        private List<HighwayData.UIData> ListHighwaysRegistered() => highwaysDataRegistry.Values.Select(x => x.ToUI()).ToList();
+
+        private void SaveHighwayData(HighwayData.UIData newDataUI)
+        {
+            var newData = newDataUI.ToData();
+            if (newData.Id == default)
+            {
+                newData.RegenerateId();
+            }
+            highwaysDataRegistry[newData.Id] = newData;
+        }
+
+        #endregion
+
         #region Serialization
 
         private const uint CURRENT_VERSION = 0;
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
         {
             reader.CheckVersionK45(CURRENT_VERSION, GetType());
+            reader.Read(out int countHwData);
+            highwaysDataRegistry.Clear();
+            for (int i = 0; i < countHwData; i++)
+            {
+                reader.ReadNullCheck(out HighwayData highwayData);
+                highwaysDataRegistry[highwayData.Id] = highwayData;
+            }
         }
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
+            writer.Write(highwaysDataRegistry.Count);
+            foreach (var item in highwaysDataRegistry.Values)
+            {
+                writer.WriteNullCheck(item);
+            }
         }
 
         public void SetDefaults(Context context)
         {
         }
         #endregion
+    }
+
+    public class HighwayData : ISerializable
+    {
+        private const uint CURRENT_VERSION = 0;
+        public Colossal.Hash128 Id { get; private set; }
+        public string prefix;
+        public string suffix;
+        public string name;
+        public float2 refStartPoint;
+
+        public HighwayData()
+        {
+            Id = Guid.NewGuid();
+        }
+
+        public void Deserialize<TReader>(TReader reader) where TReader : IReader
+        {
+            reader.CheckVersionK45(CURRENT_VERSION, GetType());
+            reader.Read(out Colossal.Hash128 id);
+            Id = id;
+            reader.Read(out prefix);
+            reader.Read(out suffix);
+            reader.Read(out name);
+            reader.Read(out refStartPoint);
+        }
+
+        public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
+        {
+            writer.Write(CURRENT_VERSION);
+            writer.Write(Id);
+            writer.Write(prefix);
+            writer.Write(suffix);
+            writer.Write(name);
+            writer.Write(refStartPoint);
+        }
+
+        internal void RegenerateId()
+        {
+            Id = Guid.NewGuid();
+        }
+        public UIData ToUI() => new()
+        {
+            Id = Id.ToString(),
+            name = name,
+            prefix = prefix,
+            suffix = suffix,
+            refStartPoint = new float[] { refStartPoint.x, refStartPoint.y }
+        };
+
+        public struct UIData
+        {
+            public string Id;
+            public string prefix;
+            public string suffix;
+            public string name;
+            public float[] refStartPoint;
+
+            public readonly HighwayData ToData() => new()
+            {
+                Id = Colossal.Hash128.TryParse(Id, out var id) ? id : default,
+                name = name,
+                prefix = prefix,
+                suffix = suffix,
+                refStartPoint = new float2(refStartPoint[0], refStartPoint[1]),
+            };
+        }
     }
 }
 
