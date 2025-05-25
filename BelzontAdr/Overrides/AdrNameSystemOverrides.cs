@@ -31,6 +31,7 @@ namespace BelzontAdr
             entityManager = world.EntityManager;
             entityExists = entityManager.UniversalQuery.GetEntityQueryMask();
             m_EndFrameBarrier = world.GetOrCreateSystemManaged<EndFrameBarrier>();
+            m_adrHighwayRoutesSystem = world.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
 
             var getCitizenName = typeof(NameSystem).GetMethod("GetCitizenName", RedirectorUtils.allFlags);
             AddRedirect(getCitizenName, GetType().GetMethod(nameof(GetCitizenName), RedirectorUtils.allFlags));
@@ -63,11 +64,23 @@ namespace BelzontAdr
         private static AdrMainSystem adrMainSystem;
         private static EntityQueryMask entityExists;
         private static NameSystem m_nameSystem;
+        private static AdrHighwayRoutesSystem m_adrHighwayRoutesSystem;
 
 
         public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
         {
             Name n = default;
+            if (entityManager.HasComponent<Aggregate>(entity)
+                && entityManager.TryGetComponent<ADRHighwayAggregationData>(entity, out var aggregationData)
+                && aggregationData.highwayDataId != default
+                && m_adrHighwayRoutesSystem.TryGetHighwayData(aggregationData.highwayDataId, out var hwData))
+            {
+
+                __result = m_nameSystem.TryGetCustomName(entity, out var customName)
+                    ? $"<color=\"yellow\">{hwData.prefix}-{hwData.suffix}</color>\n{customName}"
+                    : $"<color=\"yellow\">{hwData.prefix}-{hwData.suffix}</color>\n{hwData.name}";
+                return false;
+            }
             if (GetName_Internal(ref n, ref __instance, entity))
             {
                 return true;
@@ -341,6 +354,16 @@ namespace BelzontAdr
         {
             name = format = null;
             if (m_nameSystem.TryGetCustomName(entity, out _)) return true;
+            if (entityManager.HasComponent<Aggregate>(entity)
+              && entityManager.TryGetComponent<ADRHighwayAggregationData>(entity, out var aggregationData)
+              && aggregationData.highwayDataId != default
+              && m_adrHighwayRoutesSystem.TryGetHighwayData(aggregationData.highwayDataId, out var hwData))
+            {
+                format = hwData.name;
+                name = "";
+                return false;
+            }
+
             if (!adrMainSystem.FindReferenceRoad(entity, out DynamicBuffer<AggregateElement> elements, out Entity refRoad)) return true;
             if (!adrMainSystem.GetRoadNameList(refRoad, out var roadsNamesList)) return true;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;

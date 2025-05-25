@@ -42,6 +42,33 @@
                     stroke: #9b371e;
                     fill: transparent;
                 }
+
+                .hwId_hover {
+                    stroke: magenta;
+                    animation: flash linear 1s infinite;
+                }
+
+                @keyframes flash {
+                    0% {
+                        opacity: 1;
+                    }
+
+                    40% {
+                        opacity: .6;
+                    }
+
+                    50% {
+                        opacity: .1;
+                    }
+
+                    60% {
+                        opacity: .6;
+                    }
+
+                    100% {
+                        opacity: 1;
+                    }
+                }
             }
 
             .outsideConnectionPoint {
@@ -107,7 +134,7 @@
             }
         }
 
-        .hoverPositionBox{
+        .hoverPositionBox {
             z-index: 99999;
             background-color: var(--menuPanel1);
             position: absolute;

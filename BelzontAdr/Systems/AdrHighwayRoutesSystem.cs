@@ -459,6 +459,7 @@ namespace BelzontAdr
                     var entity = entities[i];
                     var highwayData = highwaysDatas[i];
                     var idToReplicate = highwayData.highwayDataId;
+                    var anyChanged = false;
                     if (m_aggregateElementsData.TryGetBuffer(entity, out var edges))
                     {
                         for (int j = 0; j < edges.Length; j++)
@@ -471,10 +472,16 @@ namespace BelzontAdr
                                     {
                                         markerData.routeDataIndex = idToReplicate;
                                         m_CommandBuffer.SetComponent(unfilteredChunkIndex, subObjects[k].m_SubObject, markerData);
+                                        anyChanged = true;
                                     }
                                 }
                             }
                         }
+                    }
+                    if (!anyChanged)
+                    {
+                        highwayData.highwayDataId = default;
+                        m_CommandBuffer.SetComponent(unfilteredChunkIndex, entity, highwayData);
                     }
                 }
             }

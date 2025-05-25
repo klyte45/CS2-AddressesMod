@@ -11,6 +11,9 @@ type HighwayListingProps = {
 export function HighwayRegisterManagement() {
     const [selectedHw, setSelectedHw] = useState<Partial<HighwayData>>()
 
+    useEffect(() => {
+        return () => document.querySelectorAll(".pathsOverlay .hwId_hover").forEach(x => x.classList.remove("hwId_hover"))
+    }, [])
     if (!selectedHw) {
         return <HighwayListing onSelectItem={setSelectedHw} />
     }
@@ -63,20 +66,24 @@ function HighwayListing({ onSelectItem }: HighwayListingProps) {
 
     useEffect(() => {
         HighwayRoutesService.listHighwaysRegistered().then((x) => setHighways(x.sort((a, b) => `${a.prefix} ${a.suffix}`.localeCompare(`${b.prefix} ${b.suffix}`) || a.name.localeCompare(b.name))));
+        document.querySelectorAll(".pathsOverlay .hwId_hover").forEach(x => x.classList.remove("hwId_hover"))
     }, [])
 
     return <div className="highwayList">
         <h2>{translate("highwayRegisterEditor.titleList")}</h2>
         {highways.length ?
-            <GameScrollComponent parentContainerClass="listContainer" contentClass="listWrapper">{highways.map(x => <div key={x.Id} className="tableItem">
-                <div className="data">
-                    <div className="title">{`${x.prefix}-${x.suffix} | ${x.name}`}</div>
-                    <div className="subTitle">{`[${x.refStartPoint[0].toFixed(2)} ; ${x.refStartPoint[0].toFixed(2)}]`}</div>
-                </div>
-                <div className="actions">
-                    <button className="neutralBtn" onClick={() => onSelectItem(x)}>{translate("highwayRegisterEditor.editBtn")}</button>
-                </div>
-            </div>)}
+            <GameScrollComponent parentContainerClass="listContainer" contentClass="listWrapper">{highways.map(x =>
+                <div key={x.Id} className="tableItem" onMouseEnter={() => document.querySelectorAll(".pathsOverlay .hwId_" + x.Id).forEach(x => x.classList.add("hwId_hover"))}
+                    onMouseLeave={() => document.querySelectorAll(".pathsOverlay .hwId_" + x.Id).forEach(x => x.classList.remove("hwId_hover"))}
+                >
+                    <div className="data">
+                        <div className="title">{`${x.prefix}-${x.suffix} | ${x.name}`}</div>
+                        <div className="subTitle">{`[${x.refStartPoint[0].toFixed(2)} ; ${x.refStartPoint[0].toFixed(2)}]`}</div>
+                    </div>
+                    <div className="actions">
+                        <button className="neutralBtn" onClick={() => onSelectItem(x)}>{translate("highwayRegisterEditor.editBtn")}</button>
+                    </div>
+                </div>)}
             </GameScrollComponent> : <div className="noHighwaysMessage">
                 {translate("highwayRegisterEditor.noHighwaysRegisteredMessage")}
             </div>}

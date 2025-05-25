@@ -122,6 +122,7 @@ namespace BelzontAdr
             public string name;
             public float[][][] curves;
             public Entity[] nodes;
+            public string highwayId;
         }
 
         private AggregationData[] ListHighways() => ListFromQuery(m_highwaysQuery);
@@ -144,6 +145,7 @@ namespace BelzontAdr
                         return new[] { bez.a.ToArray(), bez.b.ToArray(), bez.c.ToArray(), bez.d.ToArray() };
                     }).ToArray(),
                     nodes = x.SelectMany(x => new[] { listEdge[x.i].m_Start, listEdge[x.i].m_End }).ToHashSet().ToArray(),
+                    highwayId = (EntityManager.TryGetComponent<ADRHighwayAggregationData>(x.Key, out var data) ? data.highwayDataId : default).ToString()
                 }).ToArray();
         }
         #endregion

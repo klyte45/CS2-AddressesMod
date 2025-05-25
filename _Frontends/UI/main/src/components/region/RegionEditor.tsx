@@ -39,6 +39,7 @@ interface AggregationData {
     name: string;
     curves: [[number, number, number], [number, number, number], [number, number, number], [number, number, number]][];
     nodes: Entity[];
+    highwayId: string
 }
 
 
@@ -65,16 +66,16 @@ export const RegionEditor = () => {
         if (buildIdx == 0) return;
         setIsLoading(true);
         Promise.all([
-            // getCityBounds().then((x) => {
-            //     setMapSize([x[3] - x[0], x[4] - x[1], x[5] - x[2]])
-            //     setMapOffset([x[0], x[1], x[2]])
-            // }),
-            // listHighways().then(setHighways),
-            // listTrainTracks().then(setTrainTracks),
-            // listUrbanRoads().then(setUrbanRoads),
-            // listOutsideConnections().then(setOutsideConnections),
-            // getCityTerrain().then(setTerrainMap),
-            // getCityWater().then(setWaterMap)
+            getCityBounds().then((x) => {
+                setMapSize([x[3] - x[0], x[4] - x[1], x[5] - x[2]])
+                setMapOffset([x[0], x[1], x[2]])
+            }),
+            listHighways().then(setHighways),
+            listTrainTracks().then(setTrainTracks),
+            listUrbanRoads().then(setUrbanRoads),
+            listOutsideConnections().then(setOutsideConnections),
+            getCityTerrain().then(setTerrainMap),
+            getCityWater().then(setWaterMap)
         ]).then(() => {
             setBuildIdx(buildIdx + 1)
             setIsLoading(false);
@@ -104,8 +105,8 @@ export const RegionEditor = () => {
             const bounds = refDiv.current.getBoundingClientRect();
             const posX = (mouseInfo.clientX - bounds.x - bounds.width * .5);
             const posY = (mouseInfo.clientY - bounds.y - bounds.height * .5);
-            currentHoverPosition.x = posX / 800 / zoom * mapSize[0] - position[0];//(mouseInfo.clientX - bounds.x - bounds.width * .5 + position[0]) * (mapSize[0] / bounds.width) / zoomValue
-            currentHoverPosition.y = posY / 800 / zoom * mapSize[2] - position[1];//(mouseInfo.clientY - bounds.y - bounds.height * .5 + position[1]) * (mapSize[2] / bounds.height) / zoomValue
+            currentHoverPosition.x = posX / 800 / zoom * mapSize[0] - position[0];
+            currentHoverPosition.y = posY / 800 / zoom * mapSize[2] - position[1];
             return currentHoverPosition;
         }
         return null;
@@ -126,9 +127,9 @@ export const RegionEditor = () => {
                 style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${position[0] / mapSize[0] * 100}%, ${position[1] / mapSize[2] * 100}%)` }}
             >
                 <svg viewBox={[mapOffset[0], mapOffset[2], mapSize[0], mapSize[2]].join(" ")} className="pathsOverlay" width="100%" height="100%" >
-                    {urbanRoads.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className="mapUrbanRoads" id={`rd_${x.entity.Index}_${x.entity.Version}`} />)}
-                    {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className="mapTrainTrack" id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}
-                    {highways.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className="mapHighway" id={`tr_${x.entity.Index}_${x.entity.Version}`} />)}
+                    {urbanRoads.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapUrbanRoads", "hwId_" + x.highwayId].join(" ")} id={`rd_${x.entity.Index}_${x.entity.Version}`} />)}
+                    {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapTrainTrack", "hwId_" + x.highwayId].join(" ")} id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}
+                    {highways.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapHighway", "hwId_" + x.highwayId].join(" ")} id={`tr_${x.entity.Index}_${x.entity.Version}`} />)}
                 </svg>
                 {outsideConnections.filter(x => ![OutsideConnectionType.Pipe, OutsideConnectionType.Electricity].includes(x.outsideConnectionType.value__)).map((x, i) => {
                     const left = ((x.position[0] - mapOffset[0]) / mapSize[0] * 100);
@@ -165,6 +166,10 @@ function RegionalEditorContent() {
         {
             name: translate("highwayRegisterEditor.tabTitle"),
             panelContent: <HighwayRegisterManagement />
+        },
+        {
+            name: translate("highwayRegisterEditor.tabTitle"),
+            panelContent: <div />
         },
 
     ]
