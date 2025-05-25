@@ -1,14 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { MapDiv } from "./MapDiv"
-import './regionEditor.scss'
-import { Entity, EnumValueType } from "@klyte45/adr-commons";
-import { DefaultPanelScreen, GameScrollComponent, MenuItem } from "@klyte45/euis-components";
-import { Tabs, TabList, Tab, TabPanel } from "react-tabs";
-import { CityNamesetLibraryCmp } from "#components/fileManagement/CityNamesetLibraryCmp";
-import { OverrideSettingsCmp } from "#components/overrides/OverrideSettingsCmp";
-import { RoadPrefixCmp } from "#components/roadPrefix/RoadPrefixCmp";
 import { translate } from "#utility/translate";
-import { HighwayListingTab } from "./HighwayListingTab";
+import { Entity, EnumValueType } from "@klyte45/adr-commons";
+import { DefaultPanelScreen, MenuItem } from "@klyte45/euis-components";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
+import { HighwayRegisterManagement } from "./HighwayRegisterManagement";
+import { MapDiv } from "./MapDiv";
+import './regionEditor.scss';
 
 const listOutsideConnections = () => engine.call("k45::adr.regions.listOutsideConnections");
 const getCityBounds = () => engine.call("k45::adr.regions.getCityBounds");
@@ -167,7 +164,7 @@ function RegionalEditorContent() {
     const menus: Omit<MenuItem, 'iconUrl'>[] = [
         {
             name: translate("highwayRegisterEditor.tabTitle"),
-            panelContent: <HighwayListingTab />
+            panelContent: <HighwayRegisterManagement />
         },
 
     ]

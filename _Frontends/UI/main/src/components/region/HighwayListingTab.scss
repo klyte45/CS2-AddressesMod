@@ -78,6 +78,32 @@
 
         >* {
             flex-grow: 0;
+            flex-shrink: 1;
+        }
+    }
+}
+
+.hwEditingForm {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+
+    .hwFormGap {
+        flex-grow: 1;
+        flex-shrink: 1;
+    }
+
+
+    .bottomActions {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        padding: 10rem;
+
+        >* {
+            flex-grow: 0;
+            flex-shrink: 1;
         }
     }
 }

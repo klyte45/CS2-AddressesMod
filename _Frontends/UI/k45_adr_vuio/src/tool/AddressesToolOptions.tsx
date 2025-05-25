@@ -9,6 +9,7 @@ import AdrHighwayRoutesSystem, { AdrFields, AdrFieldType, LocalizationStrings } 
 import routesSystem, { DisplayInformation, RouteDirection, RouteItem } from "service/AdrHighwayRoutesSystem";
 import { translate } from "utility/translate";
 import { MetadataMount, MountMetadataComponentProps } from "components/MetadataMount";
+import { HighwayRoutesService } from "@klyte45/adr-commons";
 
 export const AddressesToolOptions: ModuleRegistryExtend = (Component: any) => {
     return () => {
@@ -47,7 +48,8 @@ const AdrRoadMarkerToolOptions = () => {
     const [metadata, setMetadata] = useState<AdrFields<string> | null>();
     const [displayNameTypes, setDisplayNameTypes] = useState<string[]>([])
     useEffect(() => {
-        AdrHighwayRoutesSystem.getOptionsNamesFromMetadata().then(setDisplayNameTypes)
+        AdrHighwayRoutesSystem.getOptionsNamesFromMetadata().then(setDisplayNameTypes);
+        HighwayRoutesService.listHighwaysRegistered().then(x => setRoutesRegistered(x.map(y => ({ id: y.Id, name: `${y.prefix}-${y.suffix} ${y.name}` })).sort((a,b)=>a.name.localeCompare(b.name))))
     }, [])
     useEffect(() => {
         AdrHighwayRoutesSystem.getOptionsMetadataFromCurrentLayout().then((x) => {
