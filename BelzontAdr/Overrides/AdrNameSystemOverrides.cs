@@ -163,8 +163,7 @@ namespace BelzontAdr
             DynamicBuffer<Renter> buffer = entityManager.GetBuffer<Renter>(building, true);
             for (int i = 0; i < buffer.Length; i++)
             {
-                CompanyData companyData;
-                if (entityManager.TryGetComponent(buffer[i].m_Renter, out companyData))
+                if (entityManager.TryGetComponent(buffer[i].m_Renter, out CompanyData companyData))
                 {
                     return GetId(companyData.m_Brand, true);
                 }

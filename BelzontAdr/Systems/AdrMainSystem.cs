@@ -165,7 +165,7 @@ namespace BelzontAdr
             return TryGetRoadNamesList(refDistrict, out roadsNamesList);
         }
 
-        public float3 GetZeroMarkerPosition()
+        public float2 GetZeroMarkerPosition()
         {
             return default;
         }

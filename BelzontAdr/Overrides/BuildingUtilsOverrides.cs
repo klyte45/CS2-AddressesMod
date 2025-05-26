@@ -3,8 +3,6 @@ using Colossal.Entities;
 using Colossal.Mathematics;
 using Game.Buildings;
 using Game.Net;
-using Game.Prefabs;
-using Game.Zones;
 using Game.Objects;
 using Game.SceneFlow;
 using Game.Tools;
@@ -19,6 +17,7 @@ namespace BelzontAdr
         public void DoPatches(World world)
         {
             adrMainSystem = world.GetOrCreateSystemManaged<AdrMainSystem>();
+            hwRoutesSysten = world.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
 
             var GetAddress = typeof(BuildingUtils).GetMethod("GetAddress", RedirectorUtils.allFlags, null, new[]
             {
@@ -44,8 +43,14 @@ namespace BelzontAdr
             {
                 float currentDistance = 0f;
                 if (!entityManager.TryGetComponent(aggregationBuffer[0].m_Edge, out Curve e0) || !entityManager.TryGetComponent(aggregationBuffer[^1].m_Edge, out Curve e1)) return true;
-                var zeroMarker = adrMainSystem.GetZeroMarkerPosition();
-                bool isInverseAggregate = e0.m_Bezier.a.SqrDistance(zeroMarker) > e1.m_Bezier.a.SqrDistance(zeroMarker);
+
+                var refE0 = CheckSegmentReversion(entityManager, aggregationBuffer, false, 0, aggregationBuffer[0]) ? e0.m_Bezier.d.xz : e0.m_Bezier.a.xz;
+                var refE1 = CheckSegmentReversion(entityManager, aggregationBuffer, false, aggregationBuffer.Length - 1, aggregationBuffer[^1]) ? e1.m_Bezier.a.xz : e1.m_Bezier.d.xz;
+
+                var zeroMarker = entityManager.TryGetComponent(aggregated.m_Aggregate, out ADRHighwayAggregationData hwDataInfo)
+                    && hwDataInfo.highwayDataId != default
+                    && hwRoutesSysten.TryGetHighwayData(hwDataInfo.highwayDataId, out var hwData) ? hwData.refStartPoint : adrMainSystem.GetZeroMarkerPosition();
+                bool isInverseAggregate = refE0.SqrDistance(zeroMarker) > refE1.SqrDistance(zeroMarker);
 
                 float lastOverrideNumber = 0f;
                 float overridedTo = 0f;
@@ -155,5 +160,6 @@ namespace BelzontAdr
         }
 
         private static AdrMainSystem adrMainSystem;
+        private static AdrHighwayRoutesSystem hwRoutesSysten;
     }
 }
