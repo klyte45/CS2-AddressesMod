@@ -247,6 +247,16 @@ button,
         border-color: #fff;
         box-shadow: 0 0 20rem rgba(0, 0, 0, .5);
     }
+
+    &[disabled]{
+        background-color: dimgray;
+        color: silver;
+
+        &:hover {
+            background-color: dimgray;
+            color: silver;
+        }
+    }
 }
 
 .positiveBtn {

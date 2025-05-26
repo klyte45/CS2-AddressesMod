@@ -59,7 +59,8 @@ export const RegionEditor = () => {
     const [zoom, setZoom] = useState(1);
     const [position, setPostion] = useState([0, 0]);
 
-    const [mouseInfo, setMouseInfo] = useState<any>()
+    const [mouseInfo, setMouseInfo] = useState<React.MouseEvent>()
+    const [mapPointSelectionInfo, setMapPointSelectionInfo] = useState<React.MouseEvent>()
     const refDiv = useRef<HTMLDivElement>()
 
     useEffect(() => {
@@ -101,17 +102,29 @@ export const RegionEditor = () => {
 
     const getCurrentMouseHoverPosition = useCallback(() => {
         if (refDiv.current && mouseInfo) {
-            const currentHoverPosition = { x: 0, y: 0 }
-            const bounds = refDiv.current.getBoundingClientRect();
-            const posX = (mouseInfo.clientX - bounds.x - bounds.width * .5);
-            const posY = (mouseInfo.clientY - bounds.y - bounds.height * .5);
-            currentHoverPosition.x = posX / 800 / zoom * mapSize[0] - position[0];
-            currentHoverPosition.y = posY / 800 / zoom * mapSize[2] - position[1];
-            return currentHoverPosition;
+            return mousePositionToWorldPosition(mouseInfo);
         }
         return null;
+
     }, [mouseInfo, refDiv.current])
 
+    const getSelectionPosition = useCallback(() => {
+        if (refDiv.current && mapPointSelectionInfo) {
+            return mousePositionToWorldPosition(mapPointSelectionInfo);
+        }
+        return null;
+
+    }, [mapPointSelectionInfo, refDiv.current])
+
+    function mousePositionToWorldPosition(info: React.MouseEvent) {
+        const currentHoverPosition = { x: 0, y: 0 };
+        const bounds = refDiv.current.getBoundingClientRect();
+        const posX = (info.clientX - bounds.x - bounds.width * .5);
+        const posY = (info.clientY - bounds.y - bounds.height * .5);
+        currentHoverPosition.x = posX / 800 / zoom * mapSize[0] - position[0];
+        currentHoverPosition.y = posY / 800 / zoom * mapSize[2] - position[1];
+        return currentHoverPosition;
+    }
 
     if (buildIdx < 2 || isLoading) {
         if (buildIdx == 0) setTimeout(() => setBuildIdx(buildIdx + 1), 500);
@@ -122,7 +135,8 @@ export const RegionEditor = () => {
 
 
     return <div className="regionEditor">
-        <div className="mapSide" onWheel={doOnWheel} onMouseOut={() => setMouseInfo(undefined)} onMouseMove={doOnMouseMove} style={{ ["--currentZoom"]: .6666 + zoom / 1.5 } as any} ref={refDiv}>
+        <div className="mapSide" onWheel={doOnWheel} onMouseOut={() => setMouseInfo(undefined)} onDoubleClick={(x) => setMapPointSelectionInfo(x)}
+            onMouseMove={doOnMouseMove} style={{ ["--currentZoom"]: .6666 + zoom / 1.5 } as any} ref={refDiv}>
             <MapDiv waterMap={waterMap} cityMap={terrainMap}
                 style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${position[0] / mapSize[0] * 100}%, ${position[1] / mapSize[2] * 100}%)` }}
             >
@@ -130,6 +144,7 @@ export const RegionEditor = () => {
                     {urbanRoads.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapUrbanRoads", "hwId_" + x.highwayId].join(" ")} id={`rd_${x.entity.Index}_${x.entity.Version}`} />)}
                     {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapTrainTrack", "hwId_" + x.highwayId].join(" ")} id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}
                     {highways.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapHighway", "hwId_" + x.highwayId].join(" ")} id={`tr_${x.entity.Index}_${x.entity.Version}`} />)}
+                    {getSelectionPosition() && <circle cx={getSelectionPosition().x} cy={-getSelectionPosition().y} r={75 / zoom} fill="black" stroke="red" stroke-width={20 / zoom} />}
                 </svg>
                 {outsideConnections.filter(x => ![OutsideConnectionType.Pipe, OutsideConnectionType.Electricity].includes(x.outsideConnectionType.value__)).map((x, i) => {
                     const left = ((x.position[0] - mapOffset[0]) / mapSize[0] * 100);
@@ -151,21 +166,26 @@ export const RegionEditor = () => {
                 })}
             </MapDiv>
             {getCurrentMouseHoverPosition() && <div className="hoverPositionBox">{`(${getCurrentMouseHoverPosition().x.toFixed(1)} ; ${getCurrentMouseHoverPosition().y.toFixed(1)})`}</div>}
+            {<div className="selectedPositionBox"><div className="circleLegend" />{getSelectionPosition() ? `(${getSelectionPosition().x.toFixed(1)} ; ${getSelectionPosition().y.toFixed(1)})` : translate("regionSettings.doubleClickToSelectPoint")}</div>}
         </div>
         <div className="dataSide">
             <DefaultPanelScreen title={translate("regionSettings.title")} subtitle={translate("regionSettings.subtitle")} scrollable={false}>
-                <RegionalEditorContent />
+                <RegionalEditorContent getSelectionPosition={getSelectionPosition()} />
             </DefaultPanelScreen>
         </div>
     </div>
 }
 
-function RegionalEditorContent() {
+type RegionalEditorContentProps = {
+    getSelectionPosition: { x: number, y: number }
+}
+
+function RegionalEditorContent({ getSelectionPosition }: RegionalEditorContentProps) {
 
     const menus: Omit<MenuItem, 'iconUrl'>[] = [
         {
             name: translate("highwayRegisterEditor.tabTitle"),
-            panelContent: <HighwayRegisterManagement />
+            panelContent: <HighwayRegisterManagement getSelectionPosition={getSelectionPosition} />
         },
         {
             name: translate("highwayRegisterEditor.tabTitle"),

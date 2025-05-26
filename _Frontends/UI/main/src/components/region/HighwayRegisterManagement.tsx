@@ -1,14 +1,20 @@
 import { HighwayData, HighwayRoutesService } from "@klyte45/adr-commons";
 import { useEffect, useState } from "react";
 import './HighwayListingTab.scss'
-import { Cs2FormLine, GameScrollComponent, Input } from "@klyte45/euis-components";
+import { Cs2FormLine, GameScrollComponent, Input, SimpleInput } from "@klyte45/euis-components";
 import { translate } from "#utility/translate";
 
 type HighwayListingProps = {
     onSelectItem: (x: Partial<HighwayData>) => any
 }
 
-export function HighwayRegisterManagement() {
+type MainProps = {
+    getSelectionPosition: { x: number, y: number }
+}
+
+
+
+export function HighwayRegisterManagement({ getSelectionPosition }: MainProps) {
     const [selectedHw, setSelectedHw] = useState<Partial<HighwayData>>()
 
     useEffect(() => {
@@ -19,6 +25,7 @@ export function HighwayRegisterManagement() {
     }
 
     return <HighwayRegisterForm
+        getSelectionPosition={getSelectionPosition}
         selectedHw={selectedHw}
         setSelectedHw={setSelectedHw}
         onCancel={() => setSelectedHw(undefined)}
@@ -30,10 +37,13 @@ type HighwayRegisterFormProps = {
     selectedHw: Partial<HighwayData>;
     setSelectedHw: (x: Partial<HighwayData>) => any;
     onSave: () => any;
-    onCancel: () => any
+    onCancel: () => any,
+    getSelectionPosition: { x: number, y: number }
 };
 
-function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel }: HighwayRegisterFormProps) {
+
+function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel, getSelectionPosition }: HighwayRegisterFormProps) {
+    console.log(selectedHw);
     return <div className="hwEditingForm">
         <Input title={translate("highwayRegisterEditor.highwayPrefix")}
             getValue={() => selectedHw.prefix} onValueChanged={(x) => {
@@ -51,7 +61,9 @@ function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel }: Hi
                 return x;
             }} />
         <Cs2FormLine title={translate("highwayRegisterEditor.startPositionReference")}>
-
+            <SimpleInput isValid={(x) => !isNaN(parseFloat(x.replace(",", ".")))} getValue={() => selectedHw.refStartPoint?.[0].toFixed(3) ?? "0.00"} onValueChanged={(x) => setSelectedHw({ ...selectedHw, refStartPoint: [parseFloat(x.replace(",", ".")), selectedHw.refStartPoint?.[1] ?? 0] })} />
+            <SimpleInput isValid={(x) => !isNaN(parseFloat(x.replace(",", ".")))} getValue={() => selectedHw.refStartPoint?.[1].toFixed(3) ?? "0.00"} onValueChanged={(x) => setSelectedHw({ ...selectedHw, refStartPoint: [selectedHw.refStartPoint?.[0] ?? 0, parseFloat(x.replace(",", "."))] })} />
+            <button className="neutralBtn" disabled={!getSelectionPosition} onClick={() => setSelectedHw({ ...selectedHw, refStartPoint: [getSelectionPosition.x, getSelectionPosition.y] })}>{translate("highwayRegisterEditor.copyFromMapSelection")}</button>
         </Cs2FormLine>
         <div className="hwFormGap" />
         <div className="bottomActions">
@@ -78,7 +90,7 @@ function HighwayListing({ onSelectItem }: HighwayListingProps) {
                 >
                     <div className="data">
                         <div className="title">{`${x.prefix}-${x.suffix} | ${x.name}`}</div>
-                        <div className="subTitle">{`[${x.refStartPoint[0].toFixed(2)} ; ${x.refStartPoint[0].toFixed(2)}]`}</div>
+                        <div className="subTitle">{`[${x.refStartPoint[0].toFixed(2)} ; ${x.refStartPoint[1].toFixed(2)}]`}</div>
                     </div>
                     <div className="actions">
                         <button className="neutralBtn" onClick={() => onSelectItem(x)}>{translate("highwayRegisterEditor.editBtn")}</button>

@@ -142,6 +142,42 @@
             right: 10rem;
             padding: 4rem;
         }
+
+        .selectedPositionBox {
+            z-index: 99999;
+            background-color: var(--menuPanel1);
+            position: absolute;
+            bottom: 10rem;
+            left: 10rem;
+            padding: 4rem;
+            display: flex;
+            align-items: center;
+
+
+            .circleLegend {
+                width: 20rem;
+                height: 20rem;
+                background-color: rgba(0, 0, 0, 1);
+                border-top-left-radius: 9999rem 9999rem;
+                border-top-right-radius: 9999rem 9999rem;
+                border-bottom-left-radius: 9999rem 9999rem;
+                border-bottom-right-radius: 9999rem 9999rem;
+                border-top-color: rgba(255, 0, 0, 1);
+                border-left-color: rgba(255, 0, 0, 1);
+                border-right-color: rgba(255, 0, 0, 1);
+                border-bottom-color: rgba(255, 0, 0, 1);
+                border-top-style: solid;
+                border-left-style: solid;
+                border-right-style: solid;
+                border-bottom-style: solid;
+                border-top-width: 2rem;
+                border-left-width: 2rem;
+                border-right-width: 2rem;
+                border-bottom-width: 2rem;
+                margin-right: 10rem;
+                margin-bottom: 2rem;
+            }
+        }
     }
 
     .dataSide {
