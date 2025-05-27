@@ -53,8 +53,9 @@ namespace BelzontAdr
                 bool isInverseAggregate = refE0.SqrDistance(zeroMarker) > refE1.SqrDistance(zeroMarker);
 
                 float lastOverrideNumber = 0f;
-                float overridedTo = 0f;
-                bool isInverseOverride = false;
+                entityManager.TryGetComponent<ADRHighwayAggregationCacheData>(aggregated.m_Aggregate, out var cacheData);
+                float overridedToKm = cacheData.startDistanceOverrideKm;
+                bool isInverseOverride = cacheData.reverseCounting;
 
                 for (int i = isInverseAggregate ? aggregationBuffer.Length - 1 : 0;
                      isInverseAggregate ? i >= 0 : i < aggregationBuffer.Length;
@@ -98,10 +99,10 @@ namespace BelzontAdr
                         }
                         if (overridePosition >= 0)
                         {
-                            var t = new Bounds1(isReversedSegment.Value ? overridePosition : 0f, isReversedSegment.Value ? 1f : overridePosition);
+                            var t = new Bounds1(0f, overridePosition);
                             float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
                             lastOverrideNumber = math.lerp(currentDistance, newDistance, s);
-                            overridedTo = targetNewNumber;
+                            overridedToKm = targetNewNumber;
                         }
                     }
 
@@ -113,7 +114,7 @@ namespace BelzontAdr
                         float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
                         road = aggregated.m_Aggregate;
                         var unitMultiplier = GameManager.instance.settings.userInterface.unitSystem == Game.Settings.InterfaceSettings.UnitSystem.Freedom ? 1.09361329f : 1f; //yd or m
-                        number = (Mathf.RoundToInt(((overridedTo * 500) + ((isInverseOverride ? -.5f : .5f) * (math.lerp(currentDistance, newDistance, s) - lastOverrideNumber))) * unitMultiplier) * 2) + 1;
+                        number = (Mathf.RoundToInt(((overridedToKm * 500) + ((isInverseOverride ? -.5f : .5f) * (math.lerp(currentDistance, newDistance, s) - lastOverrideNumber))) * unitMultiplier) * 2) + 1;
 
                         //Check road side
                         if (entityManager.TryGetComponent(entity, out Game.Objects.Transform transform))
