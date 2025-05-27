@@ -71,6 +71,27 @@
                 }
             }
 
+            .selectedPoint {
+                position: absolute;
+                --sideSize: calc(220rem / var(--currentZoom));
+                width: var(--sideSize);
+                height: var(--sideSize);
+                transform: translate(-50%, 50%);
+                --border-radius: calc(var(--sideSize) / 2);
+                border-top-left-radius: var(--border-radius) var(--border-radius);
+                border-top-right-radius: var(--border-radius) var(--border-radius);
+                border-bottom-left-radius: var(--border-radius) var(--border-radius);
+                border-bottom-right-radius: var(--border-radius) var(--border-radius);
+                --borderWidth: calc(25rem / var(--currentZoom));
+                border-left-width: var(--borderWidth);
+                border-right-width: var(--borderWidth);
+                border-top-width: var(--borderWidth);
+                border-bottom-width: var(--borderWidth);
+                border-style: solid;
+                border-color: red;
+                background-color: black;
+            }
+
             .outsideConnectionPoint {
                 position: absolute;
                 width: calc(120rem / var(--currentZoom));

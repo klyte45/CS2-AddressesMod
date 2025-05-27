@@ -144,11 +144,17 @@ export const RegionEditor = () => {
                     {urbanRoads.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapUrbanRoads", "hwId_" + x.highwayId].join(" ")} id={`rd_${x.entity.Index}_${x.entity.Version}`} />)}
                     {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapTrainTrack", "hwId_" + x.highwayId].join(" ")} id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}
                     {highways.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapHighway", "hwId_" + x.highwayId].join(" ")} id={`tr_${x.entity.Index}_${x.entity.Version}`} />)}
-                    {getSelectionPosition() && <circle cx={getSelectionPosition().x} cy={-getSelectionPosition().y} r={75 / zoom} fill="black" stroke="red" stroke-width={20 / zoom} />}
                 </svg>
+                {getSelectionPosition() && (() => {
+                    const { bottom, left } = AsRelativePosition(getSelectionPosition(), mapOffset, mapSize);
+                    return <div className="selectedPoint"
+                        style={{
+                            left: left + "%",
+                            bottom: bottom + "%",
+                        }} ></div>
+                })()}
                 {outsideConnections.filter(x => ![OutsideConnectionType.Pipe, OutsideConnectionType.Electricity].includes(x.outsideConnectionType.value__)).map((x, i) => {
-                    const left = ((x.position[0] - mapOffset[0]) / mapSize[0] * 100);
-                    const bottom = (100 * (x.position[2] - mapOffset[2]) / mapSize[2]);
+                    const { bottom, left } = AsRelativePosition({ x: x.position[0], y: -x.position[2] }, mapOffset, mapSize);
 
                     const nameRotationDeg = bottom < 1 ? 45 : bottom > 99 ? -45 : 0;
                     const isAtLeft = left < 1;
@@ -178,6 +184,12 @@ export const RegionEditor = () => {
 
 type RegionalEditorContentProps = {
     getSelectionPosition: { x: number, y: number }
+}
+
+function AsRelativePosition(point2d: { x: number, y: number }, mapOffset: number[], mapSize: number[]) {
+    const left = ((point2d.x - mapOffset[0]) / mapSize[0] * 100);
+    const bottom = 100 - (100 * (point2d.y - mapOffset[2]) / mapSize[2]);
+    return { bottom, left };
 }
 
 function RegionalEditorContent({ getSelectionPosition }: RegionalEditorContentProps) {
