@@ -128,11 +128,8 @@ export const RegionEditor = () => {
 
     if (buildIdx < 2 || isLoading) {
         if (buildIdx == 0) setTimeout(() => setBuildIdx(buildIdx + 1), 500);
-        return <div>Loading...</div>;
+        return <div className="loadmapWait">{translate("regionSettings.loadmap")}</div>;
     }
-
-
-
 
     return <div className="regionEditor">
         <div className="mapSide" onWheel={doOnWheel} onMouseOut={() => setMouseInfo(undefined)} onDoubleClick={(x) => setMapPointSelectionInfo(x)}
@@ -173,6 +170,7 @@ export const RegionEditor = () => {
             </MapDiv>
             {getCurrentMouseHoverPosition() && <div className="hoverPositionBox">{`(${getCurrentMouseHoverPosition().x.toFixed(1)} ; ${getCurrentMouseHoverPosition().y.toFixed(1)})`}</div>}
             {<div className="selectedPositionBox"><div className="circleLegend" />{getSelectionPosition() ? `(${getSelectionPosition().x.toFixed(1)} ; ${getSelectionPosition().y.toFixed(1)})` : translate("regionSettings.doubleClickToSelectPoint")}</div>}
+            <button onClick={() => setBuildIdx(0)} className={["neutralBtn", "reloadButton"].join(" ")}>{translate("regionSettings.reloadMapButton")}</button>
         </div>
         <div className="dataSide">
             <DefaultPanelScreen title={translate("regionSettings.title")} subtitle={translate("regionSettings.subtitle")} scrollable={false}>

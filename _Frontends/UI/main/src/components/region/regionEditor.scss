@@ -1,3 +1,13 @@
+.loadmapWait{
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+    align-content: center;
+    text-align: center;
+    font-size: 70rem;
+    height: 100%;
+}
 .regionEditor {
     display: flex;
     flex-direction: row;
@@ -10,6 +20,13 @@
         width: 100vh;
         height: 100%;
         overflow: hidden;
+
+        .reloadButton {
+            position: absolute;
+            top: 10rem;
+            left: 50%;
+            transform: translate(-50%, 0)
+        }
 
         .cityMapTopographic {
             position: absolute;
