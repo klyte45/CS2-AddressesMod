@@ -388,7 +388,7 @@ namespace BelzontAdr
 
         protected override void OnUpdate()
         {
-            if (GameManager.instance.isLoading || GameManager.instance.isGameLoading)
+            if (GameManager.instance.isGameLoading)
             {
                 return;
             }

@@ -78,7 +78,7 @@ namespace BelzontAdr
 
         protected override void OnUpdate()
         {
-            if (!GameManager.instance.isLoading && !GameManager.instance.isGameLoading)
+            if (!GameManager.instance.isGameLoading && !GameManager.instance.isGameLoading)
             {
                 while (actionsToGoOnUpdate.TryDequeue(out var action))
                 {

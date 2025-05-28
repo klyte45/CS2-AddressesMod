@@ -209,7 +209,7 @@ namespace BelzontAdr
 
         protected unsafe override void OnUpdate()
         {
-            if (GameManager.instance.isGameLoading || GameManager.instance.isLoading)
+            if (GameManager.instance.isGameLoading)
             {
                 return;
             }
