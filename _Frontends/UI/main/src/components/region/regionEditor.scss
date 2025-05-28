@@ -1,4 +1,4 @@
-.loadmapWait{
+.loadmapWait {
     display: flex;
     align-items: center;
     justify-items: center;
@@ -8,6 +8,7 @@
     font-size: 70rem;
     height: 100%;
 }
+
 .regionEditor {
     display: flex;
     flex-direction: row;
@@ -20,6 +21,7 @@
         width: 100vh;
         height: 100%;
         overflow: hidden;
+        background-repeat: no-repeat;
 
         .reloadButton {
             position: absolute;
@@ -33,6 +35,57 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
+
+            .bgneighbors {
+                width: 500%;
+                height: 500%;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                border-top-left-radius: 1e+06rem 1e+06rem;
+                border-top-right-radius: 1e+06rem 1e+06rem;
+                border-bottom-left-radius: 1e+06rem 1e+06rem;
+                border-bottom-right-radius: 1e+06rem 1e+06rem;
+
+                .divLine {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 100%;
+                    transform-origin: 0% 0% 0px;
+                    --divLineSize: 50rem;
+
+                    >div {
+                        width: 100%;
+                        border-top-width: var(--divLineSize);
+                        border-top-style: solid;
+                        border-top-color: black;
+
+                        .next {
+                            position: absolute;
+                            font-size: calc(500rem / var(--currentZoom));
+                            left: 15%;
+                            top: 0px;
+
+                            &.after180 {
+                                transform: rotateZ(180deg);
+                            }
+                        }
+
+                        .prev {
+                            position: absolute;
+                            font-size: calc(500rem / var(--currentZoom));
+                            left: 15%;
+                            bottom: 0px;
+
+                            &.after180 {
+                                transform: rotateZ(180deg);
+                            }
+                        }
+                    }
+                }
+            }
 
             .pathsOverlay {
                 position: absolute;

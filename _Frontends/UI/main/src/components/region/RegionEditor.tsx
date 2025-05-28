@@ -85,7 +85,7 @@ export const RegionEditor = () => {
 
 
     const doOnWheel = (x) => {
-        setZoom(Math.max(1, Math.min(20, zoom - x.deltaY * .01)))
+        setZoom(Math.max(.25, Math.min(20, zoom - x.deltaY * .01)))
     }
     const doOnMouseMove = (x) => {
         setMouseInfo(x);
@@ -131,12 +131,57 @@ export const RegionEditor = () => {
         return <div className="loadmapWait">{translate("regionSettings.loadmap")}</div>;
     }
 
+    const mapTranslationX = position[0] / mapSize[0] * 100;
+    const mapTranslationY = position[1] / mapSize[2] * 100;
+    const effZoom = .6666 + zoom / 1.5;
+
+    const entries = [
+        { endPosition: 45, name: "AAAAA" },
+        { endPosition: 90, name: "BBBBB" },
+        { endPosition: 135, name: "CCCCC" },
+        { endPosition: 180, name: "DDDDD" },
+        { endPosition: 225, name: "EEEEE" },
+        { endPosition: 270, name: "FFFFF" },
+        { endPosition: 315, name: "HHHH" },
+        { endPosition: 0, name: "GGGGGG" },
+        { endPosition: 10, name: "IIIIII" },
+        { endPosition: 20, name: "JJJJJJ" },
+        { endPosition: 30, name: "KKKKKK" },
+        { endPosition: 40, name: "LLLLLL" },
+        { endPosition: 50, name: "MMMMMM" },
+        { endPosition: 60, name: "NNNNNN" },
+        { endPosition: 70, name: "OOOOOO" },
+        { endPosition: 80, name: "LLLLLL" },        
+    ]
+    entries.sort((a, b) => (a.endPosition % 360) - (b.endPosition % 360))
+    const divLines = []
+    for (let i = 0; i < entries.length; i++) {
+        const endPos = ((entries[i].endPosition % 360) + 360) % 360 - 90;
+        const left = 11 + (1 - Math.tan(Math.abs(Math.abs(endPos % 90) - 45) / 180 * Math.PI)) * Math.PI * 1.1
+        divLines.push(<div key={i} className="divLine" style={{ ["--divLineSize"]: (70 / effZoom) + "rem", transform: `rotate(${endPos}deg)` } as any} >
+            <div>
+                <div className={["prev", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
+                    {entries[i].name}
+                </div>
+                <div className={["next", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
+                    {entries[(i + 1) % entries.length].name}
+                </div>
+            </div>
+        </div>)
+    }
+
+
     return <div className="regionEditor">
-        <div className="mapSide" onWheel={doOnWheel} onMouseOut={() => setMouseInfo(undefined)} onDoubleClick={(x) => setMapPointSelectionInfo(x)}
-            onMouseMove={doOnMouseMove} style={{ ["--currentZoom"]: .6666 + zoom / 1.5 } as any} ref={refDiv}>
+        <div style={{ ["--currentZoom"]: effZoom } as any} className="mapSide" onWheel={doOnWheel} onMouseOut={() => setMouseInfo(undefined)} onDoubleClick={(x) => setMapPointSelectionInfo(x)}
+            onMouseMove={doOnMouseMove} ref={refDiv}>
+
             <MapDiv waterMap={waterMap} cityMap={terrainMap}
-                style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${position[0] / mapSize[0] * 100}%, ${position[1] / mapSize[2] * 100}%)` }}
+                style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${mapTranslationX}%, ${mapTranslationY}%)` }}
+                beforeAnyLayer={<div className="bgneighbors">
+                    {divLines}
+                </div>}
             >
+
                 <svg viewBox={[mapOffset[0], mapOffset[2], mapSize[0], mapSize[2]].join(" ")} className="pathsOverlay" width="100%" height="100%" >
                     {urbanRoads.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapUrbanRoads", "hwId_" + x.highwayId].join(" ")} id={`rd_${x.entity.Index}_${x.entity.Version}`} />)}
                     {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapTrainTrack", "hwId_" + x.highwayId].join(" ")} id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}
@@ -169,7 +214,7 @@ export const RegionEditor = () => {
                 })}
             </MapDiv>
             {getCurrentMouseHoverPosition() && <div className="hoverPositionBox">{`(${getCurrentMouseHoverPosition().x.toFixed(1)} ; ${getCurrentMouseHoverPosition().y.toFixed(1)})`}</div>}
-            {<div className="selectedPositionBox"><div className="circleLegend" />{getSelectionPosition() ? `(${getSelectionPosition().x.toFixed(1)} ; ${getSelectionPosition().y.toFixed(1)})` : translate("regionSettings.doubleClickToSelectPoint")}</div>}
+            {<div className="selectedPositionBox"><div className="circleLegend" />{getSelectionPosition() ? `(${getSelectionPosition().x.toFixed(1)} ; ${getSelectionPosition().y.toFixed(1)}) | Δ (0;0) = ${Math.sqrt(getSelectionPosition().x * getSelectionPosition().x + getSelectionPosition().y * getSelectionPosition().y).toFixed(2)}m` : translate("regionSettings.doubleClickToSelectPoint")}</div>}
             <button onClick={() => setBuildIdx(0)} className={["neutralBtn", "reloadButton"].join(" ")}>{translate("regionSettings.reloadMapButton")}</button>
         </div>
         <div className="dataSide">
@@ -201,7 +246,6 @@ function RegionalEditorContent({ getSelectionPosition }: RegionalEditorContentPr
             name: translate("highwayRegisterEditor.tabTitle"),
             panelContent: <div />
         },
-
     ]
 
     return <Tabs className="tabsContainer">
