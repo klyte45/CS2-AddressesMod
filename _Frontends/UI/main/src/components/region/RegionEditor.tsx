@@ -1,20 +1,13 @@
 import { translate } from "#utility/translate";
-import { Entity, EnumValueType } from "@klyte45/adr-commons";
+import { CityResponseData, Entity, EnumValueType, RegionService } from "@klyte45/adr-commons";
 import { DefaultPanelScreen, MenuItem } from "@klyte45/euis-components";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import { HighwayRegisterManagement } from "./HighwayRegisterManagement";
+import { HighwayRegisterManagement } from "./subpages/HighwayRegisterManagement";
 import { MapDiv } from "./MapDiv";
 import './regionEditor.scss';
+import RegionCitiesManagement from "./subpages/RegionCitiesMangement";
 
-const listOutsideConnections = () => engine.call("k45::adr.regions.listOutsideConnections");
-const getCityBounds = () => engine.call("k45::adr.regions.getCityBounds");
-const listHighways = () => engine.call("k45::adr.regions.listHighways");
-const listTrainTracks = () => engine.call("k45::adr.regions.listTrainTracks");
-const listUrbanRoads = () => engine.call("k45::adr.regions.listUrbanRoads");
-const getCityTerrain = (): Promise<string> => engine.call("k45::adr.regions.getCityTerrain");
-const getCityWater = (): Promise<string> => engine.call("k45::adr.regions.getCityWater");
-const getCityWaterPollution = (): Promise<string> => engine.call("k45::adr.regions.getCityWaterPollution");
 
 enum OutsideConnectionType {
     Road,
@@ -24,6 +17,14 @@ enum OutsideConnectionType {
     Waterway,
     Airway
 }
+
+enum RegionMapType {
+    None,
+    Land,
+    Water,
+    Air
+}
+
 interface ObjectOutsideConnectionResponse {
     entity: Entity;
     name: string;
@@ -42,7 +43,6 @@ interface AggregationData {
     highwayId: string
 }
 
-
 export const RegionEditor = () => {
 
     const [buildIdx, setBuildIdx] = useState(0)
@@ -56,32 +56,55 @@ export const RegionEditor = () => {
     const [terrainMap, setTerrainMap] = useState(null as string);
     const [waterMap, setWaterMap] = useState(null as string);
 
+    const [regionLand, setRegionLand] = useState(null as CityResponseData[]);
+    const [regionWater, setRegionWater] = useState(null as CityResponseData[]);
+    const [regionAir, setRegionAir] = useState(null as CityResponseData[]);
+
+    const [selectedRegionMapType, setSelectedRegionMapType] = useState<RegionMapType>(RegionMapType.None);
+
     const [zoom, setZoom] = useState(1);
     const [position, setPostion] = useState([0, 0]);
 
     const [mouseInfo, setMouseInfo] = useState<React.MouseEvent>()
     const [mapPointSelectionInfo, setMapPointSelectionInfo] = useState<React.MouseEvent>()
+    const [selectedTab, setSelectedTab] = useState(0);
     const refDiv = useRef<HTMLDivElement>()
 
     useEffect(() => {
         if (buildIdx == 0) return;
         setIsLoading(true);
         Promise.all([
-            getCityBounds().then((x) => {
+            RegionService.getCityBounds().then((x) => {
                 setMapSize([x[3] - x[0], x[4] - x[1], x[5] - x[2]])
                 setMapOffset([x[0], x[1], x[2]])
             }),
-            listHighways().then(setHighways),
-            listTrainTracks().then(setTrainTracks),
-            listUrbanRoads().then(setUrbanRoads),
-            listOutsideConnections().then(setOutsideConnections),
-            getCityTerrain().then(setTerrainMap),
-            getCityWater().then(setWaterMap)
+            RegionService.listHighways().then(setHighways),
+            RegionService.listTrainTracks().then(setTrainTracks),
+            RegionService.listUrbanRoads().then(setUrbanRoads),
+            RegionService.listOutsideConnections().then(setOutsideConnections),
+            RegionService.getCityTerrain().then(setTerrainMap),
+            RegionService.getCityWater().then(setWaterMap),
+            RegionService.getLandRegionNeighborhood().then(setRegionLand),
+            RegionService.getWaterRegionNeighborhood().then(setRegionWater),
+            RegionService.getAirRegionNeighborhood().then(setRegionAir)
         ]).then(() => {
             setBuildIdx(buildIdx + 1)
             setIsLoading(false);
         })
     }, [buildIdx == 0])
+
+
+    const onCitiesChanged = () => {
+        setIsLoading(true);
+        Promise.all([
+            RegionService.getLandRegionNeighborhood().then(setRegionLand),
+            RegionService.getWaterRegionNeighborhood().then(setRegionWater),
+            RegionService.getAirRegionNeighborhood().then(setRegionAir)
+        ]).then(() => {
+            setBuildIdx(buildIdx + 1)
+            setIsLoading(false);
+        })
+    };
 
 
     const doOnWheel = (x) => {
@@ -99,6 +122,7 @@ export const RegionEditor = () => {
             )
         }
     }
+    const divLines = useCallback(() => getNeighborhoodMap(), [buildIdx, selectedRegionMapType, regionLand, regionWater, regionAir]);
 
     const getCurrentMouseHoverPosition = useCallback(() => {
         if (refDiv.current && mouseInfo) {
@@ -135,40 +159,6 @@ export const RegionEditor = () => {
     const mapTranslationY = position[1] / mapSize[2] * 100;
     const effZoom = .6666 + zoom / 1.5;
 
-    const entries = [
-        { endPosition: 45, name: "AAAAA" },
-        { endPosition: 90, name: "BBBBB" },
-        { endPosition: 135, name: "CCCCC" },
-        { endPosition: 180, name: "DDDDD" },
-        { endPosition: 225, name: "EEEEE" },
-        { endPosition: 270, name: "FFFFF" },
-        { endPosition: 315, name: "HHHH" },
-        { endPosition: 0, name: "GGGGGG" },
-        { endPosition: 10, name: "IIIIII" },
-        { endPosition: 20, name: "JJJJJJ" },
-        { endPosition: 30, name: "KKKKKK" },
-        { endPosition: 40, name: "LLLLLL" },
-        { endPosition: 50, name: "MMMMMM" },
-        { endPosition: 60, name: "NNNNNN" },
-        { endPosition: 70, name: "OOOOOO" },
-        { endPosition: 80, name: "LLLLLL" },        
-    ]
-    entries.sort((a, b) => (a.endPosition % 360) - (b.endPosition % 360))
-    const divLines = []
-    for (let i = 0; i < entries.length; i++) {
-        const endPos = ((entries[i].endPosition % 360) + 360) % 360 - 90;
-        const left = 11 + (1 - Math.tan(Math.abs(Math.abs(endPos % 90) - 45) / 180 * Math.PI)) * Math.PI * 1.1
-        divLines.push(<div key={i} className="divLine" style={{ ["--divLineSize"]: (70 / effZoom) + "rem", transform: `rotate(${endPos}deg)` } as any} >
-            <div>
-                <div className={["prev", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
-                    {entries[i].name}
-                </div>
-                <div className={["next", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
-                    {entries[(i + 1) % entries.length].name}
-                </div>
-            </div>
-        </div>)
-    }
 
 
     return <div className="regionEditor">
@@ -178,7 +168,7 @@ export const RegionEditor = () => {
             <MapDiv waterMap={waterMap} cityMap={terrainMap}
                 style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${mapTranslationX}%, ${mapTranslationY}%)` }}
                 beforeAnyLayer={<div className="bgneighbors">
-                    {divLines}
+                    {divLines()}
                 </div>}
             >
 
@@ -216,17 +206,56 @@ export const RegionEditor = () => {
             {getCurrentMouseHoverPosition() && <div className="hoverPositionBox">{`(${getCurrentMouseHoverPosition().x.toFixed(1)} ; ${getCurrentMouseHoverPosition().y.toFixed(1)})`}</div>}
             {<div className="selectedPositionBox"><div className="circleLegend" />{getSelectionPosition() ? `(${getSelectionPosition().x.toFixed(1)} ; ${getSelectionPosition().y.toFixed(1)}) | Δ (0;0) = ${Math.sqrt(getSelectionPosition().x * getSelectionPosition().x + getSelectionPosition().y * getSelectionPosition().y).toFixed(2)}m` : translate("regionSettings.doubleClickToSelectPoint")}</div>}
             <button onClick={() => setBuildIdx(0)} className={["neutralBtn", "reloadButton"].join(" ")}>{translate("regionSettings.reloadMapButton")}</button>
+            <button onClick={() => setSelectedRegionMapType((selectedRegionMapType + 1) % 4)} className={["neutralBtn", "toggleMapMode"].join(" ")}>{translate("regionSettings.mapModeName." + selectedRegionMapType)}</button>
         </div>
         <div className="dataSide">
             <DefaultPanelScreen title={translate("regionSettings.title")} subtitle={translate("regionSettings.subtitle")} scrollable={false}>
-                <RegionalEditorContent getSelectionPosition={getSelectionPosition()} />
+                <RegionalEditorContent getSelectionPosition={getSelectionPosition()} onCitiesChanged={onCitiesChanged} selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
             </DefaultPanelScreen>
         </div>
     </div>
+
+    function getNeighborhoodMap() {
+        let entries: CityResponseData[];
+        switch (selectedRegionMapType) {
+            case RegionMapType.Land:
+                entries = regionLand || [];
+                break;
+            case RegionMapType.Water:
+                entries = regionWater || [];
+                break;
+            case RegionMapType.Air:
+                entries = regionAir || [];
+                break;
+            default:
+                return [];
+        }
+        entries.sort((a, b) => (a.azimuthAngleEnd % 360) - (b.azimuthAngleEnd % 360));
+        const divLines = [];
+        for (let i = 0; i < entries.length; i++) {
+            const endPos = ((entries[i].azimuthAngleEnd % 360) + 360) % 360 - 90;
+            const left = 11 + (1 - Math.tan(Math.abs(Math.abs(endPos % 90) - 45) / 180 * Math.PI)) * Math.PI * 1.1;
+
+            divLines.push(<div key={i} className="divLine" style={{ ["--divLineSize"]: (70 / effZoom) + "rem", transform: `rotate(${endPos}deg)` } as any}>
+                <div>
+                    <div className={["prev", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
+                        {entries[i].name}
+                    </div>
+                    <div className={["next", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
+                        {entries[(i + 1) % entries.length].name}
+                    </div>
+                </div>
+            </div>);
+        }
+        return divLines;
+    }
 }
 
 type RegionalEditorContentProps = {
     getSelectionPosition: { x: number, y: number }
+    onCitiesChanged: () => void;
+    setSelectedTab: (x: number) => void;
+    selectedTab: number;
 }
 
 function AsRelativePosition(point2d: { x: number, y: number }, mapOffset: number[], mapSize: number[]) {
@@ -235,7 +264,7 @@ function AsRelativePosition(point2d: { x: number, y: number }, mapOffset: number
     return { bottom, left };
 }
 
-function RegionalEditorContent({ getSelectionPosition }: RegionalEditorContentProps) {
+function RegionalEditorContent({ getSelectionPosition, onCitiesChanged, selectedTab, setSelectedTab }: RegionalEditorContentProps) {
 
     const menus: Omit<MenuItem, 'iconUrl'>[] = [
         {
@@ -243,12 +272,12 @@ function RegionalEditorContent({ getSelectionPosition }: RegionalEditorContentPr
             panelContent: <HighwayRegisterManagement getSelectionPosition={getSelectionPosition} />
         },
         {
-            name: translate("highwayRegisterEditor.tabTitle"),
-            panelContent: <div />
+            name: translate("regionCityEditor.tabTitle"),
+            panelContent: <RegionCitiesManagement onCitiesChanged={onCitiesChanged} />
         },
     ]
 
-    return <Tabs className="tabsContainer">
+    return <Tabs className="tabsContainer" onSelect={(x) => setSelectedTab(x)} selectedIndex={selectedTab}>
         <TabList className="horizontalTabStrip">
             {menus.map((x, i) =>
                 <Tab key={i} className="horizontalTabStripTab">

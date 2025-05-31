@@ -29,6 +29,11 @@
             left: 50%;
             transform: translate(-50%, 0)
         }
+        .toggleMapMode {
+            position: absolute;
+            top: 10rem;
+            right: 10rem;            
+        }
 
         .cityMapTopographic {
             position: absolute;

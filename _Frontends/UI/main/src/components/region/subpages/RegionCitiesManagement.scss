@@ -1,0 +1,6 @@
+@import './tabCommons.scss';
+
+
+.regionCityEditingForm {
+    @extend %baseEditingForm;
+}

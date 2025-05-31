@@ -1,0 +1,7 @@
+@import './tabCommons.scss';
+
+
+
+.hwEditingForm {
+    @extend %baseEditingForm;
+}
