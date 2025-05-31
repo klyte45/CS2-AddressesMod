@@ -47,6 +47,7 @@ export class RegionService {
 export type CityResponseData = {
     name: string;
     azimuthAngleStart: number;
+    azimuthAngleCenter: number;
     azimuthAngleEnd: number;
     reachableByLand: boolean;
     reachableByWater: boolean;

@@ -4,7 +4,9 @@ using Colossal.Entities;
 using Colossal.Serialization.Entities;
 using Game;
 using Game.Buildings;
+using Game.City;
 using Game.Common;
+using Game.Events;
 using Game.Net;
 using Game.Objects;
 using Game.Routes;
@@ -16,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Entities.UniversalDelegates;
 using UnityEngine;
 using static BelzontAdr.ADRMapUtils;
 using Color = UnityEngine.Color;
@@ -339,6 +342,7 @@ namespace BelzontAdr
         {
             public string name;
             public float azimuthAngleStart;
+            public float azimuthAngleCenter;
             public float azimuthAngleEnd;
             public bool reachableByLand;
             public bool reachableByWater;
@@ -356,18 +360,34 @@ namespace BelzontAdr
                 tempList.Add((EntityManager.GetComponentData<ADRRegionCity>(city), city));
             }
             tempList.Sort((a, b) => a.data.azimuthAngle.CompareTo(b.data.azimuthAngle));
+            if(tempList.Count == 1)
+            {
+                var city = tempList[0].data;
+                cities.Add(new CityResponseData
+                {
+                    name = city.name.ToString(),
+                    azimuthAngleStart = (ushort)(city.azimuthAngle - city.azimuthWidthLeft) / (float)0x1_0000 * 360,
+                    azimuthAngleCenter = city.azimuthAngle / (float)0x1_0000 * 360,
+                    azimuthAngleEnd = (ushort)(city.azimuthAngle + city.azimuthWidthRight) / (float)0x1_0000 * 360,
+                    reachableByLand = EntityManager.HasComponent<ADRRegionLandCity>(tempList[0].entity),
+                    reachableByWater = EntityManager.HasComponent<ADRRegionWaterCity>(tempList[0].entity),
+                    reachableByAir = EntityManager.HasComponent<ADRRegionAirCity>(tempList[0].entity),
+                    mapColor = city.mapColor.ToRGB(true)
+                });
+            }
             for (int i = 0; i < tempList.Count; i++)
             {
                 var prevCity = tempList[(i - 1 + tempList.Count) % tempList.Count].data;
                 var city = tempList[i].data;
                 var nextCity = tempList[(i + 1) % tempList.Count].data;
-                var startAngle = (ushort)(city.azimuthAngle - (ushort)Mathf.RoundToInt(Math.Abs(city.azimuthAngle - prevCity.azimuthAngle) * -(1 + (city.azimuthWidthLeft / (float)(city.azimuthWidthLeft + prevCity.azimuthWidthRight)))));
-                var endAngle = (ushort)(city.azimuthAngle + (ushort)Mathf.RoundToInt(Math.Abs(nextCity.azimuthAngle - city.azimuthAngle) * -(1 + (city.azimuthWidthRight / (float)(nextCity.azimuthWidthLeft + city.azimuthWidthRight)))));
+                var startAngle = (ushort)(city.azimuthAngle - Math.Min(city.azimuthWidthLeft, (ushort)Mathf.RoundToInt(Math.Abs(city.azimuthAngle - prevCity.azimuthAngle) * -(1 + (city.azimuthWidthLeft / (float)(city.azimuthWidthLeft + prevCity.azimuthWidthRight))))));
+                var endAngle = (ushort)(city.azimuthAngle + Math.Min(city.azimuthWidthRight, (ushort)Mathf.RoundToInt(Math.Abs(nextCity.azimuthAngle - city.azimuthAngle) * -(1 + (city.azimuthWidthRight / (float)(nextCity.azimuthWidthLeft + city.azimuthWidthRight))))));
                 cities.Add(new CityResponseData
                 {
                     name = city.name.ToString(),
-                    azimuthAngleStart = startAngle / 360f,
-                    azimuthAngleEnd = endAngle / 360f,
+                    azimuthAngleStart = startAngle / (float)0x1_0000 * 360,
+                    azimuthAngleCenter = city.azimuthAngle / (float)0x1_0000 * 360,
+                    azimuthAngleEnd = endAngle / (float)0x1_0000 * 360,
                     reachableByLand = EntityManager.HasComponent<ADRRegionLandCity>(tempList[i].entity),
                     reachableByWater = EntityManager.HasComponent<ADRRegionWaterCity>(tempList[i].entity),
                     reachableByAir = EntityManager.HasComponent<ADRRegionAirCity>(tempList[i].entity),

@@ -120,10 +120,10 @@ function RegionCityRegisterForm({ onCancel, onSave, selectedCity, setSelectedCit
         }
     }, [directionPreset]);
 
-    const isValid = selectedCity.name && selectedCity.name.length > 0 &&
-        selectedCity.centerAzimuth !== undefined && selectedCity.centerAzimuth >= 0 && selectedCity.centerAzimuth <= 360 &&
-        selectedCity.degreesLeft !== undefined && selectedCity.degreesLeft >= 0 && selectedCity.degreesLeft <= 180 &&
-        selectedCity.degreesRight !== undefined && selectedCity.degreesRight >= 0 && selectedCity.degreesRight <= 180
+    const isValid = selectedCity.name && selectedCity.name.length > 0
+        && selectedCity.centerAzimuth !== undefined && selectedCity.centerAzimuth >= 0 && selectedCity.centerAzimuth <= 360
+        && selectedCity.degreesLeft !== undefined && selectedCity.degreesLeft >= 0 && selectedCity.degreesLeft <= 180
+        && selectedCity.degreesRight !== undefined && selectedCity.degreesRight >= 0 && selectedCity.degreesRight <= 180
         && selectedCity.mapColor && /^#[0-9A-Fa-f]{6}$/.test(selectedCity.mapColor)
         && (selectedCity.reachableByLand || selectedCity.reachableByWater || selectedCity.reachableByAir);
 

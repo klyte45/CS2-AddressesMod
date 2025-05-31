@@ -122,7 +122,7 @@ export const RegionEditor = () => {
             )
         }
     }
-    const divLines = useCallback(() => getNeighborhoodMap(), [buildIdx, selectedRegionMapType, regionLand, regionWater, regionAir]);
+    const svgNeighborsDraw = useCallback(() => getNeighborhoodMap(), [buildIdx, selectedRegionMapType, regionLand, regionWater, regionAir]);
 
     const getCurrentMouseHoverPosition = useCallback(() => {
         if (refDiv.current && mouseInfo) {
@@ -159,20 +159,25 @@ export const RegionEditor = () => {
     const mapTranslationY = position[1] / mapSize[2] * 100;
     const effZoom = .6666 + zoom / 1.5;
 
+    const mapBeyondBordersSizeMultiplier = 4; //1== no beyond borders, 2 == 2x map size, 4 == 4x map size
 
 
     return <div className="regionEditor">
         <div style={{ ["--currentZoom"]: effZoom } as any} className="mapSide" onWheel={doOnWheel} onMouseOut={() => setMouseInfo(undefined)} onDoubleClick={(x) => setMapPointSelectionInfo(x)}
             onMouseMove={doOnMouseMove} ref={refDiv}>
-
             <MapDiv waterMap={waterMap} cityMap={terrainMap}
                 style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${mapTranslationX}%, ${mapTranslationY}%)` }}
-                beforeAnyLayer={<div className="bgneighbors">
-                    {divLines()}
-                </div>}
+                beforeAnyLayer={svgNeighborsDraw().length
+                    && <svg viewBox={[mapOffset[0] * mapBeyondBordersSizeMultiplier, mapOffset[2] * mapBeyondBordersSizeMultiplier, mapSize[0] * mapBeyondBordersSizeMultiplier, mapSize[2] * mapBeyondBordersSizeMultiplier].join(" ")}
+                        width={mapBeyondBordersSizeMultiplier * 100 + "%"} height={mapBeyondBordersSizeMultiplier * 100 + "%"}
+                        style={{ transform: `translate(-${50 - 50 / mapBeyondBordersSizeMultiplier}%, -${50 - 50 / mapBeyondBordersSizeMultiplier}%)` }}>
+                        {svgNeighborsDraw()}
+                    </svg>}
             >
 
-                <svg viewBox={[mapOffset[0], mapOffset[2], mapSize[0], mapSize[2]].join(" ")} className="pathsOverlay" width="100%" height="100%" >
+                <svg viewBox={[mapOffset[0] * mapBeyondBordersSizeMultiplier, mapOffset[2] * mapBeyondBordersSizeMultiplier, mapSize[0] * mapBeyondBordersSizeMultiplier, mapSize[2] * mapBeyondBordersSizeMultiplier].join(" ")}
+                    width={mapBeyondBordersSizeMultiplier * 100 + "%"} height={mapBeyondBordersSizeMultiplier * 100 + "%"} className="pathsOverlay"
+                    style={{ transform: `translate(-${50 - 50 / mapBeyondBordersSizeMultiplier}%, -${50 - 50 / mapBeyondBordersSizeMultiplier}%) scaleY(-1)` }}>
                     {urbanRoads.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapUrbanRoads", "hwId_" + x.highwayId].join(" ")} id={`rd_${x.entity.Index}_${x.entity.Version}`} />)}
                     {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapTrainTrack", "hwId_" + x.highwayId].join(" ")} id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}
                     {highways.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapHighway", "hwId_" + x.highwayId].join(" ")} id={`tr_${x.entity.Index}_${x.entity.Version}`} />)}
@@ -231,26 +236,34 @@ export const RegionEditor = () => {
                 return [];
         }
         entries.sort((a, b) => (a.azimuthAngleEnd % 360) - (b.azimuthAngleEnd % 360));
-        const divLines = [];
+        const svgPaths = [];
         for (let i = 0; i < entries.length; i++) {
-            const endPos = ((entries[i].azimuthAngleEnd % 360) + 360) % 360 - 90;
-            const left = 11 + (1 - Math.tan(Math.abs(Math.abs(endPos % 90) - 45) / 180 * Math.PI)) * Math.PI * 1.1;
+            const p1 = pointAtAngle({ x: 0, y: 0 }, entries[i].azimuthAngleStart - 90, mapSize[0] / 2);
+            const p2 = pointAtAngle({ x: 0, y: 0 }, entries[i].azimuthAngleCenter - 90, 100_000);
+            const p3 = pointAtAngle({ x: 0, y: 0 }, entries[i].azimuthAngleEnd - 90, mapSize[0] / 2);
 
-            divLines.push(<div key={i} className="divLine" style={{ ["--divLineSize"]: (70 / effZoom) + "rem", transform: `rotate(${endPos}deg)` } as any}>
-                <div>
+            const p1_5 = entries[i].azimuthAngleStart > 315 || entries[i].azimuthAngleStart < 45 || (entries[i].azimuthAngleStart > 135 && entries[i].azimuthAngleStart < 225) ?  { x: p1.x, y: p2.y }:{ x: p2.x, y: p1.y };
+            const p2_5 = entries[i].azimuthAngleEnd > 315 || entries[i].azimuthAngleEnd < 45 || (entries[i].azimuthAngleEnd > 135 && entries[i].azimuthAngleEnd < 225)         ?  { x: p3.x, y: p2.y }:{ x: p2.x, y: p3.y };
+
+            svgPaths.push(<path key={i} d={`M0,0 L ${p1.x} ${p1.y} L ${p1_5.x} ${p1_5.y} L ${p2.x} ${p2.y} L ${p2_5.x} ${p2_5.y} L ${p3.x} ${p3.y} Z`} fill={entries[i].mapColor} stroke-width="10" stroke="black" />)
+            {/* <div>
                     <div className={["prev", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
                         {entries[i].name}
                     </div>
                     <div className={["next", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
                         {entries[(i + 1) % entries.length].name}
                     </div>
-                </div>
-            </div>);
+                </div> */}
         }
-        return divLines;
+        return svgPaths;
     }
 }
-
+function pointAtAngle(refPoint: { x: number, y: number }, angle: number, distance: number) {
+    const radians = angle * Math.PI / 180;
+    const newX = refPoint.x + distance * Math.cos(radians);
+    const newY = refPoint.y + distance * Math.sin(radians);
+    return { x: newX, y: newY };
+}
 type RegionalEditorContentProps = {
     getSelectionPosition: { x: number, y: number }
     onCitiesChanged: () => void;
