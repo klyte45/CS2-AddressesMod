@@ -14,4 +14,12 @@
         background-size: cover;
         filter: brightness(50.3%) sepia(0.9) hue-rotate(148.5deg) contrast(2.3);
     }
+    .cityArea {
+        filter: brightness(0.8) contrast(1.2);
+    }
+
+    .cityName {
+        font-size: 500rem;
+        fill: white;
+    }
 }

@@ -348,6 +348,7 @@ namespace BelzontAdr
             public bool reachableByWater;
             public bool reachableByAir;
             public string mapColor;
+            public Entity entity;
         }
 
         private List<CityResponseData> GetRegionNeighborhood(EntityQuery query)
@@ -372,7 +373,8 @@ namespace BelzontAdr
                     reachableByLand = EntityManager.HasComponent<ADRRegionLandCity>(tempList[0].entity),
                     reachableByWater = EntityManager.HasComponent<ADRRegionWaterCity>(tempList[0].entity),
                     reachableByAir = EntityManager.HasComponent<ADRRegionAirCity>(tempList[0].entity),
-                    mapColor = city.mapColor.ToRGB(true)
+                    mapColor = city.mapColor.ToRGB(true),
+                    entity = tempList[0].entity
                 });
             }
             for (int i = 0; i < tempList.Count; i++)
@@ -391,7 +393,8 @@ namespace BelzontAdr
                     reachableByLand = EntityManager.HasComponent<ADRRegionLandCity>(tempList[i].entity),
                     reachableByWater = EntityManager.HasComponent<ADRRegionWaterCity>(tempList[i].entity),
                     reachableByAir = EntityManager.HasComponent<ADRRegionAirCity>(tempList[i].entity),
-                    mapColor = city.mapColor.ToRGB(true)
+                    mapColor = city.mapColor.ToRGB(true),
+                    entity = tempList[i].entity
                 });
             }
             return cities;

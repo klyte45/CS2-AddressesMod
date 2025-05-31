@@ -53,6 +53,7 @@ export type CityResponseData = {
     reachableByWater: boolean;
     reachableByAir: boolean;
     mapColor: string;
+    entity: Entity;
 }
 
 export type RegionCityEditingDTO = {

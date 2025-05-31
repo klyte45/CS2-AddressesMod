@@ -122,7 +122,7 @@ export const RegionEditor = () => {
             )
         }
     }
-    const svgNeighborsDraw = useCallback(() => getNeighborhoodMap(), [buildIdx, selectedRegionMapType, regionLand, regionWater, regionAir]);
+    const svgNeighborsDraw = useCallback(() => getNeighborhoodMap(), [isLoading, selectedRegionMapType, regionLand, regionWater, regionAir]);
 
     const getCurrentMouseHoverPosition = useCallback(() => {
         if (refDiv.current && mouseInfo) {
@@ -238,26 +238,75 @@ export const RegionEditor = () => {
         entries.sort((a, b) => (a.azimuthAngleEnd % 360) - (b.azimuthAngleEnd % 360));
         const svgPaths = [];
         for (let i = 0; i < entries.length; i++) {
-            const p1 = pointAtAngle({ x: 0, y: 0 }, entries[i].azimuthAngleStart - 90, mapSize[0] / 2);
-            const p2 = pointAtAngle({ x: 0, y: 0 }, entries[i].azimuthAngleCenter - 90, 100_000);
-            const p3 = pointAtAngle({ x: 0, y: 0 }, entries[i].azimuthAngleEnd - 90, mapSize[0] / 2);
+            const entry = entries[i];
+            const p1 = saturatePosition(pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleStart - 90, mapSize[0] / 2), mapSize, mapBeyondBordersSizeMultiplier);
+            const p2 = saturatePosition(pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleCenter - 90, 100_000), mapSize, mapBeyondBordersSizeMultiplier);
+            const p3 = saturatePosition(pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleEnd - 90, mapSize[0] / 2), mapSize, mapBeyondBordersSizeMultiplier);
 
-            const p1_5 = entries[i].azimuthAngleStart > 315 || entries[i].azimuthAngleStart < 45 || (entries[i].azimuthAngleStart > 135 && entries[i].azimuthAngleStart < 225) ?  { x: p1.x, y: p2.y }:{ x: p2.x, y: p1.y };
-            const p2_5 = entries[i].azimuthAngleEnd > 315 || entries[i].azimuthAngleEnd < 45 || (entries[i].azimuthAngleEnd > 135 && entries[i].azimuthAngleEnd < 225)         ?  { x: p3.x, y: p2.y }:{ x: p2.x, y: p3.y };
+            const p1_5 = entry.azimuthAngleStart > 315 || entry.azimuthAngleStart < 45 || (entry.azimuthAngleStart > 135 && entry.azimuthAngleStart < 225) ? { x: p1.x, y: p2.y } : { x: p2.x, y: p1.y };
+            const p2_5 = entry.azimuthAngleEnd > 315 || entry.azimuthAngleEnd < 45 || (entry.azimuthAngleEnd > 135 && entry.azimuthAngleEnd < 225) ? { x: p3.x, y: p2.y } : { x: p2.x, y: p3.y };
 
-            svgPaths.push(<path key={i} d={`M0,0 L ${p1.x} ${p1.y} L ${p1_5.x} ${p1_5.y} L ${p2.x} ${p2.y} L ${p2_5.x} ${p2_5.y} L ${p3.x} ${p3.y} Z`} fill={entries[i].mapColor} stroke-width="10" stroke="black" />)
-            {/* <div>
+            const textPosition = lerpPosition(lerpPosition(p1, p1_5, 0.125), lerpPosition(p3, p2_5, 0.125), 0.5);
+
+            if (Math.abs(textPosition.x) < mapSize[0] / 2 && Math.abs(textPosition.y) < mapSize[2] / 2) {
+                // if (Math.abs(textPosition.x) / mapSize[0] > Math.abs(textPosition.y) / mapSize[2]) {
+                textPosition.y = mapSize[2] * .6 * Math.sign(textPosition.y);
+                // } else {
+                textPosition.x = mapSize[0] * .6 * Math.sign(textPosition.x);
+                // }
+            }
+            let dominantBaseline = "central";
+            if (textPosition.y < -mapSize[2] / 2) {
+                dominantBaseline = "hanging";
+            } else if (textPosition.y > mapSize[2] / 2) {
+                dominantBaseline = "text-before-edge";
+            }
+
+            svgPaths.push(<path key={entry.entity.Index + "_AREA"} d={`M ${p1.x} ${p1.y} L ${p1_5.x} ${p1_5.y} L ${p2.x} ${p2.y} L ${p2_5.x} ${p2_5.y} L ${p3.x} ${p3.y} Z`} fill={clampRGB({ value: entry.mapColor, min: 0x22, max: 0xcc })} className="cityArea" stroke-width="10" stroke="black" />);
+            svgPaths.push(<text key={entry.entity.Index + "_NAME"} x={textPosition.x} y={textPosition.y} textAnchor="middle" dominantBaseline={dominantBaseline} className="cityName">{entry.name}</text>);
+
+            {/* 
+                <div>
                     <div className={["prev", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
                         {entries[i].name}
                     </div>
                     <div className={["next", endPos > 90 ? "after180" : ""].join(" ")} style={{ left: left + "%" }}>
                         {entries[(i + 1) % entries.length].name}
                     </div>
-                </div> */}
+                </div> 
+                */}
         }
         return svgPaths;
     }
+
 }
+
+function clampRGB({ value, min = 0, max = 255 }: { value: string; min?: number; max?: number; }) {
+    if (value.length !== 7 || value[0] !== '#') {
+        throw new Error("Invalid hex color format");
+    }
+    const factor = (max - min) / 255;
+    const r = Math.round(parseInt(value.slice(1, 3), 16) * factor) + min;
+    const g = Math.round(parseInt(value.slice(3, 5), 16) * factor) + min;
+    const b = Math.round(parseInt(value.slice(5, 7), 16) * factor) + min;   
+
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+function lerpPosition(start: { x: number, y: number }, end: { x: number, y: number }, t: number) {
+    return {
+        x: start.x + (end.x - start.x) * t,
+        y: start.y + (end.y - start.y) * t
+    };
+}
+
+function saturatePosition(position: { x: number, y: number }, mapSize: number[], multiplier: number) {
+    return {
+        x: Math.max(mapSize[0] * multiplier / -2, Math.min(mapSize[0] * multiplier / 2, position.x)),
+        y: Math.max(mapSize[2] * multiplier / -2, Math.min(mapSize[2] * multiplier / 2, position.y))
+    };
+}
+
 function pointAtAngle(refPoint: { x: number, y: number }, angle: number, distance: number) {
     const radians = angle * Math.PI / 180;
     const newX = refPoint.x + distance * Math.cos(radians);
