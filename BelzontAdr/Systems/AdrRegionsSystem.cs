@@ -4,9 +4,7 @@ using Colossal.Entities;
 using Colossal.Serialization.Entities;
 using Game;
 using Game.Buildings;
-using Game.City;
 using Game.Common;
-using Game.Events;
 using Game.Net;
 using Game.Objects;
 using Game.Routes;
@@ -16,9 +14,13 @@ using Game.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+#if BURST
+using Unity.Burst;
+using Unity.Burst.Intrinsics;
+#endif
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Entities.UniversalDelegates;
 using UnityEngine;
 using static BelzontAdr.ADRMapUtils;
 using Color = UnityEngine.Color;
@@ -29,6 +31,10 @@ namespace BelzontAdr
 {
     public partial class AdrRegionsSystem : GameSystemBase, IBelzontBindable, IDefaultSerializable
     {
+        public const float USHORT_ANGLE_TO_DEGREES = 360f / 0x1_0000;
+
+
+
         private NameSystem m_nameSystem;
         private TerrainSystem m_terrainSystem;
         private WaterSystem m_waterSystem;
@@ -41,9 +47,12 @@ namespace BelzontAdr
         private EntityQuery m_regionByWaterQuery;
         private EntityQuery m_regionByAirQuery;
         private EntityQuery m_regionByAnyQuery;
+        private EntityQuery m_outsideConnectionsUnmapped;
+        private EntityQuery m_outsideConnectionsMapped;
 
         #region bindings
         private const string SYSTEM_PREFIX = "regions.";
+        private Action<string, object[]> sendEventToUI;
 
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
@@ -80,7 +89,7 @@ namespace BelzontAdr
 
         public void SetupCaller(Action<string, object[]> eventCaller)
         {
-
+            sendEventToUI = eventCaller;
         }
 
         public void SetupEventBinder(Action<string, Delegate> eventCaller)
@@ -326,6 +335,48 @@ namespace BelzontAdr
                     }
                 }
             });
+            m_outsideConnectionsUnmapped = GetEntityQuery(new EntityQueryDesc[]
+              {
+                    new() {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Transform>(),
+                        },
+                        Any = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Game.Objects.OutsideConnection>(),
+                            ComponentType.ReadOnly<Game.Objects.WaterPipeOutsideConnection>(),
+                            ComponentType.ReadOnly<Game.Objects.ElectricityOutsideConnection>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ADRRegionCityReference>(),
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+              });
+            m_outsideConnectionsMapped = GetEntityQuery(new EntityQueryDesc[]
+              {
+                    new() {
+                        All =new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Transform>(),
+                            ComponentType.ReadOnly<ADRRegionCityReference>(),
+                        },
+                        Any = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Game.Objects.OutsideConnection>(),
+                            ComponentType.ReadOnly<Game.Objects.WaterPipeOutsideConnection>(),
+                            ComponentType.ReadOnly<Game.Objects.ElectricityOutsideConnection>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+              });
         }
 
         protected override void OnUpdate()
@@ -334,11 +385,107 @@ namespace BelzontAdr
             {
                 runOnUpdate.Dequeue().Invoke();
             }
+            if (!m_outsideConnectionsUnmapped.IsEmpty)
+            {
+                var landArray = new NativeArray<CityJobData>(GetLandRegionNeighborhood().Select(x => x.ToCityJobData()).ToArray(), Allocator.TempJob);
+                var waterArray = new NativeArray<CityJobData>(GetWaterRegionNeighborhood().Select(x => x.ToCityJobData()).ToArray(), Allocator.TempJob);
+                var airArray = new NativeArray<CityJobData>(GetAirRegionNeighborhood().Select(x => x.ToCityJobData()).ToArray(), Allocator.TempJob);
+                var job = new MapOutsideConnectionsJob
+                {
+                    m_airplaneStopLookup = GetComponentLookup<AirplaneStop>(true),
+                    m_shipStopLookup = GetComponentLookup<ShipStop>(true),
+                    m_cmdBuffer = m_modificationEndBarrier.CreateCommandBuffer().AsParallelWriter(),
+                    m_entityHandle = GetEntityTypeHandle(),
+                    m_transformHandle = GetComponentTypeHandle<Transform>(true),
+                    m_regionCitiesLand = landArray,
+                    m_regionCitiesWater = waterArray,
+                    m_regionCitiesAir = airArray
+                }.ScheduleParallel(m_outsideConnectionsUnmapped, Dependency);
+                landArray.Dispose(job);
+                waterArray.Dispose(job);
+                airArray.Dispose(job);
+                job.Complete();
+                sendEventToUI($"{SYSTEM_PREFIX}outsideConnectionsChanged", new object[0]);
+            }
         }
         #endregion
+        #region Jobs
+        public struct CityJobData
+        {
+            public ushort azimuthAngleStart;
+            public ushort azimuthAngleCenter;
+            public ushort azimuthAngleEnd;
+            public Entity entity;
+        }
+#if BURST
+        [BurstCompile]
+#endif
+        private struct MapOutsideConnectionsJob : IJobChunk
+        {
+            public EntityCommandBuffer.ParallelWriter m_cmdBuffer;
+            public EntityTypeHandle m_entityHandle;
+            public ComponentTypeHandle<Transform> m_transformHandle;
+            public NativeArray<CityJobData> m_regionCitiesLand;
+            public NativeArray<CityJobData> m_regionCitiesWater;
+            public NativeArray<CityJobData> m_regionCitiesAir;
+
+            public ComponentLookup<ShipStop> m_shipStopLookup;
+            public ComponentLookup<AirplaneStop> m_airplaneStopLookup;
+
+
+            public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
+            {
+                var entities = chunk.GetNativeArray(m_entityHandle);
+                var transforms = chunk.GetNativeArray(ref m_transformHandle);
+                for (int i = 0; i < chunk.Count; i++)
+                {
+                    var entity = entities[i];
+                    var transform = transforms[i];
+                    var azimuthDirection = (ushort)((450 - transform.m_Position.GetAngleXZ()) % 360 / USHORT_ANGLE_TO_DEGREES);
+                    var mapToCheck = m_shipStopLookup.HasComponent(entity) ? m_regionCitiesWater
+                        : m_airplaneStopLookup.HasComponent(entity) ? m_regionCitiesAir
+                        : m_regionCitiesLand;
+
+                    for (int j = 0; j < mapToCheck.Length; j++)
+                    {
+                        if (mapToCheck[j].azimuthAngleEnd < mapToCheck[j].azimuthAngleStart)
+                        {
+                            if (mapToCheck[j].azimuthAngleStart <= azimuthDirection || azimuthDirection < mapToCheck[j].azimuthAngleEnd)
+                            {
+                                m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, new ADRRegionCityReference
+                                {
+                                    cityEntity = mapToCheck[j].entity
+                                });
+                                goto continueOuterLoop;
+                            }
+                        }
+                        else
+                        {
+                            if (mapToCheck[j].azimuthAngleStart <= azimuthDirection && azimuthDirection < mapToCheck[j].azimuthAngleEnd)
+                            {
+                                m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, new ADRRegionCityReference
+                                {
+                                    cityEntity = mapToCheck[j].entity
+                                });
+                                goto continueOuterLoop;
+                            }
+                        }
+                    }
+                    m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, new ADRRegionCityReference
+                    {
+                        cityEntity = Entity.Null
+                    });
+                continueOuterLoop:
+                    continue;
+                }
+            }
+        }
+
+        #endregion
+
         #region Region data
 
-        private class CityResponseData
+        public struct CityResponseData
         {
             public string name;
             public float azimuthAngleStart;
@@ -349,6 +496,17 @@ namespace BelzontAdr
             public bool reachableByAir;
             public string mapColor;
             public Entity entity;
+
+            internal CityJobData ToCityJobData()
+            {
+                return new CityJobData
+                {
+                    azimuthAngleStart = (ushort)(azimuthAngleStart / USHORT_ANGLE_TO_DEGREES),
+                    azimuthAngleCenter = (ushort)(azimuthAngleCenter / USHORT_ANGLE_TO_DEGREES),
+                    azimuthAngleEnd = (ushort)(azimuthAngleEnd / USHORT_ANGLE_TO_DEGREES),
+                    entity = entity
+                };
+            }
         }
 
         private List<CityResponseData> GetRegionNeighborhood(EntityQuery query)
@@ -361,15 +519,15 @@ namespace BelzontAdr
                 tempList.Add((EntityManager.GetComponentData<ADRRegionCity>(city), city));
             }
             tempList.Sort((a, b) => a.data.azimuthAngle.CompareTo(b.data.azimuthAngle));
-            if(tempList.Count == 1)
+            if (tempList.Count == 1)
             {
                 var city = tempList[0].data;
                 cities.Add(new CityResponseData
                 {
                     name = city.name.ToString(),
-                    azimuthAngleStart = (ushort)(city.azimuthAngle - city.azimuthWidthLeft) / (float)0x1_0000 * 360,
-                    azimuthAngleCenter = city.azimuthAngle / (float)0x1_0000 * 360,
-                    azimuthAngleEnd = (ushort)(city.azimuthAngle + city.azimuthWidthRight) / (float)0x1_0000 * 360,
+                    azimuthAngleStart = (ushort)(city.azimuthAngle - city.azimuthWidthLeft) * USHORT_ANGLE_TO_DEGREES,
+                    azimuthAngleCenter = city.azimuthAngle * USHORT_ANGLE_TO_DEGREES,
+                    azimuthAngleEnd = (ushort)(city.azimuthAngle + city.azimuthWidthRight) * USHORT_ANGLE_TO_DEGREES,
                     reachableByLand = EntityManager.HasComponent<ADRRegionLandCity>(tempList[0].entity),
                     reachableByWater = EntityManager.HasComponent<ADRRegionWaterCity>(tempList[0].entity),
                     reachableByAir = EntityManager.HasComponent<ADRRegionAirCity>(tempList[0].entity),
@@ -387,9 +545,9 @@ namespace BelzontAdr
                 cities.Add(new CityResponseData
                 {
                     name = city.name.ToString(),
-                    azimuthAngleStart = startAngle / (float)0x1_0000 * 360,
-                    azimuthAngleCenter = city.azimuthAngle / (float)0x1_0000 * 360,
-                    azimuthAngleEnd = endAngle / (float)0x1_0000 * 360,
+                    azimuthAngleStart = startAngle * USHORT_ANGLE_TO_DEGREES,
+                    azimuthAngleCenter = (ushort)(startAngle + ((ushort)(endAngle - startAngle + 0x1_0000) / 2)) * USHORT_ANGLE_TO_DEGREES,
+                    azimuthAngleEnd = endAngle * USHORT_ANGLE_TO_DEGREES,
                     reachableByLand = EntityManager.HasComponent<ADRRegionLandCity>(tempList[i].entity),
                     reachableByWater = EntityManager.HasComponent<ADRRegionWaterCity>(tempList[i].entity),
                     reachableByAir = EntityManager.HasComponent<ADRRegionAirCity>(tempList[i].entity),
@@ -400,11 +558,12 @@ namespace BelzontAdr
             return cities;
         }
 
-        private List<CityResponseData> GetLandRegionNeighborhood() => GetRegionNeighborhood(m_regionByLandQuery);
-
-        private List<CityResponseData> GetWaterRegionNeighborhood() => GetRegionNeighborhood(m_regionByWaterQuery);
-
-        private List<CityResponseData> GetAirRegionNeighborhood() => GetRegionNeighborhood(m_regionByAirQuery);
+        private List<CityResponseData> m_cachedRegionLandNeighborhood = null;
+        private List<CityResponseData> m_cachedRegionWaterNeighborhood = null;
+        private List<CityResponseData> m_cachedRegionAirNeighborhood = null;
+        private List<CityResponseData> GetLandRegionNeighborhood() => m_cachedRegionLandNeighborhood ??= GetRegionNeighborhood(m_regionByLandQuery);
+        private List<CityResponseData> GetWaterRegionNeighborhood() => m_cachedRegionWaterNeighborhood ??= GetRegionNeighborhood(m_regionByWaterQuery);
+        private List<CityResponseData> GetAirRegionNeighborhood() => m_cachedRegionAirNeighborhood ??= GetRegionNeighborhood(m_regionByAirQuery);
 
 
         private struct RegionCityEditingDTO
@@ -432,9 +591,9 @@ namespace BelzontAdr
                 {
                     entity = city,
                     name = data.name.ToString(),
-                    centerAzimuth = data.azimuthAngle / (float)0x1_0000 * 360,
-                    degreesLeft = data.azimuthWidthLeft / (float)0x1_0000 * 360,
-                    degreesRight = data.azimuthWidthRight / (float)0x1_0000 * 360,
+                    centerAzimuth = data.azimuthAngle * USHORT_ANGLE_TO_DEGREES,
+                    degreesLeft = data.azimuthWidthLeft * USHORT_ANGLE_TO_DEGREES,
+                    degreesRight = data.azimuthWidthRight * USHORT_ANGLE_TO_DEGREES,
                     reachableByLand = EntityManager.HasComponent<ADRRegionLandCity>(city),
                     reachableByWater = EntityManager.HasComponent<ADRRegionWaterCity>(city),
                     reachableByAir = EntityManager.HasComponent<ADRRegionAirCity>(city),
@@ -452,9 +611,9 @@ namespace BelzontAdr
                 EntityManager.AddComponentData(newCity, new ADRRegionCity
                 {
                     name = input.name,
-                    azimuthAngle = (ushort)(input.centerAzimuth / 360 * 0x1_0000),
-                    azimuthWidthLeft = (ushort)(input.degreesLeft / 360 * 0x1_0000),
-                    azimuthWidthRight = (ushort)(input.degreesRight / 360 * 0x1_0000),
+                    azimuthAngle = (ushort)(input.centerAzimuth / USHORT_ANGLE_TO_DEGREES),
+                    azimuthWidthLeft = (ushort)(input.degreesLeft / USHORT_ANGLE_TO_DEGREES),
+                    azimuthWidthRight = (ushort)(input.degreesRight / USHORT_ANGLE_TO_DEGREES),
                     mapColor = ColorExtensions.FromRGB(input.mapColor, true)
                 });
 
@@ -481,9 +640,9 @@ namespace BelzontAdr
                 {
                     var cmdBuffer = m_modificationEndBarrier.CreateCommandBuffer();
                     city.name = input.name;
-                    city.azimuthAngle = (ushort)(input.centerAzimuth / 360 * 0x1_0000);
-                    city.azimuthWidthLeft = (ushort)(input.degreesLeft / 360 * 0x1_0000);
-                    city.azimuthWidthRight = (ushort)(input.degreesRight / 360 * 0x1_0000);
+                    city.azimuthAngle = (ushort)(input.centerAzimuth / USHORT_ANGLE_TO_DEGREES);
+                    city.azimuthWidthLeft = (ushort)(input.degreesLeft / USHORT_ANGLE_TO_DEGREES);
+                    city.azimuthWidthRight = (ushort)(input.degreesRight / USHORT_ANGLE_TO_DEGREES);
                     city.mapColor = ColorExtensions.FromRGB(input.mapColor, true);
                     cmdBuffer.SetComponent(input.entity, city);
 
@@ -526,6 +685,10 @@ namespace BelzontAdr
                     }
                 });
             }
+            m_cachedRegionLandNeighborhood = null;
+            m_cachedRegionWaterNeighborhood = null;
+            m_cachedRegionAirNeighborhood = null;
+            m_modificationEndBarrier.CreateCommandBuffer().RemoveComponent<ADRRegionCityReference>(m_outsideConnectionsMapped, EntityQueryCaptureMode.AtPlayback);
         }
 
         private void RemoveRegionCity(Entity entity)
@@ -538,6 +701,7 @@ namespace BelzontAdr
                     cmdBuffer.DestroyEntity(entity);
                 });
             }
+            m_modificationEndBarrier.CreateCommandBuffer().RemoveComponent<ADRRegionCityReference>(m_outsideConnectionsMapped, EntityQueryCaptureMode.AtPlayback);
         }
 
         #endregion
@@ -553,11 +717,18 @@ namespace BelzontAdr
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
         {
             reader.CheckVersionK45(CURRENT_VERSION, GetType());
+
+
+            m_cachedRegionLandNeighborhood = null;
+            m_cachedRegionWaterNeighborhood = null;
+            m_cachedRegionAirNeighborhood = null;
         }
 
         public void SetDefaults(Context context)
         {
-
+            m_cachedRegionLandNeighborhood = null;
+            m_cachedRegionWaterNeighborhood = null;
+            m_cachedRegionAirNeighborhood = null;
         }
         #endregion
     }

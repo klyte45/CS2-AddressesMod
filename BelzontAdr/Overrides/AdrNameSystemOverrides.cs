@@ -185,6 +185,13 @@ namespace BelzontAdr
                 __result = NameSystem.Name.CustomName(name);
                 return false;
             }
+
+            if (entityManager.TryGetComponent<ADRRegionCityReference>(entity, out var cityRef) && entityManager.TryGetComponent<ADRRegionCity>(cityRef.cityEntity, out var cityData))
+            {
+                __result = Name.CustomName(cityData.name.ToString());
+                return false;
+            }
+
             if (entityManager.HasComponent<Household>(entity))
             {
                 if (!adrMainSystem.TryGetSurnameList(out var surnames)) return true;

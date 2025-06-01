@@ -1,11 +1,11 @@
 import { translate } from "#utility/translate";
 import { CityResponseData, Entity, EnumValueType, RegionService } from "@klyte45/adr-commons";
 import { DefaultPanelScreen, MenuItem } from "@klyte45/euis-components";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import { HighwayRegisterManagement } from "./subpages/HighwayRegisterManagement";
 import { MapDiv } from "./MapDiv";
 import './regionEditor.scss';
+import { HighwayRegisterManagement } from "./subpages/HighwayRegisterManagement";
 import RegionCitiesManagement from "./subpages/RegionCitiesMangement";
 
 
@@ -122,9 +122,10 @@ export const RegionEditor = () => {
             )
         }
     }
-    const svgNeighborsDraw = useCallback(() => getNeighborhoodMap(), [isLoading, selectedRegionMapType, regionLand, regionWater, regionAir]);
+    const mapBeyondBordersSizeMultiplier = 4; //1== no beyond borders, 2 == 2x map size, 4 == 4x map size
+    const svgNeighborsDraw = useMemo(() => getNeighborhoodMap(mapBeyondBordersSizeMultiplier), [isLoading, selectedRegionMapType, regionLand, regionWater, regionAir]);
 
-    const getCurrentMouseHoverPosition = useCallback(() => {
+    const currentMouseHoverPosition = useMemo(() => {
         if (refDiv.current && mouseInfo) {
             return mousePositionToWorldPosition(mouseInfo);
         }
@@ -132,7 +133,7 @@ export const RegionEditor = () => {
 
     }, [mouseInfo, refDiv.current])
 
-    const getSelectionPosition = useCallback(() => {
+    const selectionPosition = useMemo(() => {
         if (refDiv.current && mapPointSelectionInfo) {
             return mousePositionToWorldPosition(mapPointSelectionInfo);
         }
@@ -159,19 +160,16 @@ export const RegionEditor = () => {
     const mapTranslationY = position[1] / mapSize[2] * 100;
     const effZoom = .6666 + zoom / 1.5;
 
-    const mapBeyondBordersSizeMultiplier = 4; //1== no beyond borders, 2 == 2x map size, 4 == 4x map size
-
-
     return <div className="regionEditor">
         <div style={{ ["--currentZoom"]: effZoom } as any} className="mapSide" onWheel={doOnWheel} onMouseOut={() => setMouseInfo(undefined)} onDoubleClick={(x) => setMapPointSelectionInfo(x)}
             onMouseMove={doOnMouseMove} ref={refDiv}>
             <MapDiv waterMap={waterMap} cityMap={terrainMap}
                 style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${mapTranslationX}%, ${mapTranslationY}%)` }}
-                beforeAnyLayer={svgNeighborsDraw().length
+                beforeAnyLayer={svgNeighborsDraw.length
                     && <svg viewBox={[mapOffset[0] * mapBeyondBordersSizeMultiplier, mapOffset[2] * mapBeyondBordersSizeMultiplier, mapSize[0] * mapBeyondBordersSizeMultiplier, mapSize[2] * mapBeyondBordersSizeMultiplier].join(" ")}
                         width={mapBeyondBordersSizeMultiplier * 100 + "%"} height={mapBeyondBordersSizeMultiplier * 100 + "%"}
                         style={{ transform: `translate(-${50 - 50 / mapBeyondBordersSizeMultiplier}%, -${50 - 50 / mapBeyondBordersSizeMultiplier}%)` }}>
-                        {svgNeighborsDraw()}
+                        {svgNeighborsDraw}
                     </svg>}
             >
 
@@ -182,8 +180,8 @@ export const RegionEditor = () => {
                     {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapTrainTrack", "hwId_" + x.highwayId].join(" ")} id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}
                     {highways.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapHighway", "hwId_" + x.highwayId].join(" ")} id={`tr_${x.entity.Index}_${x.entity.Version}`} />)}
                 </svg>
-                {getSelectionPosition() && (() => {
-                    const { bottom, left } = AsRelativePosition(getSelectionPosition(), mapOffset, mapSize);
+                {selectionPosition && (() => {
+                    const { bottom, left } = AsRelativePosition(selectionPosition, mapOffset, mapSize);
                     return <div className="selectedPoint"
                         style={{
                             left: left + "%",
@@ -208,19 +206,20 @@ export const RegionEditor = () => {
                     </div>
                 })}
             </MapDiv>
-            {getCurrentMouseHoverPosition() && <div className="hoverPositionBox">{`(${getCurrentMouseHoverPosition().x.toFixed(1)} ; ${getCurrentMouseHoverPosition().y.toFixed(1)})`}</div>}
-            {<div className="selectedPositionBox"><div className="circleLegend" />{getSelectionPosition() ? `(${getSelectionPosition().x.toFixed(1)} ; ${getSelectionPosition().y.toFixed(1)}) | Δ (0;0) = ${Math.sqrt(getSelectionPosition().x * getSelectionPosition().x + getSelectionPosition().y * getSelectionPosition().y).toFixed(2)}m` : translate("regionSettings.doubleClickToSelectPoint")}</div>}
+            {currentMouseHoverPosition && <div className="hoverPositionBox">{`(${currentMouseHoverPosition.x.toFixed(1)} ; ${currentMouseHoverPosition.y.toFixed(1)})`}</div>}
+            {<div className="selectedPositionBox"><div className="circleLegend" />{selectionPosition ? `(${selectionPosition.x.toFixed(1)} ; ${selectionPosition.y.toFixed(1)}) | Δ (0;0) = ${Math.sqrt(selectionPosition.x * selectionPosition.x + selectionPosition.y * selectionPosition.y).toFixed(2)}m` : translate("regionSettings.doubleClickToSelectPoint")}</div>}
             <button onClick={() => setBuildIdx(0)} className={["neutralBtn", "reloadButton"].join(" ")}>{translate("regionSettings.reloadMapButton")}</button>
             <button onClick={() => setSelectedRegionMapType((selectedRegionMapType + 1) % 4)} className={["neutralBtn", "toggleMapMode"].join(" ")}>{translate("regionSettings.mapModeName." + selectedRegionMapType)}</button>
         </div>
         <div className="dataSide">
             <DefaultPanelScreen title={translate("regionSettings.title")} subtitle={translate("regionSettings.subtitle")} scrollable={false}>
-                <RegionalEditorContent getSelectionPosition={getSelectionPosition()} onCitiesChanged={onCitiesChanged} selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+                <RegionalEditorContent getSelectionPosition={selectionPosition} onCitiesChanged={onCitiesChanged} selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
             </DefaultPanelScreen>
         </div>
     </div>
 
-    function getNeighborhoodMap() {
+    function getNeighborhoodMap(mapBeyondBordersSizeMultiplier: number) {
+        if (!mapSize || mapSize.length < 3) return [];
         let entries: CityResponseData[];
         switch (selectedRegionMapType) {
             case RegionMapType.Land:
@@ -262,8 +261,8 @@ export const RegionEditor = () => {
                 dominantBaseline = "text-before-edge";
             }
 
-            svgPaths.push(<path key={entry.entity.Index + "_AREA"} d={`M ${p1.x} ${p1.y} L ${p1_5.x} ${p1_5.y} L ${p2.x} ${p2.y} L ${p2_5.x} ${p2_5.y} L ${p3.x} ${p3.y} Z`} fill={clampRGB({ value: entry.mapColor, min: 0x22, max: 0xcc })} className="cityArea" stroke-width="10" stroke="black" />);
-            svgPaths.push(<text key={entry.entity.Index + "_NAME"} x={textPosition.x} y={textPosition.y} textAnchor="middle" dominantBaseline={dominantBaseline} className="cityName">{entry.name}</text>);
+            svgPaths.push(<path key={entry.entity.Index + "_AREA_" + selectedRegionMapType} d={`M ${p1.x} ${p1.y} L ${p1_5.x} ${p1_5.y} L ${p2.x} ${p2.y} L ${p2_5.x} ${p2_5.y} L ${p3.x} ${p3.y} Z`} fill={clampRGB({ value: entry.mapColor, min: 0x22, max: 0xcc })} className="cityArea" stroke-width="10" stroke="black" />);
+            svgPaths.push(<text key={entry.entity.Index + "_NAME_" + selectedRegionMapType} x={textPosition.x} y={textPosition.y} textAnchor="middle" dominantBaseline={dominantBaseline} className="cityName">{entry.name}</text>);
 
             {/* 
                 <div>
@@ -288,7 +287,7 @@ function clampRGB({ value, min = 0, max = 255 }: { value: string; min?: number; 
     const factor = (max - min) / 255;
     const r = Math.round(parseInt(value.slice(1, 3), 16) * factor) + min;
     const g = Math.round(parseInt(value.slice(3, 5), 16) * factor) + min;
-    const b = Math.round(parseInt(value.slice(5, 7), 16) * factor) + min;   
+    const b = Math.round(parseInt(value.slice(5, 7), 16) * factor) + min;
 
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }

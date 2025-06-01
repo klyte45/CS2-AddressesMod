@@ -54,10 +54,21 @@ namespace BelzontAdr
     public struct ADRRegionLandCity : IComponentData, IQueryTypeParameter, IEmptySerializable { }
     public struct ADRRegionAirCity : IComponentData, IQueryTypeParameter, IEmptySerializable { }
 
-    public struct ADRRegionCityReference : IComponentData
+    public struct ADRRegionCityReference : IComponentData, ISerializable
     {
+        const uint CURRENT_VERSION = 0;
         public Entity cityEntity;
 
         public readonly ADRRegionCity GetCityData(EntityManager entityManager) => entityManager.GetComponentData<ADRRegionCity>(cityEntity);
+        public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
+        {
+            writer.Write(CURRENT_VERSION);
+            writer.Write(cityEntity);
+        }
+        public void Deserialize<TReader>(TReader reader) where TReader : IReader
+        {
+            reader.CheckVersionK45(CURRENT_VERSION, GetType());
+            reader.Read(out cityEntity);
+        }
     }
 }
