@@ -11,6 +11,9 @@ You can find several name files at [Addresses Files repository at GitHub](https:
 
 ## Current features
 
+- **Road marker asset:** store information of a road and don't lose it when the game regenerate the road names
+- **Highway settings editor:** register highways to be shown specially in the game, useful for Write Everywhere integration but also helpful without it. Requires the Road marker asset to associate the highway with the roads.
+- **Neighbor cities editor:** register neighbor cities to be used when retrieving the outside connection name. They can be reached by land, water, air or any combination of them. A map show all them on EUIS UI.
 - Edit names of any clickable object in the editor (and save changes to send with the maps created)
 - Change sources references for stations names and seeds for roads and districts names in the selected info panel
 - In-game filename viewer, showing the weight of each word.
@@ -31,6 +34,15 @@ You can find several name files at [Addresses Files repository at GitHub](https:
 - Use district and road names to name your public transport stations!
 
 Now it's possible to setup the mod to generate up to 5 given names and up to 5 surnames! Notice that very large names might be truncated by game limitations... This feature may receive a tunning in future releases to be more configurable.
+
+## Road marker: Write Everywhere integration
+
+Any modder interested on create WE Modules that serves content to road markers might want to describe the available settings to show in the game UI. Addresses offers two integer parameters that can be used as desired by 
+module designers, example can be found at [Addresses Marker as Signs Pack](????) repository.
+
+To generate the metadata, [this repository might be useful](https://github.com/klyte45/CS2-ADR-WE-road-marker-metadata). It's filled with the data describing how Addresses Marker as Signs Pack uses the two parameters.
+
+Making story short, the parameters can be worked as bits groups, and can use dropdowns or integer inputs to set the values at UI. Simple conditions can be used to make a field be visible or not.
 
 ## Experimental mod warning!
 This mod may cause issues in the game due their early stage of development. This may be updated in the future until the official platform PDXMods get done and released
