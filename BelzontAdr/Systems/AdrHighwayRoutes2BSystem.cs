@@ -4,6 +4,8 @@ using Unity.Burst.Intrinsics;
 using Unity.Entities;
 using Unity.Jobs;
 using Game;
+using Game.Tools;
+
 
 
 
@@ -24,7 +26,6 @@ namespace BelzontAdr
         protected override void OnCreate()
         {
             base.OnCreate();
-            m_ModifiedBarrier2B = World.GetExistingSystemManaged<ModificationBarrier2B>();
             this.m_ModifiedQuery = base.GetEntityQuery(new EntityQueryDesc[]
            {
                 new EntityQueryDesc
@@ -39,10 +40,19 @@ namespace BelzontAdr
                         ComponentType.ReadOnly<Updated>(),
                         ComponentType.ReadOnly<Deleted>()
                     },
-                    None = new ComponentType[0]
+                    None =  new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<Temp>()
+                    },
                 }
            });
             RequireForUpdate(m_ModifiedQuery);
+        }
+
+        protected override void OnStartRunning()
+        {
+            base.OnStartRunning();
+            m_ModifiedBarrier2B = World.GetExistingSystemManaged<ModificationBarrier2B>();
         }
 
         protected override void OnUpdate()

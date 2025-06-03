@@ -390,6 +390,15 @@ namespace BelzontAdr
                 var landArray = new NativeArray<CityJobData>(GetLandRegionNeighborhood().Select(x => x.ToCityJobData()).ToArray(), Allocator.TempJob);
                 var waterArray = new NativeArray<CityJobData>(GetWaterRegionNeighborhood().Select(x => x.ToCityJobData()).ToArray(), Allocator.TempJob);
                 var airArray = new NativeArray<CityJobData>(GetAirRegionNeighborhood().Select(x => x.ToCityJobData()).ToArray(), Allocator.TempJob);
+
+                if (BasicIMod.DebugMode) LogUtils.DoLog($"land = {landArray.Length} | water = {waterArray.Length} | air = {airArray.Length}");
+                if (BasicIMod.TraceMode)
+                {
+                    LogUtils.DoLog($"land = \n\t{string.Join("\n\t", landArray.Select(x => $"- E: {x.entity} | {x.azimuthAngleStart} => {x.azimuthAngleCenter} => {x.azimuthAngleEnd}"))}");
+                    LogUtils.DoLog($"water = \n\t{string.Join("\n\t", waterArray.Select(x => $"- E: {x.entity} | {x.azimuthAngleStart} => {x.azimuthAngleCenter} => {x.azimuthAngleEnd}"))}");
+                    LogUtils.DoLog($"air = \n\t{string.Join("\n\t", airArray.Select(x => $"- E: {x.entity} | {x.azimuthAngleStart} => {x.azimuthAngleCenter} => {x.azimuthAngleEnd}"))}");
+                }
+
                 var job = new MapOutsideConnectionsJob
                 {
                     m_airplaneStopLookup = GetComponentLookup<AirplaneStop>(true),
@@ -399,7 +408,8 @@ namespace BelzontAdr
                     m_transformHandle = GetComponentTypeHandle<Transform>(true),
                     m_regionCitiesLand = landArray,
                     m_regionCitiesWater = waterArray,
-                    m_regionCitiesAir = airArray
+                    m_regionCitiesAir = airArray,
+                    doLog = BasicIMod.TraceMode
                 }.ScheduleParallel(m_outsideConnectionsUnmapped, Dependency);
                 landArray.Dispose(job);
                 waterArray.Dispose(job);
@@ -431,6 +441,7 @@ namespace BelzontAdr
 
             public ComponentLookup<ShipStop> m_shipStopLookup;
             public ComponentLookup<AirplaneStop> m_airplaneStopLookup;
+            public bool doLog;
 
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
@@ -445,7 +456,7 @@ namespace BelzontAdr
                     var mapToCheck = m_shipStopLookup.HasComponent(entity) ? m_regionCitiesWater
                         : m_airplaneStopLookup.HasComponent(entity) ? m_regionCitiesAir
                         : m_regionCitiesLand;
-
+                    if (doLog) UnityEngine.Debug.Log($"${entity.Index}:${entity.Version}|${azimuthDirection}");
                     for (int j = 0; j < mapToCheck.Length; j++)
                     {
                         if (mapToCheck[j].azimuthAngleEnd < mapToCheck[j].azimuthAngleStart)
@@ -688,7 +699,7 @@ namespace BelzontAdr
             m_cachedRegionLandNeighborhood = null;
             m_cachedRegionWaterNeighborhood = null;
             m_cachedRegionAirNeighborhood = null;
-            m_modificationEndBarrier.CreateCommandBuffer().RemoveComponent<ADRRegionCityReference>(m_outsideConnectionsMapped, EntityQueryCaptureMode.AtPlayback);
+            runOnUpdate.Enqueue(() => m_modificationEndBarrier.CreateCommandBuffer().RemoveComponent<ADRRegionCityReference>(m_outsideConnectionsMapped, EntityQueryCaptureMode.AtPlayback));
         }
 
         private void RemoveRegionCity(Entity entity)
@@ -701,7 +712,7 @@ namespace BelzontAdr
                     cmdBuffer.DestroyEntity(entity);
                 });
             }
-            m_modificationEndBarrier.CreateCommandBuffer().RemoveComponent<ADRRegionCityReference>(m_outsideConnectionsMapped, EntityQueryCaptureMode.AtPlayback);
+            runOnUpdate.Enqueue(() => m_modificationEndBarrier.CreateCommandBuffer().RemoveComponent<ADRRegionCityReference>(m_outsideConnectionsMapped, EntityQueryCaptureMode.AtPlayback));
         }
 
         #endregion

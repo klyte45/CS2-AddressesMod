@@ -45,7 +45,7 @@ namespace BelzontAdr
                 foreach (var tempEntity in archetypeChunk.GetNativeArray(entitiesHandle))
                 {
                     bool thisResult = anyValidResult |= DrawTooltip(tempEntity, out var isTemp, out var tempData);
-                    if (isTemp && tempData.m_Original == Entity.Null)
+                    if (isTemp && (tempData.m_Flags & (TempFlags.Create | TempFlags.Select | TempFlags.Delete | TempFlags.Upgrade)) != 0)
                     {
                         anyValidResult = thisResult;
                         goto end;

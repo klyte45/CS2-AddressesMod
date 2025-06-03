@@ -1,7 +1,7 @@
 import { HighwayData, HighwayRoutesService, RegionCityEditingDTO, RegionService } from "@klyte45/adr-commons";
 import { useEffect, useState } from "react";
 import './HighwayListingTab.scss'
-import { Cs2FormLine, Input, SimpleInput } from "@klyte45/euis-components";
+import { Cs2FormBoundaries, Cs2FormLine, Input, SimpleInput } from "@klyte45/euis-components";
 import { translate } from "#utility/translate";
 import { ListItemData, _GenericListing } from "./_GenericListing";
 
@@ -40,7 +40,7 @@ type HighwayRegisterFormProps = {
 
 
 function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel, getSelectionPosition }: HighwayRegisterFormProps) {
-    return <div className="hwEditingForm">
+    return <Cs2FormBoundaries className="hwEditingForm">
         <Input title={translate("highwayRegisterEditor.highwayPrefix")}
             getValue={() => selectedHw.prefix} onValueChanged={(x) => {
                 setSelectedHw({ ...selectedHw, prefix: x });
@@ -66,7 +66,7 @@ function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel, getS
             <button className="positiveBtn" onClick={onSave}>{translate("highwayRegisterEditor.save")}</button>
             <button className="negativeBtn" onClick={onCancel}>{translate("highwayRegisterEditor.cancel")}</button>
         </div>
-    </div>;
+    </Cs2FormBoundaries>;
 }
 
 
