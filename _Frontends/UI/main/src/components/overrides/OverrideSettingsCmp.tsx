@@ -65,7 +65,7 @@ export const OverrideSettingsCmp = ({ }) => {
     TabsNames.AirPlates,
   ]
 
-  const [currentTab, setCurrentTab] = useState(TabsNames.RoadPlates ?? tabsOrder[0] as TabsNames);
+  const [currentTab, setCurrentTab] = useState(tabsOrder[0] as TabsNames);
   const [simpleFiles, setSimpleFiles] = useState([] as SimpleNameEntry[]);
   const [innerContextSimpleFiles, setInnerContextSimpleFiles] = useState([] as SimpleNameEntry[]);
   const [indexedSimpleFiles, setIndexedSimpleFiles] = useState({} as Record<string, SimpleNameEntry>);

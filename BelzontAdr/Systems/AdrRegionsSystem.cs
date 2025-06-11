@@ -14,10 +14,10 @@ using Game.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Burst.Intrinsics;
 
 #if BURST
 using Unity.Burst;
-using Unity.Burst.Intrinsics;
 #endif
 using Unity.Collections;
 using Unity.Entities;

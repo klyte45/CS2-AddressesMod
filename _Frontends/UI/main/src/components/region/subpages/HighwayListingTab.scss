@@ -5,3 +5,10 @@
 .hwEditingForm {
     @extend %baseEditingForm;
 }
+
+svg.pathsOverlay {
+    .starHw {
+        fill: black;
+        stroke: red;        
+    }
+}

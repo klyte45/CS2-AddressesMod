@@ -2,15 +2,15 @@ import { GameScrollComponent } from "@klyte45/euis-components";
 
 export type ListItemData<T> = {
     key: string | number;
-    title: string;
-    subTitle?: string;
+    title: React.ReactNode;
+    subTitle?: React.ReactNode;
     color?: string;
     actions: { label: string; className?: string; onClick: () => void; }[];
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
 };
 type GenericListProps<T> = {
-    title: string;
+    title: React.ReactNode;
     items: ListItemData<T>[];
     noItemsMessage: string;
     onAdd: () => void;

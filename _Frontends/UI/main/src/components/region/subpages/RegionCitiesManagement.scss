@@ -4,3 +4,73 @@
 .regionCityEditingForm {
     @extend %baseEditingForm;
 }
+
+h2 .filterRegionCities {
+    flex-grow: 1;
+    flex-direction: row;
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+        margin-left: 10rem;
+        width: 30rem;
+        height: 30rem;
+        padding: 5rem;
+        background-size: 90% auto;
+        background-position-y: 50%;
+        background-position-x: 50%;
+        background-repeat: no-repeat;
+        background-color: #222222;
+
+        &.airFilter {
+            background-image: url(assetdb://gameui/Media/Game/Icons/CargoAirplane.svg);
+        }
+
+        &.waterFilter {
+            background-image: url(assetdb://gameui/Media/Game/Icons/Ship.svg);
+        }
+
+        &.landFilter {
+            background-image: url(assetdb://gameui/Media/Game/Icons/GenericVehicle.svg);
+        }
+
+        &.selected {
+            background-color: var(--accentColorDark);
+        }
+
+        &:focus {
+            border-style: none;
+        }
+    }
+}
+
+.subTitle {
+    flex-direction: row;
+    display: flex;
+    align-items: center;
+
+    >* {
+        margin-left: 5rem;
+    }
+
+    .iconReachable {
+        width: 25rem;
+        height: 25rem;
+        background-size: 90% auto;
+        background-position-y: 50%;
+        background-position-x: 50%;
+        background-repeat: no-repeat;
+    }
+
+    .air {
+        background-image: url(assetdb://gameui/Media/Game/Icons/CargoAirplane.svg);
+    }
+
+    .water {
+        background-image: url(assetdb://gameui/Media/Game/Icons/Ship.svg);
+    }
+
+    .land {
+        background-image: url(assetdb://gameui/Media/Game/Icons/GenericVehicle.svg);
+    }
+}

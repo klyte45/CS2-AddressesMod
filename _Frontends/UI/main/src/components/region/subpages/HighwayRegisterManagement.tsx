@@ -1,27 +1,30 @@
 import { HighwayData, HighwayRoutesService, RegionCityEditingDTO, RegionService } from "@klyte45/adr-commons";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import './HighwayListingTab.scss'
 import { Cs2FormBoundaries, Cs2FormLine, Input, SimpleInput } from "@klyte45/euis-components";
 import { translate } from "#utility/translate";
 import { ListItemData, _GenericListing } from "./_GenericListing";
+import { createPortal } from "react-dom";
+import { getStarPathD } from "#utility/svgutils";
 
 type MainProps = {
     getSelectionPosition: { x: number, y: number }
+    mapSizeY: number
 }
 
-
-
-export function HighwayRegisterManagement({ getSelectionPosition }: MainProps) {
+export function HighwayRegisterManagement({ getSelectionPosition, mapSizeY }: MainProps) {
     const [selectedHw, setSelectedHw] = useState<Partial<HighwayData>>()
+
 
     useEffect(() => {
         return () => document.querySelectorAll(".pathsOverlay .hwId_hover").forEach(x => x.classList.remove("hwId_hover"))
     }, [])
     if (!selectedHw) {
-        return <HighwayListing onSelectItem={setSelectedHw} />
+        return <HighwayListing onSelectItem={setSelectedHw} mapSizeY={mapSizeY} />
     }
 
     return <HighwayRegisterForm
+        mapSizeY={mapSizeY}
         getSelectionPosition={getSelectionPosition}
         selectedHw={selectedHw}
         setSelectedHw={setSelectedHw}
@@ -35,12 +38,16 @@ type HighwayRegisterFormProps = {
     setSelectedHw: (x: Partial<HighwayData>) => any;
     onSave: () => any;
     onCancel: () => any,
-    getSelectionPosition: { x: number, y: number }
+    getSelectionPosition: { x: number, y: number },
+    mapSizeY: number
 };
 
 
-function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel, getSelectionPosition }: HighwayRegisterFormProps) {
-    return <Cs2FormBoundaries className="hwEditingForm">
+function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel, getSelectionPosition, mapSizeY }: HighwayRegisterFormProps) {
+
+
+
+    return <><Cs2FormBoundaries className="hwEditingForm">
         <Input title={translate("highwayRegisterEditor.highwayPrefix")}
             getValue={() => selectedHw.prefix} onValueChanged={(x) => {
                 setSelectedHw({ ...selectedHw, prefix: x });
@@ -57,8 +64,8 @@ function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel, getS
                 return x;
             }} />
         <Cs2FormLine title={translate("highwayRegisterEditor.startPositionReference")}>
-            <SimpleInput isValid={(x) => !isNaN(parseFloat(x.replace(",", ".")))} getValue={() => selectedHw.refStartPoint?.[0].toFixed(3) ?? "0.00"} onValueChanged={(x) => setSelectedHw({ ...selectedHw, refStartPoint: [parseFloat(x.replace(",", ".")), selectedHw.refStartPoint?.[1] ?? 0] })} />
-            <SimpleInput isValid={(x) => !isNaN(parseFloat(x.replace(",", ".")))} getValue={() => selectedHw.refStartPoint?.[1].toFixed(3) ?? "0.00"} onValueChanged={(x) => setSelectedHw({ ...selectedHw, refStartPoint: [selectedHw.refStartPoint?.[0] ?? 0, parseFloat(x.replace(",", "."))] })} />
+            <SimpleInput isValid={(x) => !isNaN(parseFloat(x?.replace(",", ".")))} getValue={() => selectedHw.refStartPoint?.[0].toFixed(3) ?? "0.00"} onValueChanged={(x) => setSelectedHw({ ...selectedHw, refStartPoint: [parseFloat(x.replace(",", ".")), selectedHw.refStartPoint?.[1] ?? 0] })} />
+            <SimpleInput isValid={(x) => !isNaN(parseFloat(x?.replace(",", ".")))} getValue={() => selectedHw.refStartPoint?.[1].toFixed(3) ?? "0.00"} onValueChanged={(x) => setSelectedHw({ ...selectedHw, refStartPoint: [selectedHw.refStartPoint?.[0] ?? 0, parseFloat(x.replace(",", "."))] })} />
             <button className="neutralBtn" disabled={!getSelectionPosition} onClick={() => setSelectedHw({ ...selectedHw, refStartPoint: [getSelectionPosition.x, getSelectionPosition.y] })}>{translate("highwayRegisterEditor.copyFromMapSelection")}</button>
         </Cs2FormLine>
         <div className="formGap" />
@@ -66,16 +73,25 @@ function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel, getS
             <button className="positiveBtn" onClick={onSave}>{translate("highwayRegisterEditor.save")}</button>
             <button className="negativeBtn" onClick={onCancel}>{translate("highwayRegisterEditor.cancel")}</button>
         </div>
-    </Cs2FormBoundaries>;
+    </Cs2FormBoundaries>
+        {createPortal(
+            <path key={"HW-" + selectedHw.Id} className="starHw" stroke-width={mapSizeY * .001}
+                d={getStarPathD(selectedHw.refStartPoint?.[0] ?? 0, selectedHw.refStartPoint?.[1] ?? 0, mapSizeY * .025)} />,
+            document.querySelector("svg.pathsOverlay")!
+        )}
+    </>;
 }
 
 
 type HighwayListingProps = {
     onSelectItem: (x: Partial<HighwayData>) => any;
+    mapSizeY: number;
 };
 
-function HighwayListing({ onSelectItem }: HighwayListingProps) {
+function HighwayListing({ onSelectItem, mapSizeY }: HighwayListingProps) {
     const [highways, setHighways] = useState([] as HighwayData[]);
+    const [hoveredHw, setHoveredHw] = useState<HighwayData>();
+
 
     useEffect(() => {
         HighwayRoutesService.listHighwaysRegistered().then((x) =>
@@ -89,6 +105,7 @@ function HighwayListing({ onSelectItem }: HighwayListingProps) {
         );
         document.querySelectorAll(".pathsOverlay .hwId_hover").forEach((x) => x.classList.remove("hwId_hover"));
     }, []);
+    const isReady = useMemo(() => !!document.querySelector("svg.pathsOverlay"), [document.querySelector("svg.pathsOverlay")]);
 
     const items: ListItemData<HighwayData>[] = highways.map((x) => ({
         key: x.Id,
@@ -100,17 +117,21 @@ function HighwayListing({ onSelectItem }: HighwayListingProps) {
                 onClick: () => onSelectItem(x),
             },
         ],
-        onMouseEnter: () =>
+        onMouseEnter: () => {
             document
                 .querySelectorAll(".pathsOverlay .hwId_" + x.Id)
-                .forEach((el) => el.classList.add("hwId_hover")),
-        onMouseLeave: () =>
+                .forEach((el) => el.classList.add("hwId_hover"))
+            setHoveredHw(x);
+        },
+        onMouseLeave: () => {
             document
                 .querySelectorAll(".pathsOverlay .hwId_" + x.Id)
                 .forEach((el) => el.classList.remove("hwId_hover")),
+                setHoveredHw(undefined);
+        }
     }));
 
-    return (
+    return <>
         <_GenericListing
             title={translate("highwayRegisterEditor.titleList")}
             items={items}
@@ -118,5 +139,10 @@ function HighwayListing({ onSelectItem }: HighwayListingProps) {
             onAdd={() => onSelectItem({})}
             addBtnLabel={translate("highwayRegisterEditor.addBtn")}
         />
-    );
+        {isReady && createPortal(<>
+            {hoveredHw && <path key={"HW-" + hoveredHw.Id} className="starHw" stroke-width={mapSizeY * .001} d={getStarPathD(hoveredHw.refStartPoint?.[0] ?? 0, hoveredHw.refStartPoint?.[1] ?? 0, mapSizeY * .025)} />}
+        </>,
+            document.querySelector("svg.pathsOverlay")!
+        )}
+    </>
 }

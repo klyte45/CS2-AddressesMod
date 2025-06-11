@@ -147,7 +147,7 @@ export const RegionEditor = () => {
         const posX = (info.clientX - bounds.x - bounds.width * .5);
         const posY = (info.clientY - bounds.y - bounds.height * .5);
         currentHoverPosition.x = posX / 800 / zoom * mapSize[0] - position[0];
-        currentHoverPosition.y = posY / 800 / zoom * mapSize[2] - position[1];
+        currentHoverPosition.y = -(posY / 800 / zoom * mapSize[2] - position[1]);
         return currentHoverPosition;
     }
 
@@ -185,7 +185,7 @@ export const RegionEditor = () => {
                     return <div className="selectedPoint"
                         style={{
                             left: left + "%",
-                            bottom: bottom + "%",
+                            bottom: 100 - bottom + "%",
                         }} ></div>
                 })()}
                 {outsideConnections.filter(x => ![OutsideConnectionType.Pipe, OutsideConnectionType.Electricity].includes(x.outsideConnectionType.value__)).map((x, i) => {
@@ -213,7 +213,7 @@ export const RegionEditor = () => {
         </div>
         <div className="dataSide">
             <DefaultPanelScreen title={translate("regionSettings.title")} subtitle={translate("regionSettings.subtitle")} scrollable={false}>
-                <RegionalEditorContent getSelectionPosition={selectionPosition} onCitiesChanged={onCitiesChanged} selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+                <RegionalEditorContent getSelectionPosition={selectionPosition} onCitiesChanged={onCitiesChanged} selectedTab={selectedTab} setSelectedTab={setSelectedTab} mapSizeY={mapSize[2]} />
             </DefaultPanelScreen>
         </div>
     </div>
@@ -238,14 +238,17 @@ export const RegionEditor = () => {
         const svgPaths = [];
         for (let i = 0; i < entries.length; i++) {
             const entry = entries[i];
-            const p1 = pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleStart - 90, mapSize[0] / 1.5);
+            const p1 = pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleStart - 90, mapSize[0] * 1.1);
             const p2 = pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleCenter - 90, 100_000);
-            const p3 = pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleEnd - 90, mapSize[0] / 1.5);
+            const p3 = pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleEnd - 90, mapSize[0] * 1.1);
 
-            const p1_5 = entry.azimuthAngleStart > 315 || entry.azimuthAngleStart < 45 || (entry.azimuthAngleStart > 135 && entry.azimuthAngleStart < 225) ? { x: p1.x, y: p2.y } : { x: p2.x, y: p1.y };
-            const p2_5 = entry.azimuthAngleEnd > 315 || entry.azimuthAngleEnd < 45 || (entry.azimuthAngleEnd > 135 && entry.azimuthAngleEnd < 225) ? { x: p3.x, y: p2.y } : { x: p2.x, y: p3.y };
+            const p1_5 = entry.azimuthAngleStart / 45 % 2 === 1 ? pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleStart - 90, mapSize[0] * 6) : entry.azimuthAngleStart > 315 || entry.azimuthAngleStart < 45 || (entry.azimuthAngleStart > 135 && entry.azimuthAngleStart < 225) ? { x: p1.x, y: p2.y } : { x: p2.x, y: p1.y };
+            const p2_5 = entry.azimuthAngleEnd / 45 % 2 === 1 ? pointAtAngle({ x: 0, y: 0 }, entry.azimuthAngleEnd - 90, mapSize[0] * 6) : entry.azimuthAngleEnd > 315 || entry.azimuthAngleEnd < 45 || (entry.azimuthAngleEnd > 135 && entry.azimuthAngleEnd < 225) ? { x: p3.x, y: p2.y } : { x: p2.x, y: p3.y };
 
-            const textPosition = pointAtAngle({ x: 0, y: 0 }, (entry.azimuthAngleEnd + entry.azimuthAngleStart) / 2 - 90, mapSize[0] / 1.5)
+            const textPosition = pointAtAngle({ x: 0, y: 0 }, ((entry.azimuthAngleEnd + entry.azimuthAngleStart + (entry.azimuthAngleEnd > entry.azimuthAngleStart ? 0 : 360)) / 2) - 90, mapSize[0] / 1.5)
+
+
+
 
             if (Math.abs(textPosition.x) < mapSize[0] / 2 && Math.abs(textPosition.y) < mapSize[2] / 2) {
                 // if (Math.abs(textPosition.x) / mapSize[0] > Math.abs(textPosition.y) / mapSize[2]) {
@@ -263,7 +266,7 @@ export const RegionEditor = () => {
 
             const anchor = p1.x < mapSize[0] / -2 ? "end" : p1.x > mapSize[0] / 2 ? "start" : "middle";
 
-            svgPaths.push(<path key={entry.entity.Index + "_AREA_" + selectedRegionMapType} d={`M0,0 L ${p1.x} ${p1.y} L ${p1_5.x} ${p1_5.y} L ${p2.x} ${p2.y} L ${p2_5.x} ${p2_5.y} L ${p3.x} ${p3.y} Z`} fill={clampRGB({ value: entry.mapColor, min: 0x22, max: 0xcc })} className="cityArea" stroke-width="10" stroke="black" />);
+            svgPaths.unshift(<path key={entry.entity.Index + "_AREA_" + selectedRegionMapType} d={`M0,0 L ${p1.x} ${p1.y} L ${p1_5.x} ${p1_5.y} L ${p2.x} ${p2.y} L ${p2_5.x} ${p2_5.y} L ${p3.x} ${p3.y} Z`} fill={clampRGB({ value: entry.mapColor, min: 0x22, max: 0xcc })} className="cityArea" stroke-width="10" stroke="black" />);
             svgPaths.push(<text key={entry.entity.Index + "_NAME_" + selectedRegionMapType} x={textPosition.x} y={textPosition.y} textAnchor={anchor} dominantBaseline={dominantBaseline} className="cityName">{entry.name}</text>);
 
             {/* 
@@ -319,6 +322,7 @@ type RegionalEditorContentProps = {
     onCitiesChanged: () => void;
     setSelectedTab: (x: number) => void;
     selectedTab: number;
+    mapSizeY: number;
 }
 
 function AsRelativePosition(point2d: { x: number, y: number }, mapOffset: number[], mapSize: number[]) {
@@ -327,12 +331,12 @@ function AsRelativePosition(point2d: { x: number, y: number }, mapOffset: number
     return { bottom, left };
 }
 
-function RegionalEditorContent({ getSelectionPosition, onCitiesChanged, selectedTab, setSelectedTab }: RegionalEditorContentProps) {
+function RegionalEditorContent({ getSelectionPosition, onCitiesChanged, selectedTab, setSelectedTab, mapSizeY }: RegionalEditorContentProps) {
 
     const menus: Omit<MenuItem, 'iconUrl'>[] = [
         {
             name: translate("highwayRegisterEditor.tabTitle"),
-            panelContent: <HighwayRegisterManagement getSelectionPosition={getSelectionPosition} />
+            panelContent: <HighwayRegisterManagement getSelectionPosition={getSelectionPosition} mapSizeY={mapSizeY} />
         },
         {
             name: translate("regionCityEditor.tabTitle"),

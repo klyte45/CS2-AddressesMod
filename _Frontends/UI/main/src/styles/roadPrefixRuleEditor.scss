@@ -19,7 +19,7 @@
         border-right-color: var(--menuBorderColor1);
         overflow: auto;
 
-        >div {
+        .cs2-fieldStyle2 {
             &.selectedItem {
                 background-color: var(--menuBorderColor2);
                 color: black;
@@ -27,6 +27,8 @@
 
             button,
             div.buttonPlaceholder {
+                flex-grow: 0;
+
                 width: 35rem;
                 height: 35rem;
                 padding: 0;

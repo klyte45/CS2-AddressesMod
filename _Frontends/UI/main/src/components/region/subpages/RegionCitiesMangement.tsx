@@ -37,15 +37,29 @@ type RegionCityListProps = {
 
 function RegionCityListing({ onSelectItem }: RegionCityListProps) {
     const [cities, setCities] = useState([] as RegionCityEditingDTO[]);
+    const [airFilter, setAirFilter] = useState(true);
+    const [landFilter, setLandFilter] = useState(true);
+    const [waterFilter, setWaterFilter] = useState(true);
 
     useEffect(() => {
         RegionService.listAllRegionCities().then((x) => setCities(x.sort((a, b) => a.name.localeCompare(b.name))));
     }, []);
 
-    const items: ListItemData<RegionCityEditingDTO>[] = cities.map((x) => ({
+
+
+
+    const items: ListItemData<RegionCityEditingDTO>[] = cities.filter(x =>
+        (airFilter && x.reachableByAir) ||
+        (landFilter && x.reachableByLand) ||
+        (waterFilter && x.reachableByWater) || (!x.reachableByAir && !x.reachableByLand && !x.reachableByWater) // Include cities with no reachability set
+    ).map((x) => ({
         key: x.entity.Index,
         title: x.name,
-        subTitle: `${(x.centerAzimuth).toFixed(1)}°`,
+        subTitle: <>{(x.centerAzimuth).toFixed(1) + '°'}
+            {x.reachableByLand && <div className='iconReachable land' />}
+            {x.reachableByWater && <div className='iconReachable water' />}
+            {x.reachableByAir && <div className='iconReachable air' />}
+        </>,
         color: x.mapColor,
         actions: [
             {
@@ -58,7 +72,11 @@ function RegionCityListing({ onSelectItem }: RegionCityListProps) {
 
     return (
         <_GenericListing
-            title={translate(`${REGION_CITY_EDITOR}.titleList`)}
+            title={<>{translate(`${REGION_CITY_EDITOR}.titleList`)}<div className='filterRegionCities'>
+                <button data-tooltip={translate(`${REGION_CITY_EDITOR}.reachableByLand`)} className={["landFilter", landFilter && "selected"].join(" ")} onClick={() => setLandFilter(!landFilter)}></button>
+                <button data-tooltip={translate(`${REGION_CITY_EDITOR}.reachableByWater`)} className={["waterFilter", waterFilter && "selected"].join(" ")} onClick={() => setWaterFilter(!waterFilter)}></button>
+                <button data-tooltip={translate(`${REGION_CITY_EDITOR}.reachableByAir`)} className={["airFilter", airFilter && "selected"].join(" ")} onClick={() => setAirFilter(!airFilter)}></button>
+            </div></>}
             items={items}
             noItemsMessage={translate(`${REGION_CITY_EDITOR}.noCitiesRegisteredMessage`)}
             onAdd={() => onSelectItem({})}

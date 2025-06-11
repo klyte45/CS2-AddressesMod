@@ -25,11 +25,6 @@ export default () => {
 
   const menus: MenuItem[] = [
     {
-      iconUrl: "coui://adr.k45/UI/images/outsideConnections.svg",
-      name: translate("regionSettings.title"),
-      panelContent: <RegionEditor />
-    },
-    {
       iconUrl: "coui://uil/Standard/NameSort.svg",
       name: translate("namesetManagement.title"),
       panelContent: <CityNamesetLibraryCmp />,
@@ -44,6 +39,11 @@ export default () => {
       iconUrl: "coui://uil/Standard/Highway.svg",
       name: translate("roadPrefixSettings.title"),
       panelContent: <RoadPrefixCmp />
+    },
+    {
+      iconUrl: "coui://adr.k45/UI/images/outsideConnections.svg",
+      name: translate("regionSettings.title"),
+      panelContent: <RegionEditor />
     },
   ]
   return <>
