@@ -21,6 +21,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static BelzontAdr.AdrNameFile;
+using Hash128 = Colossal.Hash128;
 
 namespace BelzontAdr
 {
@@ -28,10 +29,12 @@ namespace BelzontAdr
     {
         const uint CURRENT_VERSION = 1;
 
+        public static AdrNamesetSystem Instance { get; private set; }
+
         private AdrMainSystem mainSystem;
         private EntityQuery m_UnsetRandomQuery;
-        private static Unity.Mathematics.Random seedGenerator = Unity.Mathematics.Random.CreateFromIndex(0xf4a54);
-        internal static ref Unity.Mathematics.Random SeedGenerator => ref seedGenerator;
+        private Unity.Mathematics.Random seedGenerator;
+        internal static ref Unity.Mathematics.Random SeedGenerator => ref Instance.seedGenerator;
 
         #region UI Bindings
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
@@ -66,6 +69,7 @@ namespace BelzontAdr
         protected override void OnCreate()
         {
             base.OnCreate();
+            Instance = this;
             mainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
 
             m_UnsetRandomQuery = GetEntityQuery(new EntityQueryDesc[]
@@ -253,7 +257,7 @@ namespace BelzontAdr
         public void SetDefaults(Context context)
         {
             CityNamesets.Clear();
-            seedGenerator = new Unity.Mathematics.Random();
+            seedGenerator = Unity.Mathematics.Random.CreateFromIndex(((Hash128)Guid.NewGuid()).value.x);
         }
 
         private bool isDirty;

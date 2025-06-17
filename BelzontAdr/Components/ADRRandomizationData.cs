@@ -8,7 +8,7 @@ namespace BelzontAdr
     {
         private uint m_seedIdentifier = 0;
 
-        const uint CURRENT_VERSION = 1;
+        const uint CURRENT_VERSION = 2;
 
         public readonly uint SeedIdentifier => m_seedIdentifier;
 
@@ -37,9 +37,13 @@ namespace BelzontAdr
                 reader.Read(out ushort identifier);
                 m_seedIdentifier = identifier;
             }
-            else
+            else 
             {
                 reader.Read(out m_seedIdentifier);
+                if (version == 1 && m_seedIdentifier == ~0u)
+                {
+                    Redraw();
+                }
             }
         }
 

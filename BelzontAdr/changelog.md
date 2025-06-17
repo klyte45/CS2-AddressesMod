@@ -1,4 +1,8 @@
-# v0.2.0r0 (11-JUN-25)
+# v0.2.0r3 (17-JUN-25)
+
+- Fixed lack of randomizing for names when creating new cities.
+
+## FROM v0.2.0r0 (11-JUN-25)
 
 ## Highway & Road System
 - Added a new prop that allows customizing some road attributes. It prevents the game from losing the name data if a road is deleted. Available at road services tab.

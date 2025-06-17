@@ -166,7 +166,6 @@ namespace BelzontAdr
 
         private void DoInitValueBindings_InfoPanel(Action<string, object[]> EventCaller, Action<string, Delegate> CallBinder)
         {
-            m_selectedInfoUISystem = World.GetExistingSystemManaged<SelectedInfoUISystem>();
 
             InfoPanel_RouteId = new(default, $"{PREFIX}{nameof(InfoPanel_RouteId)}", EventCaller, CallBinder, (x, _) => x.ToString(), (x, _) => Colossal.Hash128.Parse(x));
             InfoPanel_RouteDirection = new(default, $"{PREFIX}{nameof(InfoPanel_RouteDirection)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (RouteDirection)x);
@@ -177,7 +176,18 @@ namespace BelzontAdr
             InfoPanel_OverrideMileage = new(default, $"{PREFIX}{nameof(InfoPanel_OverrideMileage)}", EventCaller, CallBinder);
             InfoPanel_ReverseMileageCounting = new(default, $"{PREFIX}{nameof(InfoPanel_ReverseMileageCounting)}", EventCaller, CallBinder);
 
-            m_selectedInfoUISystem.eventSelectionChanged += OnSelectionChanged;
+            bool registerSelfOnUI()
+            {
+                m_selectedInfoUISystem = World.GetExistingSystemManaged<SelectedInfoUISystem>();
+                if (m_selectedInfoUISystem is null)
+                {
+                    return false;
+                }
+                m_selectedInfoUISystem.eventSelectionChanged += OnSelectionChanged;
+                return true;
+            }
+
+            GameManager.instance.RegisterUpdater(registerSelfOnUI);
 
             InfoPanel_RouteId.OnScreenValueChanged += (x) => EnqueueModification<Colossal.Hash128, ADRHighwayMarkerData>(x, (x, currentItem, entity) =>
             {
