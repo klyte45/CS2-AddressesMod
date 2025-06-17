@@ -442,6 +442,7 @@ namespace BelzontAdr
                     m_subObjectsLookup = GetBufferLookup<SubObject>(),
                 };
                 updater.ScheduleParallel(m_unprocessedAggregations, Dependency).Complete();
+                m_mainSystem.OnChangedRoadNameGenerationRules();
             }
             else if (!m_dirtyHwDataAggregations.IsEmpty)
             {
@@ -455,6 +456,7 @@ namespace BelzontAdr
                     m_HighwayAggregationData = GetComponentTypeHandle<ADRHighwayAggregationData>()
                 };
                 updater.ScheduleParallel(m_dirtyHwDataAggregations, Dependency).Complete();
+                m_mainSystem.OnChangedRoadNameGenerationRules();
             }
             else if (m_cacheToBeErased.Count() > 0 && !m_cachedAggregations.IsEmpty)
             {
@@ -467,6 +469,7 @@ namespace BelzontAdr
                 };
                 updater.ScheduleParallel(m_cachedAggregations, Dependency).Complete();
                 m_cacheToBeErased.Clear();
+                m_mainSystem.OnChangedRoadNameGenerationRules();
             }
             else if (!m_uncachedAggregations.IsEmpty)
             {
@@ -491,6 +494,7 @@ namespace BelzontAdr
                 };
                 updater.ScheduleParallel(m_uncachedAggregations, Dependency).Complete();
                 highwayRefPointMap.Dispose();
+                m_mainSystem.OnChangedRoadNameGenerationRules();
             }
         }
 #if BURST

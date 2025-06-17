@@ -34,7 +34,12 @@ namespace BelzontAdr
         private AdrMainSystem mainSystem;
         private EntityQuery m_UnsetRandomQuery;
         private Unity.Mathematics.Random seedGenerator;
-        internal static ref Unity.Mathematics.Random SeedGenerator => ref Instance.seedGenerator;
+        
+        public uint GetNextSeed()
+        {
+            seedGenerator = Unity.Mathematics.Random.CreateFromIndex(seedGenerator.state);
+            return seedGenerator.NextUInt();
+        }
 
         #region UI Bindings
         public void SetupCallBinder(Action<string, Delegate> eventCaller)

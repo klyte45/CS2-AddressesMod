@@ -1,5 +1,6 @@
-# v0.2.0r3 (17-JUN-25)
+# v0.2.0r4 (17-JUN-25)
 
+- Invalidating roads names cache when a highway rule is changed.
 - Fixed lack of randomizing for names when creating new cities.
 
 ## FROM v0.2.0r0 (11-JUN-25)

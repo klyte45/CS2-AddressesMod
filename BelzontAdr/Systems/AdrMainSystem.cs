@@ -78,7 +78,7 @@ namespace BelzontAdr
 
         protected override void OnUpdate()
         {
-            if (!GameManager.instance.isGameLoading && !GameManager.instance.isGameLoading)
+            if (!GameManager.instance.isGameLoading)
             {
                 while (actionsToGoOnUpdate.TryDequeue(out var action))
                 {
@@ -119,9 +119,9 @@ namespace BelzontAdr
             isDirtyDistricts = false;
         }
 
-        private void OnChangedRoadNameGenerationRules() => EnqueueToRunOnUpdate(ResetRoadsCache);
+        public void OnChangedRoadNameGenerationRules() => EnqueueToRunOnUpdate(ResetRoadsCache);
 
-        private void OnChangedDistrictNameGenerationRules() => EnqueueToRunOnUpdate(ResetDistrictsCache);
+        public void OnChangedDistrictNameGenerationRules() => EnqueueToRunOnUpdate(ResetDistrictsCache);
 
         private bool isDirtyRoads;
         private bool isDirtyDistricts;

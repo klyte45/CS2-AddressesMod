@@ -16,7 +16,7 @@ namespace BelzontAdr
 
         public void Redraw()
         {
-            m_seedIdentifier = AdrNamesetSystem.SeedGenerator.NextUInt();
+            m_seedIdentifier = AdrNamesetSystem.Instance.GetNextSeed();
         }
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
