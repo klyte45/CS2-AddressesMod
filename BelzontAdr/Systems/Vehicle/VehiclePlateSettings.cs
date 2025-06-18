@@ -196,7 +196,7 @@ namespace BelzontAdr
                         alpha,alphaNum,alphaNum,alphaNum,alphaNum,"-",alphaNum
                     },
                 m_flagsLocal = 0b11100,
-                m_flagsCarNumber = 0b1,
+                m_flagsCarNumber = 0b11,
                 m_randomSeed = (uint)new Random().Next()
             };
             result.UpdateChecksum();
@@ -264,7 +264,7 @@ namespace BelzontAdr
             public NativeArray<int> m_charZeroPos;
 
             public Hash128 Checksum;
-            public readonly FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch, int compositionNumber = 1)
+            public readonly FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch, int compositionNumber = 1, bool prefixOnly = false)
             {
                 var output = new NativeArray<Unicode.Rune>(m_charZeroPos.Length, Allocator.Temp);
                 uint currentFlag = 1;
@@ -279,8 +279,11 @@ namespace BelzontAdr
                     var numberChars = (ulong)(currentIdx == m_charZeroPos.Length - 1 ? m_lettersAllowedProcessed.Length : m_charZeroPos[currentIdx + 1]) - charZeroPos;
                     if ((m_flagsCarNumber & currentFlag) != 0)
                     {
-                        output[currentIdx] = new Unicode.Rune(m_lettersAllowedProcessed[(int)((ulong)compositionNumber % numberChars + charZeroPos)]);
-                        compositionNumber /= (int)numberChars;
+                        if (!prefixOnly)
+                        {
+                            output[currentIdx] = new Unicode.Rune(m_lettersAllowedProcessed[(int)((ulong)compositionNumber % numberChars + charZeroPos)]);
+                            compositionNumber /= (int)numberChars;
+                        }
                     }
                     else if ((m_flagsLocal & currentFlag) != 0)
                     {

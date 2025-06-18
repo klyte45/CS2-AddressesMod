@@ -56,6 +56,7 @@ namespace BelzontAdr
                             serialNumber = serialNumber,
                             manufactureMonthsFromEpoch = m_refDateTime,
                             calculatedPlate = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, m_refDateTime, carNumber),
+                            calculatedConvoyPrefix = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, m_refDateTime, carNumber, true),
                             checksumRule = railPlatesSettings.Checksum,
                         };
                         m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);
@@ -78,6 +79,7 @@ namespace BelzontAdr
                             serialNumber = serialNumber,
                             manufactureMonthsFromEpoch = m_refDateTime,
                             calculatedPlate = settingEffective.GetPlateFor(0, serialNumber, m_refDateTime),
+                            calculatedConvoyPrefix = settingEffective.GetPlateFor(0, serialNumber, m_refDateTime, prefixOnly: true),
                             checksumRule = settingEffective.Checksum,
                         };
                         m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);

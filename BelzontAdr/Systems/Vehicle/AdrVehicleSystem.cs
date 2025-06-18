@@ -13,6 +13,7 @@ using Game.Simulation;
 using Game.Tools;
 using Game.Vehicles;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Unity.Entities;
@@ -23,7 +24,7 @@ namespace BelzontAdr
 
     public partial class AdrVehicleSystem : GameSystemBase, IBelzontBindable, IDefaultSerializable
     {
-        private const uint CURRENT_VERSION = 0;
+        private const uint CURRENT_VERSION = 1;
 
         #region Controller endpoints
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
@@ -58,7 +59,10 @@ namespace BelzontAdr
         private VehiclePlateSettings airVehiclesPlatesSettings = new();
         private VehiclePlateSettings waterVehiclesPlatesSettings = new();
 
-
+        public override int GetUpdateInterval(SystemUpdatePhase phase)
+        {
+            return 16;
+        }
 
         public VehiclePlateSettings RoadVehiclesPlatesSettings
         {
@@ -181,37 +185,43 @@ namespace BelzontAdr
                         }
                     }
             });
-            RequireAnyForUpdate(m_unregisteredVehiclesQuery, m_dirtyVehiclesPlateQuery
-#if DEBUG
-         , m_unregisteredVehicleSpawnerQuery
-#endif
-                );
+            GameManager.instance.RegisterUpdater(() =>
+            {
+                if (AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == "BelzontWE") is Assembly weAssembly
+                    && weAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == "WEVehicleFn") is Type t)
+                {
+                    if (t.GetField("GetVehiclePlate_binding", RedirectorUtils.allFlags) is FieldInfo vehiclePlateField)
+                    {
+                        var originalValue = vehiclePlateField.GetValue(null) as Func<Entity, string>;
+                        vehiclePlateField.SetValue(null, (Entity e) => EntityManager.TryGetComponent(e, out ADRVehicleData vehicleData) ? vehicleData.calculatedPlate.ToString() : originalValue(e));
+                    }
+                    if (t.GetField("GetSerialNumber_binding", RedirectorUtils.allFlags) is FieldInfo getSerialNumber)
+                    {
+                        var originalValue = getSerialNumber.GetValue(null) as Func<Entity, string>;
+                        getSerialNumber.SetValue(null, (Entity e) => EntityManager.TryGetComponent(e, out ADRVehicleData vehicleData) ? vehicleData.serialNumber.ToString() : originalValue(e));
+                    }
+                }
+            });
+
         }
 
 
-        private bool weInitialized = false;
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
-            if (!weInitialized)
-            {
-                weInitialized = true;
-                if (AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == "BelzontWE") is Assembly weAssembly
-                    && weAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == "WEVehicleFn") is Type t
-                    && t.GetField("GetVehiclePlate_binding", RedirectorUtils.allFlags) is FieldInfo vehiclePlateField)
-                {
-                    var originalValue = vehiclePlateField.GetValue(null) as Func<Entity, string>;
-                    vehiclePlateField.SetValue(null, (Entity e) => EntityManager.TryGetComponent(e, out ADRVehicleData vehicleData) ? vehicleData.calculatedPlate.ToString() : originalValue(e));
-                }
-            }
         }
 
+        private readonly Queue<Action> actionsToRunOnMain = new();
 
         protected unsafe override void OnUpdate()
         {
             if (GameManager.instance.isGameLoading)
             {
                 return;
+            }
+            while (actionsToRunOnMain.TryDequeue(out Action action))
+            {
+                action.Invoke();
             }
             if (!m_unregisteredVehiclesQuery.IsEmptyIgnoreFilter)
             {
@@ -321,7 +331,7 @@ namespace BelzontAdr
         public void Deserialize<R>(R reader) where R : IReader
         {
 
-            reader.CheckVersionK45(CURRENT_VERSION, GetType());
+            var version = reader.CheckVersionK45(CURRENT_VERSION, GetType());
             roadVehiclesPlatesSettings = new();
             waterVehiclesPlatesSettings = new();
             airVehiclesPlatesSettings = new();
@@ -334,6 +344,19 @@ namespace BelzontAdr
             reader.Read(out currentSerialNumberVehicleSources);
             reader.Read(out currentSerialNumberVehicles);
 
+            if (version == 0)
+            {
+                railVehiclesPlatesSettings = VehiclePlateSettings.CreateRailVehicleDefault(m_timeSystem);
+                actionsToRunOnMain.Enqueue(() => m_Barrier.CreateCommandBuffer().RemoveComponent<ADRVehicleData>(GetEntityQuery(new[]{
+                    new EntityQueryDesc
+                    {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ADRVehicleData>(),
+                        }
+                    }
+                }), EntityQueryCaptureMode.AtPlayback));
+            }
         }
 
         public void Serialize<W>(W writer) where W : IWriter

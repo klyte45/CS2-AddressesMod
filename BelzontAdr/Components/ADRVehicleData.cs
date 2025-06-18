@@ -14,6 +14,7 @@ namespace BelzontAdr
             public Entity cityOrigin;
             public ulong serialNumber;
             public string calculatedPlate;
+            public string calculatedConvoyPrefix;
             public int manufactureMonthsFromEpoch;
 
             private CohtmlSafe() { }
@@ -25,6 +26,7 @@ namespace BelzontAdr
                     plateCategory = data.plateCategory,
                     cityOrigin = data.cityOrigin,
                     calculatedPlate = data.calculatedPlate.ToString(),
+                    calculatedConvoyPrefix = data.calculatedConvoyPrefix.ToString(),
                     manufactureMonthsFromEpoch = data.manufactureMonthsFromEpoch,
                     serialNumber = data.serialNumber
                 };
@@ -39,13 +41,14 @@ namespace BelzontAdr
             Rail
         }
 
-        private const uint CURRENT_VERSION = 0;
-
+        private const uint CURRENT_VERSION = 1;
+        private const string LEGACY_CONVOY_PREFIX = "<INVALID LEGACY VALUE>";
         public VehiclePlateCategory plateCategory;
         public Entity cityOrigin;
         public Colossal.Hash128 checksumRule;
         public ulong serialNumber;
         public FixedString32Bytes calculatedPlate;
+        public FixedString32Bytes calculatedConvoyPrefix;
         public int manufactureMonthsFromEpoch;
 
 
@@ -63,6 +66,21 @@ namespace BelzontAdr
             reader.Read(out serialNumber);
             reader.Read(out calculatedPlate); ;
             reader.Read(out manufactureMonthsFromEpoch);
+            if(version >= 1)
+            {
+                reader.Read(out calculatedConvoyPrefix);
+            }
+            else
+            {
+                if (plateCategory == VehiclePlateCategory.Rail)
+                {
+                    calculatedConvoyPrefix = LEGACY_CONVOY_PREFIX;
+                }
+                else
+                {
+                    calculatedConvoyPrefix = calculatedPlate;
+                }
+            }
         }
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
@@ -74,6 +92,7 @@ namespace BelzontAdr
             writer.Write(serialNumber);
             writer.Write(calculatedPlate);
             writer.Write(manufactureMonthsFromEpoch);
+            writer.Write(calculatedConvoyPrefix);
         }
 
 #if DEBUG

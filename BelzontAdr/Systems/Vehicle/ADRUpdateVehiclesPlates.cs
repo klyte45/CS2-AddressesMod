@@ -49,6 +49,7 @@ namespace BelzontAdr
                         }
                         var carNumber = ADRRegisterVehicles.CalculateTrainCarNumber(entity, refEntity, layoutData);
                         vehicleData.calculatedPlate = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, vehicleData.manufactureMonthsFromEpoch, carNumber);
+                        vehicleData.calculatedConvoyPrefix = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, vehicleData.manufactureMonthsFromEpoch, carNumber, true);
                         vehicleData.checksumRule = railPlatesSettings.Checksum;
                     }
                     else

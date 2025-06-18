@@ -1,3 +1,9 @@
+# v0.2.0r5 (18-JUN-25)
+
+- Added extra features to Write Everywhere integration
+- Fixed WE integration startup timing
+
+
 # v0.2.0r4 (17-JUN-25)
 
 - Invalidating roads names cache when a highway rule is changed.
