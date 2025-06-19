@@ -200,6 +200,11 @@ namespace BelzontAdr
                         var originalValue = getSerialNumber.GetValue(null) as Func<Entity, string>;
                         getSerialNumber.SetValue(null, (Entity e) => EntityManager.TryGetComponent(e, out ADRVehicleData vehicleData) ? vehicleData.serialNumber.ToString() : originalValue(e));
                     }
+                    if (t.GetField("GetConvoyId_binding", RedirectorUtils.allFlags) is FieldInfo getConvoyId)
+                    {
+                        var originalValue = getConvoyId.GetValue(null) as Func<Entity, string>;
+                        getConvoyId.SetValue(null, (Entity e) => EntityManager.TryGetComponent(e, out ADRVehicleData vehicleData) && vehicleData.plateCategory == ADRVehicleData.VehiclePlateCategory.Rail ? vehicleData.calculatedConvoyPrefix.ToString() : originalValue(e));
+                    }
                 }
             });
 
