@@ -1,4 +1,8 @@
-# v0.2.0r6 (19-JUN-25)
+# v0.2.0r7 (07-JUL-25)
+
+- Fixed various crashes scenarions on region map screen
+
+## FROM v0.2.0r6 (19-JUN-25)
 
 - Overriding get convoy Id on Write Everywhere to get the non-car related serial for trains.
 

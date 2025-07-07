@@ -43,6 +43,13 @@ interface AggregationData {
     highwayId: string
 }
 
+export type ExtraSvgPath = {
+    d: string;
+    classNames?: string[];
+    style?: React.CSSProperties;
+    id: string;
+}
+
 export const RegionEditor = () => {
 
     const [buildIdx, setBuildIdx] = useState(0)
@@ -68,6 +75,7 @@ export const RegionEditor = () => {
     const [mouseInfo, setMouseInfo] = useState<React.MouseEvent>()
     const [mapPointSelectionInfo, setMapPointSelectionInfo] = useState<React.MouseEvent>()
     const [selectedTab, setSelectedTab] = useState(0);
+    const [extraSvgPaths, setExtraSvgPaths] = useState<ExtraSvgPath[]>([]);
     const refDiv = useRef<HTMLDivElement>()
 
     useEffect(() => {
@@ -161,7 +169,7 @@ export const RegionEditor = () => {
     const effZoom = .6666 + zoom / 1.5;
 
     return <div className="regionEditor">
-        <div style={{ ["--currentZoom"]: effZoom } as any} className="mapSide" onWheel={doOnWheel} onMouseOut={() => setMouseInfo(undefined)} onDoubleClick={(x) => setMapPointSelectionInfo(x)}
+        <div style={{ ["--currentZoom"]: effZoom } as any} className="mapSide" onWheel={doOnWheel} onMouseLeave={() => setMouseInfo(undefined)} onDoubleClick={(x) => setMapPointSelectionInfo(x)}
             onMouseMove={doOnMouseMove} ref={refDiv}>
             <MapDiv waterMap={waterMap} cityMap={terrainMap}
                 style={{ transform: `translate(-50%, -50%) scale(${zoom / 20}) translate(${mapTranslationX}%, ${mapTranslationY}%)` }}
@@ -179,6 +187,7 @@ export const RegionEditor = () => {
                     {urbanRoads.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapUrbanRoads", "hwId_" + x.highwayId].join(" ")} id={`rd_${x.entity.Index}_${x.entity.Version}`} />)}
                     {trainTracks.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapTrainTrack", "hwId_" + x.highwayId].join(" ")} id={`hw_${x.entity.Index}_${x.entity.Version}`} />)}
                     {highways.map((x, i) => <path key={i} d={x.curves.map(x => `M ${x[0][0]} ${x[0][2]} C ${x[1][0]} ${x[1][2]}, ${x[2][0]} ${x[2][2]}, ${x[3][0]} ${x[3][2]}`).join(" ")} className={["mapHighway", "hwId_" + x.highwayId].join(" ")} id={`tr_${x.entity.Index}_${x.entity.Version}`} />)}
+                    {extraSvgPaths.map((x, i) => <path key={i + x.id} d={x.d} className={x.classNames?.join(" ")} id={x.id} style={x.style} />)}
                 </svg>
                 {selectionPosition && (() => {
                     const { bottom, left } = AsRelativePosition(selectionPosition, mapOffset, mapSize);
@@ -213,7 +222,7 @@ export const RegionEditor = () => {
         </div>
         <div className="dataSide">
             <DefaultPanelScreen title={translate("regionSettings.title")} subtitle={translate("regionSettings.subtitle")} scrollable={false}>
-                <RegionalEditorContent getSelectionPosition={selectionPosition} onCitiesChanged={onCitiesChanged} selectedTab={selectedTab} setSelectedTab={setSelectedTab} mapSizeY={mapSize[2]} />
+                <RegionalEditorContent getSelectionPosition={selectionPosition} onCitiesChanged={onCitiesChanged} selectedTab={selectedTab} setSelectedTab={setSelectedTab} mapSizeY={mapSize[2]} setExtraPaths={x => setExtraSvgPaths(x?.length ? x : [{ d: "M 0 0", id: "dummy" }])} />
             </DefaultPanelScreen>
         </div>
     </div>
@@ -323,6 +332,7 @@ type RegionalEditorContentProps = {
     setSelectedTab: (x: number) => void;
     selectedTab: number;
     mapSizeY: number;
+    setExtraPaths: (x: ExtraSvgPath[]) => any;
 }
 
 function AsRelativePosition(point2d: { x: number, y: number }, mapOffset: number[], mapSize: number[]) {
@@ -331,12 +341,12 @@ function AsRelativePosition(point2d: { x: number, y: number }, mapOffset: number
     return { bottom, left };
 }
 
-function RegionalEditorContent({ getSelectionPosition, onCitiesChanged, selectedTab, setSelectedTab, mapSizeY }: RegionalEditorContentProps) {
+function RegionalEditorContent({ getSelectionPosition, onCitiesChanged, selectedTab, setSelectedTab, mapSizeY, setExtraPaths }: RegionalEditorContentProps) {
 
     const menus: Omit<MenuItem, 'iconUrl'>[] = [
         {
             name: translate("highwayRegisterEditor.tabTitle"),
-            panelContent: <HighwayRegisterManagement getSelectionPosition={getSelectionPosition} mapSizeY={mapSizeY} />
+            panelContent: <HighwayRegisterManagement getSelectionPosition={getSelectionPosition} mapSizeY={mapSizeY} setExtraPaths={setExtraPaths} />
         },
         {
             name: translate("regionCityEditor.tabTitle"),
@@ -344,7 +354,10 @@ function RegionalEditorContent({ getSelectionPosition, onCitiesChanged, selected
         },
     ]
 
-    return <Tabs className="tabsContainer" onSelect={(x) => setSelectedTab(x)} selectedIndex={selectedTab}>
+    return <Tabs className="tabsContainer" onSelect={(x) => {
+        setExtraPaths(undefined);
+        return setSelectedTab(x);
+    }} selectedIndex={selectedTab}>
         <TabList className="horizontalTabStrip">
             {menus.map((x, i) =>
                 <Tab key={i} className="horizontalTabStripTab">
