@@ -55,6 +55,7 @@ namespace BelzontAdr
                     (typeof(WEFontManagementBridge), "FontManagementBridge"),
                     (typeof(WEImageManagementBridge), "ImageManagementBridge"),
                     (typeof(WETemplatesManagementBridge), "TemplatesManagementBridge"),
+                    (typeof(WEMeshManagementBridge), "MeshManagementBridge"),
                 })
                     {
                         var targetType = exportedTypes.First(x => x.Name == sourceClassName);
@@ -97,6 +98,19 @@ namespace BelzontAdr
 
             var fontsDirectory = Path.Combine(modDir, "fonts");
             WEFontManagementBridge.RegisterModFonts(typeof(AddressesCs2Mod).Assembly, fontsDirectory);
+
+
+            var objDirctory = Path.Combine(modDir, "objMeshes");
+
+            var meshes = Directory.GetFiles(objDirctory, "*.obj", SearchOption.AllDirectories);
+            foreach (var meshFile in meshes)
+            {
+                var meshName = Path.GetFileNameWithoutExtension(meshFile);
+                if (!WEMeshManagementBridge.RegisterMesh(typeof(AddressesCs2Mod).Assembly, meshName, meshFile))
+                {
+                    LogUtils.DoWarnLog($"Failed to register mesh: {meshName} from {meshFile}");
+                }
+            }
         }
 
         protected override void OnUpdate()

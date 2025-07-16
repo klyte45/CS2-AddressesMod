@@ -7,7 +7,7 @@ namespace BelzontAdr
 {
     public struct ADRHighwayMarkerData : IComponentData, ISerializable
     {
-        const uint CURRENT_VERSION = 0;
+        const uint CURRENT_VERSION = 1;
 
         public Colossal.Hash128 routeDataIndex;
 
@@ -19,6 +19,11 @@ namespace BelzontAdr
         public bool overrideMileage;
         public float newMileage;
         public bool reverseMileageCounting;
+
+        public byte pylonCount;
+        public float pylonSpacing;
+        public PylonMaterial pylonMaterial;
+        public float pylonHeight;
 
         private bool initialized;
 
@@ -61,6 +66,12 @@ namespace BelzontAdr
             CUSTOM_5,
             CUSTOM_6,
             CUSTOM_7
+        }
+
+        public enum PylonMaterial
+        {
+            Metal,
+            Wood
         }
 
 

@@ -5,7 +5,6 @@ using Belzont.Interfaces;
 using Colossal.IO.AssetDatabase;
 using Game;
 using Game.Modding;
-using Game.Net;
 using System.Collections.Generic;
 using Unity.Entities;
 
@@ -35,6 +34,7 @@ namespace BelzontAdr
             updateSystem.UpdateAt<AdrHighwayRoutesSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<AdrHighwayRoutes2BSystem>(SystemUpdatePhase.Modification2B);
             updateSystem.UpdateAt<AdrRegionsSystem>(SystemUpdatePhase.ModificationEnd);
+            updateSystem.UpdateBefore<AdrClearSystem>(SystemUpdatePhase.Deserialize);
         }
 
         protected override void AfterRegisterAssets()
