@@ -55,7 +55,7 @@ export const EditorBindings = () => {
         <Portal>
             <Panel header={header} style={{ width: "400rem", position: "absolute", left: "5rem", top: "5rem" }} initialPosition={{ x: 0, y: .0 }}>
                 <PanelSection>
-                    <AddressesInfoOptionsComponent entity={selectedEntity$} isEditor={true} entityRef={entityData} onChange={() => updateEntityData(selectedEntity$.value)} />
+                    <AddressesInfoOptionsComponent entity={selectedEntity$} isEditor={true} onChange={() => updateEntityData(selectedEntity$.value)} />
                 </PanelSection>
             </Panel>
         </Portal>

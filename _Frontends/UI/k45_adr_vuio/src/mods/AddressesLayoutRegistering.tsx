@@ -2,7 +2,7 @@ import { AddressesInfoOptionsComponent } from "components/AddressesInfoOptionsCo
 import { selectedInfo } from "cs2/bindings";
 
 
-export const AddressesLayoutRegistering = (lastMiddleSection: () => any, onChange?: () => any) => (componentList: any): any => {
-    componentList["K45.Addresses"] = () => <><AddressesInfoOptionsComponent entity={selectedInfo.selectedEntity$} entityRef={lastMiddleSection()} onChange={onChange} isEditor={true} /></>;
+export const AddressesLayoutRegistering = (onChange?: () => any) => (componentList: any): any => {
+    componentList["BelzontAdr.AdrSelectionInfoPanelSystem"] = () => <><AddressesInfoOptionsComponent entity={selectedInfo.selectedEntity$} onChange={onChange} isEditor={true} /></>;
     return componentList as any;
 };

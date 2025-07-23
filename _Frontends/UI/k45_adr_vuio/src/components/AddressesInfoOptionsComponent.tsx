@@ -9,16 +9,16 @@ import { StationBuildingOptionsComponent } from "./StationBuildingOptions";
 import { VehicleDataDetailSection } from "./VehicleDataDetailSection";
 import { RoadMarkSettings } from "./RoadMarkSettings";
 
-type Props = { entity: ValueBinding<Entity>, entityRef?: any, isEditor?: boolean, onChange?: () => any };
+type Props = { entity: ValueBinding<Entity>,  isEditor?: boolean, onChange?: () => any };
 
-export const AddressesInfoOptionsComponent = ({ entity, entityRef, onChange }: Props) => {
+export const AddressesInfoOptionsComponent = ({ entity,  onChange }: Props) => {
 
     const [optionsResult, setOptionsResult] = useState(undefined as SelectedInfoOptions | undefined);
 
 
     useEffect(() => {
         loadOptions(entity.value)
-    }, [entityRef, entity.value])
+    }, [entity.value])
 
     const loadOptions = async (entity: Entity) => {
         if (!entity) {

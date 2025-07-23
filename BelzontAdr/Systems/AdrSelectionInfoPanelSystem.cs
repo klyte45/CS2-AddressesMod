@@ -1,12 +1,13 @@
 ﻿using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Entities;
-using Game;
+using Colossal.UI.Binding;
 using Game.Areas;
 using Game.Buildings;
 using Game.Common;
 using Game.Net;
 using Game.UI;
+using Game.UI.InGame;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ using static Belzont.Utils.NameSystemExtensions;
 
 namespace BelzontAdr
 {
-    public partial class AdrSelectionInfoPanelSystem : GameSystemBase, IBelzontBindable
+    public partial class AdrSelectionInfoPanelSystem : InfoSectionBase, IBelzontBindable
     {
         #region Binding
         private Action<string, object[]> m_eventCaller;
@@ -43,15 +44,21 @@ namespace BelzontAdr
         private AdrMainSystem mainSystem;
         private EntityQueryMask entityExistsQuery;
 
+        protected override string group => "K45.Addresses";
+
         protected override void OnCreate()
         {
             base.OnCreate();
             nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
             mainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
-
+            m_InfoUISystem.AddMiddleSection(this);
             entityExistsQuery = EntityManager.UniversalQuery.GetEntityQueryMask();
+            visible = true;
         }
-        protected override void OnUpdate() { }
+        protected override void OnUpdate()
+        {
+
+        }
 
         private AdrEntityData GetEntityOptions(Entity e)
         {
@@ -249,6 +256,18 @@ namespace BelzontAdr
                 }
             }
             return result;
+        }
+
+        protected override void Reset()
+        {
+        }
+
+        protected override void OnProcess()
+        {
+        }
+
+        public override void OnWriteProperties(IJsonWriter writer)
+        {
         }
 
         private class AdrEntityData
