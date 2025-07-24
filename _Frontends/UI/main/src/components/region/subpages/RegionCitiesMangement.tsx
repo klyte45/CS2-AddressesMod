@@ -40,10 +40,11 @@ function RegionCityListing({ onSelectItem }: RegionCityListProps) {
     const [airFilter, setAirFilter] = useState(true);
     const [landFilter, setLandFilter] = useState(true);
     const [waterFilter, setWaterFilter] = useState(true);
+    const [buildIdx, setBuildIdx] = useState(0);
 
     useEffect(() => {
         RegionService.listAllRegionCities().then((x) => setCities(x.sort((a, b) => a.name.localeCompare(b.name))));
-    }, []);
+    }, [buildIdx]);
 
 
 
@@ -65,6 +66,11 @@ function RegionCityListing({ onSelectItem }: RegionCityListProps) {
             {
                 label: translate(`${REGION_CITY_EDITOR}.editBtn`),
                 onClick: () => onSelectItem(x),
+            },
+            {
+                label: translate(`${REGION_CITY_EDITOR}.removeBtn`),
+                className: "negativeBtn",
+                onClick: () => RegionService.removeRegionCity(x.entity).then(() => setBuildIdx(buildIdx + 1)),
             },
         ],
         raw: x,
