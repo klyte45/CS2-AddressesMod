@@ -112,10 +112,21 @@ namespace BelzontAdr
         public MultiUIValueBinding<float> Tool_NewMileage { get; private set; }
         public MultiUIValueBinding<bool> Tool_OverrideMileage { get; private set; }
         public MultiUIValueBinding<bool> Tool_ReverseMileageCounting { get; private set; }
+        public MultiUIValueBinding<byte> Tool_PylonCount { get; private set; }
+        public MultiUIValueBinding<float> Tool_PylonSpacing { get; private set; }
+        public MultiUIValueBinding<PylonMaterial, int> Tool_PylonMaterial { get; private set; }
+        public MultiUIValueBinding<float> Tool_PylonHeight { get; private set; }
+        public MultiUIValueBinding<PylonFormat, int> Tool_PylonFormat { get; private set; }
+
 
         private ADRHighwayMarkerData m_dataForNewItem = new ADRHighwayMarkerData
         {
-            Initialized = true
+            Initialized = true,
+            pylonCount = 1,
+            pylonHeight = 2,
+            pylonFormat = PylonFormat.Cylinder,
+            pylonMaterial = PylonMaterial.Metal,
+            pylonSpacing = .25f,
         };
 
         private void DoInitValueBindings_Tool(Action<string, object[]> EventCaller, Action<string, Delegate> CallBinder)
@@ -128,6 +139,12 @@ namespace BelzontAdr
             Tool_NewMileage = new(m_dataForNewItem.newMileage, $"{PREFIX}{nameof(Tool_NewMileage)}", EventCaller, CallBinder);
             Tool_OverrideMileage = new(m_dataForNewItem.overrideMileage, $"{PREFIX}{nameof(Tool_OverrideMileage)}", EventCaller, CallBinder);
             Tool_ReverseMileageCounting = new(m_dataForNewItem.reverseMileageCounting, $"{PREFIX}{nameof(Tool_ReverseMileageCounting)}", EventCaller, CallBinder);
+            Tool_PylonCount = new(m_dataForNewItem.pylonCount, $"{PREFIX}{nameof(Tool_PylonCount)}", EventCaller, CallBinder);
+            Tool_PylonSpacing = new(m_dataForNewItem.pylonSpacing, $"{PREFIX}{nameof(Tool_PylonSpacing)}", EventCaller, CallBinder);
+            Tool_PylonMaterial = new(m_dataForNewItem.pylonMaterial, $"{PREFIX}{nameof(Tool_PylonMaterial)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (PylonMaterial)x);
+            Tool_PylonHeight = new(m_dataForNewItem.pylonHeight, $"{PREFIX}{nameof(Tool_PylonHeight)}", EventCaller, CallBinder);
+            Tool_PylonFormat = new(m_dataForNewItem.pylonFormat, $"{PREFIX}{nameof(Tool_PylonFormat)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (PylonFormat)x);
+
 
             CallBinder($"{PREFIX}isCurrentPrefabRoadMarker", IsCurrentPrefabRoadMarker);
 
@@ -139,6 +156,11 @@ namespace BelzontAdr
             Tool_NewMileage.OnScreenValueChanged += (x) => { m_dataForNewItem.newMileage = x; MarkTempMarksDirty(); };
             Tool_OverrideMileage.OnScreenValueChanged += (x) => { m_dataForNewItem.overrideMileage = x; MarkTempMarksDirty(); };
             Tool_ReverseMileageCounting.OnScreenValueChanged += (x) => { m_dataForNewItem.reverseMileageCounting = x; MarkTempMarksDirty(); };
+            Tool_PylonCount.OnScreenValueChanged += (x) => { m_dataForNewItem.pylonCount = (byte)math.clamp(x, 1, 2); MarkTempMarksDirty(); };
+            Tool_PylonSpacing.OnScreenValueChanged += (x) => { m_dataForNewItem.pylonSpacing = math.clamp(x, 0.05f, 3f); MarkTempMarksDirty(); };
+            Tool_PylonMaterial.OnScreenValueChanged += (x) => { m_dataForNewItem.pylonMaterial = x; MarkTempMarksDirty(); };
+            Tool_PylonHeight.OnScreenValueChanged += (x) => { m_dataForNewItem.pylonHeight = math.clamp(x, .25f, 10); MarkTempMarksDirty(); };
+            Tool_PylonFormat.OnScreenValueChanged += (x) => { m_dataForNewItem.pylonFormat = x; MarkTempMarksDirty(); };
         }
 
         private void MarkTempMarksDirty()
@@ -162,6 +184,11 @@ namespace BelzontAdr
         public MultiUIValueBinding<float> InfoPanel_NewMileage { get; private set; }
         public MultiUIValueBinding<bool> InfoPanel_OverrideMileage { get; private set; }
         public MultiUIValueBinding<bool> InfoPanel_ReverseMileageCounting { get; private set; }
+        public MultiUIValueBinding<int> InfoPanel_PylonCount { get; private set; }
+        public MultiUIValueBinding<float> InfoPanel_PylonSpacing { get; private set; }
+        public MultiUIValueBinding<PylonMaterial, int> InfoPanel_PylonMaterial { get; private set; }
+        public MultiUIValueBinding<float> InfoPanel_PylonHeight { get; private set; }
+        public MultiUIValueBinding<PylonFormat, int> InfoPanel_PylonFormat { get; private set; }
 
 
         private void DoInitValueBindings_InfoPanel(Action<string, object[]> EventCaller, Action<string, Delegate> CallBinder)
@@ -175,6 +202,11 @@ namespace BelzontAdr
             InfoPanel_NewMileage = new(default, $"{PREFIX}{nameof(InfoPanel_NewMileage)}", EventCaller, CallBinder);
             InfoPanel_OverrideMileage = new(default, $"{PREFIX}{nameof(InfoPanel_OverrideMileage)}", EventCaller, CallBinder);
             InfoPanel_ReverseMileageCounting = new(default, $"{PREFIX}{nameof(InfoPanel_ReverseMileageCounting)}", EventCaller, CallBinder);
+            InfoPanel_PylonCount = new(default, $"{PREFIX}{nameof(InfoPanel_PylonCount)}", EventCaller, CallBinder);
+            InfoPanel_PylonSpacing = new(default, $"{PREFIX}{nameof(InfoPanel_PylonSpacing)}", EventCaller, CallBinder);
+            InfoPanel_PylonMaterial = new(default, $"{PREFIX}{nameof(InfoPanel_PylonMaterial)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (PylonMaterial)x);
+            InfoPanel_PylonHeight = new(default, $"{PREFIX}{nameof(InfoPanel_PylonHeight)}", EventCaller, CallBinder);
+            InfoPanel_PylonFormat = new(default, $"{PREFIX}{nameof(InfoPanel_PylonFormat)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (PylonFormat)x);
 
             bool registerSelfOnUI()
             {
@@ -209,6 +241,12 @@ namespace BelzontAdr
             InfoPanel_NewMileage.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.newMileage = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
             InfoPanel_OverrideMileage.OnScreenValueChanged += (x) => EnqueueModification<bool, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.overrideMileage = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
             InfoPanel_ReverseMileageCounting.OnScreenValueChanged += (x) => EnqueueModification<bool, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.reverseMileageCounting = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
+            InfoPanel_PylonCount.OnScreenValueChanged += (x) => EnqueueModification<byte, ADRHighwayMarkerData>((byte)x, (x, currentItem, _) => { currentItem.pylonCount = (byte)math.clamp(x, 1, 2); m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
+            InfoPanel_PylonSpacing.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonSpacing = math.clamp(x, 0.05f, 3f); m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
+            InfoPanel_PylonMaterial.OnScreenValueChanged += (x) => EnqueueModification<PylonMaterial, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonMaterial = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
+            InfoPanel_PylonHeight.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonHeight = math.clamp(x, .25f, 10); m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
+            InfoPanel_PylonFormat.OnScreenValueChanged += (x) => EnqueueModification<PylonFormat, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonFormat = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
+
         }
 
         void OnSelectionChanged(Entity entity, Entity prefab, Unity.Mathematics.float3 position)
@@ -223,6 +261,11 @@ namespace BelzontAdr
                 InfoPanel_NewMileage.Value = component.newMileage;
                 InfoPanel_OverrideMileage.Value = component.overrideMileage;
                 InfoPanel_ReverseMileageCounting.Value = component.reverseMileageCounting;
+                InfoPanel_PylonCount.Value = component.pylonCount;
+                InfoPanel_PylonSpacing.Value = component.pylonSpacing;
+                InfoPanel_PylonMaterial.Value = component.pylonMaterial;
+                InfoPanel_PylonHeight.Value = component.pylonHeight;
+                InfoPanel_PylonFormat.Value = component.pylonFormat;
             }
         }
 
@@ -231,14 +274,15 @@ namespace BelzontAdr
         internal void EnqueueModification<T, W>(T newVal, Func<T, W, Entity, W> x) where W : unmanaged, IComponentData
         {
             var target = m_selectedInfoUISystem.selectedEntity;
-            m_executionQueue.Enqueue(() =>
-            {
-                if (EntityManager.TryGetComponent<W>(target, out var currentItem))
+            if (target.Index > 0)
+                m_executionQueue.Enqueue(() =>
                 {
-                    currentItem = x(newVal, currentItem, target);
-                    EntityManager.SetComponentData(target, currentItem);
-                }
-            });
+                    if (EntityManager.TryGetComponent<W>(target, out var currentItem))
+                    {
+                        currentItem = x(newVal, currentItem, target);
+                        EntityManager.SetComponentData(target, currentItem);
+                    }
+                });
 
         }
         #endregion

@@ -12,6 +12,11 @@ const AdrHighwayRoutesSystem = {
     Tool_NewMileage: MultiUIValueBinding<number>,
     Tool_OverrideMileage: MultiUIValueBinding<boolean>,
     Tool_ReverseMileageCounting: MultiUIValueBinding<boolean>,
+    Tool_PylonCount: MultiUIValueBinding<number>,
+    Tool_PylonSpacing: MultiUIValueBinding<number>,
+    Tool_PylonMaterial: MultiUIValueBinding<number>,
+    Tool_PylonHeight: MultiUIValueBinding<number>,
+    Tool_PylonFormat: MultiUIValueBinding<number>,
     InfoPanel_RouteId: MultiUIValueBinding<string>,
     InfoPanel_RouteDirection: MultiUIValueBinding<number>,
     InfoPanel_DisplayInformation: MultiUIValueBinding<number>,
@@ -20,6 +25,12 @@ const AdrHighwayRoutesSystem = {
     InfoPanel_NewMileage: MultiUIValueBinding<number>,
     InfoPanel_OverrideMileage: MultiUIValueBinding<boolean>,
     InfoPanel_ReverseMileageCounting: MultiUIValueBinding<boolean>,
+    InfoPanel_PylonCount: MultiUIValueBinding<number>,
+    InfoPanel_PylonSpacing: MultiUIValueBinding<number>,
+    InfoPanel_PylonMaterial: MultiUIValueBinding<number>,
+    InfoPanel_PylonHeight: MultiUIValueBinding<number>,
+    InfoPanel_PylonFormat: MultiUIValueBinding<number>,
+
 }
 
 export default {
@@ -91,6 +102,15 @@ export enum RouteDirection {
     EXTERNAL
 }
 
+export enum PylonFormat {
+    Cylinder,
+    Cubic
+}
+export enum PylonMaterial {
+    Metal,
+    Wood
+}
+
 export enum DisplayInformation {
     ORIGINAL,
     CUSTOM_1,
@@ -118,7 +138,13 @@ export const LocalizationStrings = {
     displayInformation: "RoadMarkSettings.DisplayInformation",
     customParam1: "RoadMarkSettings.CustomParam1",
     customParams: "RoadMarkSettings.CustomParams",
-    customParam2: "RoadMarkSettings.CustomParam2"
+    customParam2: "RoadMarkSettings.CustomParam2",
+    poleFormat: "RoadMarkSettings.PoleFormat",
+    poleMaterial: "RoadMarkSettings.PoleMaterial",
+    poleSettings: "RoadMarkSettings.PoleSettings",
+    poleHeight: "RoadMarkSettings.PoleHeight",
+    useDoublePole: "RoadMarkSettings.UseDoublePole",
+    poleSpacing: "RoadMarkSettings.PoleSpacing",
 }
 
 

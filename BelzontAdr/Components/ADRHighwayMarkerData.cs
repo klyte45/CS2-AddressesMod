@@ -1,13 +1,15 @@
 ﻿using Belzont.Utils;
 using Colossal.Serialization.Entities;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Mathematics;
 
 namespace BelzontAdr
 {
     public struct ADRHighwayMarkerData : IComponentData, ISerializable
     {
-        const uint CURRENT_VERSION = 1;
+        const uint CURRENT_VERSION = 2;
 
         public Colossal.Hash128 routeDataIndex;
 
@@ -23,6 +25,7 @@ namespace BelzontAdr
         public byte pylonCount;
         public float pylonSpacing;
         public PylonMaterial pylonMaterial;
+        public PylonFormat pylonFormat;
         public float pylonHeight;
 
         private bool initialized;
@@ -38,8 +41,6 @@ namespace BelzontAdr
                 }
             }
         }
-
-
 
         public enum RouteDirection
         {
@@ -68,16 +69,21 @@ namespace BelzontAdr
             CUSTOM_7
         }
 
-        public enum PylonMaterial
+        public enum PylonMaterial : byte
         {
             Metal,
             Wood
+        }
+        public enum PylonFormat : byte
+        {
+            Cylinder,
+            Cubic
         }
 
 
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
         {
-            reader.CheckVersionK45(CURRENT_VERSION, typeof(ADRHighwayMarkerData));
+            var version = reader.CheckVersionK45(CURRENT_VERSION, typeof(ADRHighwayMarkerData));
             reader.Read(out routeDataIndex);
             reader.Read(out routeDirection);
             reader.Read(out displayInformation);
@@ -86,6 +92,22 @@ namespace BelzontAdr
             reader.Read(out overrideMileage);
             reader.Read(out newMileage);
             reader.Read(out reverseMileageCounting);
+            if (version >= 2)
+            {
+                reader.Read(out pylonCount);
+                reader.Read(out pylonSpacing);
+                reader.Read(out pylonMaterial);
+                reader.Read(out pylonFormat);
+                reader.Read(out pylonHeight);
+            }
+            else
+            {
+                pylonCount = 1;
+                pylonSpacing = .5f;
+                pylonMaterial = PylonMaterial.Metal;
+                pylonFormat = PylonFormat.Cylinder;
+                pylonHeight = 2f;
+            }
             Initialized = true;
         }
 
@@ -100,6 +122,35 @@ namespace BelzontAdr
             writer.Write(overrideMileage);
             writer.Write(newMileage);
             writer.Write(reverseMileageCounting);
+            writer.Write(pylonCount);
+            writer.Write(pylonSpacing);
+            writer.Write(pylonMaterial);
+            writer.Write(pylonFormat);
+            writer.Write(pylonHeight);
         }
+
+        public readonly float3 GetPylonScale() => new(1, pylonHeight, 1);
+
+        public readonly float3 GetSignOffset() => new(-0.004f, pylonHeight - .14f, 0);
+
+        private static readonly string DLL_PREFIX = typeof(ADRHighwayMarkerData).Assembly.GetName().Name + ":";
+        public readonly string GetPylonMeshName() => DLL_PREFIX + (pylonFormat switch
+        {
+            PylonFormat.Cubic => "__BoxHolder",
+            _ => "__CylinderHolder"
+        });
+
+        public readonly float3 GetNthPylonOffset(Dictionary<string, string> vars)
+        {
+            if (pylonCount <= 1) return default;
+            if (vars.TryGetValue("pylonIndex", out string pylonIndexStr) && ushort.TryParse(pylonIndexStr, out var pylonIndex) && pylonIndex < pylonCount)
+            {
+                var totalSpacing = pylonSpacing * (pylonCount - 1);
+                float offset = (pylonIndex / (pylonCount - 1f) * totalSpacing) - (totalSpacing / 2f);
+                return new float3(0, 0, offset);
+            }
+            return default;
+        }
+
     }
 }

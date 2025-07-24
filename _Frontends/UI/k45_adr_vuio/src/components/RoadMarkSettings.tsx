@@ -6,7 +6,7 @@ import { useLocalization } from "cs2/l10n";
 import { useFormattedLargeNumber } from "cs2/utils";
 import { ObjectTyped } from "object-typed";
 import { useEffect, useState } from "react";
-import { AdrFields, AdrFieldType, default as AdrHighwayRoutesSystem, DisplayInformation, LocalizationStrings, RouteDirection, RouteItem, default as routesSystem } from "service/AdrHighwayRoutesSystem";
+import { AdrFields, AdrFieldType, default as AdrHighwayRoutesSystem, DisplayInformation, LocalizationStrings, PylonFormat, PylonMaterial, RouteDirection, RouteItem, default as routesSystem } from "service/AdrHighwayRoutesSystem";
 import { translate } from "utility/translate";
 import { MetadataMount, MountMetadataComponentProps } from "./MetadataMount";
 
@@ -28,7 +28,7 @@ export const RoadMarkSettings = () => {
     const [displayNameTypes, setDisplayNameTypes] = useState<string[]>([])
     useEffect(() => {
         AdrHighwayRoutesSystem.getOptionsNamesFromMetadata().then(setDisplayNameTypes)
-        HighwayRoutesService.listHighwaysRegistered().then(x => setRoutesRegistered(x.map(y => ({ id: y.Id, name: `${y.prefix}-${y.suffix} ${y.name}` })).sort((a,b)=>a.name.localeCompare(b.name))))
+        HighwayRoutesService.listHighwaysRegistered().then(x => setRoutesRegistered(x.map(y => ({ id: y.Id, name: `${y.prefix}-${y.suffix} ${y.name}` })).sort((a, b) => a.name.localeCompare(b.name))))
     }, [buildIdx])
     useEffect(() => {
         AdrHighwayRoutesSystem.getOptionsMetadataFromLayout(routesSystem.InfoPanel_DisplayInformation.value).then((x) => {
@@ -39,7 +39,8 @@ export const RoadMarkSettings = () => {
     }, [routesSystem.InfoPanel_DisplayInformation.value])
 
     useEffect(() => {
-        selectedInfo.selectedEntity$.subscribe(() => setBuildIdx(buildIdx + 1));
+        selectedInfo.selectedEntity$.subscribe(() => setBuildIdx(x => x + 1));
+        if (selectedInfo.selectedEntity$.value.index) setBuildIdx(x => x + 1);
     }, [])
 
     //
@@ -69,7 +70,39 @@ export const RoadMarkSettings = () => {
             onChange={x => routesSystem.InfoPanel_RouteDirection.set(x).then(x => setBuildIdx(buildIdx + 1))}
             value={routesSystem.InfoPanel_RouteDirection.value}
         /></div>} />
-        <VR.InfoRow left={<>{replaceArgs(translate(LocalizationStrings.overrideMileage), [useFormattedLargeNumber(1 * mileageMultiplier) + (localization.unitSettings.unitSystem ? " mi" : " km")])}</>} right={<div><VW.Checkbox
+        <div style={{ height: "20rem" }} />
+        <h4>{translate(LocalizationStrings.poleSettings)}</h4>
+        <VR.InfoRow left={<>{translate(LocalizationStrings.poleFormat)}</>} right={<div><NumberDD
+            items={ObjectTyped.entries(PylonFormat).filter(x => typeof x[1] == 'number').map((x: [string, number]) => ({ value: x[1], displayName: { __Type: LocElementType.String, value: translate("PylonFormat." + x[0]) } }))}
+            onChange={x => routesSystem.InfoPanel_PylonFormat.set(x).then(x => setBuildIdx(buildIdx + 1))}
+            value={routesSystem.InfoPanel_PylonFormat.value}
+        /></div>} />
+        <VR.InfoRow left={<>{translate(LocalizationStrings.poleMaterial)}</>} right={<div><NumberDD
+            items={ObjectTyped.entries(PylonMaterial).filter(x => typeof x[1] == 'number').map((x: [string, number]) => ({ value: x[1], displayName: { __Type: LocElementType.String, value: translate("PylonMaterial." + x[0]) } }))}
+            onChange={x => routesSystem.InfoPanel_PylonMaterial.set(x).then(x => setBuildIdx(buildIdx + 1))}
+            value={routesSystem.InfoPanel_PylonMaterial.value}
+        /></div>} />
+        <VR.InfoRow left={<>{translate(LocalizationStrings.poleHeight)}</>} right={<VW.FloatInputStandalone className={editorModule.input}
+            onChange={x => routesSystem.InfoPanel_PylonHeight.set(x).then(x => setBuildIdx(buildIdx + 1))}
+            value={routesSystem.InfoPanel_PylonHeight.value}
+            style={{ maxWidth: "150rem", textAlign: "right" }}
+            min={0.25} max={10}
+        />} />
+        <VR.InfoRow left={<>{translate(LocalizationStrings.useDoublePole)}</>} right={<VW.Checkbox
+            onChange={x => routesSystem.InfoPanel_PylonCount.set(x ? 2 : 1).then(x => setBuildIdx(buildIdx + 1))}
+            checked={routesSystem.InfoPanel_PylonCount.value == 2}
+        />} />
+        {
+            routesSystem.InfoPanel_PylonCount.value == 2 &&
+            <VR.InfoRow left={<>{translate(LocalizationStrings.poleSpacing)}</>} right={<VW.FloatInputStandalone className={editorModule.input}
+                onChange={x => routesSystem.InfoPanel_PylonSpacing.set(x).then(x => setBuildIdx(buildIdx + 1))}
+                value={routesSystem.InfoPanel_PylonSpacing.value}
+                style={{ maxWidth: "150rem", textAlign: "right" }}
+                min={0.05} max={3}
+            />} />
+        }
+        <div style={{ height: "20rem" }} />
+        <VR.InfoRow left={<>{replaceArgs(translate(LocalizationStrings.overrideMileage), [useFormattedLargeNumber(12 * mileageMultiplier) + (localization.unitSettings.unitSystem ? " mi" : " km")])}</>} right={<div><VW.Checkbox
             onChange={x => routesSystem.InfoPanel_OverrideMileage.set(x).then(x => setBuildIdx(buildIdx + 1))}
             checked={routesSystem.InfoPanel_OverrideMileage.value}
         /></div>} />
@@ -87,6 +120,7 @@ export const RoadMarkSettings = () => {
 
             </VR.InfoSection>
         }
+        <div style={{ height: "20rem" }} />
         <VR.InfoRow left={<>{translate(LocalizationStrings.displayInformation)}</>} right={<div><NumberDD
             items={[{ value: 0, displayName: { __Type: LocElementType.String, value: translate("DisplayInformation." + DisplayInformation[DisplayInformation.ORIGINAL]) } as LocElement }].concat(
                 displayNameTypes.map((x, i) => ({

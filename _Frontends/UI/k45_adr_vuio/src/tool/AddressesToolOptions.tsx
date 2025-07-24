@@ -5,7 +5,7 @@ import { useLocalization } from "cs2/l10n";
 import { ModuleRegistryExtend } from "cs2/modding";
 import { ObjectTyped } from "object-typed";
 import { useState, useEffect } from "react";
-import AdrHighwayRoutesSystem, { AdrFields, AdrFieldType, LocalizationStrings } from "service/AdrHighwayRoutesSystem";
+import AdrHighwayRoutesSystem, { AdrFields, AdrFieldType, LocalizationStrings, PylonFormat, PylonMaterial } from "service/AdrHighwayRoutesSystem";
 import routesSystem, { DisplayInformation, RouteDirection, RouteItem } from "service/AdrHighwayRoutesSystem";
 import { translate } from "utility/translate";
 import { MetadataMount, MountMetadataComponentProps } from "components/MetadataMount";
@@ -49,7 +49,7 @@ const AdrRoadMarkerToolOptions = () => {
     const [displayNameTypes, setDisplayNameTypes] = useState<string[]>([])
     useEffect(() => {
         AdrHighwayRoutesSystem.getOptionsNamesFromMetadata().then(setDisplayNameTypes);
-        HighwayRoutesService.listHighwaysRegistered().then(x => setRoutesRegistered(x.map(y => ({ id: y.Id, name: `${y.prefix}-${y.suffix} ${y.name}` })).sort((a,b)=>a.name.localeCompare(b.name))))
+        HighwayRoutesService.listHighwaysRegistered().then(x => setRoutesRegistered(x.map(y => ({ id: y.Id, name: `${y.prefix}-${y.suffix} ${y.name}` })).sort((a, b) => a.name.localeCompare(b.name))))
     }, [])
     useEffect(() => {
         AdrHighwayRoutesSystem.getOptionsMetadataFromCurrentLayout().then((x) => {
@@ -84,6 +84,49 @@ const AdrRoadMarkerToolOptions = () => {
                 value={routesSystem.Tool_RouteDirection.value}
             />
         </VCR.Section>
+        <div style={{ height: "20rem" }} />
+        <VCR.Section title={translate(LocalizationStrings.poleSettings)}><div /></VCR.Section>
+        <VCR.Section title={translate(LocalizationStrings.poleFormat)}>
+            <NumberDD
+                items={ObjectTyped.entries(PylonFormat).filter(x => typeof x[1] == 'number').map((x: [string, number]) => ({ value: x[1], displayName: { __Type: LocElementType.String, value: translate("PylonFormat." + x[0]) } }))}
+                onChange={x => routesSystem.Tool_PylonFormat.set(x).then(x => setBuildIdx(buildIdx + 1))}
+                value={routesSystem.Tool_PylonFormat.value}
+            />
+        </VCR.Section>
+        <VCR.Section title={translate(LocalizationStrings.poleMaterial)}>
+            <NumberDD
+                items={ObjectTyped.entries(PylonMaterial).filter(x => typeof x[1] == 'number').map((x: [string, number]) => ({ value: x[1], displayName: { __Type: LocElementType.String, value: translate("PylonMaterial." + x[0]) } }))}
+                onChange={x => routesSystem.Tool_PylonMaterial.set(x).then(x => setBuildIdx(buildIdx + 1))}
+                value={routesSystem.Tool_PylonMaterial.value}
+            />
+        </VCR.Section>
+        <VCR.Section title={translate(LocalizationStrings.poleHeight)}>
+            <FocusDisabled>
+                <VW.FloatInputStandalone style={{ flexShrink: 1, textAlign: "right", width: "auto", flexGrow: 2, marginRight: "7rem" }} className={editorModule.input}
+                    min={0.25} max={10}
+                    value={routesSystem.Tool_PylonHeight.value} onChange={(x) => routesSystem.Tool_PylonHeight.set(x).then(x => setBuildIdx(buildIdx + 1))} />
+            </FocusDisabled>
+        </VCR.Section>
+        <VCR.Section title={translate(LocalizationStrings.useDoublePole)}>
+            <FocusDisabled>
+                <VanillaComponentResolver.instance.ToolButton
+                    selected={routesSystem.Tool_PylonCount.value > 1}
+                    onSelect={() => routesSystem.Tool_PylonCount.set(routesSystem.Tool_PylonCount.value > 1 ? 1 : 2).then(x => setBuildIdx(buildIdx + 1))}
+                    src={routesSystem.Tool_PylonCount.value > 1 ? i_OverrideMileageOn : i_OverrideMileageOff}
+                    className={VanillaComponentResolver.instance.toolButtonTheme.button}></VanillaComponentResolver.instance.ToolButton>
+            </FocusDisabled>
+        </VCR.Section>
+        {routesSystem.Tool_PylonCount.value > 1 &&
+            <VCR.Section title={translate(LocalizationStrings.poleSpacing)}>
+                <FocusDisabled>
+                    <VW.FloatInputStandalone style={{ flexShrink: 1, textAlign: "right", width: "auto", flexGrow: 2, marginRight: "7rem" }} className={editorModule.input}
+                        value={routesSystem.Tool_PylonSpacing.value} onChange={(x) => routesSystem.Tool_PylonSpacing.set(x).then(x => setBuildIdx(buildIdx + 1))}
+                        max={3} min={0.05}
+                    />
+                </FocusDisabled>
+            </VCR.Section>
+        }
+        <div style={{ height: "20rem" }} />
         <VCR.Section title={translate(LocalizationStrings.overrideMileageShort)}>
             <FocusDisabled>
                 <VanillaComponentResolver.instance.ToolButton selected={routesSystem.Tool_OverrideMileage.value} onSelect={() => routesSystem.Tool_OverrideMileage.set(!routesSystem.Tool_OverrideMileage.value).then(x => setBuildIdx(buildIdx + 1))} src={routesSystem.Tool_OverrideMileage.value ? i_OverrideMileageOn : i_OverrideMileageOff} className={VanillaComponentResolver.instance.toolButtonTheme.button}></VanillaComponentResolver.instance.ToolButton>

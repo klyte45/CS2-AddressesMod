@@ -11,7 +11,7 @@
         <arraySpacing x="0" y="0" z="0" />
       </transform>
       <matrixTransform>
-        <offsetPosition>
+        <offsetPosition formulae="BelzontAdr.ADRHighwayMarkerData;GetSignOffset">
           <defaultValue x="-0.005" y="1.86" z="-0" />
         </offsetPosition>
         <offsetRotation>
@@ -144,23 +144,25 @@
         <arraySpacing x="0" y="0" z="0" />
       </transform>
       <matrixTransform>
-        <scale>
+        <scale formulae="BelzontAdr.ADRHighwayMarkerData;GetPylonScale">
           <defaultValue x="1" y="2" z="1" />
         </scale>
+        <offsetPosition formulae="BelzontAdr.ADRHighwayMarkerData;GetNthPylonOffset" />
       </matrixTransform>
     </self>
     <children>
       <self itemName="Pylon 1">
         <transform alignment="Left" isAbsoluteScale="true" arrayAxisOrder="XYZ">
           <offsetPosition x="0" y="0" z="0" />
-          <offsetRotation x="-0" y="0" z="0" />
+          <offsetRotation x="0" y="270" z="0" />
           <scale x="1" y="1" z="1" />
           <mustDraw>1</mustDraw>
           <instanceCount>-1</instanceCount>
           <arrayInstances x="1" y="1" z="1" />
           <arraySpacing x="0" y="0" z="0" />
         </transform>
-        <imageMesh atlas="__materialsHolders" mesh="__CylinderHolder">
+        <imageMesh atlas="AddressesCS2:__materialsHolders">
+          <mesh formulae="BelzontAdr.ADRHighwayMarkerData;GetPylonMeshName">__CylinderHolder</mesh>
           <image formulae="BelzontAdr.ADRHighwayMarkerData;pylonMaterial.ToString">wood</image>
         </imageMesh>
         <defaultStyle>
@@ -177,35 +179,39 @@
         </defaultStyle>
       </self>
     </children>
+    <variable key="pylonIndex" value="0" />
   </children>
   <children>
     <self itemName="Pylon 2">
-      <transform alignment="Left" arrayAxisOrder="XYZ">
+      <transform alignment="Left" useFormulaeToCheckIfDraw="true" arrayAxisOrder="XYZ">
         <offsetPosition x="0" y="0" z="0" />
         <offsetRotation x="-0" y="270" z="0" />
         <scale x="1" y="1" z="1" />
-        <mustDraw formulae="BelzontAdr.ADRHighwayMarkerData;pylonCount.>1">1</mustDraw>
+        <mustDraw formulae="BelzontAdr.ADRHighwayMarkerData;pylonCount.&gt;1,000000">1</mustDraw>
         <instanceCount>-1</instanceCount>
         <arrayInstances x="1" y="1" z="1" />
         <arraySpacing x="0" y="0" z="0" />
       </transform>
       <matrixTransform>
-        <scale>
+        <scale formulae="BelzontAdr.ADRHighwayMarkerData;GetPylonScale">
           <defaultValue x="1" y="2" z="1" />
         </scale>
+        <offsetPosition formulae="BelzontAdr.ADRHighwayMarkerData;GetNthPylonOffset" />
       </matrixTransform>
     </self>
     <children>
-      <self itemName="Pylon2">
+      <self itemName="Pylon 2">
         <transform alignment="Left" isAbsoluteScale="true" arrayAxisOrder="XYZ">
           <offsetPosition x="0" y="0" z="0" />
-          <offsetRotation x="-0" y="0" z="0" />
+          <offsetRotation x="-0" y="270" z="0" />
           <scale x="1" y="1" z="1" />
+          <mustDraw>1</mustDraw>
           <instanceCount>-1</instanceCount>
           <arrayInstances x="1" y="1" z="1" />
           <arraySpacing x="0" y="0" z="0" />
         </transform>
-        <imageMesh atlas="__materialsHolders" mesh="__CylinderHolder">
+        <imageMesh atlas="AddressesCS2:__materialsHolders">
+          <mesh formulae="BelzontAdr.ADRHighwayMarkerData;GetPylonMeshName">__CylinderHolder</mesh>
           <image formulae="BelzontAdr.ADRHighwayMarkerData;pylonMaterial.ToString">wood</image>
         </imageMesh>
         <defaultStyle>
@@ -222,5 +228,7 @@
         </defaultStyle>
       </self>
     </children>
+    <variable key="pylonIndex" value="1" />
   </children>
+  <hideMesh>0</hideMesh>
 </WELayout>
