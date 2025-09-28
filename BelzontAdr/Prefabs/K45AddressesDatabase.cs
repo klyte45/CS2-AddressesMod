@@ -1,5 +1,6 @@
 ﻿using Belzont.Interfaces;
 using Colossal.IO.AssetDatabase;
+using Colossal.PSI.Common;
 using System;
 using System.IO;
 
@@ -21,6 +22,8 @@ namespace AddressesCS2.Prefabs
         private readonly string EffectivePath => Path.Combine(BasicIMod.ModInstallFolder, "Prefabs", ".Content");
 
         public readonly IDataSourceProvider dataSourceProvider => new FileSystemDataSource(name, EffectivePath, assetFactory, 0L);
+
+        public readonly DlcId dlcId => DlcId.Virtual;
 
         public readonly bool Equals(K45AddressesDatabase other) => true;
 

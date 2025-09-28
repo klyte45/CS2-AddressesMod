@@ -215,6 +215,8 @@ namespace BelzontAdr
                 {
                     return false;
                 }
+                m_adrEditorUI = World.GetExistingSystemManaged<AdrEditorUISystem>();
+                m_adrEditorUI.eventSelectionChanged += OnSelectionChanged;
                 m_selectedInfoUISystem.eventSelectionChanged += OnSelectionChanged;
                 return true;
             }
@@ -273,8 +275,9 @@ namespace BelzontAdr
 
         internal void EnqueueModification<T, W>(T newVal, Func<T, W, Entity, W> x) where W : unmanaged, IComponentData
         {
-            var target = m_selectedInfoUISystem.selectedEntity;
+            var target = GameManager.instance.gameMode == Game.GameMode.Editor ? m_adrEditorUI.SelectedEntity : m_selectedInfoUISystem.selectedEntity;
             if (target.Index > 0)
+            {
                 m_executionQueue.Enqueue(() =>
                 {
                     if (EntityManager.TryGetComponent<W>(target, out var currentItem))
@@ -283,7 +286,7 @@ namespace BelzontAdr
                         EntityManager.SetComponentData(target, currentItem);
                     }
                 });
-
+            }
         }
         #endregion
 
@@ -301,6 +304,7 @@ namespace BelzontAdr
         private ToolSystem m_toolSystem;
         private Adr_WEIntegrationSystem m_adrWeIntegrationSystem;
         private AdrMainSystem m_mainSystem;
+        private AdrEditorUISystem m_adrEditorUI;
         private readonly NativeParallelHashSet<Colossal.Hash128> m_cacheToBeErased = new(20, Allocator.Persistent);
         protected override void OnCreate()
         {

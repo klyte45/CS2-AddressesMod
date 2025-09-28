@@ -48,8 +48,9 @@ const AdrRoadMarkerToolOptions = () => {
     const [metadata, setMetadata] = useState<AdrFields<string> | null>();
     const [displayNameTypes, setDisplayNameTypes] = useState<string[]>([])
     useEffect(() => {
-        AdrHighwayRoutesSystem.getOptionsNamesFromMetadata().then(setDisplayNameTypes);
+        AdrHighwayRoutesSystem.getOptionsNamesFromMetadata().then(setDisplayNameTypes).then(() => routesSystem.refreshAllBindings());
         HighwayRoutesService.listHighwaysRegistered().then(x => setRoutesRegistered(x.map(y => ({ id: y.Id, name: `${y.prefix}-${y.suffix} ${y.name}` })).sort((a, b) => a.name.localeCompare(b.name))))
+
     }, [])
     useEffect(() => {
         AdrHighwayRoutesSystem.getOptionsMetadataFromCurrentLayout().then((x) => {

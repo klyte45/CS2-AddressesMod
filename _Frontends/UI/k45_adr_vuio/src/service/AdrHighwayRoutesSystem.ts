@@ -35,6 +35,9 @@ const AdrHighwayRoutesSystem = {
 
 export default {
     ...MultiUIValueBindingTools.InitializeBindings(AdrHighwayRoutesSystem),
+    async refreshAllBindings() {
+        (ObjectTyped.keys(AdrHighwayRoutesSystem) as Exclude<keyof typeof AdrHighwayRoutesSystem, '_prefix'>[]).filter(x => !x.startsWith("_")).map((binding) => this[binding].reactivate())
+    },
     async isCurrentPrefabRoadMarker(): Promise<boolean> { return await engine.call(AdrHighwayRoutesSystem._prefix + ".isCurrentPrefabRoadMarker"); },
     async getOptionsMetadataFromCurrentLayout(): Promise<string | null> { return await engine.call(AdrHighwayRoutesSystem._prefix + ".getOptionsMetadataFromCurrentLayout"); },
     async getOptionsMetadataFromLayout(enumId: DisplayInformation & number): Promise<string | null> { return await engine.call(AdrHighwayRoutesSystem._prefix + ".getOptionsMetadataFromLayout", enumId); },

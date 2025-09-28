@@ -16,12 +16,12 @@
   <Import Project="$(SolutionDir)\_Build\belzont_public.targets" />
 
   <!--File with machine specific data - can be disabled-->
-  <Import Project="$(K45_CS2_ALLROOT)\_Shared\belzont.targets" />
+  <Import Project="$(K45_CS2_ALLROOT)\_Shared\local_shared.targets" />
 
   <!--Mod data-->
   <PropertyGroup>
     <ModId>74182</ModId>
-    <Version>0.2.0.8</Version>
+    <Version>0.2.1.1</Version>
     <GameVersion>1.3.*</GameVersion>
     <Version Condition="'$(Configuration)'=='Debug'">65534.$([System.DateTime]::Now.ToString("yyyy.Mdd.HHmm"))</Version>
     <ThumbnailPath>Properties/Thumbnail.png</ThumbnailPath>

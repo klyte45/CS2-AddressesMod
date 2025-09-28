@@ -25,6 +25,8 @@ namespace BelzontAdr
         private ToolSystem m_ToolSystem;
         private NameSystem m_NameSystem;
         private Entity m_SelectedEntity;
+        public Entity SelectedEntity => m_SelectedEntity;
+        public Action<Entity, Entity, float3> eventSelectionChanged { get; set; }
 
         public override GameMode gameMode
         {
@@ -63,9 +65,17 @@ namespace BelzontAdr
                 if (SelectedInfoUISystem.TryGetPosition(entity, EntityManager, ref elIdx, out Entity entity2, out float3 selectedPosition, out Bounds3 bounds, out quaternion quaternion, false) || EntityManager.HasComponent<Household>(entity))
                 {
                     selectedPosition.y = MathUtils.Center(bounds.y);
+                    if (m_SelectedEntity != entity)
+                    {
+                        eventSelectionChanged?.Invoke(entity, prefabRef.m_Prefab, selectedPosition);
+                    }
                     m_SelectedEntity = entity;
                     return;
                 }
+            }
+            if (m_SelectedEntity != Entity.Null)
+            {
+                eventSelectionChanged?.Invoke(Entity.Null, Entity.Null, default);
             }
             m_SelectedEntity = Entity.Null;
         }
