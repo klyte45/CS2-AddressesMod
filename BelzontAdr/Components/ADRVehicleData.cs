@@ -1,6 +1,5 @@
 ﻿using Belzont.Utils;
 using Colossal.Serialization.Entities;
-using System;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -16,6 +15,7 @@ namespace BelzontAdr
             public string calculatedPlate;
             public string calculatedConvoyPrefix;
             public int manufactureMonthsFromEpoch;
+            public uint ownerSerialNumber;
 
             private CohtmlSafe() { }
 
@@ -28,7 +28,8 @@ namespace BelzontAdr
                     calculatedPlate = data.calculatedPlate.ToString(),
                     calculatedConvoyPrefix = data.calculatedConvoyPrefix.ToString(),
                     manufactureMonthsFromEpoch = data.manufactureMonthsFromEpoch,
-                    serialNumber = data.serialNumber
+                    serialNumber = data.serialNumber,
+                    ownerSerialNumber = data.ownerSerialNumber
                 };
             }
         }
@@ -41,12 +42,15 @@ namespace BelzontAdr
             Rail
         }
 
-        private const uint CURRENT_VERSION = 1;
+
+        private const uint CURRENT_VERSION = 2;
         private const string LEGACY_CONVOY_PREFIX = "<INVALID LEGACY VALUE>";
         public VehiclePlateCategory plateCategory;
         public Entity cityOrigin;
+        public Entity serialOwnerSource;
         public Colossal.Hash128 checksumRule;
         public ulong serialNumber;
+        public uint ownerSerialNumber;
         public FixedString32Bytes calculatedPlate;
         public FixedString32Bytes calculatedConvoyPrefix;
         public int manufactureMonthsFromEpoch;
@@ -54,45 +58,53 @@ namespace BelzontAdr
 
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
         {
-            reader.Read(out uint version);
-            if (version > CURRENT_VERSION)
+            var version = reader.CheckVersionK45(CURRENT_VERSION, GetType());
+            if (version < 2)
             {
-                throw new Exception($"Invalid version of {GetType()}!");
+                reader.Read(out int pc);
+                plateCategory = (VehiclePlateCategory)pc;
             }
-            reader.Read(out int pc);
-            plateCategory = (VehiclePlateCategory)pc;
+            else
+            {
+                reader.Read(out plateCategory);
+            }
             reader.Read(out cityOrigin);
             reader.Read(out checksumRule);
             reader.Read(out serialNumber);
-            reader.Read(out calculatedPlate); ;
+            reader.Read(out calculatedPlate);
             reader.Read(out manufactureMonthsFromEpoch);
-            if(version >= 1)
+            if (version >= 1)
             {
                 reader.Read(out calculatedConvoyPrefix);
             }
             else
             {
-                if (plateCategory == VehiclePlateCategory.Rail)
-                {
-                    calculatedConvoyPrefix = LEGACY_CONVOY_PREFIX;
-                }
-                else
-                {
-                    calculatedConvoyPrefix = calculatedPlate;
-                }
+                calculatedConvoyPrefix = plateCategory == VehiclePlateCategory.Rail ? (FixedString32Bytes)LEGACY_CONVOY_PREFIX : calculatedPlate;
+            }
+            if (version >= 2)
+            {
+                reader.Read(out serialOwnerSource);
+                reader.Read(out ownerSerialNumber);
+            }
+            else
+            {
+                ownerSerialNumber = 0;
+                serialOwnerSource = Entity.Null;
             }
         }
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
-            writer.Write((int)plateCategory);
+            writer.Write(plateCategory);
             writer.Write(cityOrigin);
             writer.Write(checksumRule);
             writer.Write(serialNumber);
             writer.Write(calculatedPlate);
             writer.Write(manufactureMonthsFromEpoch);
             writer.Write(calculatedConvoyPrefix);
+            writer.Write(serialOwnerSource);
+            writer.Write(ownerSerialNumber);
         }
 
 #if DEBUG

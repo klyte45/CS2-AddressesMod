@@ -29,6 +29,7 @@ namespace BelzontAdr
             public VehiclePlateSettings.SafeStruct railPlatesSettings;
 
 
+
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
                 var entities = chunk.GetNativeArray(m_entityHdl);
@@ -49,25 +50,19 @@ namespace BelzontAdr
                         {
                             continue;
                         }
-                        int carNumber = CalculateTrainCarNumber(entity, refEntity, layoutData);
                         var newItem = new ADRVehicleData
                         {
                             plateCategory = ADRVehicleData.VehiclePlateCategory.Rail,
                             serialNumber = serialNumber,
                             manufactureMonthsFromEpoch = m_refDateTime,
-                            calculatedPlate = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, m_refDateTime, carNumber),
-                            calculatedConvoyPrefix = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, m_refDateTime, carNumber, true),
-                            checksumRule = railPlatesSettings.Checksum,
+                            calculatedPlate = new Unity.Collections.FixedString32Bytes(),
+                            calculatedConvoyPrefix = new Unity.Collections.FixedString32Bytes(),
                         };
                         m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);
+                        m_cmdBuffer.AddComponent<ADRVehiclePlateDataDirty>(unfilteredChunkIndex, entity);
                     }
                     else
                     {
-                        var settingEffective =
-                            isTrain ? railPlatesSettings
-                            : m_aircraftLkp.HasComponent(entity) ? airPlatesSettings
-                            : m_watercraftLkp.HasComponent(entity) ? waterPlatesSettings
-                            : roadPlatesSettings;
                         var plateCategory =
                             isTrain ? ADRVehicleData.VehiclePlateCategory.Rail
                             : m_aircraftLkp.HasComponent(entity) ? ADRVehicleData.VehiclePlateCategory.Air
@@ -78,31 +73,18 @@ namespace BelzontAdr
                             plateCategory = plateCategory,
                             serialNumber = serialNumber,
                             manufactureMonthsFromEpoch = m_refDateTime,
-                            calculatedPlate = settingEffective.GetPlateFor(0, serialNumber, m_refDateTime),
-                            calculatedConvoyPrefix = settingEffective.GetPlateFor(0, serialNumber, m_refDateTime, prefixOnly: true),
-                            checksumRule = settingEffective.Checksum,
+                            calculatedPlate = new Unity.Collections.FixedString32Bytes(),
+                            calculatedConvoyPrefix = new Unity.Collections.FixedString32Bytes(),
                         };
                         m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);
+                        m_cmdBuffer.AddComponent<ADRVehiclePlateDataDirty>(unfilteredChunkIndex, entity);
+                        m_cmdBuffer.AddComponent<ADRVehicleSerialDataDirty>(unfilteredChunkIndex, entity);
 #if DEBUG
-                 //       if (newItem.serialNumber % 5 == 0) UnityEngine.Debug.Log($"Added serial nº: {newItem.serialNumber} => {newItem.calculatedPlate}");
+                        //       if (newItem.serialNumber % 5 == 0) UnityEngine.Debug.Log($"Added serial nº: {newItem.serialNumber} => {newItem.calculatedPlate}");
 #endif
                     }
                 }
 
-            }
-
-            public static int CalculateTrainCarNumber(Entity entity, Entity refEntity, DynamicBuffer<LayoutElement> layoutData)
-            {
-                var carNumber = 0;
-                for (; carNumber < layoutData.Length; carNumber++)
-                {
-                    if (layoutData[carNumber].m_Vehicle == entity)
-                    {
-                        break;
-                    }
-                }
-                carNumber = layoutData[0].m_Vehicle == refEntity ? carNumber + 1 : layoutData.Length - carNumber;
-                return carNumber;
             }
         }
 

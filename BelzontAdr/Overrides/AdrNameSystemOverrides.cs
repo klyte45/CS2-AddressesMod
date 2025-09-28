@@ -178,6 +178,12 @@ namespace BelzontAdr
             return GetName_Internal(ref __result, ref __instance, entity);
         }
 
+        private static Name DirectGetName(ref NameSystem __instance, Entity entity)
+        {
+            Name n = default;
+            return GetName(ref n, ref __instance, entity) ? n : Original_GetName(__instance, entity);
+        }
+
         private static bool GetName_Internal(ref Name __result, ref NameSystem __instance, Entity entity, bool omitAddressQualifier = false)
         {
             if (__instance.TryGetCustomName(entity, out string name))
@@ -234,6 +240,33 @@ namespace BelzontAdr
             if (entityManager.HasComponent<District>(entity))
             {
                 return GetDistrictName(__instance, ref __result, entity);
+            }
+            if (entityManager.TryGetComponent<ADRVehicleData>(entity, out var vehicleData) && !vehicleData.calculatedConvoyPrefix.IsEmpty)
+            {
+                if (vehicleData.serialOwnerSource != Entity.Null && entityManager.TryGetComponent<ADRVehicleSpawnerData>(vehicleData.serialOwnerSource, out var spawnerData))
+                {
+                    __result = spawnerData.kind switch
+                    {
+                        ADRVehicleSpawnerData.VehicleSourceKind.PublicTransport_Bus
+                        or ADRVehicleSpawnerData.VehicleSourceKind.PublicTransport
+                        or ADRVehicleSpawnerData.VehicleSourceKind.PublicTransport_Taxi
+                        => Name.CustomName($"{vehicleData.calculatedConvoyPrefix}"),
+                        ADRVehicleSpawnerData.VehicleSourceKind.Police
+                       or ADRVehicleSpawnerData.VehicleSourceKind.Hospital
+                       or ADRVehicleSpawnerData.VehicleSourceKind.Deathcare
+                       or ADRVehicleSpawnerData.VehicleSourceKind.FireResponse
+                       or ADRVehicleSpawnerData.VehicleSourceKind.Garbage
+                       or ADRVehicleSpawnerData.VehicleSourceKind.Maintenance
+                       or ADRVehicleSpawnerData.VehicleSourceKind.Post
+                          => Name.CustomName($"{DirectGetName(ref __instance, vehicleData.serialOwnerSource).Translate()} #{vehicleData.ownerSerialNumber}"),
+                       _ => Name.CustomName(vehicleData.calculatedPlate.ToString())
+                    };
+                }
+                else
+                {
+                    __result = Name.CustomName(vehicleData.calculatedPlate.ToString());
+                }
+                return false;
             }
             var original = entity;
             while (entityManager.TryGetComponent<Owner>(entity, out var owner))

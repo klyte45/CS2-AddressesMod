@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
+using static Unity.Collections.Unicode;
 using Hash128 = Colossal.Hash128;
 
 
@@ -185,7 +186,6 @@ namespace BelzontAdr
         }
         public static VehiclePlateSettings CreateRailVehicleDefault(TimeSystem timeSystem)
         {
-            var alpha = ALPHA;
             var alphaNum = ALPHA_NUM;
             var result = new VehiclePlateSettings
             {
@@ -193,7 +193,7 @@ namespace BelzontAdr
                 m_serialIncrementEachMonth = 36 * 36,
                 m_lettersAllowed = new string[]
                     {
-                        alpha,alphaNum,alphaNum,alphaNum,alphaNum,"-",alphaNum
+                      " "+alphaNum,ALPHA,alphaNum,alphaNum,alphaNum,"-",alphaNum
                     },
                 m_flagsLocal = 0b11100,
                 m_flagsCarNumber = 0b11,
@@ -264,14 +264,25 @@ namespace BelzontAdr
             public NativeArray<int> m_charZeroPos;
 
             public Hash128 Checksum;
-            public readonly FixedString32Bytes GetPlateFor(ulong regionalCode, ulong localSerial, int monthsFromEpoch, int compositionNumber = 1, bool prefixOnly = false)
+            public readonly FixedString32Bytes GetPlateFor(ulong regionalCode, FixedString32Bytes regionalAcronym, ulong localSerial, int monthsFromEpoch, int compositionNumber = 1, bool prefixOnly = false)
             {
                 var output = new NativeArray<Unicode.Rune>(m_charZeroPos.Length, Allocator.Temp);
                 uint currentFlag = 1;
                 int currentIdx = m_charZeroPos.Length - 1;
-                unchecked
+                if (monthsFromEpoch >= 0)
                 {
-                    localSerial += (ulong)(Math.Max(0, monthsFromEpoch - m_monthsFromEpochOffset) * m_serialIncrementEachMonth);
+                    unchecked
+                    {
+                        localSerial += (ulong)(Math.Max(0, monthsFromEpoch - m_monthsFromEpochOffset) * m_serialIncrementEachMonth);
+                    }
+                }
+                int regionalAcronymLettersLeft = regionalAcronym.Length;
+                NativeList<Rune> runeList = new NativeList<Rune>(regionalAcronym.Length, Allocator.Temp);
+
+                // Iterate through the FixedString32Bytes and append each Rune
+                foreach (Rune rune in regionalAcronym)
+                {
+                    runeList.Add(rune);
                 }
                 do
                 {
@@ -292,11 +303,13 @@ namespace BelzontAdr
                     }
                     else
                     {
-                        output[currentIdx] = new Unicode.Rune(m_lettersAllowedProcessed[(int)(regionalCode % numberChars + charZeroPos)]);
+                        output[currentIdx] = regionalAcronymLettersLeft > 0 ? runeList[regionalAcronym.Length - regionalAcronymLettersLeft--] : new Unicode.Rune(m_lettersAllowedProcessed[(int)(regionalCode % numberChars + charZeroPos)]);
                         regionalCode /= numberChars;
                     }
                     currentFlag <<= 1;
                 } while (--currentIdx >= 0);
+
+                runeList.Dispose();
                 var result = new FixedString32Bytes();
                 for (int i = 0; i < output.Length; i++)
                 {

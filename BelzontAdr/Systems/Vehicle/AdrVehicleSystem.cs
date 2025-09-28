@@ -4,10 +4,8 @@ using Colossal;
 using Colossal.Entities;
 using Colossal.Serialization.Entities;
 using Game;
-using Game.Buildings;
 using Game.Common;
 using Game.Companies;
-using Game.Objects;
 using Game.SceneFlow;
 using Game.Simulation;
 using Game.Tools;
@@ -16,15 +14,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
+using static BelzontAdr.ADRVehicleSpawnerData;
 
 namespace BelzontAdr
 {
 
     public partial class AdrVehicleSystem : GameSystemBase, IBelzontBindable, IDefaultSerializable
     {
-        private const uint CURRENT_VERSION = 1;
+        private const uint CURRENT_VERSION = 2;
 
         #region Controller endpoints
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
@@ -51,27 +51,41 @@ namespace BelzontAdr
         private EntityQuery m_unregisteredVehiclesQuery;
         private EntityQuery m_dirtyVehiclesPlateQuery;
         private EntityQuery m_unregisteredVehicleSpawnerQuery;
+        private EntityQuery m_vehicleToUpdateConvoyId;
+        private EntityQuery m_buildingWithVehicleToUpdateConvoyId;
+        private EntityQuery m_buildingOwnSerialDirty;
         private ulong currentSerialNumberVehicles;
-        private uint currentSerialNumberVehicleSources;
+        private Dictionary<VehicleSourceKind, ushort> currentSerialNumberVehicleSources;
 
         private VehiclePlateSettings roadVehiclesPlatesSettings = new();
         private VehiclePlateSettings railVehiclesPlatesSettings = new();
         private VehiclePlateSettings airVehiclesPlatesSettings = new();
         private VehiclePlateSettings waterVehiclesPlatesSettings = new();
 
+        private VehicleSerialSettings busSerialSettings = new();
+        private VehicleSerialSettings taxiSerialSettings = new();
+        private VehicleSerialSettings policeSerialSettings = new();
+        private VehicleSerialSettings firetruckSerialSettings = new();
+        private VehicleSerialSettings ambulanceSerialSettings = new();
+        private VehicleSerialSettings garbageSerialSettings = new();
+        private VehicleSerialSettings postalSerialSettings = new();
+
+
         public override int GetUpdateInterval(SystemUpdatePhase phase)
         {
             return 16;
         }
 
-        public VehiclePlateSettings RoadVehiclesPlatesSettings
+        internal static ushort GetNextSerial(VehicleSourceKind kind)
         {
-            get => roadVehiclesPlatesSettings; set
+            if (!Instance.currentSerialNumberVehicleSources.TryGetValue(kind, out var current))
             {
-                roadVehiclesPlatesSettings = value;
-                MarkEntitiesPlateDirty(ComponentType.ReadOnly<Car>());
+                Instance.currentSerialNumberVehicleSources[kind] = current = 0;
             }
+            Instance.currentSerialNumberVehicleSources[kind]++;
+            return current;
         }
+
 
         private void MarkEntitiesPlateDirty(ComponentType specificType)
         {
@@ -120,8 +134,99 @@ namespace BelzontAdr
             }
         }
 
+        private void MarkEntitiesSerialDirty(ComponentType specificType)
+        {
+            EntityManager.AddComponent<ADRVehicleSerialDataDirty>(GetEntityQuery(new EntityQueryDesc[]
+                 {
+                    new ()
+                    {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Vehicle>(),
+                            ComponentType.ReadOnly<ADRVehicleData>(),
+                            specificType
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+             }));
+        }
+
+        public VehiclePlateSettings RoadVehiclesPlatesSettings
+        {
+            get => roadVehiclesPlatesSettings; set
+            {
+                roadVehiclesPlatesSettings = value;
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+
+        public VehicleSerialSettings BusSerialSettings
+        {
+            get => busSerialSettings; set
+            {
+                busSerialSettings = value;
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+
+        public VehicleSerialSettings TaxiSerialSettings
+        {
+            get => taxiSerialSettings; set
+            {
+                taxiSerialSettings = value;
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+        public VehicleSerialSettings PoliceSerialSettings
+        {
+            get => policeSerialSettings; set
+            {
+                policeSerialSettings = value;
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+        public VehicleSerialSettings FiretruckSerialSettings
+        {
+            get => firetruckSerialSettings; set
+            {
+                firetruckSerialSettings = value;
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+        public VehicleSerialSettings AmbulanceSerialSettings
+        {
+            get => ambulanceSerialSettings; set
+            {
+                ambulanceSerialSettings = value;
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+        public VehicleSerialSettings GarbageSerialSettings
+        {
+            get => garbageSerialSettings; set
+            {
+                garbageSerialSettings = value;
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+        public VehicleSerialSettings PostalSerialSettings
+        {
+            get => postalSerialSettings; set
+            {
+                postalSerialSettings = value;
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+
+        private static AdrVehicleSystem Instance;
+
         protected override void OnCreate()
         {
+            Instance = this;
             m_Barrier = World.GetOrCreateSystemManaged<EndFrameBarrier>();
             m_timeSystem = World.GetOrCreateSystemManaged<TimeSystem>();
             m_unregisteredVehiclesQuery = GetEntityQuery(new EntityQueryDesc[]
@@ -164,27 +269,76 @@ namespace BelzontAdr
                     {
                         Any = new ComponentType[]
                         {
-                            ComponentType.ReadOnly<PoliceStation>(),
-                            ComponentType.ReadOnly<Hospital>(),
-                            ComponentType.ReadOnly<DeathcareFacility>(),
-                            ComponentType.ReadOnly<FireStation>(),
-                            ComponentType.ReadOnly<GarbageFacility>(),
-                            ComponentType.ReadOnly<TransportDepot>(),
-                            ComponentType.ReadOnly<CargoTransportStation>(),
-                            ComponentType.ReadOnly<MaintenanceDepot>(),
-                            ComponentType.ReadOnly<PostFacility>(),
+                            ComponentType.ReadOnly<Game.Buildings.PoliceStation>(),
+                            ComponentType.ReadOnly<Game.Buildings.Hospital>(),
+                            ComponentType.ReadOnly<Game.Buildings.DeathcareFacility>(),
+                            ComponentType.ReadOnly<Game.Buildings.FireStation>(),
+                            ComponentType.ReadOnly<Game.Buildings.GarbageFacility>(),
+                            ComponentType.ReadOnly<Game.Buildings.TransportDepot>(),
+                            ComponentType.ReadOnly<Game.Buildings.CargoTransportStation>(),
+                            ComponentType.ReadOnly<Game.Buildings.MaintenanceDepot>(),
+                            ComponentType.ReadOnly<Game.Buildings.PostFacility>(),
                             ComponentType.ReadOnly<TransportCompany>(),
                         },
                         None = new ComponentType[]
                         {
-                            ComponentType.ReadOnly<ADRVehicleSourceData>(),
+                            ComponentType.ReadOnly<ADRVehicleSpawnerData>(),
                             ComponentType.ReadOnly<Owner>(),
-                            ComponentType.ReadOnly<OutsideConnection>(),
                             ComponentType.ReadOnly<Temp>(),
                             ComponentType.ReadOnly<Deleted>(),
                         }
                     }
             });
+            m_vehicleToUpdateConvoyId = GetEntityQuery(new EntityQueryDesc[]
+            {
+                new ()
+                    {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ADRVehicleData>(),
+                            ComponentType.ReadOnly<ADRVehicleSerialDataDirty>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+            });
+            m_buildingWithVehicleToUpdateConvoyId = GetEntityQuery(new EntityQueryDesc[]
+            {
+                new ()
+                    {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ADRBuildingVehiclesSerialDirty>(),
+                            ComponentType.ReadOnly<ADRVehicleSpawnerData>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ADRBuildingOwnSerialUnset>(),
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+            });
+            m_buildingOwnSerialDirty = GetEntityQuery(new EntityQueryDesc[]
+            {
+                new ()
+                    {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ADRBuildingOwnSerialUnset>(),
+                            ComponentType.ReadOnly<ADRVehicleSpawnerData>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+            });
+
             GameManager.instance.RegisterUpdater(() =>
             {
                 if (AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == "BelzontWE") is Assembly weAssembly
@@ -203,7 +357,15 @@ namespace BelzontAdr
                     if (t.GetField("GetConvoyId_binding", RedirectorUtils.allFlags) is FieldInfo getConvoyId)
                     {
                         var originalValue = getConvoyId.GetValue(null) as Func<Entity, string>;
-                        getConvoyId.SetValue(null, (Entity e) => EntityManager.TryGetComponent(e, out ADRVehicleData vehicleData) && vehicleData.plateCategory == ADRVehicleData.VehiclePlateCategory.Rail ? vehicleData.calculatedConvoyPrefix.ToString() : originalValue(e));
+                        getConvoyId.SetValue(null, (Entity e) =>
+                        {
+                            if (EntityManager.TryGetComponent(e, out ADRVehicleData vehicleData))
+                            {
+                                if (vehicleData.plateCategory == ADRVehicleData.VehiclePlateCategory.Rail || vehicleData.plateCategory == ADRVehicleData.VehiclePlateCategory.Road) return vehicleData.calculatedConvoyPrefix.ToString();
+                            }
+                            return originalValue(e);
+
+                        });
                     }
                 }
             });
@@ -235,6 +397,7 @@ namespace BelzontAdr
                 var airPlatesSettings = airVehiclesPlatesSettings.ForBurstJob;
                 var waterPlatesSettings = waterVehiclesPlatesSettings.ForBurstJob;
                 var railPlatesSettings = railVehiclesPlatesSettings.ForBurstJob;
+
                 var job = new ADRRegisterVehicles
                 {
                     m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
@@ -286,7 +449,8 @@ namespace BelzontAdr
                     m_adrVehicleDataLkp = GetComponentLookup<ADRVehicleData>(),
                     m_adrVehiclePlateDataLkp = GetComponentLookup<ADRVehiclePlateDataDirty>(),
                     m_controllerLkp = GetComponentLookup<Controller>(),
-                    m_layoutElementLkp = GetBufferLookup<LayoutElement>()
+                    m_layoutElementLkp = GetBufferLookup<LayoutElement>(),
+                    m_spawnerDataLkp = GetComponentLookup<ADRVehicleSpawnerData>(),
                 };
                 Dependency = job.ScheduleParallel(m_dirtyVehiclesPlateQuery, Dependency);
 
@@ -299,36 +463,84 @@ namespace BelzontAdr
 #if DEBUG
             if (!m_unregisteredVehicleSpawnerQuery.IsEmptyIgnoreFilter)
             {
-                var counter = new NativeCounter(Unity.Collections.Allocator.Temp);
                 var job = new ADRRegisterVehicleSources
                 {
                     m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
                     m_entityHdl = GetEntityTypeHandle(),
-                    m_serialNumberCounter = counter.ToConcurrent(),
-                    refSerialNumber = currentSerialNumberVehicleSources,
-                    m_policeStation = GetComponentLookup<PoliceStation>(),
-                    m_hospital = GetComponentLookup<Hospital>(),
-                    m_deathcareFacility = GetComponentLookup<DeathcareFacility>(),
-                    m_fireStation = GetComponentLookup<FireStation>(),
-                    m_garbageFacility = GetComponentLookup<GarbageFacility>(),
-                    m_transportDepot = GetComponentLookup<TransportDepot>(),
-                    m_cargoTransportStation = GetComponentLookup<CargoTransportStation>(),
-                    m_maintenanceDepot = GetComponentLookup<MaintenanceDepot>(),
-                    m_postFacility = GetComponentLookup<PostFacility>(),
+                    m_policeStation = GetComponentLookup<Game.Buildings.PoliceStation>(),
+                    m_hospital = GetComponentLookup<Game.Buildings.Hospital>(),
+                    m_deathcareFacility = GetComponentLookup<Game.Buildings.DeathcareFacility>(),
+                    m_fireStation = GetComponentLookup<Game.Buildings.FireStation>(),
+                    m_garbageFacility = GetComponentLookup<Game.Buildings.GarbageFacility>(),
+                    m_transportDepot = GetComponentLookup<Game.Buildings.TransportDepot>(),
+                    m_cargoTransportStation = GetComponentLookup<Game.Buildings.CargoTransportStation>(),
+                    m_maintenanceDepot = GetComponentLookup<Game.Buildings.MaintenanceDepot>(),
+                    m_postFacility = GetComponentLookup<Game.Buildings.PostFacility>(),
                     m_transportCompany = GetComponentLookup<TransportCompany>(),
                     m_industrialCompany = GetComponentLookup<IndustrialCompany>(),
                     m_commercialCompany = GetComponentLookup<CommercialCompany>(),
+                    m_prefabRef = GetComponentLookup<Game.Prefabs.PrefabRef>(),
+                    m_depotData = GetComponentLookup<Game.Prefabs.TransportDepotData>(),
                 };
-                Dependency = job.ScheduleParallel(m_unregisteredVehicleSpawnerQuery, Dependency);
-                Dependency.GetAwaiter().OnCompleted(() =>
-                {
-                    currentSerialNumberVehicleSources += (uint)counter.Count;
-                    counter.Dispose();
-                });
+                job.ScheduleParallel(m_unregisteredVehicleSpawnerQuery, Dependency);
             }
-#endif
-        }
 
+            if (!m_buildingOwnSerialDirty.IsEmptyIgnoreFilter)
+            {
+                var entities = m_buildingOwnSerialDirty.ToEntityArray(Allocator.Temp);
+                for (int i = 0; i < entities.Length; i++)
+                {
+                    var entity = entities[i];
+                    if (EntityManager.TryGetComponent<ADRVehicleSpawnerData>(entity, out var sourceData))
+                    {
+                        sourceData.DoRegisterCategorySerialNumber();
+                        EntityManager.SetComponentData(entity, sourceData);
+                    }
+                    EntityManager.RemoveComponent<ADRBuildingOwnSerialUnset>(entity);
+                }
+                entities.Dispose();
+            }
+
+            if (!m_vehicleToUpdateConvoyId.IsEmptyIgnoreFilter)
+            {
+
+                var job = new ADRUpdateVehiclesConvoyId
+                {
+                    m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
+                    m_entityHdl = GetEntityTypeHandle(),
+                    m_ownerLookup = GetComponentLookup<Owner>(),
+
+                };
+                job.ScheduleParallel(m_vehicleToUpdateConvoyId, Dependency);
+
+            }
+
+            if (!m_buildingWithVehicleToUpdateConvoyId.IsEmpty)
+            {
+                var job = new ADRUpdateBuildingVehiclesConvoyId
+                {
+                    ambulanceSerialSettings = ambulanceSerialSettings.ForBurstJob,
+                    busSerialSettings = busSerialSettings.ForBurstJob,
+                    firetruckSerialSettings = firetruckSerialSettings.ForBurstJob,
+                    garbageSerialSettings = garbageSerialSettings.ForBurstJob,
+                    policeSerialSettings = policeSerialSettings.ForBurstJob,
+                    postalSerialSettings = postalSerialSettings.ForBurstJob,
+                    taxiSerialSettings = taxiSerialSettings.ForBurstJob,
+                    m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
+                    entityTypeHandle = GetEntityTypeHandle(),
+                    m_ownedVehiclesLkp = GetBufferLookup<OwnedVehicle>(),
+                    m_sourceDataLkp = GetComponentLookup<ADRVehicleSpawnerData>(),
+                    m_vehicleDataLkp = GetComponentLookup<ADRVehicleData>(),
+                    m_layoutElementLkp = GetBufferLookup<LayoutElement>(),
+                    m_controllerLkp = GetComponentLookup<Controller>(),
+
+                };
+                job.ScheduleParallel(m_buildingWithVehicleToUpdateConvoyId, Dependency);
+            }
+
+#endif
+            Dependency.Complete();
+        }
 
         #region Serialization
 
@@ -346,7 +558,10 @@ namespace BelzontAdr
             reader.Read(waterVehiclesPlatesSettings);
             reader.Read(airVehiclesPlatesSettings);
             reader.Read(railVehiclesPlatesSettings);
-            reader.Read(out currentSerialNumberVehicleSources);
+            if (version <= 1)
+            {
+                reader.Read(out uint _);
+            }
             reader.Read(out currentSerialNumberVehicles);
 
             if (version == 0)
@@ -362,8 +577,45 @@ namespace BelzontAdr
                     }
                 }), EntityQueryCaptureMode.AtPlayback));
             }
-        }
+            if (version >= 2)
+            {
+                reader.Read(out int count);
+                currentSerialNumberVehicleSources = new Dictionary<VehicleSourceKind, ushort>(count);
+                for (int i = 0; i < count; i++)
+                {
+                    reader.Read(out VehicleSourceKind key);
+                    reader.Read(out ushort value);
+                    currentSerialNumberVehicleSources[key] = value;
+                }
+            }
+            else
+            {
+                currentSerialNumberVehicleSources = new Dictionary<VehicleSourceKind, ushort>();
 
+                busSerialSettings = VehicleSerialSettings.CreateBusSerialSettings();
+                taxiSerialSettings = VehicleSerialSettings.CreateTaxiSerialSettings();
+                policeSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+                firetruckSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+                ambulanceSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+                garbageSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+                postalSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+                actionsToRunOnMain.Enqueue(() => EntityManager.AddComponent<ADRBuildingVehiclesSerialDirty>(GetEntityQuery(new EntityQueryDesc[]
+                 {
+                    new ()
+                    {
+                        All = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<ADRVehicleSpawnerData>(),
+                        },
+                        None = new ComponentType[]
+                        {
+                            ComponentType.ReadOnly<Temp>(),
+                            ComponentType.ReadOnly<Deleted>(),
+                        }
+                    }
+             })));
+            }
+        }
         public void Serialize<W>(W writer) where W : IWriter
         {
             writer.Write(CURRENT_VERSION);
@@ -371,18 +623,30 @@ namespace BelzontAdr
             writer.Write(waterVehiclesPlatesSettings);
             writer.Write(airVehiclesPlatesSettings);
             writer.Write(railVehiclesPlatesSettings);
-            writer.Write(currentSerialNumberVehicleSources);
             writer.Write(currentSerialNumberVehicles);
+            writer.Write(currentSerialNumberVehicleSources.Count);
+            foreach (var kvp in currentSerialNumberVehicleSources)
+            {
+                writer.Write(kvp.Key);
+                writer.Write(kvp.Value);
+            }
         }
 
         public void SetDefaults(Context context)
         {
             currentSerialNumberVehicles = 0;
-            currentSerialNumberVehicleSources = 0;
+            currentSerialNumberVehicleSources = new();
             roadVehiclesPlatesSettings = VehiclePlateSettings.CreateRoadVehicleDefault(m_timeSystem);
             airVehiclesPlatesSettings = VehiclePlateSettings.CreateAirVehicleDefault(m_timeSystem);
             waterVehiclesPlatesSettings = VehiclePlateSettings.CreateWaterVehicleDefault(m_timeSystem);
             railVehiclesPlatesSettings = VehiclePlateSettings.CreateRailVehicleDefault(m_timeSystem);
+            busSerialSettings = VehicleSerialSettings.CreateBusSerialSettings();
+            taxiSerialSettings = VehicleSerialSettings.CreateTaxiSerialSettings();
+            policeSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+            firetruckSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+            ambulanceSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+            garbageSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+            postalSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
         }
 
         #endregion

@@ -1,6 +1,7 @@
 ﻿using Game.Vehicles;
 using Unity.Burst;
 using Unity.Burst.Intrinsics;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace BelzontAdr
@@ -23,6 +24,7 @@ namespace BelzontAdr
             public ComponentLookup<Controller> m_controllerLkp;
             public ComponentLookup<ADRVehicleData> m_adrVehicleDataLkp;
             public ComponentLookup<ADRVehiclePlateDataDirty> m_adrVehiclePlateDataLkp;
+            public ComponentLookup<ADRVehicleSpawnerData> m_spawnerDataLkp;
             public BufferLookup<LayoutElement> m_layoutElementLkp;
 
 
@@ -38,38 +40,60 @@ namespace BelzontAdr
                     var vehicleData = vehicles[i];
                     var isTrain = m_trainLkp.HasComponent(entity);
                     var refEntity = !isTrain || !m_controllerLkp.TryGetComponent(entity, out var ctrl) || ctrl.m_Controller == entity ? entity : ctrl.m_Controller;
-                    if (isTrain && refEntity != entity)
+                    ushort regionalCode = ushort.MaxValue;
+                    var regionalAcronym = default(FixedString32Bytes);
+                    var refSerial = vehicleData.serialNumber;
+                    var refEpoch = vehicleData.manufactureMonthsFromEpoch;
+                    if (m_adrVehicleDataLkp.TryGetComponent(refEntity, out var dataController) && dataController.serialOwnerSource != Entity.Null && m_spawnerDataLkp.TryGetComponent(dataController.serialOwnerSource, out var spawnerData))
                     {
-                        if (!m_adrVehicleDataLkp.TryGetComponent(refEntity, out var vehicleDataParent)
-                            || m_adrVehiclePlateDataLkp.HasComponent(refEntity)
-                            || !m_layoutElementLkp.TryGetBuffer(refEntity, out var layoutData)
-                            )
+                        regionalCode = spawnerData.CategorySerialNumber;
+                        regionalAcronym = spawnerData.customId;
+                        refSerial = vehicleData.ownerSerialNumber;
+                        refEpoch = -1;
+                    }
+                    if (isTrain)
+                    {
+                        if (!m_layoutElementLkp.TryGetBuffer(refEntity, out var layoutData))
                         {
                             continue;
                         }
-                        var carNumber = ADRRegisterVehicles.CalculateTrainCarNumber(entity, refEntity, layoutData);
-                        vehicleData.calculatedPlate = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, vehicleData.manufactureMonthsFromEpoch, carNumber);
-                        vehicleData.calculatedConvoyPrefix = railPlatesSettings.GetPlateFor(0, vehicleDataParent.serialNumber, vehicleData.manufactureMonthsFromEpoch, carNumber, true);
+                        var carNumber = CalculateTrainCarNumber(entity, refEntity, layoutData);
+
+
+                        vehicleData.calculatedPlate = railPlatesSettings.GetPlateFor(regionalCode, regionalAcronym, refSerial, refEpoch, carNumber);
+                        vehicleData.calculatedConvoyPrefix = railPlatesSettings.GetPlateFor(regionalCode, regionalAcronym, refSerial, refEpoch, carNumber, true);
                         vehicleData.checksumRule = railPlatesSettings.Checksum;
                     }
                     else
                     {
                         var settingEffective =
-                            isTrain ? railPlatesSettings
-                            : m_aircraftLkp.HasComponent(entity) ? airPlatesSettings
+                            m_aircraftLkp.HasComponent(entity) ? airPlatesSettings
                             : m_watercraftLkp.HasComponent(entity) ? waterPlatesSettings
                             : roadPlatesSettings;
 
                         var serialNumber = vehicleData.serialNumber;
 
-                        vehicleData.calculatedPlate = settingEffective.GetPlateFor(0, serialNumber, vehicleData.manufactureMonthsFromEpoch);
+                        vehicleData.calculatedPlate = settingEffective.GetPlateFor(regionalCode, regionalAcronym, serialNumber, vehicleData.manufactureMonthsFromEpoch);
                         vehicleData.checksumRule = settingEffective.Checksum;
 
                     }
                     m_cmdBuffer.SetComponent(unfilteredChunkIndex, entity, vehicleData);
                     m_cmdBuffer.RemoveComponent<ADRVehiclePlateDataDirty>(unfilteredChunkIndex, entity);
                 }
+            }
 
+            public static int CalculateTrainCarNumber(Entity entity, Entity refEntity, DynamicBuffer<LayoutElement> layoutData)
+            {
+                var carNumber = 0;
+                for (; carNumber < layoutData.Length; carNumber++)
+                {
+                    if (layoutData[carNumber].m_Vehicle == entity)
+                    {
+                        break;
+                    }
+                }
+                carNumber = layoutData[0].m_Vehicle == refEntity ? carNumber + 1 : layoutData.Length - carNumber;
+                return carNumber;
             }
         }
     }
