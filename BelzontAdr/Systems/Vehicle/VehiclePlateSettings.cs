@@ -10,7 +10,6 @@ using Unity.Jobs;
 using static Unity.Collections.Unicode;
 using Hash128 = Colossal.Hash128;
 
-
 namespace BelzontAdr
 {
     public class VehiclePlateSettings : ISerializable
@@ -254,7 +253,7 @@ namespace BelzontAdr
 
         };
 
-        public unsafe struct SafeStruct
+        public unsafe struct SafeStruct : IDisposable, INativeDisposable
         {
             internal uint m_flagsLocal;
             internal uint m_flagsCarNumber;
@@ -276,14 +275,17 @@ namespace BelzontAdr
                         localSerial += (ulong)(Math.Max(0, monthsFromEpoch - m_monthsFromEpochOffset) * m_serialIncrementEachMonth);
                     }
                 }
-                int regionalAcronymLettersLeft = regionalAcronym.Length;
                 NativeList<Rune> runeList = new NativeList<Rune>(regionalAcronym.Length, Allocator.Temp);
 
                 // Iterate through the FixedString32Bytes and append each Rune
-                foreach (Rune rune in regionalAcronym)
+                var enumerator = regionalAcronym.GetEnumerator();
+                while (enumerator.MoveNext())
                 {
-                    runeList.Add(rune);
+                    runeList.Add(enumerator.Current);
                 }
+                enumerator.Dispose();
+                int regionalAcronymLettersLeft = runeList.Length;
+                bool hasCustomAcronym = regionalAcronymLettersLeft > 0;
                 do
                 {
                     var charZeroPos = (ulong)m_charZeroPos[currentIdx];
@@ -303,26 +305,43 @@ namespace BelzontAdr
                     }
                     else
                     {
-                        output[currentIdx] = regionalAcronymLettersLeft > 0 ? runeList[regionalAcronym.Length - regionalAcronymLettersLeft--] : new Unicode.Rune(m_lettersAllowedProcessed[(int)(regionalCode % numberChars + charZeroPos)]);
-                        regionalCode /= numberChars;
+                        if (hasCustomAcronym && regionalAcronymLettersLeft > 0)
+                        {
+                            var nextIdx = --regionalAcronymLettersLeft;
+                            output[currentIdx] = runeList[nextIdx];
+                        }
+                        else if (!hasCustomAcronym)
+                        {
+                            output[currentIdx] = new Unicode.Rune(m_lettersAllowedProcessed[(int)((regionalCode % numberChars) + charZeroPos)]);
+                            regionalCode /= numberChars;
+                        }
                     }
                     currentFlag <<= 1;
                 } while (--currentIdx >= 0);
 
                 runeList.Dispose();
                 var result = new FixedString32Bytes();
+                var outputRunes = output.GetEnumerator();
                 for (int i = 0; i < output.Length; i++)
                 {
                     if (output[i].value != 0) result.Append(output[i]);
                 }
                 output.Dispose();
+                outputRunes.Dispose();
                 return result;
             }
 
-            internal void Dispose(JobHandle dependency)
+            public JobHandle Dispose(JobHandle dependency)
             {
                 m_lettersAllowedProcessed.Dispose(dependency);
                 m_charZeroPos.Dispose(dependency);
+                return dependency;
+            }
+
+            public void Dispose()
+            {
+                m_lettersAllowedProcessed.Dispose();
+                m_charZeroPos.Dispose();
             }
         }
     }

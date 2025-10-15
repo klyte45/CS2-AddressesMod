@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { OverrideCitizenTab } from "./OverrideCitizenTab";
 import { OverrideRoadsDistrictsTab } from "./OverrideRoadsDistrictsTab";
 import { VehiclePlateControllerComponent } from "./VehiclePlateControllerComponent";
+import { VehicleSerialControllerComponent } from "./VehicleSerialControllerComponent";
 
 enum TabsNames {
   RoadsDistricts = "RoadsDistricts",
@@ -12,7 +13,16 @@ enum TabsNames {
   RoadPlates = "RoadPlates",
   RailPlates = "RailPlates",
   WaterPlates = "WaterPlates",
-  AirPlates = "AirPlates"
+  AirPlates = "AirPlates",
+  BusSerial = "BusSerial",
+  TaxiSerial = "TaxiSerial",
+  PoliceSerial = "PoliceSerial",
+  FiretruckSerial = "FiretruckSerial",
+  AmbulanceSerial = "AmbulanceSerial",
+  GarbageSerial = "GarbageSerial",
+  PostalSerial = "PostalSerial",
+
+
 }
 
 
@@ -43,11 +53,11 @@ export const OverrideSettingsCmp = ({ }) => {
   }, []);
 
   const [currentSettings, setCurrentSettings] = useState({} as AdrCitywideSettings);
-  
+
   const getSettings = async () => {
     setCurrentSettings(await NamingRulesService.getCurrentCitywideSettings());
   }
-  
+
   const [districts, setDistricts] = useState([] as DistrictListItem[])
   const listDistricts = async () => {
     const districtNames = (await DistrictRelativeService.listAllDistricts())?.sort((a, b) => nameToString(a.Name).localeCompare(nameToString(b.Name), undefined, { sensitivity: "base" }))
@@ -63,6 +73,14 @@ export const OverrideSettingsCmp = ({ }) => {
     TabsNames.RailPlates,
     TabsNames.WaterPlates,
     TabsNames.AirPlates,
+    { type: "H2", title: translate("overrideSettings.subCategory.roadVehicleSerial") },
+    TabsNames.BusSerial,
+    TabsNames.TaxiSerial,
+    TabsNames.PoliceSerial,
+    TabsNames.FiretruckSerial,
+    TabsNames.AmbulanceSerial,
+    TabsNames.GarbageSerial,
+    TabsNames.PostalSerial
   ]
 
   const [currentTab, setCurrentTab] = useState(tabsOrder[0] as TabsNames);
@@ -95,7 +113,14 @@ export const OverrideSettingsCmp = ({ }) => {
       [TabsNames.RoadPlates]: <VehiclePlateControllerComponent type="road" />,
       [TabsNames.WaterPlates]: <VehiclePlateControllerComponent type="water" />,
       [TabsNames.AirPlates]: <VehiclePlateControllerComponent type="air" />,
-      [TabsNames.RailPlates]: <VehiclePlateControllerComponent type="rail" />
+      [TabsNames.RailPlates]: <VehiclePlateControllerComponent type="rail" />,
+      [TabsNames.BusSerial]: <VehicleSerialControllerComponent type="bus" />,
+      [TabsNames.TaxiSerial]: <VehicleSerialControllerComponent type="taxi" />,
+      [TabsNames.PoliceSerial]: <VehicleSerialControllerComponent type="police" />,
+      [TabsNames.FiretruckSerial]: <VehicleSerialControllerComponent type="firetruck" />,
+      [TabsNames.AmbulanceSerial]: <VehicleSerialControllerComponent type="ambulance" />,
+      [TabsNames.GarbageSerial]: <VehicleSerialControllerComponent type="garbage" />,
+      [TabsNames.PostalSerial]: <VehicleSerialControllerComponent type="postal" />
     }
   }
 

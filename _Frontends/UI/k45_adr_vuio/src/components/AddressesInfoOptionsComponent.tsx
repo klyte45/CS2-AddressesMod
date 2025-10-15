@@ -8,10 +8,11 @@ import { SeedManagementOptionsComponent } from "./SeedManagementOptions";
 import { StationBuildingOptionsComponent } from "./StationBuildingOptions";
 import { VehicleDataDetailSection } from "./VehicleDataDetailSection";
 import { RoadMarkSettings } from "./RoadMarkSettings";
+import { VehicleSourceSettings } from "./VehicleSourceSettings";
 
-type Props = { entity: ValueBinding<Entity>,  isEditor?: boolean, onChange?: () => any };
+type Props = { entity: ValueBinding<Entity>, isEditor?: boolean, onChange?: () => any };
 
-export const AddressesInfoOptionsComponent = ({ entity,  onChange }: Props) => {
+export const AddressesInfoOptionsComponent = ({ entity, onChange }: Props) => {
 
     const [optionsResult, setOptionsResult] = useState(undefined as SelectedInfoOptions | undefined);
 
@@ -48,6 +49,8 @@ export const AddressesInfoOptionsComponent = ({ entity,  onChange }: Props) => {
                 return <VehicleDataDetailSection entity={toEntityTyped(entity.value)} />
             case AdrEntityType.RoadMark:
                 return <RoadMarkSettings />
+            case AdrEntityType.VehicleSource:
+                return <VehicleSourceSettings />
             default:
                 return <></>
         }

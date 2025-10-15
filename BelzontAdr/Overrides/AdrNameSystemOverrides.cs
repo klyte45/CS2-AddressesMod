@@ -243,21 +243,21 @@ namespace BelzontAdr
             }
             if (entityManager.TryGetComponent<ADRVehicleData>(entity, out var vehicleData) && !vehicleData.calculatedConvoyPrefix.IsEmpty)
             {
-                if (vehicleData.serialOwnerSource != Entity.Null && entityManager.TryGetComponent<ADRVehicleSpawnerData>(vehicleData.serialOwnerSource, out var spawnerData))
+                if (vehicleData.serialOwnerSource != Entity.Null && entityManager.TryGetComponent<ADRVehicleBuildingOrigin>(vehicleData.serialOwnerSource, out var spawnerData))
                 {
                     __result = spawnerData.kind switch
                     {
-                        ADRVehicleSpawnerData.VehicleSourceKind.PublicTransport_Bus
-                        or ADRVehicleSpawnerData.VehicleSourceKind.PublicTransport
-                        or ADRVehicleSpawnerData.VehicleSourceKind.PublicTransport_Taxi
+                        ADRVehicleBuildingOrigin.VehicleSourceKind.PublicTransport_Bus
+                        or ADRVehicleBuildingOrigin.VehicleSourceKind.PublicTransport
+                        or ADRVehicleBuildingOrigin.VehicleSourceKind.PublicTransport_Taxi
                         => Name.CustomName($"{vehicleData.calculatedConvoyPrefix}"),
-                        ADRVehicleSpawnerData.VehicleSourceKind.Police
-                       or ADRVehicleSpawnerData.VehicleSourceKind.Hospital
-                       or ADRVehicleSpawnerData.VehicleSourceKind.Deathcare
-                       or ADRVehicleSpawnerData.VehicleSourceKind.FireResponse
-                       or ADRVehicleSpawnerData.VehicleSourceKind.Garbage
-                       or ADRVehicleSpawnerData.VehicleSourceKind.Maintenance
-                       or ADRVehicleSpawnerData.VehicleSourceKind.Post
+                        ADRVehicleBuildingOrigin.VehicleSourceKind.Police
+                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Hospital
+                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Deathcare
+                       or ADRVehicleBuildingOrigin.VehicleSourceKind.FireResponse
+                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Garbage
+                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Maintenance
+                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Post
                           => Name.CustomName($"{DirectGetName(ref __instance, vehicleData.serialOwnerSource).Translate()} #{vehicleData.ownerSerialNumber}"),
                        _ => Name.CustomName(vehicleData.calculatedPlate.ToString())
                     };

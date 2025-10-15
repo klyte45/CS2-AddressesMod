@@ -17,7 +17,8 @@ using System.Reflection;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using static BelzontAdr.ADRVehicleSpawnerData;
+using UnityEngine;
+using static BelzontAdr.ADRVehicleBuildingOrigin;
 
 namespace BelzontAdr
 {
@@ -82,6 +83,10 @@ namespace BelzontAdr
             {
                 Instance.currentSerialNumberVehicleSources[kind] = current = 0;
             }
+            if (Mathf.Log10(Instance.currentSerialNumberVehicleSources[kind]) % 1 == 0)
+            {
+                Instance.MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
             Instance.currentSerialNumberVehicleSources[kind]++;
             return current;
         }
@@ -114,6 +119,7 @@ namespace BelzontAdr
             {
                 railVehiclesPlatesSettings = value;
                 MarkEntitiesPlateDirty(ComponentType.ReadOnly<Train>());
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Train>());
             }
         }
         public VehiclePlateSettings AirVehiclesPlatesSettings
@@ -123,6 +129,7 @@ namespace BelzontAdr
                 airVehiclesPlatesSettings = value;
 
                 MarkEntitiesPlateDirty(ComponentType.ReadOnly<Aircraft>());
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Aircraft>());
             }
         }
         public VehiclePlateSettings WaterVehiclesPlatesSettings
@@ -131,6 +138,7 @@ namespace BelzontAdr
             {
                 waterVehiclesPlatesSettings = value;
                 MarkEntitiesPlateDirty(ComponentType.ReadOnly<Watercraft>());
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Watercraft>());
             }
         }
 
@@ -161,6 +169,7 @@ namespace BelzontAdr
             {
                 roadVehiclesPlatesSettings = value;
                 MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+                MarkEntitiesPlateDirty(ComponentType.ReadOnly<Car>());
             }
         }
 
@@ -282,7 +291,7 @@ namespace BelzontAdr
                         },
                         None = new ComponentType[]
                         {
-                            ComponentType.ReadOnly<ADRVehicleSpawnerData>(),
+                            ComponentType.ReadOnly<ADRVehicleBuildingOrigin>(),
                             ComponentType.ReadOnly<Owner>(),
                             ComponentType.ReadOnly<Temp>(),
                             ComponentType.ReadOnly<Deleted>(),
@@ -312,7 +321,7 @@ namespace BelzontAdr
                         All = new ComponentType[]
                         {
                             ComponentType.ReadOnly<ADRBuildingVehiclesSerialDirty>(),
-                            ComponentType.ReadOnly<ADRVehicleSpawnerData>(),
+                            ComponentType.ReadOnly<ADRVehicleBuildingOrigin>(),
                         },
                         None = new ComponentType[]
                         {
@@ -329,7 +338,7 @@ namespace BelzontAdr
                         All = new ComponentType[]
                         {
                             ComponentType.ReadOnly<ADRBuildingOwnSerialUnset>(),
-                            ComponentType.ReadOnly<ADRVehicleSpawnerData>(),
+                            ComponentType.ReadOnly<ADRVehicleBuildingOrigin>(),
                         },
                         None = new ComponentType[]
                         {
@@ -450,7 +459,7 @@ namespace BelzontAdr
                     m_adrVehiclePlateDataLkp = GetComponentLookup<ADRVehiclePlateDataDirty>(),
                     m_controllerLkp = GetComponentLookup<Controller>(),
                     m_layoutElementLkp = GetBufferLookup<LayoutElement>(),
-                    m_spawnerDataLkp = GetComponentLookup<ADRVehicleSpawnerData>(),
+                    m_spawnerDataLkp = GetComponentLookup<ADRVehicleBuildingOrigin>(),
                 };
                 Dependency = job.ScheduleParallel(m_dirtyVehiclesPlateQuery, Dependency);
 
@@ -491,7 +500,7 @@ namespace BelzontAdr
                 for (int i = 0; i < entities.Length; i++)
                 {
                     var entity = entities[i];
-                    if (EntityManager.TryGetComponent<ADRVehicleSpawnerData>(entity, out var sourceData))
+                    if (EntityManager.TryGetComponent<ADRVehicleBuildingOrigin>(entity, out var sourceData))
                     {
                         sourceData.DoRegisterCategorySerialNumber();
                         EntityManager.SetComponentData(entity, sourceData);
@@ -519,23 +528,24 @@ namespace BelzontAdr
             {
                 var job = new ADRUpdateBuildingVehiclesConvoyId
                 {
-                    ambulanceSerialSettings = ambulanceSerialSettings.ForBurstJob,
-                    busSerialSettings = busSerialSettings.ForBurstJob,
-                    firetruckSerialSettings = firetruckSerialSettings.ForBurstJob,
-                    garbageSerialSettings = garbageSerialSettings.ForBurstJob,
-                    policeSerialSettings = policeSerialSettings.ForBurstJob,
-                    postalSerialSettings = postalSerialSettings.ForBurstJob,
-                    taxiSerialSettings = taxiSerialSettings.ForBurstJob,
+                    ambulanceSerialSettings = ambulanceSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.Hospital)),
+                    busSerialSettings = busSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.PublicTransport_Bus)),
+                    firetruckSerialSettings = firetruckSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.FireResponse)),
+                    garbageSerialSettings = garbageSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.Garbage)),
+                    policeSerialSettings = policeSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.Police)),
+                    postalSerialSettings = postalSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.Post)),
+                    taxiSerialSettings = taxiSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.PublicTransport_Taxi)),
                     m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
                     entityTypeHandle = GetEntityTypeHandle(),
                     m_ownedVehiclesLkp = GetBufferLookup<OwnedVehicle>(),
-                    m_sourceDataLkp = GetComponentLookup<ADRVehicleSpawnerData>(),
+                    m_sourceDataLkp = GetComponentLookup<ADRVehicleBuildingOrigin>(),
                     m_vehicleDataLkp = GetComponentLookup<ADRVehicleData>(),
                     m_layoutElementLkp = GetBufferLookup<LayoutElement>(),
                     m_controllerLkp = GetComponentLookup<Controller>(),
 
                 };
-                job.ScheduleParallel(m_buildingWithVehicleToUpdateConvoyId, Dependency);
+                var deps = job.ScheduleParallel(m_buildingWithVehicleToUpdateConvoyId, Dependency);
+                job.Dispose(deps);
             }
 
 #endif
@@ -605,7 +615,7 @@ namespace BelzontAdr
                     {
                         All = new ComponentType[]
                         {
-                            ComponentType.ReadOnly<ADRVehicleSpawnerData>(),
+                            ComponentType.ReadOnly<ADRVehicleBuildingOrigin>(),
                         },
                         None = new ComponentType[]
                         {

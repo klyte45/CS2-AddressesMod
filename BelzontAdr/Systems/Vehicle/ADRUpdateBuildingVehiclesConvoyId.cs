@@ -4,7 +4,8 @@ using Unity.Burst;
 using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Entities;
-using static BelzontAdr.ADRVehicleSpawnerData;
+using Unity.Jobs;
+using static BelzontAdr.ADRVehicleBuildingOrigin;
 
 namespace BelzontAdr
 {
@@ -12,7 +13,7 @@ namespace BelzontAdr
     public partial class AdrVehicleSystem
     {
         [BurstCompile]
-        private struct ADRUpdateBuildingVehiclesConvoyId : IJobChunk
+        private struct ADRUpdateBuildingVehiclesConvoyId : IJobChunk, INativeDisposable
         {
             public VehicleSerialSettings.SafeStruct busSerialSettings;
             public VehicleSerialSettings.SafeStruct taxiSerialSettings;
@@ -22,12 +23,35 @@ namespace BelzontAdr
             public VehicleSerialSettings.SafeStruct garbageSerialSettings;
             public VehicleSerialSettings.SafeStruct postalSerialSettings;
             public ComponentLookup<ADRVehicleData> m_vehicleDataLkp;
-            public ComponentLookup<ADRVehicleSpawnerData> m_sourceDataLkp;
+            public ComponentLookup<ADRVehicleBuildingOrigin> m_sourceDataLkp;
             public BufferLookup<LayoutElement> m_layoutElementLkp;
             public ComponentLookup<Controller> m_controllerLkp;
             public BufferLookup<OwnedVehicle> m_ownedVehiclesLkp;
             public EntityTypeHandle entityTypeHandle;
             public EntityCommandBuffer.ParallelWriter m_cmdBuffer;
+
+            public JobHandle Dispose(JobHandle inputDeps)
+            {
+                busSerialSettings.Dispose(inputDeps);
+                taxiSerialSettings.Dispose(inputDeps);
+                policeSerialSettings.Dispose(inputDeps);
+                firetruckSerialSettings.Dispose(inputDeps);
+                ambulanceSerialSettings.Dispose(inputDeps);
+                garbageSerialSettings.Dispose(inputDeps);
+                postalSerialSettings.Dispose(inputDeps);
+                return inputDeps;
+            }
+
+            public void Dispose()
+            {
+                busSerialSettings.Dispose();
+                taxiSerialSettings.Dispose();
+                policeSerialSettings.Dispose();
+                firetruckSerialSettings.Dispose();
+                ambulanceSerialSettings.Dispose();
+                garbageSerialSettings.Dispose();
+                postalSerialSettings.Dispose();
+            }
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
@@ -107,12 +131,7 @@ namespace BelzontAdr
                         }
                         if (generator.Checksum != default)
                         {
-                            var buildingId = sourceData.customId;
-                            if (buildingId.IsEmpty)
-                            {
-                                buildingId.Append(sourceData.CategorySerialNumber);
-                            }
-                            vehicleData.calculatedConvoyPrefix = generator.GetSerialFor(buildingId, (ulong)vehicleData.ownerSerialNumber);
+                            vehicleData.calculatedConvoyPrefix = generator.GetSerialFor(sourceData.customId, sourceData.CategorySerialNumber, (ulong)vehicleData.ownerSerialNumber);
                         }
                         else if (vehicleData.plateCategory == ADRVehicleData.VehiclePlateCategory.Road)
                         {

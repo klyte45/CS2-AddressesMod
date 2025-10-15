@@ -27,7 +27,6 @@ namespace BelzontAdr
             eventCaller("selectionPanel.setEntityRoadReference", SetEntityRoadReference);
             eventCaller("selectionPanel.redrawSeed", ResetEntityAdrSeed);
             eventCaller("selectionPanel.changeSeedByDelta", ChangeEntityAdrSeedByDelta);
-
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -74,6 +73,11 @@ namespace BelzontAdr
             if (EntityManager.HasComponent<ADRVehicleData>(e))
             {
                 result.type = AdrEntityType.Vehicle;
+                return result;
+            }
+            if (EntityManager.HasComponent<ADRVehicleBuildingOrigin>(e))
+            {
+                result.type = AdrEntityType.VehicleSource;
                 return result;
             }
             if (EntityManager.HasComponent<CustomName>(e))
@@ -292,7 +296,8 @@ namespace BelzontAdr
             RoadAggregation,
             District,
             Vehicle,
-            RoadMark
+            RoadMark,
+            VehicleSource
 
         }
 

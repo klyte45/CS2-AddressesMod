@@ -5,6 +5,7 @@ using Colossal.Serialization.Entities;
 using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine;
 using Hash128 = Colossal.Hash128;
 
 
@@ -56,9 +57,18 @@ namespace BelzontAdr
             }
         }
 
+        public bool? BuildingIdOnStart
+        {
+            get => m_buildingIdOnStart; set
+            {
+                m_buildingIdOnStart = value;
+                UpdateChecksum();
+            }
+        }
+
         private void UpdateChecksum()
         {
-            checksum = GuidUtils.Create(default, m_lettersAllowed.SelectMany(x => x.SelectMany(y => y.ToBytes())).Union(m_flagsOwnSerial.ToBytes()).Union(m_flagsCarNumber.ToBytes()).ToArray());
+            checksum = GuidUtils.Create(default, m_lettersAllowed.SelectMany(x => x.SelectMany(y => y.ToBytes())).Concat(m_flagsOwnSerial.ToBytes()).Concat(m_flagsCarNumber.ToBytes()).Concat(m_buildingIdOnStart.GetHashCode().ToBytes()).ToArray());
             IsDirty = true;
         }
 
@@ -69,7 +79,7 @@ namespace BelzontAdr
             {
                 m_flagsCarNumber = 0b0,
                 m_buildingIdOnStart = true,
-                m_flagsOwnSerial = 0b1111,
+                m_flagsOwnSerial = 0b11111,
                 m_lettersAllowed = new string[]
                 {
                     " ",
@@ -88,7 +98,7 @@ namespace BelzontAdr
             {
                 m_flagsCarNumber = 0b0,
                 m_buildingIdOnStart = true,
-                m_flagsOwnSerial = 0b1111,
+                m_flagsOwnSerial = 0b11111,
                 m_lettersAllowed = new string[]
                 {
                     "-",
@@ -109,7 +119,7 @@ namespace BelzontAdr
             {
                 m_flagsCarNumber = 0b0,
                 m_buildingIdOnStart = true,
-                m_flagsOwnSerial = 0b111,
+                m_flagsOwnSerial = 0b11111,
                 m_lettersAllowed = new string[]
                 {
                     "-",
@@ -155,26 +165,31 @@ namespace BelzontAdr
             foreach (var s in m_lettersAllowed) writer.Write(s);
         }
 
-        public SafeStruct ForBurstJob => new()
+        public SafeStruct GetForBurstJob(ushort nextBuildingId)
         {
-            Checksum = checksum,
-            m_flagsCarNumber = m_flagsCarNumber,
-            m_flagsLocal = m_flagsOwnSerial,
-            m_buildingIdOnStart = m_buildingIdOnStart.HasValue ? (m_buildingIdOnStart.Value ? 1 : 0) : -1,
-            m_charZeroPos = new NativeArray<int>(m_lettersAllowed.Select((x, i) => m_lettersAllowed.Take(i).Sum(y => y.Length)).ToArray(), Allocator.TempJob),
-            m_lettersAllowed = string.Join("", m_lettersAllowed).ToUshortNativeArray(Allocator.TempJob),
-        };
+            return new()
+            {
+                Checksum = checksum,
+                m_flagsCarNumber = m_flagsCarNumber,
+                m_flagsLocal = m_flagsOwnSerial,
+                m_buildingIdOnStart = m_buildingIdOnStart.HasValue ? (m_buildingIdOnStart.Value ? 1 : 0) : -1,
+                m_charZeroPos = new NativeArray<int>(m_lettersAllowed.Select((x, i) => m_lettersAllowed.Take(i).Sum(y => y.Length)).ToArray(), Allocator.TempJob),
+                m_lettersAllowed = string.Join("", m_lettersAllowed).ToUshortNativeArray(Allocator.TempJob),
+                m_buildingIdLength = (ushort)(nextBuildingId - 1).ToString().Length,
+            };
+        }
 
-        public unsafe struct SafeStruct
+        public unsafe struct SafeStruct : INativeDisposable
         {
             internal uint m_flagsLocal;
             internal uint m_flagsCarNumber;
             internal int m_buildingIdOnStart;
             internal NativeArray<ushort> m_lettersAllowed;
             public NativeArray<int> m_charZeroPos;
+            public ushort m_buildingIdLength;
 
             public Hash128 Checksum;
-            public readonly FixedString32Bytes GetSerialFor(FixedString32Bytes buildingId, ulong localSerial, int compositionNumber = 1)
+            public readonly FixedString32Bytes GetSerialFor(FixedString32Bytes buildingId, ushort buildingSerial, ulong localSerial, int compositionNumber = 1)
             {
                 var output = new NativeArray<Unicode.Rune>(m_charZeroPos.Length, Allocator.Temp);
                 uint currentFlag = 1;
@@ -196,26 +211,48 @@ namespace BelzontAdr
                     currentFlag <<= 1;
                 } while (--currentIdx >= 0);
                 var result = new FixedString32Bytes();
-                if (m_buildingIdOnStart == 1 && buildingId.Length > 0)
+                void AppendBuildingSerial(ushort m_buildingIdLength)
                 {
-                    result.Append(buildingId);
+                    if (buildingId.Length > 0)
+                    {
+                        result.Append(buildingId);
+                    }
+                    else
+                    {
+                        var leadingZeroes = m_buildingIdLength - Mathf.FloorToInt(Mathf.Log10(buildingSerial)) - 1;
+                        for (int i = 0; i < leadingZeroes; i++)
+                        {
+                            result.Append(new Unicode.Rune('0'));
+                        }
+                        result.Append(buildingSerial);
+                    }
+                }
+                if (m_buildingIdOnStart == 1)
+                {
+                    AppendBuildingSerial(m_buildingIdLength);
                 }
                 for (int i = 0; i < output.Length; i++)
                 {
                     if (output[i].value != 0) result.Append(output[i]);
                 }
-                if (m_buildingIdOnStart == 0 && buildingId.Length > 0)
+                if (m_buildingIdOnStart == 0)
                 {
-                    result.Append(buildingId);
+                    AppendBuildingSerial(m_buildingIdLength);
                 }
                 output.Dispose();
                 return result;
             }
 
-            internal void Dispose(JobHandle dependency)
+            public JobHandle Dispose(JobHandle dependency)
             {
                 m_lettersAllowed.Dispose(dependency);
                 m_charZeroPos.Dispose(dependency);
+                return dependency;
+            }
+            public void Dispose()
+            {
+                m_lettersAllowed.Dispose();
+                m_charZeroPos.Dispose();
             }
         }
     }

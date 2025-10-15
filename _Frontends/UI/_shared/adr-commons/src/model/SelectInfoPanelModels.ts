@@ -24,7 +24,8 @@ export enum AdrEntityType {
     RoadAggregation,
     District,
     Vehicle,
-    RoadMark
+    RoadMark,
+    VehicleSource
 }
 export type EntityOption = {
     entity: Entity

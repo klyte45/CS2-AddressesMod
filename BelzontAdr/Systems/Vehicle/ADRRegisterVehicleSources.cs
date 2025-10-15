@@ -1,15 +1,13 @@
 ﻿using Game.Buildings;
 using Game.Companies;
-using Unity.Burst;
 using Unity.Burst.Intrinsics;
 using Unity.Entities;
-using static BelzontAdr.ADRVehicleSpawnerData;
+using static BelzontAdr.ADRVehicleBuildingOrigin;
 
 namespace BelzontAdr
 {
     public partial class AdrVehicleSystem
     {
-#if DEBUG
         [BurstCompile]
         private unsafe struct ADRRegisterVehicleSources : IJobChunk
         {
@@ -38,7 +36,7 @@ namespace BelzontAdr
                 for (int i = 0; i < length; i++)
                 {
                     Entity entity = entities[i];
-                    var newCmp = new ADRVehicleSpawnerData(
+                    var newCmp = new ADRVehicleBuildingOrigin(
                         m_policeStation.HasComponent(entity) ? VehicleSourceKind.Police
                             : m_hospital.HasComponent(entity) ? VehicleSourceKind.Hospital
                             : m_deathcareFacility.HasComponent(entity) ? VehicleSourceKind.Deathcare
@@ -69,8 +67,6 @@ namespace BelzontAdr
                 }
             }
         }
-
-#endif
     }
 }
 

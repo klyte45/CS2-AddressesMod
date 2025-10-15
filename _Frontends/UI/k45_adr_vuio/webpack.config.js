@@ -52,7 +52,7 @@ module.exports = (en) => {
         },
         {
           test: /\.s?css$/,
-          include: path.join(__dirname, "src"),
+          exclude: /node_modules/,
           use: [
             MiniCssExtractPlugin.loader,
             {

@@ -5,10 +5,10 @@ using Unity.Entities;
 
 namespace BelzontAdr
 {
-    public struct ADRVehicleSpawnerData : IComponentData, ISerializable
+    public struct ADRVehicleBuildingOrigin : IComponentData, ISerializable
     {
-        private const uint CURRENT_VERSION = 1;
-        public enum VehicleSourceKind : ushort
+        private const uint CURRENT_VERSION = 0;
+        public enum VehicleSourceKind : uint
         {
             Police,//Game.Buildings.PoliceStation
             Hospital, //Game.Buildings.Hospital
@@ -24,9 +24,9 @@ namespace BelzontAdr
             PublicTransport_Taxi,
             PublicTransport_Bus,
 
-            Unknown = 0xfffd,
-            TransportCompany = 0xFFFe, //Game.Companies.TransportCompany && !(Game.Companies.CommercialCompany || Game.Companies.IndustrialCompany || Game.Buildings.CargoTransportStation)
-            Other = 0xffff,
+            Unknown = ~0u - 2,
+            TransportCompany = ~0u - 1, //Game.Companies.TransportCompany && !(Game.Companies.CommercialCompany || Game.Companies.IndustrialCompany || Game.Buildings.CargoTransportStation)
+            Other = ~0u,
         }
 
         private ushort categorySerialNumber;
@@ -39,6 +39,7 @@ namespace BelzontAdr
         public bool CategorySerialNumberSet { get; private set; }
 
         public readonly ushort CategorySerialNumber => categorySerialNumber;
+        public readonly uint InternalSerialCounter => internalSerialCounter;
 
         public void DoRegisterCategorySerialNumber()
         {
@@ -49,7 +50,7 @@ namespace BelzontAdr
             }
         }
 
-        public ADRVehicleSpawnerData(VehicleSourceKind kind)
+        public ADRVehicleBuildingOrigin(VehicleSourceKind kind)
         {
             this.kind = kind;
             categorySerialNumber = 0;

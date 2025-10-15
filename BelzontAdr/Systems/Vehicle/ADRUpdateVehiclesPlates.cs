@@ -24,7 +24,7 @@ namespace BelzontAdr
             public ComponentLookup<Controller> m_controllerLkp;
             public ComponentLookup<ADRVehicleData> m_adrVehicleDataLkp;
             public ComponentLookup<ADRVehiclePlateDataDirty> m_adrVehiclePlateDataLkp;
-            public ComponentLookup<ADRVehicleSpawnerData> m_spawnerDataLkp;
+            public ComponentLookup<ADRVehicleBuildingOrigin> m_spawnerDataLkp;
             public BufferLookup<LayoutElement> m_layoutElementLkp;
 
 
