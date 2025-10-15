@@ -1,5 +1,6 @@
 ﻿using Game.Buildings;
 using Game.Companies;
+using Unity.Burst;
 using Unity.Burst.Intrinsics;
 using Unity.Entities;
 using static BelzontAdr.ADRVehicleBuildingOrigin;

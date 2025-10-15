@@ -468,8 +468,6 @@ namespace BelzontAdr
                 waterPlatesSettings.Dispose(Dependency);
                 railPlatesSettings.Dispose(Dependency);
             }
-
-#if DEBUG
             if (!m_unregisteredVehicleSpawnerQuery.IsEmptyIgnoreFilter)
             {
                 var job = new ADRRegisterVehicleSources
@@ -547,8 +545,6 @@ namespace BelzontAdr
                 var deps = job.ScheduleParallel(m_buildingWithVehicleToUpdateConvoyId, Dependency);
                 job.Dispose(deps);
             }
-
-#endif
             Dependency.Complete();
         }
 
