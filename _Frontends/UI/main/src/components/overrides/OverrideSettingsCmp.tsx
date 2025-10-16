@@ -21,8 +21,7 @@ enum TabsNames {
   AmbulanceSerial = "AmbulanceSerial",
   GarbageSerial = "GarbageSerial",
   PostalSerial = "PostalSerial",
-
-
+  DeathcareSerial = "DeathcareSerial"
 }
 
 
@@ -80,7 +79,8 @@ export const OverrideSettingsCmp = ({ }) => {
     TabsNames.FiretruckSerial,
     TabsNames.AmbulanceSerial,
     TabsNames.GarbageSerial,
-    TabsNames.PostalSerial
+    TabsNames.PostalSerial,
+    TabsNames.DeathcareSerial
   ]
 
   const [currentTab, setCurrentTab] = useState(tabsOrder[0] as TabsNames);
@@ -120,7 +120,8 @@ export const OverrideSettingsCmp = ({ }) => {
       [TabsNames.FiretruckSerial]: <VehicleSerialControllerComponent type="firetruck" />,
       [TabsNames.AmbulanceSerial]: <VehicleSerialControllerComponent type="ambulance" />,
       [TabsNames.GarbageSerial]: <VehicleSerialControllerComponent type="garbage" />,
-      [TabsNames.PostalSerial]: <VehicleSerialControllerComponent type="postal" />
+      [TabsNames.PostalSerial]: <VehicleSerialControllerComponent type="postal" />,
+      [TabsNames.DeathcareSerial]: <VehicleSerialControllerComponent type="deathcare" />
     }
   }
 

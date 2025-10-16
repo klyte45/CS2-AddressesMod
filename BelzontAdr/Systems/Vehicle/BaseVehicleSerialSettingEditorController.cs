@@ -102,6 +102,11 @@ namespace BelzontAdr
         protected override string Prefix => "vehicleSerial.postal.";
         protected override VehicleSerialSettings Data { get => adrVehicleSystem.PostalSerialSettings; set => adrVehicleSystem.PostalSerialSettings = value; }
     }
+    public class DeathcareSerialSettingsEditorController : BaseVehicleSerialSettingEditorController
+    {
+        protected override string Prefix => "vehicleSerial.deathcare.";
+        protected override VehicleSerialSettings Data { get => adrVehicleSystem.PostalSerialSettings; set => adrVehicleSystem.PostalSerialSettings = value; }
+    }
 
 }
 

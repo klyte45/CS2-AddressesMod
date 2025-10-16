@@ -25,7 +25,7 @@ namespace BelzontAdr
 
     public partial class AdrVehicleSystem : GameSystemBase, IBelzontBindable, IDefaultSerializable
     {
-        private const uint CURRENT_VERSION = 2;
+        private const uint CURRENT_VERSION = 3;
 
         #region Controller endpoints
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
@@ -70,6 +70,7 @@ namespace BelzontAdr
         private VehicleSerialSettings ambulanceSerialSettings = new();
         private VehicleSerialSettings garbageSerialSettings = new();
         private VehicleSerialSettings postalSerialSettings = new();
+        private VehicleSerialSettings deathcareSerialSettings = new();
 
 
         public override int GetUpdateInterval(SystemUpdatePhase phase)
@@ -227,6 +228,14 @@ namespace BelzontAdr
             get => postalSerialSettings; set
             {
                 postalSerialSettings = value;
+                MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
+            }
+        }
+        public VehicleSerialSettings DeathcareSerialSettings
+        {
+            get => deathcareSerialSettings; set
+            {
+                deathcareSerialSettings = value;
                 MarkEntitiesSerialDirty(ComponentType.ReadOnly<Car>());
             }
         }
@@ -533,6 +542,7 @@ namespace BelzontAdr
                     policeSerialSettings = policeSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.Police)),
                     postalSerialSettings = postalSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.Post)),
                     taxiSerialSettings = taxiSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.PublicTransport_Taxi)),
+                    deathcareSerialSettings = deathcareSerialSettings.GetForBurstJob(currentSerialNumberVehicleSources.GetValueOrDefault(VehicleSourceKind.Deathcare)),
                     m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
                     entityTypeHandle = GetEntityTypeHandle(),
                     m_ownedVehiclesLkp = GetBufferLookup<OwnedVehicle>(),
@@ -598,6 +608,20 @@ namespace BelzontAdr
             {
                 currentSerialNumberVehicleSources = new Dictionary<VehicleSourceKind, ushort>();
 
+            }
+            if (version >= 3)
+            {
+                reader.Read(busSerialSettings ??= new());
+                reader.Read(taxiSerialSettings ??= new());
+                reader.Read(policeSerialSettings ??= new());
+                reader.Read(firetruckSerialSettings ??= new());
+                reader.Read(ambulanceSerialSettings ??= new());
+                reader.Read(garbageSerialSettings ??= new());
+                reader.Read(postalSerialSettings ??= new());
+                reader.Read(deathcareSerialSettings ??= new());
+            }
+            else
+            {
                 busSerialSettings = VehicleSerialSettings.CreateBusSerialSettings();
                 taxiSerialSettings = VehicleSerialSettings.CreateTaxiSerialSettings();
                 policeSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
@@ -605,6 +629,7 @@ namespace BelzontAdr
                 ambulanceSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
                 garbageSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
                 postalSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+                deathcareSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
                 actionsToRunOnMain.Enqueue(() => EntityManager.AddComponent<ADRBuildingVehiclesSerialDirty>(GetEntityQuery(new EntityQueryDesc[]
                  {
                     new ()
@@ -636,6 +661,14 @@ namespace BelzontAdr
                 writer.Write(kvp.Key);
                 writer.Write(kvp.Value);
             }
+            writer.Write(busSerialSettings);
+            writer.Write(taxiSerialSettings);
+            writer.Write(policeSerialSettings);
+            writer.Write(firetruckSerialSettings);
+            writer.Write(ambulanceSerialSettings);
+            writer.Write(garbageSerialSettings);
+            writer.Write(postalSerialSettings);
+            writer.Write(deathcareSerialSettings);
         }
 
         public void SetDefaults(Context context)
@@ -653,6 +686,7 @@ namespace BelzontAdr
             ambulanceSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
             garbageSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
             postalSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
+            deathcareSerialSettings = VehicleSerialSettings.CreateCityServicesSerialSettings();
         }
 
         #endregion

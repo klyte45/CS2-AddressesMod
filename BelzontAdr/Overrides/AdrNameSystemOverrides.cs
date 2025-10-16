@@ -250,21 +250,20 @@ namespace BelzontAdr
                         ADRVehicleBuildingOrigin.VehicleSourceKind.PublicTransport_Bus
                         or ADRVehicleBuildingOrigin.VehicleSourceKind.PublicTransport
                         or ADRVehicleBuildingOrigin.VehicleSourceKind.PublicTransport_Taxi
-                        => Name.CustomName($"{vehicleData.calculatedConvoyPrefix}"),
-                        ADRVehicleBuildingOrigin.VehicleSourceKind.Police
-                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Hospital
-                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Deathcare
-                       or ADRVehicleBuildingOrigin.VehicleSourceKind.FireResponse
-                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Garbage
-                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Maintenance
-                       or ADRVehicleBuildingOrigin.VehicleSourceKind.Post
-                          => Name.CustomName($"{DirectGetName(ref __instance, vehicleData.serialOwnerSource).Translate()} #{vehicleData.ownerSerialNumber}"),
-                       _ => Name.CustomName(vehicleData.calculatedPlate.ToString())
+                        or ADRVehicleBuildingOrigin.VehicleSourceKind.Hospital
+                        or ADRVehicleBuildingOrigin.VehicleSourceKind.Police
+                        or ADRVehicleBuildingOrigin.VehicleSourceKind.Deathcare
+                        or ADRVehicleBuildingOrigin.VehicleSourceKind.FireResponse
+                        or ADRVehicleBuildingOrigin.VehicleSourceKind.Garbage
+                        or ADRVehicleBuildingOrigin.VehicleSourceKind.Maintenance
+                        or ADRVehicleBuildingOrigin.VehicleSourceKind.Post
+                          => Name.CustomName($"{vehicleData.calculatedConvoyPrefix} ({Original_GetName(__instance, entity).Translate()})"),
+                        _ => Name.CustomName($"{vehicleData.calculatedPlate} ({Original_GetName(__instance, entity).Translate()})")
                     };
                 }
                 else
                 {
-                    __result = Name.CustomName(vehicleData.calculatedPlate.ToString());
+                    __result = Name.CustomName($"{vehicleData.calculatedPlate} ({Original_GetName(__instance, entity).Translate()})");
                 }
                 return false;
             }

@@ -22,6 +22,7 @@ namespace BelzontAdr
             public VehicleSerialSettings.SafeStruct ambulanceSerialSettings;
             public VehicleSerialSettings.SafeStruct garbageSerialSettings;
             public VehicleSerialSettings.SafeStruct postalSerialSettings;
+            public VehicleSerialSettings.SafeStruct deathcareSerialSettings;
             public ComponentLookup<ADRVehicleData> m_vehicleDataLkp;
             public ComponentLookup<ADRVehicleBuildingOrigin> m_sourceDataLkp;
             public BufferLookup<LayoutElement> m_layoutElementLkp;
@@ -39,6 +40,7 @@ namespace BelzontAdr
                 ambulanceSerialSettings.Dispose(inputDeps);
                 garbageSerialSettings.Dispose(inputDeps);
                 postalSerialSettings.Dispose(inputDeps);
+                deathcareSerialSettings.Dispose(inputDeps);
                 return inputDeps;
             }
 
@@ -51,6 +53,7 @@ namespace BelzontAdr
                 ambulanceSerialSettings.Dispose();
                 garbageSerialSettings.Dispose();
                 postalSerialSettings.Dispose();
+                deathcareSerialSettings.Dispose();
             }
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
@@ -80,6 +83,7 @@ namespace BelzontAdr
                         VehicleSourceKind.Garbage => garbageSerialSettings,
                         VehicleSourceKind.Post => postalSerialSettings,
                         VehicleSourceKind.PublicTransport_Taxi => taxiSerialSettings,
+                        VehicleSourceKind.Deathcare => deathcareSerialSettings,
                         _ => default,
                     };
 
