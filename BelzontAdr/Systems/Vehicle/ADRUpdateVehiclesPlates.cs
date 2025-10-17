@@ -48,7 +48,7 @@ namespace BelzontAdr
                     {
                         regionalCode = spawnerData.CategorySerialNumber;
                         regionalAcronym = spawnerData.customId;
-                        refSerial = vehicleData.ownerSerialNumber;
+                        refSerial = dataController.ownerSerialNumber;
                         refEpoch = -1;
                     }
                     if (isTrain)

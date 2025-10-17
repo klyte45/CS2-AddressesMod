@@ -25,7 +25,7 @@ namespace BelzontAdr
 
     public partial class AdrVehicleSystem : GameSystemBase, IBelzontBindable, IDefaultSerializable
     {
-        private const uint CURRENT_VERSION = 3;
+        private const uint CURRENT_VERSION = 4;
 
         #region Controller endpoints
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
@@ -404,9 +404,14 @@ namespace BelzontAdr
             {
                 return;
             }
-            while (actionsToRunOnMain.TryDequeue(out Action action))
+            if (actionsToRunOnMain.Count > 0)
             {
-                action.Invoke();
+                var actionsThisFrame = actionsToRunOnMain.ToArray();
+                actionsToRunOnMain.Clear();
+                foreach (var action in actionsThisFrame)
+                {
+                    action?.Invoke();
+                }
             }
             if (!m_unregisteredVehiclesQuery.IsEmptyIgnoreFilter)
             {

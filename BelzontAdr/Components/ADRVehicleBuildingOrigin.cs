@@ -24,6 +24,7 @@ namespace BelzontAdr
             PublicTransport_Taxi,
             PublicTransport_Bus,
 
+            OutsideConnection = ~0u - 3,
             Unknown = ~0u - 2,
             TransportCompany = ~0u - 1, //Game.Companies.TransportCompany && !(Game.Companies.CommercialCompany || Game.Companies.IndustrialCompany || Game.Buildings.CargoTransportStation)
             Other = ~0u,

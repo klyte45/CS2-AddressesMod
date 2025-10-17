@@ -1,5 +1,6 @@
 ﻿using Game.Buildings;
 using Game.Companies;
+using Game.Net;
 using Unity.Burst;
 using Unity.Burst.Intrinsics;
 using Unity.Entities;
@@ -14,6 +15,7 @@ namespace BelzontAdr
         {
             internal EntityCommandBuffer.ParallelWriter m_cmdBuffer;
             internal EntityTypeHandle m_entityHdl;
+            internal ComponentLookup<Game.Objects.OutsideConnection> m_outsideConnection;
             internal ComponentLookup<PoliceStation> m_policeStation;
             internal ComponentLookup<Hospital> m_hospital;
             internal ComponentLookup<DeathcareFacility> m_deathcareFacility;
@@ -38,7 +40,8 @@ namespace BelzontAdr
                 {
                     Entity entity = entities[i];
                     var newCmp = new ADRVehicleBuildingOrigin(
-                        m_policeStation.HasComponent(entity) ? VehicleSourceKind.Police
+                        m_outsideConnection.HasComponent(entity)? VehicleSourceKind.OutsideConnection
+                            : m_policeStation.HasComponent(entity) ? VehicleSourceKind.Police
                             : m_hospital.HasComponent(entity) ? VehicleSourceKind.Hospital
                             : m_deathcareFacility.HasComponent(entity) ? VehicleSourceKind.Deathcare
                             : m_fireStation.HasComponent(entity) ? VehicleSourceKind.FireResponse
