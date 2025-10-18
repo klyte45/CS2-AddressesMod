@@ -420,6 +420,7 @@ namespace BelzontAdr
                 var airPlatesSettings = airVehiclesPlatesSettings.ForBurstJob;
                 var waterPlatesSettings = waterVehiclesPlatesSettings.ForBurstJob;
                 var railPlatesSettings = railVehiclesPlatesSettings.ForBurstJob;
+                var currentNumber = currentSerialNumberVehicles;
 
                 var job = new ADRRegisterVehicles
                 {
@@ -443,13 +444,56 @@ namespace BelzontAdr
                 Dependency = job.ScheduleParallel(m_unregisteredVehiclesQuery, Dependency);
                 Dependency.GetAwaiter().OnCompleted(() =>
                 {
-                    currentSerialNumberVehicles += (uint)counter.Count;
+                    currentSerialNumberVehicles += (uint)counter.Count;                    
                     counter.Dispose();
                 });
                 roadPlatesSettings.Dispose(Dependency);
                 airPlatesSettings.Dispose(Dependency);
                 waterPlatesSettings.Dispose(Dependency);
                 railPlatesSettings.Dispose(Dependency);
+                Dependency.Complete();
+                return;
+            }
+            if (!m_unregisteredVehicleSpawnerQuery.IsEmptyIgnoreFilter)
+            {
+                var job = new ADRRegisterVehicleSources
+                {
+                    m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
+                    m_entityHdl = GetEntityTypeHandle(),
+                    m_policeStation = GetComponentLookup<Game.Buildings.PoliceStation>(),
+                    m_hospital = GetComponentLookup<Game.Buildings.Hospital>(),
+                    m_deathcareFacility = GetComponentLookup<Game.Buildings.DeathcareFacility>(),
+                    m_fireStation = GetComponentLookup<Game.Buildings.FireStation>(),
+                    m_garbageFacility = GetComponentLookup<Game.Buildings.GarbageFacility>(),
+                    m_transportDepot = GetComponentLookup<Game.Buildings.TransportDepot>(),
+                    m_cargoTransportStation = GetComponentLookup<Game.Buildings.CargoTransportStation>(),
+                    m_maintenanceDepot = GetComponentLookup<Game.Buildings.MaintenanceDepot>(),
+                    m_postFacility = GetComponentLookup<Game.Buildings.PostFacility>(),
+                    m_transportCompany = GetComponentLookup<TransportCompany>(),
+                    m_industrialCompany = GetComponentLookup<IndustrialCompany>(),
+                    m_commercialCompany = GetComponentLookup<CommercialCompany>(),
+                    m_prefabRef = GetComponentLookup<Game.Prefabs.PrefabRef>(),
+                    m_depotData = GetComponentLookup<Game.Prefabs.TransportDepotData>(),
+                    m_outsideConnection = GetComponentLookup<Game.Objects.OutsideConnection>(),                    
+                };
+                job.ScheduleParallel(m_unregisteredVehicleSpawnerQuery, Dependency).Complete();
+                return;
+            }
+            if (!m_buildingOwnSerialDirty.IsEmptyIgnoreFilter)
+            {
+                var entities = m_buildingOwnSerialDirty.ToEntityArray(Allocator.Temp);
+                for (int i = 0; i < entities.Length; i++)
+                {
+                    var entity = entities[i];
+                    if (EntityManager.TryGetComponent<ADRVehicleBuildingOrigin>(entity, out var sourceData))
+                    {
+                        sourceData.DoRegisterCategorySerialNumber();
+                        EntityManager.SetComponentData(entity, sourceData);
+                    }
+                    EntityManager.RemoveComponent<ADRBuildingOwnSerialUnset>(entity);
+                }
+                entities.Dispose();
+                return;
             }
             if (!m_dirtyVehiclesPlateQuery.IsEmptyIgnoreFilter)
             {
@@ -481,45 +525,6 @@ namespace BelzontAdr
                 airPlatesSettings.Dispose(Dependency);
                 waterPlatesSettings.Dispose(Dependency);
                 railPlatesSettings.Dispose(Dependency);
-            }
-            if (!m_unregisteredVehicleSpawnerQuery.IsEmptyIgnoreFilter)
-            {
-                var job = new ADRRegisterVehicleSources
-                {
-                    m_cmdBuffer = m_Barrier.CreateCommandBuffer().AsParallelWriter(),
-                    m_entityHdl = GetEntityTypeHandle(),
-                    m_policeStation = GetComponentLookup<Game.Buildings.PoliceStation>(),
-                    m_hospital = GetComponentLookup<Game.Buildings.Hospital>(),
-                    m_deathcareFacility = GetComponentLookup<Game.Buildings.DeathcareFacility>(),
-                    m_fireStation = GetComponentLookup<Game.Buildings.FireStation>(),
-                    m_garbageFacility = GetComponentLookup<Game.Buildings.GarbageFacility>(),
-                    m_transportDepot = GetComponentLookup<Game.Buildings.TransportDepot>(),
-                    m_cargoTransportStation = GetComponentLookup<Game.Buildings.CargoTransportStation>(),
-                    m_maintenanceDepot = GetComponentLookup<Game.Buildings.MaintenanceDepot>(),
-                    m_postFacility = GetComponentLookup<Game.Buildings.PostFacility>(),
-                    m_transportCompany = GetComponentLookup<TransportCompany>(),
-                    m_industrialCompany = GetComponentLookup<IndustrialCompany>(),
-                    m_commercialCompany = GetComponentLookup<CommercialCompany>(),
-                    m_prefabRef = GetComponentLookup<Game.Prefabs.PrefabRef>(),
-                    m_depotData = GetComponentLookup<Game.Prefabs.TransportDepotData>(),
-                };
-                job.ScheduleParallel(m_unregisteredVehicleSpawnerQuery, Dependency);
-            }
-
-            if (!m_buildingOwnSerialDirty.IsEmptyIgnoreFilter)
-            {
-                var entities = m_buildingOwnSerialDirty.ToEntityArray(Allocator.Temp);
-                for (int i = 0; i < entities.Length; i++)
-                {
-                    var entity = entities[i];
-                    if (EntityManager.TryGetComponent<ADRVehicleBuildingOrigin>(entity, out var sourceData))
-                    {
-                        sourceData.DoRegisterCategorySerialNumber();
-                        EntityManager.SetComponentData(entity, sourceData);
-                    }
-                    EntityManager.RemoveComponent<ADRBuildingOwnSerialUnset>(entity);
-                }
-                entities.Dispose();
             }
 
             if (!m_vehicleToUpdateConvoyId.IsEmptyIgnoreFilter)

@@ -39,50 +39,27 @@ namespace BelzontAdr
                 {
                     Entity entity = entities[i];
                     var isTrain = m_trainLkp.HasComponent(entity);
-                    var refEntity = !isTrain || !m_controllerLkp.TryGetComponent(entity, out var ctrl) || ctrl.m_Controller == entity ? entity : ctrl.m_Controller;
                     var serialNumber = refSerialNumber + (uint)m_serialNumber.Increment();
-                    if (isTrain && refEntity != entity)
+                    var plateCategory =
+                        isTrain ? ADRVehicleData.VehiclePlateCategory.Rail
+                        : m_aircraftLkp.HasComponent(entity) ? ADRVehicleData.VehiclePlateCategory.Air
+                        : m_watercraftLkp.HasComponent(entity) ? ADRVehicleData.VehiclePlateCategory.Water
+                        : ADRVehicleData.VehiclePlateCategory.Road;
+                    var newItem = new ADRVehicleData
                     {
-                        if (!m_adrVehicleDataLkp.TryGetComponent(refEntity, out var vehicleDataParent)
-                            || m_adrVehiclePlateDataLkp.HasComponent(refEntity)
-                            || !m_layoutElementLkp.TryGetBuffer(refEntity, out var layoutData)
-                            )
-                        {
-                            continue;
-                        }
-                        var newItem = new ADRVehicleData
-                        {
-                            plateCategory = ADRVehicleData.VehiclePlateCategory.Rail,
-                            serialNumber = serialNumber,
-                            manufactureMonthsFromEpoch = m_refDateTime,
-                            calculatedPlate = new Unity.Collections.FixedString32Bytes(),
-                            calculatedConvoyPrefix = new Unity.Collections.FixedString32Bytes(),
-                        };
-                        m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);
-                        m_cmdBuffer.AddComponent<ADRVehiclePlateDataDirty>(unfilteredChunkIndex, entity);
-                    }
-                    else
-                    {
-                        var plateCategory =
-                            isTrain ? ADRVehicleData.VehiclePlateCategory.Rail
-                            : m_aircraftLkp.HasComponent(entity) ? ADRVehicleData.VehiclePlateCategory.Air
-                            : m_watercraftLkp.HasComponent(entity) ? ADRVehicleData.VehiclePlateCategory.Water
-                            : ADRVehicleData.VehiclePlateCategory.Road;
-                        var newItem = new ADRVehicleData
-                        {
-                            plateCategory = plateCategory,
-                            serialNumber = serialNumber,
-                            manufactureMonthsFromEpoch = m_refDateTime,
-                            calculatedPlate = new Unity.Collections.FixedString32Bytes(),
-                            calculatedConvoyPrefix = new Unity.Collections.FixedString32Bytes(),
-                        };
-                        m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);
-                        m_cmdBuffer.AddComponent<ADRVehiclePlateDataDirty>(unfilteredChunkIndex, entity);
-                        m_cmdBuffer.AddComponent<ADRVehicleSerialDataDirty>(unfilteredChunkIndex, entity);
+                        plateCategory = plateCategory,
+                        serialNumber = serialNumber,
+                        manufactureMonthsFromEpoch = m_refDateTime,
+                        calculatedPlate = new Unity.Collections.FixedString32Bytes(),
+                        calculatedConvoyPrefix = new Unity.Collections.FixedString32Bytes(),
+                    };
+                    m_cmdBuffer.AddComponent(unfilteredChunkIndex, entity, newItem);
+                    m_cmdBuffer.AddComponent<ADRVehiclePlateDataDirty>(unfilteredChunkIndex, entity);
+                    m_cmdBuffer.AddComponent<ADRVehicleSerialDataDirty>(unfilteredChunkIndex, entity);
 #if DEBUG
-                        //       if (newItem.serialNumber % 5 == 0) UnityEngine.Debug.Log($"Added serial nº: {newItem.serialNumber} => {newItem.calculatedPlate}");
+                    //       if (newItem.serialNumber % 5 == 0) UnityEngine.Debug.Log($"Added serial nº: {newItem.serialNumber} => {newItem.calculatedPlate}");
 #endif
-                    }
+
                 }
 
             }
