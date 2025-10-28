@@ -1,25 +1,26 @@
 import { Entity, SelectInfoPanelService, SelectedInfoOptions, replaceArgs } from "@klyte45/adr-commons";
-import { VanillaComponentResolver } from '@klyte45/vuio-commons';
+import { toEntityTyped, VanillaComponentResolver } from '@klyte45/vuio-commons';
+import { DropdownItem, LocElement, selectedInfo } from "cs2/bindings";
 import { useState } from "react";
 import { translate } from "utility/translate";
 
-type Props = { entity: Entity, response: SelectedInfoOptions, onChanged: () => Promise<any> };
+type Props = { response: SelectedInfoOptions, onChanged: () => Promise<any> };
 
 
-export const SeedManagementOptionsComponent = ({ entity, response, onChanged }: Props) => {
+export const SeedManagementOptionsComponent = ({ response, onChanged }: Props) => {
 
-    const [loading, setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false);
 
-    const randomizeSeed = async (target: Entity) => {
+    const randomizeSeed = async () => {
         setLoading(true)
-        await SelectInfoPanelService.redrawSeed(target);
+        await SelectInfoPanelService.redrawSeed(toEntityTyped(selectedInfo.selectedEntity$.value));
         await onChanged();
         setLoading(false)
     }
 
-    const changeSeedRefDelta = async (target: Entity, delta: number) => {
+    const changeSeedRefDelta = async (delta: number) => {
         setLoading(true)
-        await SelectInfoPanelService.changeSeedByDelta(target, delta);
+        await SelectInfoPanelService.changeSeedByDelta(toEntityTyped(selectedInfo.selectedEntity$.value), delta);
         await onChanged();
         setLoading(false)
     }
@@ -34,13 +35,13 @@ export const SeedManagementOptionsComponent = ({ entity, response, onChanged }: 
 
         const right = <>
             <VR.Tooltip tooltip={translate("SeedManagementOptions.UsePreviousNameInList")} >
-                <VR.IconButton focusKey={focusKey} onSelect={() => changeSeedRefDelta(currentVal, -1)} style={{ background: "var(--accentColorNormal)" }} theme={VR.themeGamepadToolOptions} src="Media/Glyphs/ThickStrokeArrowLeft.svg" tinted={true} />
+                <VR.IconButton focusKey={focusKey} onSelect={() => changeSeedRefDelta(-1)} style={{ background: "var(--accentColorNormal)" }} theme={VR.themeGamepadToolOptions} src="Media/Glyphs/ThickStrokeArrowLeft.svg" tinted={true} />
             </VR.Tooltip>
             <VR.Tooltip tooltip={translate("SeedManagementOptions.RegenerateNameTooltip")}>
-                <VR.IconButton focusKey={focusKey} onSelect={() => randomizeSeed(currentVal)} className="" theme={VR.themeGamepadToolOptions} src="Media/Glyphs/Dice.svg" tinted={true} />
+                <VR.IconButton focusKey={focusKey} onSelect={() => randomizeSeed()} className="" theme={VR.themeGamepadToolOptions} src="Media/Glyphs/Dice.svg" tinted={true} />
             </VR.Tooltip>
             <VR.Tooltip tooltip={translate("SeedManagementOptions.UseNextNameInList")}>
-                <VR.IconButton focusKey={focusKey} onSelect={() => changeSeedRefDelta(currentVal, 1)} className={VR.themeGamepadToolOptions.arrowButton} theme={VR.themeGamepadToolOptions} src="Media/Glyphs/ThickStrokeArrowRight.svg" tinted={true} />
+                <VR.IconButton focusKey={focusKey} onSelect={() => changeSeedRefDelta(1)} className={VR.themeGamepadToolOptions.arrowButton} theme={VR.themeGamepadToolOptions} src="Media/Glyphs/ThickStrokeArrowRight.svg" tinted={true} />
             </VR.Tooltip>
         </>
         return <>

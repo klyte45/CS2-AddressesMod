@@ -255,19 +255,22 @@ namespace BelzontAdr
         {
             if (Enabled && EntityManager.TryGetComponent<ADRHighwayMarkerData>(entity, out var component))
             {
-                InfoPanel_RouteId.Value = component.routeDataIndex;
-                InfoPanel_RouteDirection.Value = component.routeDirection;
-                InfoPanel_DisplayInformation.Value = component.displayInformation;
-                InfoPanel_NumericCustomParam1.Value = component.numericCustomParam1;
-                InfoPanel_NumericCustomParam2.Value = component.numericCustomParam2;
-                InfoPanel_NewMileage.Value = component.newMileage;
-                InfoPanel_OverrideMileage.Value = component.overrideMileage;
-                InfoPanel_ReverseMileageCounting.Value = component.reverseMileageCounting;
-                InfoPanel_PylonCount.Value = component.pylonCount;
-                InfoPanel_PylonSpacing.Value = component.pylonSpacing;
-                InfoPanel_PylonMaterial.Value = component.pylonMaterial;
-                InfoPanel_PylonHeight.Value = component.pylonHeight;
-                InfoPanel_PylonFormat.Value = component.pylonFormat;
+                m_executionQueue.Enqueue(() =>
+                {
+                    InfoPanel_RouteId.Value = component.routeDataIndex;
+                    InfoPanel_RouteDirection.Value = component.routeDirection;
+                    InfoPanel_DisplayInformation.Value = component.displayInformation;
+                    InfoPanel_NumericCustomParam1.Value = component.numericCustomParam1;
+                    InfoPanel_NumericCustomParam2.Value = component.numericCustomParam2;
+                    InfoPanel_NewMileage.Value = component.newMileage;
+                    InfoPanel_OverrideMileage.Value = component.overrideMileage;
+                    InfoPanel_ReverseMileageCounting.Value = component.reverseMileageCounting;
+                    InfoPanel_PylonCount.Value = component.pylonCount;
+                    InfoPanel_PylonSpacing.Value = component.pylonSpacing;
+                    InfoPanel_PylonMaterial.Value = component.pylonMaterial;
+                    InfoPanel_PylonHeight.Value = component.pylonHeight;
+                    InfoPanel_PylonFormat.Value = component.pylonFormat;
+                });
             }
         }
 

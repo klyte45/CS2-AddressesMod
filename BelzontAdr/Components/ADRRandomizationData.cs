@@ -37,7 +37,7 @@ namespace BelzontAdr
                 reader.Read(out ushort identifier);
                 m_seedIdentifier = identifier;
             }
-            else 
+            else
             {
                 reader.Read(out m_seedIdentifier);
                 if (version == 1 && m_seedIdentifier == ~0u)
@@ -49,7 +49,10 @@ namespace BelzontAdr
 
         internal void AddDelta(int delta)
         {
-            m_seedIdentifier = (ushort)((delta + m_seedIdentifier) & 0xFFFF);
+            unchecked
+            {
+                m_seedIdentifier = (uint)(delta + m_seedIdentifier);
+            }
         }
     }
 }

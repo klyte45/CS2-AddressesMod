@@ -59,35 +59,28 @@ namespace BelzontAdr
 
         }
 
-        private AdrEntityData GetEntityOptions(Entity e)
+        private List<AdrEntityData> GetEntityOptions(Entity e)
         {
-            var result = new AdrEntityData
-            {
-                targetEntityToName = e
-            };
+            var resultList = new List<AdrEntityData>();
             if (EntityManager.HasComponent<ADRHighwayMarkerData>(e))
             {
-                result.type = AdrEntityType.RoadMark;
-                return result;
+                resultList.Add(new() { type = AdrEntityType.RoadMark });
             }
             if (EntityManager.HasComponent<ADRVehicleData>(e))
             {
-                result.type = AdrEntityType.Vehicle;
-                return result;
-            }
-            if (EntityManager.HasComponent<ADRVehicleBuildingOrigin>(e))
-            {
-                result.type = AdrEntityType.VehicleSource;
-                return result;
+                resultList.Add(new() { type = AdrEntityType.Vehicle });
             }
             if (EntityManager.HasComponent<CustomName>(e))
             {
-                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} uses custom name");
-                result.type = AdrEntityType.CustomName;
-                return result;
+                resultList.Add(new() { type = AdrEntityType.CustomName });
+            }
+            if (EntityManager.HasComponent<ADRVehicleBuildingOrigin>(e))
+            {
+                resultList.Add(new() { type = AdrEntityType.VehicleSource });
             }
             if (EntityManager.TryGetComponent<Building>(e, out var building))
             {
+                var result = new AdrEntityData();
                 if (EntityManager.HasComponent<PublicTransportStation>(e))
                 {
                     if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have building and PublicTransportStation");
@@ -108,9 +101,11 @@ namespace BelzontAdr
                 {
                     if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have building only");
                 }
+                resultList.Add(result);
             }
-            else if (EntityManager.TryGetComponent<Aggregated>(e, out var agg))
+            if (EntityManager.TryGetComponent<Aggregated>(e, out var agg))
             {
+                var result = new AdrEntityData();
                 if (EntityManager.HasComponent<Road>(e))
                 {
                     if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have Aggregated and Road");
@@ -121,9 +116,11 @@ namespace BelzontAdr
                 {
                     if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have agg only");
                 }
+                resultList.Add(result);
             }
-            else if (EntityManager.HasComponent<Aggregate>(e))
+            if (EntityManager.HasComponent<Aggregate>(e))
             {
+                var result = new AdrEntityData();
                 if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is Aggregate");
                 result.type = AdrEntityType.RoadAggregation;
                 if (mainSystem.FindReferenceRoad(e, out _, out var refRoad))
@@ -135,9 +132,11 @@ namespace BelzontAdr
                     }
                 }
                 result.entityValue = e;
+                resultList.Add(result);
             }
-            else if (EntityManager.HasComponent<District>(e))
+            if (EntityManager.HasComponent<District>(e))
             {
+                var result = new AdrEntityData();
                 if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is District");
                 result.type = AdrEntityType.District;
                 result.hasCustomNameList = mainSystem.TryGetDistrictNamesList(out var districtNamesList);
@@ -146,14 +145,11 @@ namespace BelzontAdr
                     result.customNameListName = districtNamesList.Name;
                 }
                 result.entityValue = e;
-            }
-            else
-            {
-                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have no special rule");
+                resultList.Add(result);
             }
 
 
-            return result;
+            return resultList;
         }
 
         private void StationRefFill(Entity e, AdrEntityData result, Building building)

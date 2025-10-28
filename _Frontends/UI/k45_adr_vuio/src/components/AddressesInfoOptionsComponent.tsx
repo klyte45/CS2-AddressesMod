@@ -1,7 +1,6 @@
-import { AdrEntityType, SelectInfoPanelService, SelectedInfoOptions, toEntityTyped } from "@klyte45/adr-commons";
+import { AdrEntityType, Entity, SelectInfoPanelService, SelectedInfoOptions, toEntityTyped } from "@klyte45/adr-commons";
 import { VanillaComponentResolver } from '@klyte45/vuio-commons';
 import { ValueBinding } from "cs2/api";
-import { Entity } from "cs2/utils";
 import { useEffect, useState } from "react";
 import { translate } from "utility/translate";
 import { SeedManagementOptionsComponent } from "./SeedManagementOptions";
@@ -9,44 +8,46 @@ import { StationBuildingOptionsComponent } from "./StationBuildingOptions";
 import { VehicleDataDetailSection } from "./VehicleDataDetailSection";
 import { RoadMarkSettings } from "./RoadMarkSettings";
 import { VehicleSourceSettings } from "./VehicleSourceSettings";
+import { selectedInfo } from "cs2/bindings";
 
-type Props = { entity: ValueBinding<Entity>, isEditor?: boolean, onChange?: () => any };
+type Props = { isEditor?: boolean, onChange?: () => any };
 
-export const AddressesInfoOptionsComponent = ({ entity, onChange }: Props) => {
+export const AddressesInfoOptionsComponent = ({ onChange }: Props) => {
 
-    const [optionsResult, setOptionsResult] = useState(undefined as SelectedInfoOptions | undefined);
+    const [optionsResult, setOptionsResult] = useState([] as SelectedInfoOptions[]);
 
+    const entity = toEntityTyped(selectedInfo.selectedEntity$.value)
 
     useEffect(() => {
-        loadOptions(entity.value)
-    }, [entity.value])
+        loadOptions(entity)
+    }, [entity.Index])
 
     const loadOptions = async (entity: Entity) => {
         if (!entity) {
-            setOptionsResult(undefined);
+            setOptionsResult([]);
             return;
         }
-        const call = SelectInfoPanelService.getEntityOptions(toEntityTyped(entity));
+        const call = SelectInfoPanelService.getEntityOptions(entity);
         const result = await call
         setOptionsResult(result)
     }
 
     const onValueChanged = async () => {
         await onChange?.();
-        await loadOptions(entity.value)
+        await loadOptions(entity)
     }
 
 
-    const getSubRows = () => {
-        switch (optionsResult?.type?.value__) {
+    const getSubRows = (optionResult: SelectedInfoOptions) => {
+        switch (optionResult?.type?.value__) {
             case AdrEntityType.PublicTransportStation:
             case AdrEntityType.CargoTransportStation:
-                return <StationBuildingOptionsComponent onChanged={() => onValueChanged()} entityOrigin={toEntityTyped(entity.value)} response={optionsResult} />
+                return <StationBuildingOptionsComponent onChanged={() => onValueChanged()} entityOrigin={entity} response={optionResult} />
             case AdrEntityType.RoadAggregation:
             case AdrEntityType.District:
-                return <SeedManagementOptionsComponent onChanged={() => onValueChanged()} entity={toEntityTyped(entity.value)} response={optionsResult} />
+                return <SeedManagementOptionsComponent onChanged={() => onValueChanged()} response={optionResult} />
             case AdrEntityType.Vehicle:
-                return <VehicleDataDetailSection entity={toEntityTyped(entity.value)} />
+                return <VehicleDataDetailSection />
             case AdrEntityType.RoadMark:
                 return <RoadMarkSettings />
             case AdrEntityType.VehicleSource:
@@ -56,11 +57,12 @@ export const AddressesInfoOptionsComponent = ({ entity, onChange }: Props) => {
         }
     }
 
-    const getLeftColumnText = () => {
-        switch (optionsResult?.type?.value__) {
+    const getLeftColumnText = (optionResult: SelectedInfoOptions) => {
+        switch (optionResult.type.value__) {
             case AdrEntityType.Vehicle:
                 return translate("AddressesInfoOptions.ExtraDataInformationFor");
             case AdrEntityType.RoadMark:
+            case AdrEntityType.VehicleSource:
                 return translate("AddressesInfoOptions.SettingsFor");
             default:
                 return translate("AddressesInfoOptions.NamingReference");
@@ -69,14 +71,18 @@ export const AddressesInfoOptionsComponent = ({ entity, onChange }: Props) => {
 
 
     if (!optionsResult) return <></>;
-    const valueType = AdrEntityType[optionsResult?.type?.value__];
-    const VR = VanillaComponentResolver.instance;
-    return <VR.InfoSection disableFocus={true}  >
-        <VR.InfoRow uppercase={true} icon="coui://adr.k45/UI/images/ADR.svg"
-            left={<>{getLeftColumnText()}</>}
-            right={<div style={{ whiteSpace: "pre-wrap" }}>{translate("AdrEntityType." + valueType)}</div>}
-            tooltip={<>{translate("AddressesInfoOptions.Tooltip." + valueType)}</>} />
-        {getSubRows()}
-    </VR.InfoSection>
+    var result = [];
+    for (const optionResult of optionsResult) {
+        const valueType = AdrEntityType[optionResult?.type?.value__];
+        const VR = VanillaComponentResolver.instance;
+        result.push(<VR.InfoSection disableFocus={true} className="k45_modding" >
+            <VR.InfoRow uppercase={true} icon="coui://adr.k45/UI/images/ADR.svg"
+                left={<>{getLeftColumnText(optionResult)}</>}
+                right={<div style={{ whiteSpace: "pre-wrap" }}>{translate("AdrEntityType." + valueType)}</div>}
+                tooltip={<>{translate("AddressesInfoOptions.Tooltip." + valueType)}</>} />
+            {getSubRows(optionResult)}
+        </VR.InfoSection>)
+    }
+    return <>{result}</>;
 
 }

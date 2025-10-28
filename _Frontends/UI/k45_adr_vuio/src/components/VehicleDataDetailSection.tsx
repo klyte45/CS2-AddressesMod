@@ -1,15 +1,18 @@
-import { ADRVehicleData, Entity, VehicleService, SelectInfoPanelService, SelectedInfoOptions, replaceArgs, VehiclePlateCategory } from "@klyte45/adr-commons";
+import { ADRVehicleData, Entity, VehicleService, SelectInfoPanelService, SelectedInfoOptions, replaceArgs, VehiclePlateCategory, toEntityTyped } from "@klyte45/adr-commons";
 import { VanillaComponentResolver } from '@klyte45/vuio-commons';
+import { selectedInfo } from "cs2/bindings";
 import { useEffect, useState } from "react";
 import { translate } from "utility/translate";
 
 type Props = { entity: Entity };
 
 
-export const VehicleDataDetailSection = ({ entity }: Props) => {
+export const VehicleDataDetailSection = () => {
 
     const [loading, setLoading] = useState(true);
     const [currentData, setCurrentData] = useState(undefined as any as ADRVehicleData);
+
+    const entity = toEntityTyped(selectedInfo.selectedEntity$.value);
 
     useEffect(() => {
         setLoading(true);
@@ -17,7 +20,7 @@ export const VehicleDataDetailSection = ({ entity }: Props) => {
             setLoading(false);
             setCurrentData(x);
         });
-    }, [entity])
+    }, [entity.Index])
 
     if (loading) return <>Loading...</>
     const VR = VanillaComponentResolver.instance;
