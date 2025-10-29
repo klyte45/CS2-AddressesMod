@@ -27,7 +27,7 @@ export const RoadPrefixCmp = ({ }) => {
   const getSettings = async () => {
     setCurrentSettings((await NamingRulesService.getCurrentCitywideSettings()).roadPrefixSetting);
   }
-  
+
   useEffect(() => {
     getSettings();
     NamingRulesService.onCityDataReloaded(() => { getSettings(); });
@@ -51,27 +51,54 @@ export const RoadPrefixCmp = ({ }) => {
     setTimeout(() => setLoadButtonState(0), 3000)
   }
   if (!currentSettings) return null;
+
+  const getLoadButtonConfig = () => {
+    if (saveButtonState !== 0) return { className: "darkestBtn", disabled: true, onClick: undefined };
+
+    const loadStates = {
+      0: { className: "neutralBtn", disabled: false, onClick: doLoad, key: "loadFromDefaults" },
+      999: { className: "darkestBtn", disabled: true, onClick: undefined, key: "loadingWaiting" },
+      1: { className: "positiveBtn", disabled: true, onClick: undefined, key: "loadSuccess" },
+      [-1]: { className: "negativeBtn", disabled: true, onClick: undefined, key: "loadErrorFileNotFound" },
+      [-2]: { className: "negativeBtn", disabled: true, onClick: undefined, key: "loadErrorCheckLogs" },
+    };
+
+    return loadStates[loadButtonState] || { className: "negativeBtn", disabled: true, onClick: undefined, key: "loadUnknownState" };
+  };
+
+  const getSaveButtonConfig = () => {
+    if (loadButtonState !== 0) return { className: "darkestBtn", disabled: true, onClick: undefined };
+
+    const saveStates = {
+      0: { className: "neutralBtn", disabled: false, onClick: doSave, key: "saveBtn" },
+      1: { className: "darkestBtn", disabled: true, onClick: undefined, key: "savingWaiting" },
+      2: { className: "positiveBtn", disabled: true, onClick: undefined, key: "saved" },
+    };
+
+    return saveStates[saveButtonState] || { className: "neutralBtn", disabled: false, onClick: doSave, key: "saveBtn" };
+  };
+
+  const loadButtonConfig = getLoadButtonConfig();
+  const saveButtonConfig = getSaveButtonConfig();
+
   const buttonRow = <>
     <button className="neutralBtn" onClick={() => {
       currentSettings.AdditionalRules ??= [];
       currentSettings.AdditionalRules.push(basicRule);
       NamingRulesService.setAdrRoadPrefixSetting(currentSettings);
     }}>{translate("roadPrefixSettings.addNewRule")}</button>
-    {
-      saveButtonState != 0 ? <button className="darkestBtn">{translate("roadPrefixSettings.loadFromDefaults")}</button>
-        : loadButtonState == 0 ? <button className="neutralBtn" onClick={() => doLoad()}>{translate("roadPrefixSettings.loadFromDefaults")}</button>
-          : loadButtonState == 999 ? <button className="darkestBtn">{translate("roadPrefixSettings.loadingWaiting")}</button>
-            : loadButtonState == -1 ? <button className="negativeBtn">{translate("roadPrefixSettings.loadErrorFileNotFound")}</button>
-              : loadButtonState == -2 ? <button className="negativeBtn">{translate("roadPrefixSettings.loadErrorCheckLogs")}</button>
-                : loadButtonState == 1 ? <button className="positiveBtn">{translate("roadPrefixSettings.loadSuccess")}</button>
-                  : <button className="negativeBtn">{translate("roadPrefixSettings.loadUnknownState")}</button>
-    }
-    {
-      loadButtonState != 0 ? <button className="darkestBtn">{translate("roadPrefixSettings.saveBtn")}</button>
-        : saveButtonState == 0 ? <button className="neutralBtn" onClick={() => doSave()}>{translate("roadPrefixSettings.saveBtn")}</button>
-          : saveButtonState == 1 ? <button className="darkestBtn">{translate("roadPrefixSettings.savingWaiting")}</button>
-            : <button className="positiveBtn">{translate("roadPrefixSettings.saved")}</button>
-    }
+    <button
+      className={loadButtonConfig.className}
+      onClick={loadButtonConfig.onClick}
+      disabled={loadButtonConfig.disabled}>
+      {translate(`roadPrefixSettings.${loadButtonConfig.key || "loadFromDefaults"}`)}
+    </button>
+    <button
+      className={saveButtonConfig.className}
+      onClick={saveButtonConfig.onClick}
+      disabled={saveButtonConfig.disabled}>
+      {translate(`roadPrefixSettings.${saveButtonConfig.key || "saveBtn"}`)}
+    </button>
   </>
   return !currentSettings ? <></> :
     <DefaultPanelScreen title={translate("roadPrefixSettings.title")} subtitle={translate("roadPrefixSettings.subtitle")} buttonsRowContent={buttonRow}>
@@ -94,8 +121,8 @@ export const RoadPrefixCmp = ({ }) => {
                 key={i}
                 onClick={() => { setCurrentEditingRule(i) }} title={`${i + 1}: ${x.FormatPattern}`}
                 className={i == currentEditingRule ? "selectedItem" : ""}>
-                {i > 0 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i - 1); NamingRulesService.setAdrRoadPrefixSetting(currentSettings) }}><div className="moveItemUp" /></button> : <div className="buttonPlaceholder"></div>}
-                {i < arr.length - 1 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i + 1); NamingRulesService.setAdrRoadPrefixSetting(currentSettings) }}><div className="moveItemDown" /></button> : <div className="buttonPlaceholder"></div>}
+                {i > 0 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i - 1); NamingRulesService.setAdrRoadPrefixSetting(currentSettings) }}><div className="moveItemDown" /></button> : <div className="buttonPlaceholder"></div>}
+                {i < arr.length - 1 ? <button className="neutralBtn" onClick={() => { arraymove(arr, i, i + 1); NamingRulesService.setAdrRoadPrefixSetting(currentSettings) }}><div className="moveItemUp" /></button> : <div className="buttonPlaceholder"></div>}
                 <button className="negativeBtn" onClick={() => { arr.splice(i, 1); NamingRulesService.setAdrRoadPrefixSetting(currentSettings) }}><div className="removeItem" /></button>
               </Cs2FormLine>
             })
@@ -145,7 +172,11 @@ export const RoadPrefixCmp = ({ }) => {
                 </Cs2FormLine>
                 <h3>{translate("roadPrefixSettings.requiredOrForbiddenTitle")}</h3>
                 {
-                  [RoadFlags.EnableZoning, RoadFlags.SeparatedCarriageways, RoadFlags.PreferTrafficLights, RoadFlags.UseHighwayRules].map((x, i) => {
+                  [
+                    RoadFlags.EnableZoning, RoadFlags.SeparatedCarriageways,
+                    RoadFlags.PreferTrafficLights, RoadFlags.UseHighwayRules,
+                    RoadFlags.Train, RoadFlags.Tram, RoadFlags.Subway
+                  ].map((x, i) => {
                     const targetVal = x;
                     const editingItem = currentSettings.AdditionalRules[currentEditingRule]
                     const currentValue = (editingItem.RequiredFlagsInt & targetVal) != 0 ? true : (editingItem.ForbiddenFlagsInt & targetVal) != 0 ? null : false;

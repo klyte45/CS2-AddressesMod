@@ -9,6 +9,13 @@ export type ExtendedSimpleNameEntry = SimpleNameEntry & {
     _CurrName?: string;
 }
 
+enum TrackTypes {
+    None = 0,
+    Train = 1,
+    Tram = 2,
+    Subway = 4
+}
+
 export enum RoadFlags {
     EnableZoning = 0x1,
     SeparatedCarriageways = 0x2,
@@ -16,7 +23,10 @@ export enum RoadFlags {
     DefaultIsForward = 0x8,
     UseHighwayRules = 0x10,
     DefaultIsBackward = 0x20,
-    HasStreetLights = 0x40
+    HasStreetLights = 0x40,
+    Train = TrackTypes.Train << 16,
+    Tram = TrackTypes.Tram << 16,
+    Subway = TrackTypes.Subway << 16,    
 }
 
 export type AdrRoadPrefixRule = {

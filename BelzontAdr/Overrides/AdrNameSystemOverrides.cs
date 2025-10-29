@@ -177,13 +177,6 @@ namespace BelzontAdr
         {
             return GetName_Internal(ref __result, ref __instance, entity);
         }
-
-        private static Name DirectGetName(ref NameSystem __instance, Entity entity)
-        {
-            Name n = default;
-            return GetName(ref n, ref __instance, entity) ? n : Original_GetName(__instance, entity);
-        }
-
         private static bool GetName_Internal(ref Name __result, ref NameSystem __instance, Entity entity, bool omitAddressQualifier = false)
         {
             if (__instance.TryGetCustomName(entity, out string name))
@@ -405,7 +398,14 @@ namespace BelzontAdr
             if (!adrMainSystem.FindReferenceRoad(entity, out DynamicBuffer<AggregateElement> elements, out Entity refRoad)) return true;
             if (!adrMainSystem.GetRoadNameList(refRoad, out var roadsNamesList)) return true;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;
-            if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData)) return true;
+            if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData))
+            {
+                if (entityManager.TryGetComponent<TrackData>(roadPrefab, out var trackData))
+                {
+                    roadData.m_Flags = (Game.Prefabs.RoadFlags)((int)trackData.m_TrackType << 16);//rail track
+                    roadData.m_SpeedLimit = trackData.m_SpeedLimit;
+                }
+            }
             var fullBridge = true;
             for (int i = 0; i < elements.Length; i++)
             {

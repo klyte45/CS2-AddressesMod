@@ -39,10 +39,11 @@ export type ADRVehicleData = {
     serialNumber: number;
     calculatedPlate: string;
     manufactureMonthsFromEpoch: number;
+    ownerSerialNumber: number;
+    hasOwner: boolean;
 }
 
-export enum VehiclePlateCategory
-{
+export enum VehiclePlateCategory {
     Road,
     Air,
     Water,

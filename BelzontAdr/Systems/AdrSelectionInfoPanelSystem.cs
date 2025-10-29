@@ -59,9 +59,9 @@ namespace BelzontAdr
 
         }
 
-        private List<AdrEntityData> GetEntityOptions(Entity e)
+        private List<AdrEntityBase> GetEntityOptions(Entity e)
         {
-            var resultList = new List<AdrEntityData>();
+            var resultList = new List<AdrEntityBase>();
             if (EntityManager.HasComponent<ADRHighwayMarkerData>(e))
             {
                 resultList.Add(new() { type = AdrEntityType.RoadMark });
@@ -269,11 +269,14 @@ namespace BelzontAdr
         public override void OnWriteProperties(IJsonWriter writer)
         {
         }
+        private class AdrEntityBase
+        {
+            public AdrEntityType type;
+        }
 
-        private class AdrEntityData
+        private class AdrEntityData : AdrEntityBase
         {
             public Entity targetEntityToName;
-            public AdrEntityType type = AdrEntityType.None;
             public Entity entityValue;
             public readonly List<EntityOption> buildingsOptions = new();
             public readonly List<EntityOption> roadAggegateOptions = new();

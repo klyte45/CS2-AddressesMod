@@ -16,7 +16,7 @@
   <Import Project="$(SolutionDir)\_Build\belzont_public.targets" />
 
   <!--File with machine specific data - can be disabled-->
-  <Import Project="$(K45_CS2_ALLROOT)\_Shared\local_shared.targets" />
+  <Import Project="$(SolutionDir)\..\_Shared\local_shared.targets" />
 
   <!--Mod data-->
   <PropertyGroup>

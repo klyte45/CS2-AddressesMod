@@ -32,5 +32,6 @@ export const VehicleDataDetailSection = () => {
         <VR.InfoRow left={<>{translate(`vehicleDataVuio.vehiclePlateTitle.${VehiclePlateCategory[currentData.plateCategory.value__]}`)}</>} right={currentData.calculatedPlate} />
         <VR.InfoRow subRow={true} left={<>{translate("vehicleDataVuio.serialNumber")}</>} right={currentData.serialNumber} />
         <VR.InfoRow subRow={true} left={<>{translate("vehicleDataVuio.manufactureMonthsFromEpoch")}</>} right={engine.translate("Common.MONTH_SHORT:" + (refMonth % 12)) + " " + Math.floor(refMonth / 12)} />
+        {currentData.hasOwner && <VR.InfoRow subRow={true} left={<>{translate("vehicleDataVuio.ownerSerialNumber")}</>} right={currentData.ownerSerialNumber} />}
     </>
 }

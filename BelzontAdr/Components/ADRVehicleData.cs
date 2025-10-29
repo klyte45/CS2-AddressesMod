@@ -16,6 +16,7 @@ namespace BelzontAdr
             public string calculatedConvoyPrefix;
             public int manufactureMonthsFromEpoch;
             public uint ownerSerialNumber;
+            public bool hasOwner;
 
             private CohtmlSafe() { }
 
@@ -29,7 +30,8 @@ namespace BelzontAdr
                     calculatedConvoyPrefix = data.calculatedConvoyPrefix.ToString(),
                     manufactureMonthsFromEpoch = data.manufactureMonthsFromEpoch,
                     serialNumber = data.serialNumber,
-                    ownerSerialNumber = data.ownerSerialNumber
+                    ownerSerialNumber = data.ownerSerialNumber,
+                    hasOwner = data.serialOwnerSource != Entity.Null
                 };
             }
         }
