@@ -80,7 +80,10 @@ namespace BelzontAdr
             }
             if (EntityManager.TryGetComponent<Building>(e, out var building))
             {
-                var result = new AdrEntityData();
+                var result = new AdrEntityData
+                {
+                    targetEntityToName = e,
+                };
                 if (EntityManager.HasComponent<PublicTransportStation>(e))
                 {
                     if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have building and PublicTransportStation");
@@ -105,7 +108,10 @@ namespace BelzontAdr
             }
             if (EntityManager.TryGetComponent<Aggregated>(e, out var agg))
             {
-                var result = new AdrEntityData();
+                var result = new AdrEntityData
+                {
+                    targetEntityToName = e,
+                }; ;
                 if (EntityManager.HasComponent<Road>(e))
                 {
                     if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have Aggregated and Road");
@@ -120,7 +126,10 @@ namespace BelzontAdr
             }
             if (EntityManager.HasComponent<Aggregate>(e))
             {
-                var result = new AdrEntityData();
+                var result = new AdrEntityData
+                {
+                    targetEntityToName = e,
+                };
                 if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is Aggregate");
                 result.type = AdrEntityType.RoadAggregation;
                 if (mainSystem.FindReferenceRoad(e, out _, out var refRoad))
@@ -136,7 +145,10 @@ namespace BelzontAdr
             }
             if (EntityManager.HasComponent<District>(e))
             {
-                var result = new AdrEntityData();
+                var result = new AdrEntityData
+                {
+                    targetEntityToName = e,
+                };
                 if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is District");
                 result.type = AdrEntityType.District;
                 result.hasCustomNameList = mainSystem.TryGetDistrictNamesList(out var districtNamesList);

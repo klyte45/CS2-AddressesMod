@@ -1,4 +1,8 @@
-# v0.2.3r0 (29-OCT-25)
+# v0.2.3r1 (02-NOV-25)
+
+- Fixed issue that prevented changing naming source from buildings and roads
+
+## FROM v0.2.3r0 (29-OCT-25)
 
 - Added support for B&P update
 - Added serial number counting by building
