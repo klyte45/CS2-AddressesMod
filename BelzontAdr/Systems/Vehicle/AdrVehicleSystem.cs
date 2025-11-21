@@ -1,6 +1,7 @@
 ﻿using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal;
+using Colossal.Core;
 using Colossal.Entities;
 using Colossal.Serialization.Entities;
 using Game;
@@ -357,7 +358,7 @@ namespace BelzontAdr
                     }
             });
 
-            GameManager.instance.RegisterUpdater(() =>
+            MainThreadDispatcher.RegisterUpdater(() =>
             {
                 if (AppDomain.CurrentDomain.GetAssemblies().SingleOrDefault(assembly => assembly.GetName().Name == "BelzontWE") is Assembly weAssembly
                     && weAssembly.GetExportedTypes().FirstOrDefault(x => x.Name == "WEVehicleFn") is Type t)

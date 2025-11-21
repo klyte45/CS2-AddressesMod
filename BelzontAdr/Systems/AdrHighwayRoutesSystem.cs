@@ -23,6 +23,8 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using static Belzont.Utils.NameSystemExtensions;
 using static BelzontAdr.ADRHighwayMarkerData;
+using Colossal.Core;
+
 
 
 
@@ -221,7 +223,7 @@ namespace BelzontAdr
                 return true;
             }
 
-            GameManager.instance.RegisterUpdater(registerSelfOnUI);
+            MainThreadDispatcher.RegisterUpdater(registerSelfOnUI);
 
             InfoPanel_RouteId.OnScreenValueChanged += (x) => EnqueueModification<Colossal.Hash128, ADRHighwayMarkerData>(x, (x, currentItem, entity) =>
             {
