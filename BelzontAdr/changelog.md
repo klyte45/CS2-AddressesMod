@@ -1,4 +1,8 @@
-# v0.2.3r3 (04-DEC-25)
+# v0.2.3r4 (04-DEC-25)
+
+- Fixes for a vanilla issue about loading modding UI
+
+## FROM v0.2.3r3 (04-DEC-25)
 
 - Fixes for 1.5 update
 
