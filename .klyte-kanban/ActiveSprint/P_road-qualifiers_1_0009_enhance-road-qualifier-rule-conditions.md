@@ -1,7 +1,7 @@
+**Start time:** 2026-04-03 18:23 -0300
 # [0009] enhance-road-qualifier-rule-conditions
 
-**Developed by:** 
-
+**Developed by:** claude-sonnet-4-6@kwyt.com.br
 ## User Story
 
 > Acting as **a city builder**, I want **road qualifier rules to support more condition types (lane count, elevation, zone type)**, so that I **differentiate street naming patterns with greater precision beyond basic speed flags**.
