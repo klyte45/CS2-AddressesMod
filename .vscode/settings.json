@@ -4,6 +4,7 @@
         "ConvertFrom-Json": true,
         "git add": true,
         "git commit": true,
-        "MSBuild.exe": true
+        "MSBuild.exe": true,
+        "Test-Path": true
     }
 }

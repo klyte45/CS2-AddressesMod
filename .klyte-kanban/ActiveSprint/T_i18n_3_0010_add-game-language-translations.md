@@ -1,7 +1,8 @@
+**End time:** 2026-04-03 20:00 -0300
+**Start time:** 2026-04-03 19:59 -0300
 # [0010] Add basic machine translation support all game languages
 
-**Developed by:** 
-
+**Developed by:** claude-sonnet-4-6@kwyt.com.br
 ## User Story
 
 > Acting as **a non-English-speaking player**, I want **the Addresses mod UI to be available in my language**, so that I **use the mod comfortably without needing to read English**.
@@ -25,7 +26,7 @@ ATTENTION: Only compile the project using the solution file, as explained on the
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] All game languages supported by Cities: Skylines 2 have a corresponding translation file in the mod with machine-translated strings based on the English and Portuguese sources.
+- [x] All game languages supported by Cities: Skylines 2 have a corresponding translation file in the mod with machine-translated strings based on the English and Portuguese sources.
 
 ---
 
