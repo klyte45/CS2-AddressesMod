@@ -1,7 +1,8 @@
+**End time:** 2026-04-03 18:40 -0300
+**Start time:** 2026-04-03 18:40 -0300
 # [0001] fix-stale-event-listener-override-settings
 
-**Developed by:** 
-
+**Developed by:** claude-sonnet-4-6@kwyt.com.br
 ## User Story
 
 > Acting as **a developer**, I want **the OverrideSettingsCmp to register its city nameset change handler only once, inside useEffect**, so that I **avoid listener accumulation and redundant re-registrations on every render cycle**.
@@ -22,9 +23,9 @@ In OverrideSettingsCmp.tsx, `NamesetService.doOnCityNamesetsUpdated(callback)` i
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] The doOnCityNamesetsUpdated call is moved inside the existing useEffect that handles mount/unmount
-- [ ] The matching offCityNamesetsUpdated is confirmed in the useEffect cleanup return function
-- [ ] No redundant subscriptions are registered across multiple renders (verified by manual inspection)
+- [x] The doOnCityNamesetsUpdated call is moved inside the existing useEffect that handles mount/unmount
+- [x] The matching offCityNamesetsUpdated is confirmed in the useEffect cleanup return function
+- [x] No redundant subscriptions are registered across multiple renders (verified by manual inspection)
 
 ---
 

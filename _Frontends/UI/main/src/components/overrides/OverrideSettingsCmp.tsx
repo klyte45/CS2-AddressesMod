@@ -31,10 +31,9 @@ export const defaultSettingRoadByDistrict = () => { return { IdString: null, Val
 
 
 export const OverrideSettingsCmp = ({ }) => {
-  NamesetService.doOnCityNamesetsUpdated(() => NamesetService.listCityNamesets().then(x => listFiles(x)));
-
   useEffect(() => {
     NamesetService.listCityNamesets().then(x => listFiles(x))
+    NamesetService.doOnCityNamesetsUpdated(() => NamesetService.listCityNamesets().then(x => listFiles(x)));
     return () => NamesetService.offCityNamesetsUpdated();
   }, [])
 
