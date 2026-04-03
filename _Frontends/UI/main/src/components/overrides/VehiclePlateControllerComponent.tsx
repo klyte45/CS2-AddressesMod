@@ -24,17 +24,18 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
 
   const [controllerData, setControllerData] = useState(undefined as ConstructorObjectToInstancesObject<typeof BasePlatesController>);
   const [_, setBuildIdx] = useState(0 as any);
-
+  const bindingsRef = useRef<ConstructorObjectToInstancesObject<typeof BasePlatesController>>(undefined);
 
   useEffect(() => {
     const tmp = InitializeBindings({
       _prefix: "k45::adr.vehiclePlate." + type,
       ...BasePlatesController
     });
+    bindingsRef.current = tmp;
     setControllerData(tmp);
     Object.entries(tmp).forEach(([x, y]) => y.subscribe(async (z) => { setBuildIdx(x + JSON.stringify(z)); }));
     return () => {
-      controllerData && Object.values(controllerData).forEach(x => x.dispose());
+      bindingsRef.current && Object.values(bindingsRef.current).forEach(x => x.dispose());
     };
   }, []);
 

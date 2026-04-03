@@ -1,7 +1,8 @@
+**End time:** 2026-04-03 18:44 -0300
+**Start time:** 2026-04-03 18:44 -0300
 # [0005] fix-stale-closure-plate-settings-cleanup
 
-**Developed by:** 
-
+**Developed by:** claude-sonnet-4-6@kwyt.com.br
 ## User Story
 
 > Acting as **a developer**, I want **VehiclePlateControllerComponent to properly dispose its bindings on unmount**, so that I **prevent subscription leaks when navigating between UI tabs**.
@@ -22,9 +23,9 @@ In VehiclePlateControllerComponent.tsx, the useEffect cleanup returns a function
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] A useRef is introduced to hold the bindings instance
-- [ ] The cleanup function calls dispose on the ref's current value
-- [ ] Unmounting and remounting the component panel does not accumulate orphaned subscriptions
+- [x] A useRef is introduced to hold the bindings instance
+- [x] The cleanup function calls dispose on the ref's current value
+- [x] Unmounting and remounting the component panel does not accumulate orphaned subscriptions
 
 ---
 

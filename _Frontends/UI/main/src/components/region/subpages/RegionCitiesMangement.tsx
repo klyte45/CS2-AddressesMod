@@ -24,7 +24,7 @@ export function RegionCitiesManagement({ onCitiesChanged }: MainProps) {
         onCancel={() => setSelectedCity(undefined)}
         onSave={() => RegionService.saveRegionCity(selectedCity as RegionCityEditingDTO).then(() => {
             setSelectedCity(undefined);
-            setTimeout(onCitiesChanged, 250); // Delay to ensure the UI updates properly
+            onCitiesChanged();
         })}
     />;
 }
