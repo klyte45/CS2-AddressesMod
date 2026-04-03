@@ -1,7 +1,7 @@
 import { translate } from "#utility/translate";
 import { ExtendedSimpleNameEntry, SimpleNameEntry } from "@klyte45/adr-commons";
 import { DefaultPanelScreen, GameScrollComponent, Input } from "@klyte45/euis-components";
-import { CSSProperties, useState } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 
 type Props = {
     entryData: SimpleNameEntry
@@ -9,13 +9,18 @@ type Props = {
     onOk: (x: Omit<ExtendedSimpleNameEntry, "ChecksumString">) => void
 }
 
-
+const entryToText = (entry: SimpleNameEntry) =>
+    entry.Values.map((x, i) => entry.ValuesAlternative[i] && entry.ValuesAlternative[i] != x ? `${x};${entry.ValuesAlternative[i]}` : x).join("\n");
 
 export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
 
     const [namesetData, setNamesetData] = useState(entryData);
+    const [textValue, setTextValue] = useState(() => entryToText(entryData));
 
-
+    useEffect(() => {
+        setNamesetData(entryData);
+        setTextValue(entryToText(entryData));
+    }, [entryData]);
 
     const onEditDone = (x: { target: { value: string; }; }) => {
         const newValues = x.target.value.split("\n").map(z => z.split(";").map(y => y.trim()).filter((x: any) => x))
@@ -33,8 +38,9 @@ export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
         <GameScrollComponent>
             <textarea
                 onBlur={onEditDone}
+                onChange={(e) => setTextValue(e.target.value)}
                 style={{ width: "100%", height: Math.max(40, 1.315 * namesetData.Values.length) + "em", minHeight: "100%" }}
-                defaultValue={namesetData.Values.map((x, i) => namesetData.ValuesAlternative[i] && namesetData.ValuesAlternative[i] != x ? `${x};${namesetData.ValuesAlternative[i]}` : x).join("\n")}
+                value={textValue}
             />
         </GameScrollComponent>
     </DefaultPanelScreen>;
