@@ -12,6 +12,7 @@
 
 AdrCitywideSettings.cs defines `public long CityNameSeeds { get; set; } = new System.Random().NextLong()` but `CityNameSeeds` is absent from both Serialize and Deserialize methods. The value is re-randomized on every load, potentially causing name regeneration.
 
+ATTENTION: Only compile the project using the solution file, as explained on the kanban README! This project was compiling before, so if it stopped it was something you have done!
 ---
 
 ## Definition of Ready (DoR)

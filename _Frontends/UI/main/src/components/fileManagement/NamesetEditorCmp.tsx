@@ -19,7 +19,7 @@ export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
 
     const onEditDone = (x: { target: { value: string; }; }) => {
         const newValues = x.target.value.split("\n").map(z => z.split(";").map(y => y.trim()).filter((x: any) => x))
-        return setNamesetData(Object.assign(namesetData, { Values: newValues.map(y => y[0]), ValuesAlternative: newValues.map(y => y[1] || y[0]) }));
+        return setNamesetData({ ...namesetData, Values: newValues.map(y => y[0]), ValuesAlternative: newValues.map(y => y[1] || y[0]) });
     };
     return <DefaultPanelScreen title={translate("namesetEditor.title")} subtitle={translate("namesetEditor.subtitle")} buttonsRowContent={<>
         <button className="negativeBtn " onClick={onBack}>{translate("namesetEditor.cancel")}</button>
@@ -28,7 +28,7 @@ export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
         <div style={{ textAlign: "center", width: "100%", fontSize: "30rem" } as CSSProperties}>{namesetData.Name.split("/").pop()}</div>
         <div className="fullDivider" />
         <div>
-            <Input title={translate("namesetsImport.pathToNameset")} getValue={() => namesetData.Name} onValueChanged={(x) => { setNamesetData(Object.assign(namesetData, { Name: x })); return x; }} />
+            <Input title={translate("namesetsImport.pathToNameset")} getValue={() => namesetData.Name} onValueChanged={(x) => { setNamesetData({ ...namesetData, Name: x }); return x; }} />
         </div>
         <GameScrollComponent>
             <textarea
