@@ -12,8 +12,7 @@ namespace BelzontAdr
     public class AdrNameFilesManager
     {
         public static string NamesetsFolder { get; } = Path.Combine(AddressesCs2Mod.ModSettingsRootFolder, "NamesetsFolder");
-        public static AdrNameFilesManager Instance => instance ??= new();
-        private static AdrNameFilesManager instance;
+        public static AdrNameFilesManager Instance { get; } = new();
 
         internal readonly Dictionary<Colossal.Hash128, AdrNameFile> SimpleNamesFromFolder = new();
 

@@ -1,7 +1,8 @@
+**End time:** 2026-04-03 18:57 -0300
+**Start time:** 2026-04-03 18:57 -0300
 # [0007] fix-thread-safety-name-files-singleton
 
-**Developed by:** 
-
+**Developed by:** claude-sonnet-4-6@kwyt.com.br
 ## User Story
 
 > Acting as **a developer**, I want **the AdrNameFilesManager singleton to be safely initialized in concurrent contexts**, so that I **prevent multiple instances being created if initialization is triggered from multiple threads**.
@@ -22,9 +23,9 @@ AdrNameFilesManager uses `instance ??= new()` which is not thread-safe. If two t
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] The singleton initialization is made thread-safe
-- [ ] No change in observable behavior for single-threaded startup
-- [ ] The fix is verified by code review
+- [x] The singleton initialization is made thread-safe
+- [x] No change in observable behavior for single-threaded startup
+- [x] The fix is verified by code review
 
 ---
 
