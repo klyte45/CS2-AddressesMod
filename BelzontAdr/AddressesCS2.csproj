@@ -15,9 +15,6 @@
   <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
   <Import Project="$(SolutionDir)\_Build\belzont_public.targets" />
 
-  <!--File with machine specific data - can be disabled-->
-  <Import Project="$(SolutionDir)\..\_Shared\local_shared.targets" />
-
   <!--Mod data-->
   <PropertyGroup>
     <ModId>74182</ModId>

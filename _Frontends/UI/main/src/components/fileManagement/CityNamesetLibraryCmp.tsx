@@ -58,20 +58,31 @@ export const CityNamesetLibraryCmp = () => {
 
 
 
+    const parseGitHubFile = (fileContents: string, path: string) => {
+        const lines = fileContents.split("\n").map(x => x.split(";")).map(x => x[1] ??= x[0]);
+        return {
+            IdString: null,
+            Name: `Downloads/${path.split("/").reverse()[0].replace(".txt", "")}`,
+            Values: lines.map(x => x[0].replace("{0}", "").trim()),
+            ValuesAlternative: lines.map(x => x[1].replace("{0}", "").trim())
+        } as ExtendedSimpleNameEntry;
+    };
+
     const goToImportDetailsGitHub = async (p: GitHubFileItem) => {
         setCurrentScreen(Screen.AWAITING_ACTION);
         const fileContents = await GitHubAddressesFilesSevice.getBlobData(p.url)
-        const lines = fileContents.split("\n").map(x => x.split(";")).map(x => x[1] ??= x[0]);
+        const parsed = parseGitHubFile(fileContents, p.path);
+        setNamesetBeingImported(parsed);
+        setCurrentScreen(Screen.IMPORTING_NAMESET);
+        setLastSourceImport(Screen.NAMESET_IMPORT_GITHUB);
+    };
 
-
-        setNamesetBeingImported({
-            IdString: null,
-            Name: `Downloads/${p.path.split("/").reverse()[0].replace(".txt", "")}`,
-            Values: lines.map(x => x[0].replace("{0}", "").trim()),
-            ValuesAlternative: lines.map(x => x[1].replace("{0}", "").trim())
-        }),
-            setCurrentScreen(Screen.IMPORTING_NAMESET),
-            setLastSourceImport(Screen.NAMESET_IMPORT_GITHUB)
+    const addDirectToCityFromGitHub = async (p: GitHubFileItem) => {
+        setCurrentScreen(Screen.AWAITING_ACTION);
+        const fileContents = await GitHubAddressesFilesSevice.getBlobData(p.url);
+        const parsed = parseGitHubFile(fileContents, p.path);
+        await NamesetService.sendNamesetForCity(parsed.Name, parsed.Values, parsed.ValuesAlternative);
+        setCurrentScreen(Screen.DEFAULT);
     };
 
     const getActionButtons = (x: ExtendedSimpleNameEntry): JSX.Element => {
@@ -156,7 +167,10 @@ export const CityNamesetLibraryCmp = () => {
         case Screen.NAMESET_IMPORT_LIB:
             return <NamesetLibrarySelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <><button className="positiveBtn" onClick={() => goToImportDetails(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
         case Screen.NAMESET_IMPORT_GITHUB:
-            return <NamesetGitHubSelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <><button className="positiveBtn" onClick={() => goToImportDetailsGitHub(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
+            return <NamesetGitHubSelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <>
+                <button className="positiveBtn" onClick={() => addDirectToCityFromGitHub(p)}>{translate('cityNamesetsLibrary.addDirectToCity')}</button>
+                <button className="neutralBtn" onClick={() => goToImportDetailsGitHub(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button>
+            </>} />
         case Screen.IMPORTING_NAMESET:
             return <NamesetImportingCmp namesetData={namesetBeingImported} onBack={() => setCurrentScreen(lastSourceImport)} onOk={(x, y) => doImportNameset(x, y)} />
         case Screen.VIEWING_NAMESET:

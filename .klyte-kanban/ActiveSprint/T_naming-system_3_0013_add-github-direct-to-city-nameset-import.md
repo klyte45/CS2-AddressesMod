@@ -1,7 +1,8 @@
+**End time:** 2026-04-03 20:56 -0300
+**Start time:** 2026-04-03 20:55 -0300
 # [0013] add-github-direct-to-city-nameset-import
 
-**Developed by:** 
-
+**Developed by:** claude-sonnet-4-6@kwyt.com.br
 ## User Story
 
 > Acting as **a player browsing the GitHub name file repository**, I want **to add a name file directly to my city without downloading it to the local library first**, so that I **reduce friction when trying a name file from GitHub for a specific city**.
@@ -22,10 +23,10 @@ The GitHub file browser (NamesetGitHubSelectorCmp.tsx, GitHubAddressesFilesSevic
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] The GitHub file browser shows an 'Add to city' action in addition to the existing 'Download to library' action
-- [ ] Selecting 'Add to city' adds the name file directly to the city's nameset list via NamesetService.sendNamesetForCity
-- [ ] The file is not saved to disk (it's ephemeral - only stored in the city save)
-- [ ] The UI reflects the new city nameset immediately after the call
+- [x] The GitHub file browser shows an 'Add to city' action in addition to the existing 'Download to library' action
+- [x] Selecting 'Add to city' adds the name file directly to the city's nameset list via NamesetService.sendNamesetForCity
+- [x] The file is not saved to disk (it's ephemeral - only stored in the city save)
+- [x] The UI reflects the new city nameset immediately after the call
 
 ---
 
