@@ -52,9 +52,11 @@ namespace BelzontAdr
             eventCaller("namesets.exportToLibrary", ExportToLibrary);
             eventCaller("namesets.reloadLibraryNamesets", () =>
             {
-                AdrNameFilesManager.Instance.ReloadNameFiles();
-                return AdrNameFilesManager.Instance.SimpleNamesFromFolder.Values.ToArray();
+                AdrNameFilesManager.Instance.ReloadNameFilesAsync();
+                AdrNameFilesManager.Instance.OnLoadingComplete += NotifyLibraryReloaded;
+                return AdrNameFilesManager.Instance.IsLoading;
             });
+            eventCaller("namesets.isLibraryLoading", () => AdrNameFilesManager.Instance.IsLoading);
             eventCaller("namesets.goToSimpleNamesFolder", () => RemoteProcess.OpenFolder(AdrNameFilesManager.NamesetsFolder));
             eventCaller("namesets.sortValues", SortValues);
             eventCaller("namesets.goToGitHubRepo", () => Application.OpenURL("https://github.com/klyte45/AddressesFiles"));
@@ -68,6 +70,12 @@ namespace BelzontAdr
 
         public void SetupEventBinder(Action<string, Delegate> eventCaller)
         {
+        }
+
+        private void NotifyLibraryReloaded()
+        {
+            AdrNameFilesManager.Instance.OnLoadingComplete -= NotifyLibraryReloaded;
+            eventCaller?.Invoke("namesets.onLibraryReloaded", new object[] { AdrNameFilesManager.Instance.SimpleNamesFromFolder.Values.ToArray() });
         }
         #endregion
 

@@ -16,6 +16,7 @@ namespace BelzontAdr
 
         internal Hash128 Id { get; private set; }
         public string Name;
+        public string FilePath { get; private set; }
         public ImmutableList<string> Values { get; set; }
         public ImmutableList<string> ValuesAlternative { get; set; }
         internal Hash128 Checksum { get; private set; }
@@ -30,6 +31,10 @@ namespace BelzontAdr
             ValuesAlternative = new ImmutableList<string>(rawList?.Select(x => (x.Length > 1 ? x[1] : x[0]).Trim()).ToList() ?? new());
             RecalculateChecksum();
             Id = GuidUtils.Create(Checksum.ToGuid(), name);
+        }
+        public AdrNameFile(string name, IEnumerable<string> values, string filePath) : this(name, values)
+        {
+            FilePath = filePath;
         }
         public AdrNameFile(string name, IEnumerable<string> values, IEnumerable<string> valuesAlternative)
         {

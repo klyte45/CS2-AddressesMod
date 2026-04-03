@@ -1,6 +1,6 @@
 import { categorizeFiles } from "#utility/categorizeFiles";
 import { translate } from "#utility/translate";
-import { ExtendedSimpleNameEntry, NamesetService } from "@klyte45/adr-commons";
+import { ExtendedSimpleNameEntry, NamesetService, SimpleNameEntry } from "@klyte45/adr-commons";
 import { DefaultPanelScreen } from "@klyte45/euis-components";
 import { useEffect, useState } from "react";
 import { NamesetCategoryCmp } from "./NamesetCategoryCmp";
@@ -14,13 +14,19 @@ type Props = {
 export const NamesetLibrarySelectorCmp = ({ actionButtons, onBack }: Props) => {
 
     const [availableNamesets, setAvailableNamesets] = useState({ subtrees: {}, rootContent: [] });
+    const [isLibraryLoading, setIsLibraryLoading] = useState(false);
 
     useEffect(() => {
         updateNamesets();
+        return () => { NamesetService.offLibraryReloaded(); };
     }, [])
 
     const updateNamesets = async () => {
         const namesetsSaved = await NamesetService.listLibraryNamesets();
+        applyNamesets(namesetsSaved);
+    }
+
+    const applyNamesets = (namesetsSaved: SimpleNameEntry[]) => {
         const namesetTree = categorizeFiles(namesetsSaved)
         const root = namesetTree[""]?.rootContent ?? []
         delete namesetTree[""];
@@ -30,9 +36,24 @@ export const NamesetLibrarySelectorCmp = ({ actionButtons, onBack }: Props) => {
         });
     }
 
+    const handleReload = async () => {
+        const loading = await NamesetService.reloadLibraryNamesets();
+        if (loading) {
+            setIsLibraryLoading(true);
+            NamesetService.onLibraryReloaded((namesets: SimpleNameEntry[]) => {
+                setIsLibraryLoading(false);
+                applyNamesets(namesets);
+            });
+        } else {
+            await updateNamesets();
+        }
+    }
+
     const buttonsRowContent = <>
         <button className="negativeBtn" onClick={onBack}>{translate("namesetsLibrary.back")}</button>
-        <button className="neutralBtn" onClick={() => NamesetService.reloadLibraryNamesets().then(() => updateNamesets())}>{translate("namesetsLibrary.reloadFiles")}</button>
+        <button className="neutralBtn" onClick={handleReload} disabled={isLibraryLoading}>
+            {isLibraryLoading ? translate("namesetsLibrary.reloadingFiles") : translate("namesetsLibrary.reloadFiles")}
+        </button>
         <button className="neutralBtn" onClick={() => NamesetService.goToDiskSimpleNamesFolder()}>{translate("namesetsLibrary.goToLibraryFolder")}</button>
     </>
     return <>

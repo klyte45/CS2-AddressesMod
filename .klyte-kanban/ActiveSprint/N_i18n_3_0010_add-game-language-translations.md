@@ -13,6 +13,8 @@
 i18n.csv currently only has en-US and pt-BR columns. The game have other languages available, and players who use those languages may have trouble using the mod if they don't understand English. Adding machine translation support for all game languages would make the mod more accessible to a wider audience. The pattern of the project for more languages is to add a new file at same level as i18n.csv with the name pattern `LOCALE.csv`, where `LOCALE` is the locale code of the language registered in the game. For example, `fr-FR.csv` for French (France). This file would have the same structure as i18n.csv but with the translated strings for that language.
 
 Since it's a mod for a game, it's acceptable to use machine translation as a starting point. The community can then contribute with corrections and improvements to the translations over time.
+
+ATTENTION: Only compile the project using the solution file, as explained on the kanban README! This project was compiling before, so if it stopped it was something you have done!
 ---
 
 ## Definition of Ready (DoR)

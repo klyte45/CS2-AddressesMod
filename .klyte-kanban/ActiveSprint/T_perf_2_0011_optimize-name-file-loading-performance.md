@@ -1,7 +1,8 @@
+**End time:** 2026-04-03 18:55 -0300
+**Start time:** 2026-04-03 18:55 -0300
 # [0011] optimize-name-file-loading-performance
 
-**Developed by:** 
-
+**Developed by:** claude-sonnet-4-6@kwyt.com.br
 ## User Story
 
 > Acting as **a player with a large name files library**, I want **the mod to load name files quickly without blocking game startup**, so that I **avoid long freeze at startup when many .txt name files are present**.
@@ -22,10 +23,10 @@ AdrNameFilesManager.ReloadNameFiles calls File.ReadAllLines synchronously for ev
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Name file reload no longer blocks the main thread for folders with >50 files
-- [ ] Files that haven't changed since last load are skipped (hash or timestamp check)
-- [ ] The UI shows a loading state indicator while reload is in progress
-- [ ] No regression in name assignment after async reload completes
+- [x] Name file reload no longer blocks the main thread for folders with >50 files
+- [x] Files that haven't changed since last load are skipped (hash or timestamp check)
+- [x] The UI shows a loading state indicator while reload is in progress
+- [x] No regression in name assignment after async reload completes
 
 ---
 
