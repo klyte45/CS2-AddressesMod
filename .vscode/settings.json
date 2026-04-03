@@ -1,6 +1,7 @@
 {
     "chat.tools.terminal.autoApprove": {
         "kk": true,
-        "ConvertFrom-Json": true
+        "ConvertFrom-Json": true,
+        "git add": true
     }
 }
