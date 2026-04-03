@@ -26,6 +26,7 @@ namespace BelzontAdr
                     }
                 }
         });
+            RequireForUpdate(m_ClearQuery);
         }
         protected override void OnUpdate()
         {

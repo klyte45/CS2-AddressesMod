@@ -1,7 +1,8 @@
+**End time:** 2026-04-03 18:58 -0300
+**Start time:** 2026-04-03 18:58 -0300
 # [0008] fix-clear-system-redundant-frame-execution
 
-**Developed by:** 
-
+**Developed by:** claude-sonnet-4-6@kwyt.com.br
 ## User Story
 
 > Acting as **a developer**, I want **AdrClearSystem to only run its logic when there are entities to process**, so that I **reduce unnecessary ECS overhead caused by an always-running system with no entity guard**.
@@ -22,9 +23,9 @@ AdrClearSystem.OnUpdate calls EntityManager.DestroyEntity on every game frame wi
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] RequireForUpdate(m_ClearQuery) is added to OnCreate
-- [ ] The system only executes OnUpdate when the query has matching entities
-- [ ] No regression in entity cleanup behavior during normal gameplay
+- [x] RequireForUpdate(m_ClearQuery) is added to OnCreate
+- [x] The system only executes OnUpdate when the query has matching entities
+- [x] No regression in entity cleanup behavior during normal gameplay
 
 ---
 
