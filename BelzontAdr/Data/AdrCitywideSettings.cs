@@ -63,6 +63,7 @@ namespace BelzontAdr
             writer.Write(roadNameAsNameCargoStation);
             writer.Write(surnameAtFirst);
             writer.Write(roadPrefixSetting);
+            writer.Write(CityNameSeeds);
         }
 
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
@@ -85,6 +86,11 @@ namespace BelzontAdr
             reader.Read(out surnameAtFirst);
             roadPrefixSetting = new AdrRoadPrefixSetting();
             reader.Read(roadPrefixSetting);
+            if (version >= 1)
+            {
+                reader.Read(out long cityNameSeeds);
+                CityNameSeeds = cityNameSeeds;
+            }
         }
         [Obsolete]
         internal static AdrCitywideSettings FromLegacy(AdrCitywideSettingsLegacy settings)
