@@ -3,6 +3,7 @@
         "kk": true,
         "ConvertFrom-Json": true,
         "git add": true,
-        "git commit": true
+        "git commit": true,
+        "MSBuild.exe": true
     }
 }

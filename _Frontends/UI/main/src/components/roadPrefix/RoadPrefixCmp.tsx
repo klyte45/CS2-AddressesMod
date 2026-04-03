@@ -10,7 +10,12 @@ const basicRule: AdrRoadPrefixRule = {
   RequiredFlagsInt: 0,
   ForbiddenFlagsInt: 0,
   FormatPattern: "{name}",
-  FullBridge: 0
+  FullBridge: 0,
+  AnyElevated: 0,
+  MinCarLanes: 0,
+  MaxCarLanes: 0,
+  MinWidthM: 0,
+  MaxWidthM: 0
 }
 
 const basicObj: AdrRoadPrefixSetting = {
@@ -204,6 +209,63 @@ export const RoadPrefixCmp = ({ }) => {
                     NamingRulesService.setAdrRoadPrefixSetting(currentSettings);
                     return x;
                   }} />
+                </Cs2FormLine>
+                <Cs2FormLine title={translate("roadPrefixSettings.requireAnyElevatedState")}>
+                  <Cs2TriCheckbox isChecked={currentRule.AnyElevated < 0 ? null : currentRule.AnyElevated > 0} onValueToggle={(x) => {
+                    currentRule.AnyElevated = x === true ? 1 : x === null ? -1 : 0;
+                    NamingRulesService.setAdrRoadPrefixSetting(currentSettings);
+                    return x;
+                  }} />
+                </Cs2FormLine>
+                <Cs2FormLine title={translate("roadPrefixSettings.minimumCarLanes")}>
+                  <SimpleInput
+                    getValue={() => (currentRule.MinCarLanes ?? 0).toFixed()}
+                    onValueChanged={(x) => {
+                      if (!x.match(/^[0-9]+$/)) return (currentRule.MinCarLanes ?? 0).toFixed();
+                      currentRule.MinCarLanes = parseInt(x);
+                      NamingRulesService.setAdrRoadPrefixSetting(currentSettings);
+                      return x;
+                    }}
+                    isValid={(newVal) => !!newVal.match(/^[0-9]+$/)}
+                    maxLength={2} />
+                </Cs2FormLine>
+                <Cs2FormLine title={translate("roadPrefixSettings.maximumCarLanes")}>
+                  <SimpleInput
+                    getValue={() => (currentRule.MaxCarLanes ?? 0).toFixed()}
+                    onValueChanged={(x) => {
+                      if (!x.match(/^[0-9]+$/)) return (currentRule.MaxCarLanes ?? 0).toFixed();
+                      currentRule.MaxCarLanes = parseInt(x);
+                      NamingRulesService.setAdrRoadPrefixSetting(currentSettings);
+                      return x;
+                    }}
+                    isValid={(newVal) => !!newVal.match(/^[0-9]+$/)}
+                    maxLength={2} />
+                </Cs2FormLine>
+                <Cs2FormLine title={translate("roadPrefixSettings.minimumWidthM")}>
+                  <SimpleInput
+                    getValue={() => (currentRule.MinWidthM ?? 0).toFixed(1)}
+                    onValueChanged={(x) => {
+                      const v = parseFloat(x);
+                      if (isNaN(v) || v < 0) return (currentRule.MinWidthM ?? 0).toFixed(1);
+                      currentRule.MinWidthM = v;
+                      NamingRulesService.setAdrRoadPrefixSetting(currentSettings);
+                      return v.toFixed(1);
+                    }}
+                    isValid={(newVal) => !isNaN(parseFloat(newVal)) && parseFloat(newVal) >= 0}
+                    maxLength={5} />
+                </Cs2FormLine>
+                <Cs2FormLine title={translate("roadPrefixSettings.maximumWidthM")}>
+                  <SimpleInput
+                    getValue={() => (currentRule.MaxWidthM ?? 0).toFixed(1)}
+                    onValueChanged={(x) => {
+                      const v = parseFloat(x);
+                      if (isNaN(v) || v < 0) return (currentRule.MaxWidthM ?? 0).toFixed(1);
+                      currentRule.MaxWidthM = v;
+                      NamingRulesService.setAdrRoadPrefixSetting(currentSettings);
+                      return v.toFixed(1);
+                    }}
+                    isValid={(newVal) => !isNaN(parseFloat(newVal)) && parseFloat(newVal) >= 0}
+                    maxLength={5} />
                 </Cs2FormLine>
               </>
             })[0]}

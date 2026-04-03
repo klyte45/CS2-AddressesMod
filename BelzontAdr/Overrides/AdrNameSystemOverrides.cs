@@ -407,16 +407,45 @@ namespace BelzontAdr
                 }
             }
             var fullBridge = true;
+            var anyElevated = false;
             for (int i = 0; i < elements.Length; i++)
             {
-                if (!entityManager.TryGetComponent<Elevation>(elements[i].m_Edge, out var elevData) || elevData.m_Elevation[0] < 6)
+                if (entityManager.TryGetComponent<Elevation>(elements[i].m_Edge, out var elevData) && elevData.m_Elevation[0] >= 6)
+                {
+                    anyElevated = true;
+                }
+                else
                 {
                     fullBridge = false;
-                    break;
                 }
             }
 
-            format = adrMainSystem.CurrentCitySettings.roadPrefixSetting.GetFirstApplicable(roadData, fullBridge).FormatPattern;
+            var forwardCarLanes = 0;
+            var roadWidthM = 0f;
+            if (entityManager.TryGetComponent<Composition>(refRoad, out var refRoadComposition))
+            {
+                if (entityManager.HasBuffer<NetCompositionLane>(refRoadComposition.m_Edge))
+                {
+                    var compLanes = entityManager.GetBuffer<NetCompositionLane>(refRoadComposition.m_Edge, true);
+                    for (int i = 0; i < compLanes.Length; i++)
+                    {
+                        if ((compLanes[i].m_Flags & LaneFlags.Road) != 0 && (compLanes[i].m_Flags & LaneFlags.Invert) == 0)
+                            forwardCarLanes++;
+                    }
+                }
+                if (entityManager.TryGetComponent<NetCompositionData>(refRoadComposition.m_Edge, out var compData))
+                    roadWidthM = compData.m_Width;
+            }
+
+            var prefixCtx = new AdrRoadPrefixContext
+            {
+                RoadData = roadData,
+                FullBridge = fullBridge,
+                AnyElevated = anyElevated,
+                ForwardCarLanes = forwardCarLanes,
+                RoadWidthM = roadWidthM
+            };
+            format = adrMainSystem.CurrentCitySettings.roadPrefixSetting.GetFirstApplicable(prefixCtx).FormatPattern;
 
             name = GetFromList(roadsNamesList, entity, allowNull: true);
             return false;

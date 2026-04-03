@@ -1,3 +1,4 @@
+**End time:** 2026-04-03 18:39 -0300
 **Start time:** 2026-04-03 18:23 -0300
 # [0009] enhance-road-qualifier-rule-conditions
 
@@ -26,11 +27,11 @@ Also, it's important to review the current implementation of the road qualifier 
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] At least 3 new condition types are added to AdrRoadPrefixRule (e.g., elevation/bridge, lane count range, has zoning flag enhancements)
-- [ ] New conditions are serializable and backwards-compatible with existing saves
-- [ ] The RoadPrefixCmp.tsx UI exposes the new conditions with appropriate input controls
-- [ ] The GetFirstApplicable method correctly evaluates new conditions in priority order
-- [ ] Existing road qualifier behavior is unchanged for saves without the new conditions
+- [x] At least 3 new condition types are added to AdrRoadPrefixRule (e.g., elevation/bridge, lane count range, has zoning flag enhancements)
+- [x] New conditions are serializable and backwards-compatible with existing saves
+- [x] The RoadPrefixCmp.tsx UI exposes the new conditions with appropriate input controls
+- [x] The GetFirstApplicable method correctly evaluates new conditions in priority order
+- [x] Existing road qualifier behavior is unchanged for saves without the new conditions
 
 ---
 

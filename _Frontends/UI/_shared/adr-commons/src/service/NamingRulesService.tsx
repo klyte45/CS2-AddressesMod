@@ -35,7 +35,12 @@ export type AdrRoadPrefixRule = {
     RequiredFlagsInt: number | RoadFlags,
     ForbiddenFlagsInt: number | RoadFlags,
     FormatPattern: string,
-    FullBridge: 0 | -1 | 1
+    FullBridge: 0 | -1 | 1,
+    AnyElevated: 0 | -1 | 1,
+    MinCarLanes: number,
+    MaxCarLanes: number,
+    MinWidthM: number,
+    MaxWidthM: number
 }
 
 export type AdrRoadPrefixSetting = {

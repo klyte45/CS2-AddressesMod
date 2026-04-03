@@ -14,7 +14,7 @@ This folder contains the taskboard for Addresses mod for Cities: Skylines 2. Fut
 The project can be built using the command line with MSBuild:
 
 ```bash
-    MSBuild.exe BelzontWE.sln /p:Configuration=Debug 
+    MSBuild.exe AddressesCS2.sln /p:Configuration=Debug 
 ```
 
 It will run frontend and backends builds, and also copy the mod files into the game mods folder for testing.

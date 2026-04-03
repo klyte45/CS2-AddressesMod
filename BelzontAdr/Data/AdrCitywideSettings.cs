@@ -107,13 +107,22 @@ namespace BelzontAdr
         }
     }
 
+    public struct AdrRoadPrefixContext
+    {
+        public RoadData RoadData;
+        public bool FullBridge;
+        public bool AnyElevated;
+        public int ForwardCarLanes;
+        public float RoadWidthM;
+    }
+
     [XmlRoot("RoadPrefixSetting")]
     public class AdrRoadPrefixSetting : ISerializable
     {
         private const uint CURRENT_VERSION = 0;
         public AdrRoadPrefixRule FallbackRule { get; set; } = new() { formatPattern = "{name}" };
         public List<AdrRoadPrefixRule> AdditionalRules { get; set; } = new();
-        public AdrRoadPrefixRule GetFirstApplicable(RoadData roadData, bool fullBridge) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(roadData, fullBridge)) ?? FallbackRule;
+        public AdrRoadPrefixRule GetFirstApplicable(AdrRoadPrefixContext ctx) => AdditionalRules.FirstOrDefault(x => x.IsApplicable(ctx)) ?? FallbackRule;
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
@@ -151,7 +160,7 @@ namespace BelzontAdr
 
     public class AdrRoadPrefixRule : ISerializable
     {
-        private const uint CURRENT_VERSION = 0;
+        private const uint CURRENT_VERSION = 1;
         public enum FullBridgeRequirement
         {
             False = -1,
@@ -164,6 +173,11 @@ namespace BelzontAdr
         internal RoadFlags requiredFlags;
         internal RoadFlags forbiddenFlags;
         internal FullBridgeRequirement fullBridgeRequire;
+        internal FullBridgeRequirement anyElevatedRequire;
+        internal int minCarLanes;
+        internal int maxCarLanes;
+        internal float minWidthM;
+        internal float maxWidthM;
         internal string formatPattern;
 
         [DefaultValue(0)][XmlAttribute("MinSpeedKmh")] public float MinSpeedKmh { get => minSpeed * 1.8f; set => minSpeed = value / 1.8f; }
@@ -184,12 +198,34 @@ namespace BelzontAdr
             };
         }
 
-        public bool IsApplicable(RoadData roadData, bool fullBridge)
-            => roadData.m_SpeedLimit >= minSpeed
-            && roadData.m_SpeedLimit <= maxSpeed
-            && (requiredFlags & roadData.m_Flags) == requiredFlags
-            && (forbiddenFlags & roadData.m_Flags) == 0
-            && (fullBridgeRequire == FullBridgeRequirement.Unset || fullBridgeRequire == (fullBridge ? FullBridgeRequirement.True : FullBridgeRequirement.False));
+        [DefaultValue(0)][XmlAttribute("AnyElevated")]
+        public int AnyElevated
+        {
+            get => (int)anyElevatedRequire;
+            set => anyElevatedRequire = value switch
+            {
+                >= 1 => FullBridgeRequirement.True,
+                <= -1 => FullBridgeRequirement.False,
+                _ => FullBridgeRequirement.Unset
+            };
+        }
+
+        [DefaultValue(0)][XmlAttribute("MinCarLanes")] public int MinCarLanes { get => minCarLanes; set => minCarLanes = value < 0 ? 0 : value; }
+        [DefaultValue(0)][XmlAttribute("MaxCarLanes")] public int MaxCarLanes { get => maxCarLanes; set => maxCarLanes = value < 0 ? 0 : value; }
+        [DefaultValue(0)][XmlAttribute("MinWidthM")] public float MinWidthM { get => minWidthM; set => minWidthM = value < 0 ? 0 : value; }
+        [DefaultValue(0)][XmlAttribute("MaxWidthM")] public float MaxWidthM { get => maxWidthM; set => maxWidthM = value < 0 ? 0 : value; }
+
+        public bool IsApplicable(AdrRoadPrefixContext ctx)
+            => ctx.RoadData.m_SpeedLimit >= minSpeed
+            && ctx.RoadData.m_SpeedLimit <= maxSpeed
+            && (requiredFlags & ctx.RoadData.m_Flags) == requiredFlags
+            && (forbiddenFlags & ctx.RoadData.m_Flags) == 0
+            && (fullBridgeRequire == FullBridgeRequirement.Unset || fullBridgeRequire == (ctx.FullBridge ? FullBridgeRequirement.True : FullBridgeRequirement.False))
+            && (anyElevatedRequire == FullBridgeRequirement.Unset || anyElevatedRequire == (ctx.AnyElevated ? FullBridgeRequirement.True : FullBridgeRequirement.False))
+            && (minCarLanes == 0 || ctx.ForwardCarLanes >= minCarLanes)
+            && (maxCarLanes == 0 || ctx.ForwardCarLanes <= maxCarLanes)
+            && (minWidthM == 0 || ctx.RoadWidthM >= minWidthM)
+            && (maxWidthM == 0 || ctx.RoadWidthM <= maxWidthM);
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
@@ -200,8 +236,11 @@ namespace BelzontAdr
             writer.Write((int)forbiddenFlags);
             writer.Write((int)fullBridgeRequire);
             writer.Write(formatPattern);
-
-
+            writer.Write((int)anyElevatedRequire);
+            writer.Write(minCarLanes);
+            writer.Write(maxCarLanes);
+            writer.Write(minWidthM);
+            writer.Write(maxWidthM);
         }
 
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
@@ -220,6 +259,15 @@ namespace BelzontAdr
             this.requiredFlags = (RoadFlags)requiredFlags;
             this.forbiddenFlags = (RoadFlags)forbiddenFlags;
             this.fullBridgeRequire = (FullBridgeRequirement)fullBridgeRequire;
+            if (version >= 1)
+            {
+                reader.Read(out int anyElevatedRequire);
+                reader.Read(out minCarLanes);
+                reader.Read(out maxCarLanes);
+                reader.Read(out minWidthM);
+                reader.Read(out maxWidthM);
+                this.anyElevatedRequire = (FullBridgeRequirement)anyElevatedRequire;
+            }
         }
     }
 }
