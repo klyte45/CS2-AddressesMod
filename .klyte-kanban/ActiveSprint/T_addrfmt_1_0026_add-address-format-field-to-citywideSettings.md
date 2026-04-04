@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 00:56 -0300
 **Start time:** 2026-04-04 00:54 -0300
 # [0026] add-address-format-field-to-citywideSettings
 
@@ -22,13 +23,13 @@ AdrCitywideSettings is an ISerializable class. Adding a field requires increment
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] CURRENT_VERSION bumped by 1
-- [ ] New private nullable string field addressFormatPattern added
-- [ ] Public getter/setter AddressFormatPattern exposed
-- [ ] Serialize() writes the new field (empty string for null)
-- [ ] Deserialize() reads the field only when version >= new version
-- [ ] Old savegames (previous version) deserialize cleanly with null default
-- [ ] Build passes
+- [x] CURRENT_VERSION bumped by 1
+- [x] New private nullable string field addressFormatPattern added
+- [x] Public getter/setter AddressFormatPattern exposed
+- [x] Serialize() writes the new field (empty string for null)
+- [x] Deserialize() reads the field only when version >= new version
+- [x] Old savegames (previous version) deserialize cleanly with null default
+- [x] Build passes
 
 ---
 

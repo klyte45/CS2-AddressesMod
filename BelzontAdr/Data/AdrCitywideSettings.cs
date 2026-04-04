@@ -12,7 +12,7 @@ namespace BelzontAdr
 {
     public class AdrCitywideSettings : ISerializable
     {
-        private const uint CURRENT_VERSION = 1;
+        private const uint CURRENT_VERSION = 2;
 
         private int maximumGeneratedGivenNames = 1;
         private int maximumGeneratedSurnames = 1;
@@ -26,6 +26,7 @@ namespace BelzontAdr
         public bool roadNameAsNameCargoStation;
         public bool surnameAtFirst;
         public AdrRoadPrefixSetting roadPrefixSetting = new();
+        private string addressFormatPattern;
 
         #region Indirect setters & public getters
 
@@ -47,6 +48,7 @@ namespace BelzontAdr
         #endregion
 
         public long CityNameSeeds { get; set; } = new System.Random().NextLong();
+        public string AddressFormatPattern { get => addressFormatPattern; set => addressFormatPattern = string.IsNullOrEmpty(value) ? null : value; }
 
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
@@ -64,6 +66,7 @@ namespace BelzontAdr
             writer.Write(surnameAtFirst);
             writer.Write(roadPrefixSetting);
             writer.Write(CityNameSeeds);
+            writer.Write(addressFormatPattern ?? "");
         }
 
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
@@ -90,6 +93,11 @@ namespace BelzontAdr
             {
                 reader.Read(out long cityNameSeeds);
                 CityNameSeeds = cityNameSeeds;
+            }
+            if (version >= 2)
+            {
+                reader.Read(out string afp);
+                addressFormatPattern = string.IsNullOrEmpty(afp) ? null : afp;
             }
         }
         [Obsolete]
