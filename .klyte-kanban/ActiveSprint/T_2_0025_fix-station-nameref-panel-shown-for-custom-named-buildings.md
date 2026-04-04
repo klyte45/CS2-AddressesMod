@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 00:53 -0300
 **Start time:** 2026-04-04 00:45 -0300
 # [0025] fix-station-nameref-panel-shown-for-custom-named-buildings
 
@@ -22,10 +23,10 @@ In the game info panel (k45_adr_vuio), AdrSelectionInfoPanelSystem.GetEntityOpti
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrSelectionInfoPanelSystem.GetEntityOptions does not add transport station AdrEntityData to the result list when the entity has a CustomName component
-- [ ] The check is applied to both PublicTransportStation and CargoTransportStation branches
-- [ ] Entities without CustomName continue to show the name-reference options as before
-- [ ] Build passes
+- [x] AdrSelectionInfoPanelSystem.GetEntityOptions does not add transport station AdrEntityData to the result list when the entity has a CustomName component
+- [x] The check is applied to both PublicTransportStation and CargoTransportStation branches
+- [x] Entities without CustomName continue to show the name-reference options as before
+- [x] Build passes
 
 ---
 
