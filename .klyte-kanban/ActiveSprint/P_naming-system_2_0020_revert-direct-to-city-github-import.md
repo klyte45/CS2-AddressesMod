@@ -1,7 +1,7 @@
+**Start time:** 2026-04-03 22:29 -0300
 # [0020] revert-direct-to-city-github-import
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a city builder**, I want **GitHub imports to always go through the preview/confirmation screen before being saved**, so that I **I can review and rename the file before it is added to my save game**.
