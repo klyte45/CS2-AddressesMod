@@ -1,7 +1,7 @@
+**Start time:** 2026-04-04 01:11 -0300
 # [0030] patch-transport-stop-address-format
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a player**, I want **transport stop addresses to also use my custom format pattern**, so that I **address format is consistent across all building types in-game**.
