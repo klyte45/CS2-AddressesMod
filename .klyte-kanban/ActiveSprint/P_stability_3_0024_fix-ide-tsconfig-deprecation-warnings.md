@@ -1,7 +1,7 @@
+**Start time:** 2026-04-03 23:14 -0300
 # [0024] fix-ide-tsconfig-deprecation-warnings
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a developer**, I want **no IDE TypeScript warnings in the frontend tsconfig files**, so that I **I can trust the IDE error panel and not be confused by false deprecation warnings**.
