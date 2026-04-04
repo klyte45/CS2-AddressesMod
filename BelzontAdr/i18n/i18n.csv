@@ -285,8 +285,8 @@ K45::ADR.main[vehicleSerial.identifierCharSettingsTitle.deathcare]	Serial number
 K45::ADR.main[roadPrefixSettings.flagTrain]	Train track	Trilho de trem
 K45::ADR.main[roadPrefixSettings.flagTram]	Tram track	Trilho de bonde
 K45::ADR.main[roadPrefixSettings.flagSubway]	Subway track	Trilho de metrô
-K45::ADR.main[roadPrefixSettings.requireAnyElevated]	Require/forbid if any segment is elevated	Requer/proíbe se algum segmento estiver elevado
-K45::ADR.main[roadPrefixSettings.minCarLanes]	Minimum number of car lanes	Número mínimo de faixas de carro
-K45::ADR.main[roadPrefixSettings.maxCarLanes]	Maximum number of car lanes	Número máximo de faixas de carro
-K45::ADR.main[roadPrefixSettings.minWidthM]	Minimum road width (meters)	Largura mínima da via (metros)
-K45::ADR.main[roadPrefixSettings.maxWidthM]	Maximum road width (meters)	Largura máxima da via (metros)
+K45::ADR.main[roadPrefixSettings.requireAnyElevatedState]	Require/forbid if any segment is elevated	Requer/proíbe se algum segmento estiver elevado
+K45::ADR.main[roadPrefixSettings.minimumCarLanes]	Minimum number of car lanes	Número mínimo de faixas de carro
+K45::ADR.main[roadPrefixSettings.maximumCarLanes]	Maximum number of car lanes	Número máximo de faixas de carro
+K45::ADR.main[roadPrefixSettings.minimumWidthM]	Minimum road width (meters)	Largura mínima da via (metros)
+K45::ADR.main[roadPrefixSettings.maximumWidthM]	Maximum road width (meters)	Largura máxima da via (metros)

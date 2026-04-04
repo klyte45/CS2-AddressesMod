@@ -1,3 +1,4 @@
+**End time:** 2026-04-03 22:35 -0300
 **Start time:** 2026-04-03 22:33 -0300
 # [0018] fix-road-qualifier-missing-translations
 
@@ -22,10 +23,10 @@ Task 0009 added new fields to AdrRoadPrefixRule (MinCarLanes, MaxCarLanes, MinWi
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] roadPrefixSettings.requireAnyElevatedState key exists in i18n.csv (fixing the mismatch with code)
-- [ ] roadPrefixSettings.minimumCarLanes, maximumCarLanes, minimumWidthM, maximumWidthM added to i18n.csv with EN and pt-BR text
-- [ ] All 11 locale CSV files updated with translated values for the new/fixed keys
-- [ ] No missing translation keys in RoadPrefixCmp.tsx when loaded in-game
+- [x] roadPrefixSettings.requireAnyElevatedState key exists in i18n.csv (fixing the mismatch with code)
+- [x] roadPrefixSettings.minimumCarLanes, maximumCarLanes, minimumWidthM, maximumWidthM added to i18n.csv with EN and pt-BR text
+- [x] All 11 locale CSV files updated with translated values for the new/fixed keys
+- [x] No missing translation keys in RoadPrefixCmp.tsx when loaded in-game
 
 ---
 
