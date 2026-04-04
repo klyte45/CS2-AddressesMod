@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 01:13 -0300
 **Start time:** 2026-04-04 01:12 -0300
 # [0031] add-address-format-type-to-adr-commons
 
@@ -22,9 +23,9 @@ The AdrCitywideSettings TypeScript type in adr-commons must include the new Addr
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] addressFormatPattern: string field added to AdrCitywideSettings TypeScript type
-- [ ] static async setAddressFormatPattern(x: string): Promise<void> added to NamingRulesService
-- [ ] adr-commons package builds without TypeScript errors
+- [x] addressFormatPattern: string field added to AdrCitywideSettings TypeScript type
+- [x] static async setAddressFormatPattern(x: string): Promise<void> added to NamingRulesService
+- [x] adr-commons package builds without TypeScript errors
 
 ---
 

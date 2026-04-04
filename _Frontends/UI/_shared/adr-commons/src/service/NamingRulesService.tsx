@@ -63,6 +63,7 @@ export type AdrCitywideSettings = {
     districtNameAsNameCargoStation: boolean
     MaximumGeneratedSurnames: number
     MaximumGeneratedGivenNames: number
+    AddressFormatPattern: string
 }
 
 export class NamingRulesService {
@@ -81,6 +82,7 @@ export class NamingRulesService {
     static async setDefaultDistrictNameOverridesStr(x: string): Promise<void> { await engine.call("k45::adr.main.setDefaultDistrictNameOverridesStr", x); }
     static async setRoadNameAsNameStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setRoadNameAsNameStation", x); }
     static async setRoadNameAsNameCargoStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setRoadNameAsNameCargoStation", x); }
+    static async setAddressFormatPattern(x: string): Promise<void> { await engine.call("k45::adr.main.setAddressFormatPattern", x); }
 
     static async setMaxSurnames(x: number): Promise<string> { return await engine.call("k45::adr.main.setMaxSurnames", x); }
     static async setMaxGivenNames(x: number): Promise<string> { return await engine.call("k45::adr.main.setMaxGivenNames", x); }
