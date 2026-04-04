@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 01:17 -0300
 **Start time:** 2026-04-04 01:16 -0300
 # [0033] integrate-address-format-tab-in-override-settings
 
@@ -22,11 +23,11 @@ The new AddressFormatTab needs to be added to the OverrideSettingsCmp.tsx tab li
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] TabsNames.AddressFormat enum value added
-- [ ] Tab inserted in a logical position in tabsOrder (after RoadsDistricts or equivalent)
-- [ ] getComponents() map includes TabsNames.AddressFormat mapped to AddressFormatTab
-- [ ] No existing tabs broken
-- [ ] Frontend builds without errors
+- [x] TabsNames.AddressFormat enum value added
+- [x] Tab inserted in a logical position in tabsOrder (after RoadsDistricts or equivalent)
+- [x] getComponents() map includes TabsNames.AddressFormat mapped to AddressFormatTab
+- [x] No existing tabs broken
+- [x] Frontend builds without errors
 
 ---
 

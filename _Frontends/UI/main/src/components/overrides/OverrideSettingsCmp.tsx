@@ -6,9 +6,11 @@ import { OverrideCitizenTab } from "./OverrideCitizenTab";
 import { OverrideRoadsDistrictsTab } from "./OverrideRoadsDistrictsTab";
 import { VehiclePlateControllerComponent } from "./VehiclePlateControllerComponent";
 import { VehicleSerialControllerComponent } from "./VehicleSerialControllerComponent";
+import { AddressFormatTab } from "./AddressFormatTab";
 
 enum TabsNames {
   RoadsDistricts = "RoadsDistricts",
+  AddressFormat = "AddressFormat",
   Citizen = "Citizen",
   RoadPlates = "RoadPlates",
   RailPlates = "RailPlates",
@@ -66,6 +68,7 @@ export const OverrideSettingsCmp = ({ }) => {
   const tabsOrder: Parameters<typeof Cs2SideTabs<TabsNames>>[0]['tabsOrder'] = [
     TabsNames.Citizen,
     TabsNames.RoadsDistricts,
+    TabsNames.AddressFormat,
     { type: "H2", title: translate("overrideSettings.subCategory.vehicleIdentifiers") },
     TabsNames.RoadPlates,
     TabsNames.RailPlates,
@@ -109,6 +112,7 @@ export const OverrideSettingsCmp = ({ }) => {
         currentSettings={currentSettings}
         innerContextSimpleFiles={innerContextSimpleFiles}
         districts={districts} />,
+      [TabsNames.AddressFormat]: <AddressFormatTab currentSettings={currentSettings} />,
       [TabsNames.RoadPlates]: <VehiclePlateControllerComponent type="road" />,
       [TabsNames.WaterPlates]: <VehiclePlateControllerComponent type="water" />,
       [TabsNames.AirPlates]: <VehiclePlateControllerComponent type="air" />,
