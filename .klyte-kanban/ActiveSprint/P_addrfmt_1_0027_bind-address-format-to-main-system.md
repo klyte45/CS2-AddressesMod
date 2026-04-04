@@ -1,7 +1,7 @@
+**Start time:** 2026-04-04 00:56 -0300
 # [0027] bind-address-format-to-main-system
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a developer**, I want **AdrMainSystem to expose a binding for the address format field**, so that I **the frontend can read and update the format pattern via the established binding pattern**.
