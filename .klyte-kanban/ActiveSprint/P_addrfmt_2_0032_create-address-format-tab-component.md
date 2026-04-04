@@ -1,7 +1,7 @@
+**Start time:** 2026-04-04 01:13 -0300
 # [0032] create-address-format-tab-component
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a player**, I want **a UI tab where I can enter a custom address format**, so that I **I can configure address format without editing config files**.
