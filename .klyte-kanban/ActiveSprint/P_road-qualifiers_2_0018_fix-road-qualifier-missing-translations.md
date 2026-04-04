@@ -1,7 +1,7 @@
+**Start time:** 2026-04-03 22:33 -0300
 # [0018] fix-road-qualifier-missing-translations
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a city builder**, I want **all road qualifier rule fields to have proper translated labels**, so that I **I can understand each field's purpose without guessing from the key names**.
