@@ -1,7 +1,7 @@
+**Start time:** 2026-04-04 01:08 -0300
 # [0029] patch-spawnable-building-address-format
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a player**, I want **spawnable building addresses to use my custom format pattern**, so that I **I can display addresses in the format that matches the real-world conventions of my city**.
