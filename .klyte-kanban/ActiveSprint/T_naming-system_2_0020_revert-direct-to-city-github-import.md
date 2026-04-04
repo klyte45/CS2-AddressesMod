@@ -1,3 +1,4 @@
+**End time:** 2026-04-03 22:32 -0300
 **Start time:** 2026-04-03 22:29 -0300
 # [0020] revert-direct-to-city-github-import
 
@@ -22,10 +23,10 @@ Task 0013 added an 'Add to city' button that bypassed the import preview. The or
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] addDirectToCityFromGitHub function is removed from CityNamesetLibraryCmp.tsx
-- [ ] GitHub import screen shows only one action button per file that goes to goToImportDetailsGitHub
-- [ ] cityNamesetsLibrary.addDirectToCity key removed from i18n.csv and all 11 locale files
-- [ ] No broken references to the removed function or translation key remain
+- [x] addDirectToCityFromGitHub function is removed from CityNamesetLibraryCmp.tsx
+- [x] GitHub import screen shows only one action button per file that goes to goToImportDetailsGitHub
+- [x] cityNamesetsLibrary.addDirectToCity key removed from i18n.csv and all 11 locale files
+- [x] No broken references to the removed function or translation key remain
 
 ---
 

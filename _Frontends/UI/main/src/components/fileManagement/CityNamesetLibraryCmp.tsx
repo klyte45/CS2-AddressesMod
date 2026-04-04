@@ -82,14 +82,6 @@ export const CityNamesetLibraryCmp = () => {
         setLastSourceImport(Screen.NAMESET_IMPORT_GITHUB);
     };
 
-    const addDirectToCityFromGitHub = async (p: GitHubFileItem) => {
-        setCurrentScreen(Screen.AWAITING_ACTION);
-        const fileContents = await GitHubAddressesFilesService.getBlobData(p.url);
-        const parsed = parseGitHubFile(fileContents, p.path);
-        await NamesetService.sendNamesetForCity(parsed.Name, parsed.Values, parsed.ValuesAlternative);
-        setCurrentScreen(Screen.DEFAULT);
-    };
-
     const getActionButtons = (x: ExtendedSimpleNameEntry): JSX.Element => {
         return <>
             <button className="negativeBtn" onClick={() => goToDelete(x)}>{translate("cityNamesetsLibrary.deleteNameset")}</button>
@@ -172,10 +164,7 @@ export const CityNamesetLibraryCmp = () => {
         case Screen.NAMESET_IMPORT_LIB:
             return <NamesetLibrarySelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <><button className="positiveBtn" onClick={() => goToImportDetails(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
         case Screen.NAMESET_IMPORT_GITHUB:
-            return <NamesetGitHubSelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <>
-                <button className="positiveBtn" onClick={() => addDirectToCityFromGitHub(p)}>{translate('cityNamesetsLibrary.addDirectToCity')}</button>
-                <button className="neutralBtn" onClick={() => goToImportDetailsGitHub(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button>
-            </>} />
+            return <NamesetGitHubSelectorCmp onBack={() => setCurrentScreen(Screen.DEFAULT)} actionButtons={(p) => <><button className="positiveBtn" onClick={() => goToImportDetailsGitHub(p)}>{translate('cityNamesetsLibrary.copyToCity')}</button></>} />
         case Screen.IMPORTING_NAMESET:
             return <NamesetImportingCmp namesetData={namesetBeingImported} onBack={() => setCurrentScreen(lastSourceImport)} onOk={(x, y) => doImportNameset(x, y)} />
         case Screen.VIEWING_NAMESET:
