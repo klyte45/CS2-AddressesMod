@@ -59,7 +59,12 @@ export const CityNamesetLibraryCmp = () => {
 
 
     const parseGitHubFile = (fileContents: string, path: string) => {
-        const lines = fileContents.split("\n").map(x => x.split(";")).map(x => x[1] ??= x[0]);
+        if (process.env.NODE_ENV === "development") {
+            console.log("[ADR][parseGitHubFile] raw content:", fileContents);
+        }
+        const lines = fileContents.split("\n")
+            .filter(x => x.trim() !== "")
+            .map(x => { const parts = x.split(";"); return [parts[0], parts[1] ?? parts[0]]; });
         return {
             IdString: null,
             Name: `Downloads/${path.split("/").reverse()[0].replace(".txt", "")}`,

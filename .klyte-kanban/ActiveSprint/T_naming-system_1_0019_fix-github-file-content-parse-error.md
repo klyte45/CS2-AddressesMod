@@ -1,3 +1,4 @@
+**End time:** 2026-04-03 22:29 -0300
 **Start time:** 2026-04-03 22:29 -0300
 # [0019] fix-github-file-content-parse-error
 
@@ -22,11 +23,11 @@ The parseGitHubFile function in CityNamesetLibraryCmp.tsx has a bug: .map(x => x
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] parseGitHubFile correctly splits each line into [main, alternative] string pairs
-- [ ] Empty lines at end of file are filtered and do not cause errors
-- [ ] Clicking 'Copy to City' on a GitHub file opens the import preview with correct entries (one per line)
-- [ ] No TypeError exceptions in the UI console when loading GitHub files
-- [ ] If the root cause cannot be fully confirmed without in-game testing, a debug log printing the raw downloaded content must be added (only active when using a debug build configuration)
+- [x] parseGitHubFile correctly splits each line into [main, alternative] string pairs
+- [x] Empty lines at end of file are filtered and do not cause errors
+- [x] Clicking 'Copy to City' on a GitHub file opens the import preview with correct entries (one per line)
+- [x] No TypeError exceptions in the UI console when loading GitHub files
+- [x] If the root cause cannot be fully confirmed without in-game testing, a debug log printing the raw downloaded content must be added (only active when using a debug build configuration)
 
 ---
 
