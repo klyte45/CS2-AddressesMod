@@ -1,3 +1,4 @@
+**End time:** 2026-04-03 22:39 -0300
 **Start time:** 2026-04-03 22:37 -0300
 # [0021] improve-vehicle-identifier-visual-design
 
@@ -22,10 +23,10 @@ The vehicle plate editor shows identifier slots side by side with only spaces be
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Each slot in the vehicle plate editor has a colored background matching its type (Regional, Local, CarNumber)
-- [ ] The vehicle plate letters editor container layout centers its items
-- [ ] Color coding is applied via CSS variables so it fits game theme
-- [ ] Preview rows still show correctly alongside the redesigned slots
+- [x] Each slot in the vehicle plate editor has a colored background matching its type (Regional, Local, CarNumber)
+- [x] The vehicle plate letters editor container layout centers its items
+- [x] Color coding is applied via CSS variables so it fits game theme
+- [x] Preview rows still show correctly alongside the redesigned slots
 
 ---
 

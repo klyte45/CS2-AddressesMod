@@ -81,7 +81,9 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
       {
         controllerData.LettersAllowed.value?.map((x, i) => {
           const digitFlagId = controllerData.LettersAllowed.value.length - i - 1;
-          return <div key={i} className="letterItem">
+          const slotType = controllerData.FlagsLocal.value & (1 << digitFlagId) ? 1 : controllerData.FlagsCarNumber.value & (1 << digitFlagId) ? 2 : 0;
+          const slotClass = ["slotRegional", "slotLocal", "slotCarNumber"][slotType];
+          return <div key={i} className={`letterItem ${slotClass}`}>
             <Cs2Select
               options={options}
               getOptionLabel={(x) => translate("vehiclePlate.identifierDigitSource." + x.v)}
