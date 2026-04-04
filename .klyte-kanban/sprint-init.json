@@ -1,5 +1,0 @@
-{
-  "name": "Sprint 002",
-  "description": "Bug fixes, regressions, and UI polish from Sprint 001 QA",
-  "objective": "Fix all reported bugs (parse errors, missing translations, broken icons), revert misguided features, and improve road qualifier and vehicle plate UI"
-}
