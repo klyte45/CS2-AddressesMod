@@ -1,6 +1,6 @@
 import { categorizeFiles } from "#utility/categorizeFiles";
 import { translate } from "#utility/translate";
-import { ExtendedSimpleNameEntry, GitHubAddressesFilesSevice, GitHubFileItem, NamesetService, SimpleNameEntry } from "@klyte45/adr-commons";
+import { ExtendedSimpleNameEntry, GitHubAddressesFilesService, GitHubFileItem, NamesetService, SimpleNameEntry } from "@klyte45/adr-commons";
 import { DefaultPanelScreen } from "@klyte45/euis-components";
 import { useEffect, useState } from "react";
 import { NamesetCategoryCmp } from "./NamesetCategoryCmp";
@@ -70,7 +70,7 @@ export const CityNamesetLibraryCmp = () => {
 
     const goToImportDetailsGitHub = async (p: GitHubFileItem) => {
         setCurrentScreen(Screen.AWAITING_ACTION);
-        const fileContents = await GitHubAddressesFilesSevice.getBlobData(p.url)
+        const fileContents = await GitHubAddressesFilesService.getBlobData(p.url)
         const parsed = parseGitHubFile(fileContents, p.path);
         setNamesetBeingImported(parsed);
         setCurrentScreen(Screen.IMPORTING_NAMESET);
@@ -79,7 +79,7 @@ export const CityNamesetLibraryCmp = () => {
 
     const addDirectToCityFromGitHub = async (p: GitHubFileItem) => {
         setCurrentScreen(Screen.AWAITING_ACTION);
-        const fileContents = await GitHubAddressesFilesSevice.getBlobData(p.url);
+        const fileContents = await GitHubAddressesFilesService.getBlobData(p.url);
         const parsed = parseGitHubFile(fileContents, p.path);
         await NamesetService.sendNamesetForCity(parsed.Name, parsed.Values, parsed.ValuesAlternative);
         setCurrentScreen(Screen.DEFAULT);

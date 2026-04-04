@@ -6,7 +6,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { MapDiv } from "./MapDiv";
 import './regionEditor.scss';
 import { HighwayRegisterManagement } from "./subpages/HighwayRegisterManagement";
-import RegionCitiesManagement from "./subpages/RegionCitiesMangement";
+import RegionCitiesManagement from "./subpages/RegionCitiesManagement";
 
 
 enum OutsideConnectionType {

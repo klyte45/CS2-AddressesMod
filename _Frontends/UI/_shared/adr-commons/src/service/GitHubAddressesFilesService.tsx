@@ -38,7 +38,7 @@ export type GitHubResponseContainer<T> = {
     resetTime?: number | null
 }
 
-export class GitHubAddressesFilesSevice {
+export class GitHubAddressesFilesService {
     private static readonly ADR_FILES_REPO_URL = "https://api.github.com/repos/klyte45/AddressesFiles/git/trees/master";
     static async listAtTreePoint(url?: string): Promise<GitHubResponseContainer<GitHubItem[]>> {
         try {

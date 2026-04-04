@@ -4,7 +4,7 @@
 
 
 export * from "./src/service/DistrictRelativeService"
-export * from "./src/service/GitHubAddressesFilesSevice"
+export * from "./src/service/GitHubAddressesFilesService"
 export * from "./src/service/NamesetService"
 export * from "./src/service/NamingRulesService"
 export * from "./src/service/SelectInfoPanelService"

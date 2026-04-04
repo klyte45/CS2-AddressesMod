@@ -1,5 +1,5 @@
 import { translate } from "#utility/translate";
-import { GitHubAddressesFilesSevice, GitHubFileItem, GitHubTreeItem } from "@klyte45/adr-commons";
+import { GitHubAddressesFilesService, GitHubFileItem, GitHubTreeItem } from "@klyte45/adr-commons";
 import { replaceArgs } from "@klyte45/euis-components";
 import EuisTreeView from "@klyte45/euis-components/src/components/EuisTreeView";
 import { useEffect, useState } from "react";
@@ -20,7 +20,7 @@ export const NamesetGitHubCategoryCmp = ({ treeUrl, doWithGitHubData }: Props) =
 
     const loadUrl = async () => {
         try {
-            const treeData = await GitHubAddressesFilesSevice.listAtTreePoint(treeUrl)
+            const treeData = await GitHubAddressesFilesService.listAtTreePoint(treeUrl)
             if (treeData.success) {
                 setCurrentTree(treeData.data.filter(x => x.type == "tree") as GitHubTreeItem[])
                 setCurrentFiles(treeData.data.filter(x => x.type == "blob") as GitHubFileItem[])

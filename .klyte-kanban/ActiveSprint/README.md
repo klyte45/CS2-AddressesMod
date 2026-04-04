@@ -14,6 +14,6 @@ Deliver a stable, fully internationalized release of the Addresses mod by fixing
 - **Original tasks**: 15
 - **Original task IDs**: [0001], [0002], [0003], [0004], [0005], [0006], [0007], [0008], [0009], [0010], [0011], [0013], [0014], [0015], [0016]
 - **Delivered tasks (from original)**:
-- **Added tasks**: 0
+- **Added tasks**: 1
 - **Delivered tasks (from added)**:
 - **Total delivered tasks**:

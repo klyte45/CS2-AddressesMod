@@ -241,8 +241,6 @@ namespace BelzontAdr
             }
         }
 
-        public SafeStruct ForBurstJob => new()
-
         public string[] GeneratePreviewPlates(int count = 3)
         {
             var results = new string[count];
@@ -287,6 +285,7 @@ namespace BelzontAdr
             return results;
         }
 
+        public SafeStruct ForBurstJob => new()
         {
             Checksum = checksum,
             m_flagsCarNumber = m_flagsCarNumber,
