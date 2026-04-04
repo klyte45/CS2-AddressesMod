@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 01:16 -0300
 **Start time:** 2026-04-04 01:13 -0300
 # [0032] create-address-format-tab-component
 
@@ -22,13 +23,13 @@ A new AddressFormatTab.tsx component is needed for the Override Settings panel. 
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AddressFormatTab component created at src/components/overrides/AddressFormatTab.tsx (or equivalent path for the project structure)
-- [ ] Contains format pattern text input (single line)
-- [ ] Contains clickable token chips: {number}, {street}, {district}, {brand} — clicking inserts the token at cursor position
-- [ ] Contains live preview with mock substitution (number=42, street=Oak Avenue, district=Downtown, brand=SuperMart)
-- [ ] Contains Use game default reset button that clears the pattern
-- [ ] Calls NamingRulesService.setAddressFormatPattern on change
-- [ ] Component compiles without TypeScript errors
+- [x] AddressFormatTab component created at src/components/overrides/AddressFormatTab.tsx (or equivalent path for the project structure)
+- [x] Contains format pattern text input (single line)
+- [x] Contains clickable token chips: {number}, {street}, {district}, {brand} — clicking inserts the token at cursor position
+- [x] Contains live preview with mock substitution (number=42, street=Oak Avenue, district=Downtown, brand=SuperMart)
+- [x] Contains Use game default reset button that clears the pattern
+- [x] Calls NamingRulesService.setAddressFormatPattern on change
+- [x] Component compiles without TypeScript errors
 
 ---
 
