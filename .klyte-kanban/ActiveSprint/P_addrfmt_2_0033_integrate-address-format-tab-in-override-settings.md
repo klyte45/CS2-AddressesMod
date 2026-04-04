@@ -1,7 +1,7 @@
+**Start time:** 2026-04-04 01:16 -0300
 # [0033] integrate-address-format-tab-in-override-settings
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a player**, I want **the address format tab to be visible in the Override Settings panel**, so that I **I can access the address format settings from the same panel as other naming overrides**.
