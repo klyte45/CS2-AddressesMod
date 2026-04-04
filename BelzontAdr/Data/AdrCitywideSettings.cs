@@ -12,7 +12,7 @@ namespace BelzontAdr
 {
     public class AdrCitywideSettings : ISerializable
     {
-        private const uint CURRENT_VERSION = 0;
+        private const uint CURRENT_VERSION = 1;
 
         private int maximumGeneratedGivenNames = 1;
         private int maximumGeneratedSurnames = 1;
