@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 01:12 -0300
 **Start time:** 2026-04-04 01:11 -0300
 # [0030] patch-transport-stop-address-format
 
@@ -22,10 +23,10 @@ AdrNameSystemOverrides.GetStaticTransportStopName patches transport stop address
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] When AddressFormatPattern is null/empty, behavior unchanged
-- [ ] When set, applies token substitution ({number}, {street}, {district})
-- [ ] {brand} token is not applicable and results in empty string if included
-- [ ] Build passes
+- [x] When AddressFormatPattern is null/empty, behavior unchanged
+- [x] When set, applies token substitution ({number}, {street}, {district})
+- [x] {brand} token is not applicable and results in empty string if included
+- [x] Build passes
 
 ---
 

@@ -112,6 +112,15 @@ namespace BelzontAdr
                 return true;
             }
             var roadName = pattern.Replace("{name}", genName);
+
+            var customFmt = adrMainSystem?.CurrentCitySettings?.AddressFormatPattern;
+            if (!string.IsNullOrEmpty(customFmt))
+            {
+                string districtName = adrMainSystem.GetBuildingSideDistrictName(stop, m_nameSystem);
+                __result = Name.CustomName(ApplyCustomAddressFormat(customFmt, num.ToString(), roadName, districtName, null));
+                return false;
+            }
+
             __result = NameSystem.Name.FormattedName("Assets.ADDRESS_NAME_FORMAT", new string[]
                {
                         "ROAD",
