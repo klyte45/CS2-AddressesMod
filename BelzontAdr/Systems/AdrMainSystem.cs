@@ -43,6 +43,7 @@ namespace BelzontAdr
             doBindLink("main.setDefaultDistrictNameOverridesStr", (string x) => { CurrentCitySettings.DefaultDistrictNameOverridesStr = x; NotifyChanges(); MarkDistrictsDirty(); districtsSystem.OnDistrictChanged(); });
             doBindLink("main.setRoadNameAsNameStation", (bool x) => { CurrentCitySettings.roadNameAsNameStation = x; NotifyChanges(); });
             doBindLink("main.setRoadNameAsNameCargoStation", (bool x) => { CurrentCitySettings.roadNameAsNameCargoStation = x; NotifyChanges(); });
+            doBindLink("main.setAddressFormatPattern", (string x) => { CurrentCitySettings.AddressFormatPattern = x; MarkRoadsDirty(); NotifyChanges(); });
             doBindLink("main.exploreToRoadPrefixRulesFileDefault", () => RemoteProcess.OpenFolder(DefaultRoadPrefixFilename));
             doBindLink("main.saveRoadPrefixRulesFileDefault", () => File.WriteAllText(DefaultRoadPrefixFilename, XmlUtils.DefaultXmlSerialize(CurrentCitySettings.roadPrefixSetting)));
             doBindLink("main.loadRoadPrefixRulesFileDefault", () =>

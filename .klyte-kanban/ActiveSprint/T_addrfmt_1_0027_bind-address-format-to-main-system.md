@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 01:01 -0300
 **Start time:** 2026-04-04 00:56 -0300
 # [0027] bind-address-format-to-main-system
 
@@ -22,11 +23,11 @@ AdrMainSystem exposes city settings to the frontend via SetupCallBinder. A new b
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] main.setAddressFormatPattern binding added to SetupCallBinder
-- [ ] Setter treats empty string as null (clears to default)
-- [ ] Setter calls MarkRoadsDirty() and NotifyChanges() after update
-- [ ] getCurrentCitywideSettings already returns the full settings object including new field (no extra work needed)
-- [ ] Build passes
+- [x] main.setAddressFormatPattern binding added to SetupCallBinder
+- [x] Setter treats empty string as null (clears to default)
+- [x] Setter calls MarkRoadsDirty() and NotifyChanges() after update
+- [x] getCurrentCitywideSettings already returns the full settings object including new field (no extra work needed)
+- [x] Build passes
 
 ---
 
