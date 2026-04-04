@@ -10,10 +10,10 @@ Fix all reported bugs (parse errors, missing translations, broken icons), revert
 
 - **Sprint number**: 002
 - **Start date**: 2026-04-03 22:28 -0300
-- **End date**:
+- **End date**: 2026-04-03 23:15 -0300
 - **Original tasks**: 07
 - **Original task IDs**: [0018], [0019], [0020], [0021], [0022], [0023], [0024]
-- **Delivered tasks (from original)**:
+- **Delivered tasks (from original)**: 7
 - **Added tasks**: 0
-- **Delivered tasks (from added)**:
-- **Total delivered tasks**:
+- **Delivered tasks (from added)**: 0
+- **Total delivered tasks**: 7
