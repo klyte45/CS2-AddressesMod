@@ -299,3 +299,10 @@ K45::ADR.main[roadPrefixSettings.tooltip.minimumCarLanes]	"Minimum number of car
 K45::ADR.main[roadPrefixSettings.tooltip.maximumCarLanes]	"Maximum number of car lanes allowed for this rule to match. Set to 0 to disable."	"Número máximo de faixas de carro para aplicar esta regra. 0 para desativar."
 K45::ADR.main[roadPrefixSettings.tooltip.minimumWidthM]	"Minimum road width in meters for this rule to match. Set to 0 to disable."	"Largura mínima da via em metros para aplicar esta regra. 0 para desativar."
 K45::ADR.main[roadPrefixSettings.tooltip.maximumWidthM]	"Maximum road width in meters for this rule to match. Set to 0 to disable."	"Largura máxima da via em metros para aplicar esta regra. 0 para desativar."
+K45::ADR.main[overrideSettings.tabAddressFormat]	Address Format	Formato de Endereço
+K45::ADR.main[overrideSettings.addressFormat.patternLabel]	Format Pattern	Padrão de Formato
+K45::ADR.main[overrideSettings.addressFormat.patternPlaceholder]	e.g. {number} {street}	ex: {number} {street}
+K45::ADR.main[overrideSettings.addressFormat.tokensLabel]	Available Tokens	Tokens Disponíveis
+K45::ADR.main[overrideSettings.addressFormat.previewLabel]	Preview	Visualização
+K45::ADR.main[overrideSettings.addressFormat.previewEmpty]	(game default format)	(formato padrão do jogo)
+K45::ADR.main[overrideSettings.addressFormat.resetToDefault]	Reset to game default	Redefinir para o padrão do jogo

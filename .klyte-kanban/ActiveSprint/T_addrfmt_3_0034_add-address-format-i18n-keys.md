@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 01:19 -0300
 **Start time:** 2026-04-04 01:17 -0300
 # [0034] add-address-format-i18n-keys
 
@@ -22,12 +23,12 @@ New UI labels for the address format tab need i18n entries in i18n.csv and all l
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] i18n.csv has all required keys for the address format tab UI
-- [ ] All locale files (.csv in i18n folder) have the English text copied for each new key
-- [ ] No duplicate or missing keys detected
-- [ ] i18n.csv encoding preserved as UTF-8
-- [ ] Locale files encoding preserved as UTF-16 LE
-- [ ] Build passes
+- [x] i18n.csv has all required keys for the address format tab UI
+- [x] All locale files (.csv in i18n folder) have the English text copied for each new key
+- [x] No duplicate or missing keys detected
+- [x] i18n.csv encoding preserved as UTF-8
+- [x] Locale files encoding preserved as UTF-16 LE
+- [x] Build passes
 
 ---
 
