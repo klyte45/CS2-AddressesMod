@@ -1,7 +1,7 @@
+**Start time:** 2026-04-04 00:54 -0300
 # [0026] add-address-format-field-to-citywideSettings
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a developer**, I want **AdrCitywideSettings to have an AddressFormatPattern string field**, so that I **custom address format can be persisted per city**.
