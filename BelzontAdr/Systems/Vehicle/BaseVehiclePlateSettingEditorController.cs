@@ -45,6 +45,7 @@ namespace BelzontAdr
             SerialIncrementEachMonth.OnScreenValueChanged += (x) => { var dt = Data; dt.SerialIncrementEachMonth = x; Data = dt; };
 
             CallBinder($"{Prefix}newRandomSeed", () => { var dt = Data; dt.GenerateNewSeed(); Data = dt; });
+            CallBinder($"{Prefix}generatePreviewPlates", () => Data.GeneratePreviewPlates(3));
 
             m_initialized = true;
             FetchData();

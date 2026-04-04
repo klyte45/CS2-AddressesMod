@@ -25,6 +25,14 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
   const [controllerData, setControllerData] = useState(undefined as ConstructorObjectToInstancesObject<typeof BasePlatesController>);
   const [_, setBuildIdx] = useState(0 as any);
   const bindingsRef = useRef<ConstructorObjectToInstancesObject<typeof BasePlatesController>>(undefined);
+  const [previewPlates, setPreviewPlates] = useState([] as string[]);
+
+  const refreshPreview = async () => {
+    try {
+      const plates: string[] = await engine.call("k45::adr.vehiclePlate." + type + ".generatePreviewPlates");
+      setPreviewPlates(plates);
+    } catch { }
+  };
 
   useEffect(() => {
     const tmp = InitializeBindings({
@@ -33,7 +41,8 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
     });
     bindingsRef.current = tmp;
     setControllerData(tmp);
-    Object.entries(tmp).forEach(([x, y]) => y.subscribe(async (z) => { setBuildIdx(x + JSON.stringify(z)); }));
+    Object.entries(tmp).forEach(([x, y]) => y.subscribe(async (z) => { setBuildIdx(x + JSON.stringify(z)); refreshPreview(); }));
+    refreshPreview();
     return () => {
       bindingsRef.current && Object.values(bindingsRef.current).forEach(x => x.dispose());
     };
@@ -87,6 +96,12 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
         )
       }
     </div>
+    {previewPlates.length > 0 && <div className="vehiclePlatePreview">
+      <h3>{translate("vehiclePlate.preview")}</h3>
+      <div style={{ display: "flex", gap: "10rem", flexWrap: "wrap" }}>
+        {previewPlates.map((plate, i) => <span key={i} style={{ fontFamily: "monospace", fontSize: "120%", padding: "2rem 6rem", backgroundColor: "var(--panelColorDarker)" }}>{plate}</span>)}
+      </div>
+    </div>}
   </>;
 };
 const CharsAllowedInput = ({ controllerData, i }: {

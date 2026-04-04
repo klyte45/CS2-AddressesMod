@@ -242,6 +242,51 @@ namespace BelzontAdr
         }
 
         public SafeStruct ForBurstJob => new()
+
+        public string[] GeneratePreviewPlates(int count = 3)
+        {
+            var results = new string[count];
+            ulong[] serials = { 1, 42, 1337 };
+            for (int s = 0; s < count; s++)
+            {
+                ulong localSerial = s < serials.Length ? serials[s] : (ulong)(s * 137 + 7);
+                ulong regionalCode = 12345;
+                int monthsFromEpoch = m_monthsFromEpochOffset;
+                int compositionNumber = 1;
+
+                var output = new char[m_lettersAllowedProcessed.Length];
+                uint currentFlag = 1;
+                int currentIdx = m_lettersAllowedProcessed.Length - 1;
+
+                do
+                {
+                    var chars = m_lettersAllowedProcessed[currentIdx];
+                    ulong numberChars = (ulong)chars.Length;
+                    if (numberChars == 0) { currentFlag <<= 1; continue; }
+
+                    if ((m_flagsCarNumber & currentFlag) != 0)
+                    {
+                        output[currentIdx] = chars[(int)((ulong)compositionNumber % numberChars)];
+                        compositionNumber /= (int)numberChars;
+                    }
+                    else if ((m_flagsLocal & currentFlag) != 0)
+                    {
+                        output[currentIdx] = chars[(int)(localSerial % numberChars)];
+                        localSerial /= numberChars;
+                    }
+                    else
+                    {
+                        output[currentIdx] = chars[(int)(regionalCode % numberChars)];
+                        regionalCode /= numberChars;
+                    }
+                    currentFlag <<= 1;
+                } while (--currentIdx >= 0);
+
+                results[s] = new string(output);
+            }
+            return results;
+        }
+
         {
             Checksum = checksum,
             m_flagsCarNumber = m_flagsCarNumber,
