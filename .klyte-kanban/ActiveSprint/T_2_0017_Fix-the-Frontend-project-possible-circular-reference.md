@@ -1,3 +1,4 @@
+**End time:** 2026-04-03 21:37 -0300
 **Start time:** 2026-04-03 21:35 -0300
 # [0017] Fix the _Frontend project possible circular reference
 
@@ -24,7 +25,7 @@
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] The project compiles when targeting the sln file like explained on kanban README
+- [x] The project compiles when targeting the sln file like explained on kanban README
 
 ---
 
