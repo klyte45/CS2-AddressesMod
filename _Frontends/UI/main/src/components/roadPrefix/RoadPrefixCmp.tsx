@@ -138,7 +138,7 @@ export const RoadPrefixCmp = ({ }) => {
             [null].map(x => {
               const currentRule = currentSettings.AdditionalRules[currentEditingRule];
               return <>
-                <Cs2FormLine title={translate("roadPrefixSettings.patternFormat")}>
+                <Cs2FormLine title={translate("roadPrefixSettings.patternFormat")} tooltip={translate("roadPrefixSettings.tooltip.patternFormat")}>
                   <SimpleInput
                     getValue={() => currentRule?.FormatPattern}
                     onValueChanged={(x) => {
@@ -149,7 +149,7 @@ export const RoadPrefixCmp = ({ }) => {
                     }}
                     isValid={(newVal) => newVal?.includes("{name}")} />
                 </Cs2FormLine>
-                <Cs2FormLine title={translate("roadPrefixSettings.minimumSpeed")}>
+                <Cs2FormLine title={translate("roadPrefixSettings.minimumSpeed")} tooltip={translate("roadPrefixSettings.tooltip.minimumSpeed")}>
                   <SimpleInput
                     getValue={() => currentRule.MinSpeedKmh.toFixed()}
                     onValueChanged={(x) => {
@@ -161,7 +161,7 @@ export const RoadPrefixCmp = ({ }) => {
                     isValid={(newVal) => !!newVal.match(/^[0-9]+$/) && currentRule.MaxSpeedKmh >= parseInt(newVal)}
                     maxLength={3} />
                 </Cs2FormLine>
-                <Cs2FormLine title={translate("roadPrefixSettings.maximumSpeed")}>
+                <Cs2FormLine title={translate("roadPrefixSettings.maximumSpeed")} tooltip={translate("roadPrefixSettings.tooltip.maximumSpeed")}>
                   <SimpleInput
                     getValue={() => currentRule.MaxSpeedKmh.toFixed()}
                     onValueChanged={(x) => {
@@ -203,21 +203,21 @@ export const RoadPrefixCmp = ({ }) => {
                     </Cs2FormLine>
                   })
                 }
-                <Cs2FormLine title={translate("roadPrefixSettings.requireFullBridgeState")}>
+                <Cs2FormLine title={translate("roadPrefixSettings.requireFullBridgeState")} tooltip={translate("roadPrefixSettings.tooltip.requireFullBridgeState")}>
                   <Cs2TriCheckbox isChecked={currentRule.FullBridge < 0 ? null : currentRule.FullBridge > 0} onValueToggle={(x) => {
                     currentRule.FullBridge = x === true ? 1 : x === null ? -1 : 0;
                     NamingRulesService.setAdrRoadPrefixSetting(currentSettings);
                     return x;
                   }} />
                 </Cs2FormLine>
-                <Cs2FormLine title={translate("roadPrefixSettings.requireAnyElevatedState")}>
+                <Cs2FormLine title={translate("roadPrefixSettings.requireAnyElevatedState")} tooltip={translate("roadPrefixSettings.tooltip.requireAnyElevatedState")}>
                   <Cs2TriCheckbox isChecked={currentRule.AnyElevated < 0 ? null : currentRule.AnyElevated > 0} onValueToggle={(x) => {
                     currentRule.AnyElevated = x === true ? 1 : x === null ? -1 : 0;
                     NamingRulesService.setAdrRoadPrefixSetting(currentSettings);
                     return x;
                   }} />
                 </Cs2FormLine>
-                <Cs2FormLine title={translate("roadPrefixSettings.minimumCarLanes")}>
+                <Cs2FormLine title={translate("roadPrefixSettings.minimumCarLanes")} tooltip={translate("roadPrefixSettings.tooltip.minimumCarLanes")}>
                   <SimpleInput
                     getValue={() => (currentRule.MinCarLanes ?? 0).toFixed()}
                     onValueChanged={(x) => {
@@ -229,7 +229,7 @@ export const RoadPrefixCmp = ({ }) => {
                     isValid={(newVal) => !!newVal.match(/^[0-9]+$/)}
                     maxLength={2} />
                 </Cs2FormLine>
-                <Cs2FormLine title={translate("roadPrefixSettings.maximumCarLanes")}>
+                <Cs2FormLine title={translate("roadPrefixSettings.maximumCarLanes")} tooltip={translate("roadPrefixSettings.tooltip.maximumCarLanes")}>
                   <SimpleInput
                     getValue={() => (currentRule.MaxCarLanes ?? 0).toFixed()}
                     onValueChanged={(x) => {
@@ -241,7 +241,7 @@ export const RoadPrefixCmp = ({ }) => {
                     isValid={(newVal) => !!newVal.match(/^[0-9]+$/)}
                     maxLength={2} />
                 </Cs2FormLine>
-                <Cs2FormLine title={translate("roadPrefixSettings.minimumWidthM")}>
+                <Cs2FormLine title={translate("roadPrefixSettings.minimumWidthM")} tooltip={translate("roadPrefixSettings.tooltip.minimumWidthM")}>
                   <SimpleInput
                     getValue={() => (currentRule.MinWidthM ?? 0).toFixed(1)}
                     onValueChanged={(x) => {
@@ -254,7 +254,7 @@ export const RoadPrefixCmp = ({ }) => {
                     isValid={(newVal) => !isNaN(parseFloat(newVal)) && parseFloat(newVal) >= 0}
                     maxLength={5} />
                 </Cs2FormLine>
-                <Cs2FormLine title={translate("roadPrefixSettings.maximumWidthM")}>
+                <Cs2FormLine title={translate("roadPrefixSettings.maximumWidthM")} tooltip={translate("roadPrefixSettings.tooltip.maximumWidthM")}>
                   <SimpleInput
                     getValue={() => (currentRule.MaxWidthM ?? 0).toFixed(1)}
                     onValueChanged={(x) => {

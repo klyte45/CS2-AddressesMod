@@ -290,3 +290,12 @@ K45::ADR.main[roadPrefixSettings.minimumCarLanes]	Minimum number of car lanes	N�
 K45::ADR.main[roadPrefixSettings.maximumCarLanes]	Maximum number of car lanes	Número máximo de faixas de carro
 K45::ADR.main[roadPrefixSettings.minimumWidthM]	Minimum road width (meters)	Largura mínima da via (metros)
 K45::ADR.main[roadPrefixSettings.maximumWidthM]	Maximum road width (meters)	Largura máxima da via (metros)
+K45::ADR.main[roadPrefixSettings.tooltip.patternFormat]	"Use {name} as a placeholder for the generated road name. Example: 'Rua {name}' or '{name} Ave'."	"Use {name} como marcador para o nome gerado. Exemplo: 'Rua {name}' ou '{name} Av'."
+K45::ADR.main[roadPrefixSettings.tooltip.minimumSpeed]	"Minimum speed limit (km/h) for this rule to apply. Set to 0 to match any speed."	"Velocidade mínima (km/h) para aplicar esta regra. Coloque 0 para qualquer velocidade."
+K45::ADR.main[roadPrefixSettings.tooltip.maximumSpeed]	"Maximum speed limit (km/h) for this rule to apply. Set to 0 to match any speed."	"Velocidade máxima (km/h) para aplicar esta regra. Coloque 0 para qualquer velocidade."
+K45::ADR.main[roadPrefixSettings.tooltip.requireFullBridgeState]	"Tri-state: check=require all segments elevated (≥6m), X=forbid, empty=ignore."	"Tri-estado: marcado=exige todos elevados (≥6m), X=proíbe, vazio=ignora."
+K45::ADR.main[roadPrefixSettings.tooltip.requireAnyElevatedState]	"Tri-state: check=require at least one segment elevated, X=forbid any elevated, empty=ignore."	"Tri-estado: marcado=exige ao menos um elevado, X=proíbe elevados, vazio=ignora."
+K45::ADR.main[roadPrefixSettings.tooltip.minimumCarLanes]	"Minimum number of car lanes required for this rule to match. Set to 0 to disable."	"Número mínimo de faixas de carro para aplicar esta regra. 0 para desativar."
+K45::ADR.main[roadPrefixSettings.tooltip.maximumCarLanes]	"Maximum number of car lanes allowed for this rule to match. Set to 0 to disable."	"Número máximo de faixas de carro para aplicar esta regra. 0 para desativar."
+K45::ADR.main[roadPrefixSettings.tooltip.minimumWidthM]	"Minimum road width in meters for this rule to match. Set to 0 to disable."	"Largura mínima da via em metros para aplicar esta regra. 0 para desativar."
+K45::ADR.main[roadPrefixSettings.tooltip.maximumWidthM]	"Maximum road width in meters for this rule to match. Set to 0 to disable."	"Largura máxima da via em metros para aplicar esta regra. 0 para desativar."

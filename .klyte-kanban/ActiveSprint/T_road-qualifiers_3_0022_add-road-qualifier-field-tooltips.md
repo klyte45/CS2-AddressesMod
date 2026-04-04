@@ -1,3 +1,4 @@
+**End time:** 2026-04-03 23:13 -0300
 **Start time:** 2026-04-03 22:39 -0300
 # [0022] add-road-qualifier-field-tooltips
 
@@ -22,11 +23,11 @@ The RoadPrefixCmp.tsx shows many numeric inputs and tri-state checkboxes for roa
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Cs2FormLine in euis-components submodule accepts an optional tooltip prop (string)
-- [ ] When tooltip prop is provided, the wrapper div renders data-tooltip attribute
-- [ ] The submodule commit is made before the main project commit
-- [ ] All new and existing road qualifier field rows in RoadPrefixCmp.tsx have descriptive tooltip text
-- [ ] i18n.csv has new tooltip keys for each road qualifier field and all 11 locale files are updated
+- [x] Cs2FormLine in euis-components submodule accepts an optional tooltip prop (string)
+- [x] When tooltip prop is provided, the wrapper div renders data-tooltip attribute
+- [x] The submodule commit is made before the main project commit
+- [x] All new and existing road qualifier field rows in RoadPrefixCmp.tsx have descriptive tooltip text
+- [x] i18n.csv has new tooltip keys for each road qualifier field and all 11 locale files are updated
 
 ---
 
