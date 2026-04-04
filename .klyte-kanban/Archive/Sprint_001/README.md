@@ -10,10 +10,10 @@ Deliver a stable, fully internationalized release of the Addresses mod by fixing
 
 - **Sprint number**: 001
 - **Start date**: 2026-04-03 18:23 -0300
-- **End date**:
+- **End date**: 2026-04-03 21:38 -0300
 - **Original tasks**: 15
 - **Original task IDs**: [0001], [0002], [0003], [0004], [0005], [0006], [0007], [0008], [0009], [0010], [0011], [0013], [0014], [0015], [0016]
-- **Delivered tasks (from original)**:
+- **Delivered tasks (from original)**: 15
 - **Added tasks**: 1
-- **Delivered tasks (from added)**:
-- **Total delivered tasks**:
+- **Delivered tasks (from added)**: 1
+- **Total delivered tasks**: 16
