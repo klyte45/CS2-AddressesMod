@@ -1,0 +1,5 @@
+{
+  "name": "Sprint-003",
+  "description": "Address format customization feature + fix station nameref panel bug",
+  "objective": "Deliver a fully working custom address format system: data model, backend patch, frontend UI, i18n, and fix the station nameref panel visibility bug"
+}

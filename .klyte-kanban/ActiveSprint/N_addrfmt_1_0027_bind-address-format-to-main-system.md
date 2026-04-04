@@ -1,0 +1,54 @@
+# [0027] bind-address-format-to-main-system
+
+**Developed by:** 
+
+## User Story
+
+> Acting as **a developer**, I want **AdrMainSystem to expose a binding for the address format field**, so that I **the frontend can read and update the format pattern via the established binding pattern**.
+
+---
+
+## Background
+
+AdrMainSystem exposes city settings to the frontend via SetupCallBinder. A new binding for the address format field is needed following the existing pattern for other settings.
+
+---
+
+## Definition of Ready (DoR)
+
+
+
+---
+
+## Acceptance Criteria / Definition of Done (DoD)
+
+- [ ] main.setAddressFormatPattern binding added to SetupCallBinder
+- [ ] Setter treats empty string as null (clears to default)
+- [ ] Setter calls MarkRoadsDirty() and NotifyChanges() after update
+- [ ] getCurrentCitywideSettings already returns the full settings object including new field (no extra work needed)
+- [ ] Build passes
+
+---
+
+## Implementation Notes
+
+
+
+---
+
+## Risk Assessment
+
+| Risk | Likelihood | Mitigation |
+|------|-----------|------------|
+
+---
+
+## Related Tasks
+
+### Depends on
+
+- [0026]
+
+### Is dependent for
+
+
