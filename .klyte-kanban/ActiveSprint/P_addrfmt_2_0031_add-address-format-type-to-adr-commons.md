@@ -1,7 +1,7 @@
+**Start time:** 2026-04-04 01:12 -0300
 # [0031] add-address-format-type-to-adr-commons
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a frontend developer**, I want **the AdrCitywideSettings TypeScript type and NamingRulesService to include the address format field**, so that I **the frontend can type-safely read and update the address format pattern**.
