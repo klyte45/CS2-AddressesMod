@@ -1,7 +1,7 @@
+**Start time:** 2026-04-04 00:45 -0300
 # [0025] fix-station-nameref-panel-shown-for-custom-named-buildings
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a player**, I want **the name-reference panel for transport stations to be hidden when the building already has a custom name**, so that I **the info panel isn't cluttered with useless options for buildings I've already named manually**.
