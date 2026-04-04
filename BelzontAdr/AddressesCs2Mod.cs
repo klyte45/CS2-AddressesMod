@@ -48,6 +48,7 @@ namespace BelzontAdr
 
         public override void OnDispose()
         {
+            AdrNameFilesManager.Instance.Dispose();
         }
 
         public override void DoOnLoad()

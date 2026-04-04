@@ -20,9 +20,83 @@ namespace BelzontAdr
         public bool IsLoading { get; private set; }
         public event Action OnLoadingComplete;
 
+        private FileSystemWatcher watcher;
+        private DateTime lastWatcherTrigger = DateTime.MinValue;
+        private readonly object watcherLock = new();
+
         private AdrNameFilesManager()
         {
             KFileUtils.EnsureFolderCreation(NamesetsFolder);
+            SetupFileWatcher();
+        }
+
+        private void SetupFileWatcher()
+        {
+            try
+            {
+                watcher = new FileSystemWatcher(NamesetsFolder, "*.txt")
+                {
+                    IncludeSubdirectories = true,
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size
+                };
+                watcher.Created += OnFileChanged;
+                watcher.Changed += OnFileChanged;
+                watcher.Deleted += OnFileChanged;
+                watcher.Renamed += OnFileRenamed;
+                watcher.Error += OnWatcherError;
+                watcher.EnableRaisingEvents = true;
+            }
+            catch (Exception ex)
+            {
+                LogUtils.DoWarnLog($"Failed to set up FileSystemWatcher on {NamesetsFolder}: {ex.Message}");
+            }
+        }
+
+        private void OnFileChanged(object sender, FileSystemEventArgs e)
+        {
+            DebouncedReload();
+        }
+
+        private void OnFileRenamed(object sender, RenamedEventArgs e)
+        {
+            DebouncedReload();
+        }
+
+        private void OnWatcherError(object sender, ErrorEventArgs e)
+        {
+            LogUtils.DoWarnLog($"FileSystemWatcher error: {e.GetException()?.Message}");
+            try
+            {
+                watcher.EnableRaisingEvents = false;
+                watcher.Dispose();
+            }
+            catch { }
+            SetupFileWatcher();
+        }
+
+        private void DebouncedReload()
+        {
+            lock (watcherLock)
+            {
+                var now = DateTime.UtcNow;
+                if ((now - lastWatcherTrigger).TotalMilliseconds < 500) return;
+                lastWatcherTrigger = now;
+            }
+            ReloadNameFilesAsync();
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                if (watcher != null)
+                {
+                    watcher.EnableRaisingEvents = false;
+                    watcher.Dispose();
+                    watcher = null;
+                }
+            }
+            catch { }
         }
 
         public void ReloadNameFiles()
