@@ -1,3 +1,4 @@
+**End time:** 2026-04-03 23:14 -0300
 **Start time:** 2026-04-03 23:14 -0300
 # [0024] fix-ide-tsconfig-deprecation-warnings
 
@@ -22,10 +23,10 @@ Two tsconfig.json files report TypeScript 6+ deprecation warnings about 'baseUrl
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] No TypeScript deprecation warnings appear in the IDE for _Frontends/UI/main/tsconfig.json
-- [ ] No TypeScript deprecation warnings appear in the IDE for _Frontends/UI/_shared/adr-commons/tsconfig.json
-- [ ] Project still compiles correctly via MSBuild after tsconfig changes
-- [ ] rootDir is set to ./src in the main tsconfig to fix the declarationDir layout warning
+- [x] No TypeScript deprecation warnings appear in the IDE for _Frontends/UI/main/tsconfig.json
+- [x] No TypeScript deprecation warnings appear in the IDE for _Frontends/UI/_shared/adr-commons/tsconfig.json
+- [x] Project still compiles correctly via MSBuild after tsconfig changes
+- [x] rootDir is set to ./src in the main tsconfig to fix the declarationDir layout warning
 
 ---
 
