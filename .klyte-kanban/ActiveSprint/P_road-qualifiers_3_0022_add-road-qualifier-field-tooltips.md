@@ -1,7 +1,7 @@
+**Start time:** 2026-04-03 22:39 -0300
 # [0022] add-road-qualifier-field-tooltips
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a city builder**, I want **each road qualifier field to show a tooltip explaining what the field controls**, so that I **I can learn what each condition does without reading documentation**.
