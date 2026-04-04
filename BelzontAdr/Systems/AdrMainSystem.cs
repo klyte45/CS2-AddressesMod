@@ -2,12 +2,15 @@
 using Belzont.Utils;
 using Colossal;
 using Colossal.Entities;
+using Colossal.Mathematics;
 using Colossal.Serialization.Entities;
 using Game;
 using Game.Areas;
+using Game.Buildings;
 using Game.Net;
 using Game.Rendering;
 using Game.SceneFlow;
+using Game.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -169,6 +172,31 @@ namespace BelzontAdr
         public float2 GetZeroMarkerPosition()
         {
             return default;
+        }
+
+        internal string GetBuildingSideDistrictName(Entity buildingEntity, NameSystem nameSystem)
+        {
+            if (!EntityManager.TryGetComponent<Building>(buildingEntity, out var building)) return null;
+            if (!EntityManager.TryGetComponent<BorderDistrict>(building.m_RoadEdge, out var border)) return null;
+            if (border.m_Left == Entity.Null && border.m_Right == Entity.Null) return null;
+
+            Entity districtEntity;
+            if (border.m_Left == Entity.Null)
+                districtEntity = border.m_Right;
+            else if (border.m_Right == Entity.Null)
+                districtEntity = border.m_Left;
+            else if (!EntityManager.TryGetComponent<Curve>(building.m_RoadEdge, out var curve) ||
+                     !EntityManager.TryGetComponent<Game.Objects.Transform>(buildingEntity, out var transform))
+                districtEntity = border.m_Left;
+            else
+            {
+                float2 x2 = transform.m_Position.xz - MathUtils.Position(curve.m_Bezier, 0.5f).xz;
+                float2 y2 = MathUtils.Right(MathUtils.Tangent(curve.m_Bezier, 0.5f).xz);
+                districtEntity = math.dot(x2, y2) > 0f ? border.m_Right : border.m_Left;
+            }
+
+            if (districtEntity == Entity.Null) return null;
+            return nameSystem.GetRenderedLabelName(districtEntity);
         }
         #endregion
 

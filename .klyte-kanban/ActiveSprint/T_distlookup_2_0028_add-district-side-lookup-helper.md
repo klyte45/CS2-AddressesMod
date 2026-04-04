@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 01:08 -0300
 **Start time:** 2026-04-04 01:01 -0300
 # [0028] add-district-side-lookup-helper
 
@@ -22,12 +23,12 @@ To support the {district} placeholder, we need to determine which district a bui
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] GetBuildingSideDistrictName(Entity buildingEntity, NameSystem nameSystem) method exists on AdrMainSystem or a new static utility
-- [ ] Uses Building.m_RoadEdge to find the street edge, then BorderDistrict for side-aware district lookup
-- [ ] Returns null if no district found on either side
-- [ ] Returns district name string when found (via NameSystem.GetRenderedLabelName or equivalent)
-- [ ] Handles case where only one side has a district
-- [ ] Build passes
+- [x] GetBuildingSideDistrictName(Entity buildingEntity, NameSystem nameSystem) method exists on AdrMainSystem or a new static utility
+- [x] Uses Building.m_RoadEdge to find the street edge, then BorderDistrict for side-aware district lookup
+- [x] Returns null if no district found on either side
+- [x] Returns district name string when found (via NameSystem.GetRenderedLabelName or equivalent)
+- [x] Handles case where only one side has a district
+- [x] Build passes
 
 ---
 
