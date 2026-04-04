@@ -131,22 +131,29 @@ namespace BelzontAdr
             }
             var roadName = pattern.Replace("{name}", genName);
             ZonePrefab prefab = prefabSystem.GetPrefab<ZonePrefab>(zone);
-            if (!omitBrand && prefab.m_AreaType != AreaType.Residential)
+            bool hasBrandCapability = !omitBrand && prefab.m_AreaType != AreaType.Residential;
+            string brandId = hasBrandCapability ? GetBrandId(building) : null;
+
+            var customFmt = adrMainSystem?.CurrentCitySettings?.AddressFormatPattern;
+            if (!string.IsNullOrEmpty(customFmt))
             {
-                string brandId = GetBrandId(building);
-                if (brandId != null)
+                string districtName = adrMainSystem.GetBuildingSideDistrictName(building, m_nameSystem);
+                __result = Name.CustomName(ApplyCustomAddressFormat(customFmt, num.ToString(), roadName, districtName, brandId));
+                return false;
+            }
+
+            if (hasBrandCapability && brandId != null)
+            {
+                __result = NameSystem.Name.FormattedName("Assets.NAMED_ADDRESS_NAME_FORMAT", new string[]
                 {
-                    __result = NameSystem.Name.FormattedName("Assets.NAMED_ADDRESS_NAME_FORMAT", new string[]
-                    {
-                        "NAME",
-                        brandId,
-                        "ROAD",
-                        roadName,
-                        "NUMBER",
-                        num.ToString()
-                    });
-                    return false;
-                }
+                    "NAME",
+                    brandId,
+                    "ROAD",
+                    roadName,
+                    "NUMBER",
+                    num.ToString()
+                });
+                return false;
             }
             __result = NameSystem.Name.FormattedName("Assets.ADDRESS_NAME_FORMAT", new string[]
             {
@@ -156,6 +163,18 @@ namespace BelzontAdr
                 num.ToString()
             });
             return false;
+        }
+
+        private static string ApplyCustomAddressFormat(string formatPattern, string number, string street, string district, string brand)
+        {
+            string result = formatPattern
+                .Replace("{number}", number ?? "")
+                .Replace("{street}", street ?? "")
+                .Replace("{district}", district ?? "")
+                .Replace("{brand}", brand ?? "");
+            while (result.Contains("  "))
+                result = result.Replace("  ", " ");
+            return result.Trim();
         }
 
         private static string GetBrandId(Entity building)

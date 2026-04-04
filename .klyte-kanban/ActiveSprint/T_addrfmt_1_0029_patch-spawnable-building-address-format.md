@@ -1,3 +1,4 @@
+**End time:** 2026-04-04 01:11 -0300
 **Start time:** 2026-04-04 01:08 -0300
 # [0029] patch-spawnable-building-address-format
 
@@ -22,13 +23,13 @@ AdrNameSystemOverrides.GetSpawnableBuildingName already formats building address
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] When AddressFormatPattern is null/empty, behavior is unchanged (uses game FormattedName/ADDRESS_NAME_FORMAT)
-- [ ] When AddressFormatPattern is set, token substitution is applied: {number}, {street}, {district}, {brand}
-- [ ] {district} resolved via GetBuildingSideDistrictName helper
-- [ ] {brand} resolved only if brand exists, otherwise empty string
-- [ ] Consecutive extra spaces from empty optional tokens are collapsed (trim pass)
-- [ ] NAMED_ADDRESS_NAME_FORMAT path also applies custom format when set
-- [ ] Build passes
+- [x] When AddressFormatPattern is null/empty, behavior is unchanged (uses game FormattedName/ADDRESS_NAME_FORMAT)
+- [x] When AddressFormatPattern is set, token substitution is applied: {number}, {street}, {district}, {brand}
+- [x] {district} resolved via GetBuildingSideDistrictName helper
+- [x] {brand} resolved only if brand exists, otherwise empty string
+- [x] Consecutive extra spaces from empty optional tokens are collapsed (trim pass)
+- [x] NAMED_ADDRESS_NAME_FORMAT path also applies custom format when set
+- [x] Build passes
 
 ---
 
