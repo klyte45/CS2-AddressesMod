@@ -1,3 +1,4 @@
+**End time:** 2026-04-03 22:37 -0300
 **Start time:** 2026-04-03 22:36 -0300
 # [0023] fix-tristatebutton-forbid-icon
 
@@ -22,11 +23,11 @@ The Cs2TriCheckbox component uses a rotated plus.svg from assetdb://gameui/Media
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] The forbid state of Cs2TriCheckbox shows a visible icon in-game
-- [ ] The CSS mask-image for .cs2-checkmark.forbid uses coui://uil/Standard/XClose.svg
-- [ ] The rotateZ(45deg) transform is removed (XClose is already an X shape)
-- [ ] The euis-components submodule is committed before the parent project commit
-- [ ] No visual regression on the checked state
+- [x] The forbid state of Cs2TriCheckbox shows a visible icon in-game
+- [x] The CSS mask-image for .cs2-checkmark.forbid uses coui://uil/Standard/XClose.svg
+- [x] The rotateZ(45deg) transform is removed (XClose is already an X shape)
+- [x] The euis-components submodule is committed before the parent project commit
+- [x] No visual regression on the checked state
 
 ---
 
