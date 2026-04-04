@@ -1,7 +1,7 @@
+**Start time:** 2026-04-04 01:17 -0300
 # [0034] add-address-format-i18n-keys
 
-**Developed by:** 
-
+**Developed by:** Claude Sonnet 4.6 (claude-sonnet-4-6@kwytco.com.br)
 ## User Story
 
 > Acting as **a player**, I want **all address format UI labels to be properly translated**, so that I **the feature is accessible in all supported languages**.
