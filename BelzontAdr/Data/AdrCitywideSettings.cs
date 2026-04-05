@@ -13,6 +13,7 @@ namespace BelzontAdr
     public class AdrCitywideSettings : ISerializable
     {
         private const uint CURRENT_VERSION = 2;
+        private const string DEFAULT_ADDRESS_FORMAT_PATTERN = "{brand}, {number} {street} - {district}";
 
         private int maximumGeneratedGivenNames = 1;
         private int maximumGeneratedSurnames = 1;
@@ -26,7 +27,7 @@ namespace BelzontAdr
         public bool roadNameAsNameCargoStation;
         public bool surnameAtFirst;
         public AdrRoadPrefixSetting roadPrefixSetting = new();
-        private string addressFormatPattern;
+        private string addressFormatPattern = DEFAULT_ADDRESS_FORMAT_PATTERN;
 
         #region Indirect setters & public getters
 
@@ -98,6 +99,10 @@ namespace BelzontAdr
             {
                 reader.Read(out string afp);
                 addressFormatPattern = string.IsNullOrEmpty(afp) ? null : afp;
+            }
+            else
+            {
+                addressFormatPattern = DEFAULT_ADDRESS_FORMAT_PATTERN;
             }
         }
         [Obsolete]

@@ -1,6 +1,8 @@
 ﻿using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Entities;
+using Colossal.Mathematics;
+using Colossal.OdinSerializer.Utilities;
 using Game;
 using Game.Areas;
 using Game.Buildings;
@@ -8,13 +10,16 @@ using Game.Citizens;
 using Game.Common;
 using Game.Companies;
 using Game.Net;
+using Game.Objects;
 using Game.Prefabs;
 using Game.SceneFlow;
 using Game.UI;
 using Game.UI.Localization;
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Unity.Entities;
+using Unity.Mathematics;
 using static Game.UI.NameSystem;
 using AreaType = Game.Zones.AreaType;
 using CargoTransportStation = Game.Buildings.CargoTransportStation;
@@ -106,19 +111,18 @@ namespace BelzontAdr
         }
         private static bool GetStaticTransportStopName(ref Name __result, ref NameSystem __instance, ref Entity stop)
         {
-            BuildingUtils.GetAddress(entityManager, stop, out Entity entity, out int num);
-            if (GetAggregateName(out var pattern, out var genName, entity))
-            {
-                return true;
-            }
-            var roadName = pattern.Replace("{name}", genName);
+            BuildingUtils.GetAddress(entityManager, stop, out Entity roadEntity, out int num);
+            string roadName = GetAggregateName(out var pattern, out var genName, roadEntity)
+               ? Original_GetName(m_nameSystem, roadEntity).Translate()
+               : pattern.Replace("{name}", genName);
 
             var customFmt = adrMainSystem?.CurrentCitySettings?.AddressFormatPattern;
             if (!string.IsNullOrEmpty(customFmt))
             {
-                string districtName = adrMainSystem.GetBuildingSideDistrictName(stop, m_nameSystem);
+                GetDistrictForEntity(stop, num, out string districtName, out var _);
                 __result = Name.CustomName(ApplyCustomAddressFormat(customFmt, num.ToString(), roadName, districtName, null));
                 return false;
+
             }
 
             __result = NameSystem.Name.FormattedName("Assets.ADDRESS_NAME_FORMAT", new string[]
@@ -131,14 +135,55 @@ namespace BelzontAdr
             return false;
         }
 
+        private static void GetDistrictForEntity(Entity buildingEntity, int num, out string districtName, out bool found)
+        {
+            BorderDistrict border;
+            districtName = null;
+            found = false;
+            if (entityManager.TryGetComponent<Building>(buildingEntity, out var building))
+            {
+
+                if (!entityManager.TryGetComponent(building.m_RoadEdge, out border))
+                {
+                    return;
+                }
+            }
+            else if (entityManager.TryGetComponent<Attached>(buildingEntity, out var attached))
+            {
+                if (!entityManager.TryGetComponent(attached.m_Parent, out border))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            Entity district;
+            if (!entityManager.TryGetComponent<Curve>(building.m_RoadEdge, out var curve) ||
+                     !entityManager.TryGetComponent<Game.Objects.Transform>(buildingEntity, out var transform))
+            {
+                district = border.m_Left;
+            }
+            else
+            {
+                float2 x2 = transform.m_Position.xz - MathUtils.Position(curve.m_Bezier, 0.5f).xz;
+                float2 y2 = MathUtils.Right(MathUtils.Tangent(curve.m_Bezier, 0.5f).xz);
+                district = math.dot(x2, y2) > 0f ? border.m_Right : border.m_Left;
+            }
+
+            districtName = district == Entity.Null ? null : m_nameSystem.GetName(district).Translate();
+            found = true;
+            return;
+        }
+
         private static bool GetSpawnableBuildingName(ref Name __result, ref Entity building, ref Entity zone, ref bool omitBrand)
         {
-            BuildingUtils.GetAddress(entityManager, building, out Entity entity, out int num);
-            if (GetAggregateName(out var pattern, out var genName, entity))
-            {
-                return true;
-            }
-            var roadName = pattern.Replace("{name}", genName);
+            BuildingUtils.GetAddress(entityManager, building, out Entity aggregateEntity, out int num);
+            string roadName = GetAggregateName(out var pattern, out var genName, aggregateEntity)
+                ? Original_GetName(m_nameSystem, aggregateEntity).Translate()
+                : pattern.Replace("{name}", genName);
             ZonePrefab prefab = prefabSystem.GetPrefab<ZonePrefab>(zone);
             bool hasBrandCapability = !omitBrand && prefab.m_AreaType != AreaType.Residential;
             string brandId = hasBrandCapability ? GetBrandId(building) : null;
@@ -146,8 +191,8 @@ namespace BelzontAdr
             var customFmt = adrMainSystem?.CurrentCitySettings?.AddressFormatPattern;
             if (!string.IsNullOrEmpty(customFmt))
             {
-                string districtName = adrMainSystem.GetBuildingSideDistrictName(building, m_nameSystem);
-                __result = Name.CustomName(ApplyCustomAddressFormat(customFmt, num.ToString(), roadName, districtName, brandId));
+                GetDistrictForEntity(building, num, out string districtName, out var _);
+                __result = Name.CustomName(ApplyCustomAddressFormat(customFmt, num.ToString(), roadName, districtName, Name.LocalizedName(brandId).Translate()));
                 return false;
             }
 
@@ -176,6 +221,16 @@ namespace BelzontAdr
 
         private static string ApplyCustomAddressFormat(string formatPattern, string number, string street, string district, string brand)
         {
+            if (brand.IsNullOrWhitespace())
+            {
+                formatPattern = Regex.Replace(formatPattern, @"([^|}]|^)*\{brand\}([^{|]|$)*", "");
+            }
+            if (district.IsNullOrWhitespace())
+            {
+                formatPattern = Regex.Replace(formatPattern, @"([^|}]|^)*\{district\}([^{|]|$)*", "");
+            }
+            formatPattern = Regex.Replace(formatPattern, @"[|]", "");
+            formatPattern = Regex.Replace(formatPattern, @" +", " ");
             string result = formatPattern
                 .Replace("{number}", number ?? "")
                 .Replace("{street}", street ?? "")
@@ -438,7 +493,7 @@ namespace BelzontAdr
             var anyElevated = false;
             for (int i = 0; i < elements.Length; i++)
             {
-                if (entityManager.TryGetComponent<Elevation>(elements[i].m_Edge, out var elevData) && elevData.m_Elevation[0] >= 6)
+                if (entityManager.TryGetComponent<Game.Net.Elevation>(elements[i].m_Edge, out var elevData) && elevData.m_Elevation[0] >= 6)
                 {
                     anyElevated = true;
                 }

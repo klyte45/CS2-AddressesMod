@@ -181,7 +181,7 @@
     <Content Include="WriteEverywhere\.Resources\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Update="i18n\i18n.csv">
+    <None Update="i18n\*.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <EmbeddedResource Include="changelog.md" />

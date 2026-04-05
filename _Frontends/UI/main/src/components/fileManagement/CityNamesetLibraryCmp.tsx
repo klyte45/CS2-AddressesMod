@@ -34,11 +34,11 @@ export const CityNamesetLibraryCmp = () => {
     const [availableNamesets, setAvailableNamesets] = useState({ subtrees: {}, rootContent: [] })
     const [currentScreen, setCurrentScreen] = useState(Screen.DEFAULT)
     const [lastSourceImport, setLastSourceImport] = useState(Screen.DEFAULT)
-    const [namesetBeingImported, setNamesetBeingImported] = useState(undefined as ExtendedSimpleNameEntry)
-    const [namesetBeingDeleted, setNamesetBeingDeleted] = useState(undefined as ExtendedSimpleNameEntry)
-    const [namesetBeingEdited, setNamesetBeingEdited] = useState(undefined as ExtendedSimpleNameEntry)
-    const [lastMessage, setLastMessage] = useState(undefined as string | JSX.Element)
-    const [isExporting, setIsExporting] = useState(undefined as boolean)
+    const [namesetBeingImported, setNamesetBeingImported] = useState(undefined! as ExtendedSimpleNameEntry)
+    const [namesetBeingDeleted, setNamesetBeingDeleted] = useState(undefined! as ExtendedSimpleNameEntry)
+    const [namesetBeingEdited, setNamesetBeingEdited] = useState(undefined! as ExtendedSimpleNameEntry)
+    const [lastMessage, setLastMessage] = useState(undefined! as string | JSX.Element)
+    const [isExporting, setIsExporting] = useState(undefined! as boolean)
 
     NamesetService.doOnCityNamesetsUpdated(() => updateNamesets());
 

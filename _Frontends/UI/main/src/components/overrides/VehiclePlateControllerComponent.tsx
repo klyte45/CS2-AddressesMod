@@ -22,9 +22,9 @@ const options = [
 
 export const VehiclePlateControllerComponent = ({ type }: Props) => {
 
-  const [controllerData, setControllerData] = useState(undefined as ConstructorObjectToInstancesObject<typeof BasePlatesController>);
+  const [controllerData, setControllerData] = useState<ConstructorObjectToInstancesObject<typeof BasePlatesController>>();
   const [_, setBuildIdx] = useState(0 as any);
-  const bindingsRef = useRef<ConstructorObjectToInstancesObject<typeof BasePlatesController>>(undefined);
+  const bindingsRef = useRef<ConstructorObjectToInstancesObject<typeof BasePlatesController>>();
   const [previewPlates, setPreviewPlates] = useState([] as string[]);
 
   const refreshPreview = async () => {
@@ -47,7 +47,7 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
       bindingsRef.current && Object.values(bindingsRef.current).forEach(x => x.dispose());
     };
   }, []);
-
+  if (!controllerData) return <></>;
   const setDigitSource = (i: number, type: number) => {
     controllerData.FlagsCarNumber.set(controllerData.FlagsCarNumber.value & ~(type == 2 ? 0 : 1 << i) | (type == 2 ? 1 << i : 0));
     controllerData.FlagsLocal.set(controllerData.FlagsLocal.value & ~(type == 1 ? 0 : 1 << i) | (type == 1 ? 1 << i : 0));
@@ -91,8 +91,13 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
               value={{ v: (controllerData.FlagsLocal.value & (1 << digitFlagId) ? 1 : controllerData.FlagsCarNumber.value & (1 << digitFlagId) ? 2 : 0) }}
               onChange={x => setDigitSource(digitFlagId, x.v)} />
             <CharsAllowedInput controllerData={controllerData} i={i} />
-            <Cs2CheckboxWithLine title={translate("vehiclePlate.allowRandomizeDigitLabel")} isChecked={() => (controllerData.FlagsRandomized.value & (1 << i)) != 0} 
-            onValueToggle={(x) => controllerData.FlagsRandomized.set(controllerData.FlagsRandomized.value & ~(x ? 0 : 1 << i) | (x ? 1 << i : 0))} />
+            <button className={(controllerData.FlagsRandomized.value & (1 << i)) != 0 ? "positiveBtn" : "blackBtn"}
+              onClick={() => {
+                let x = (controllerData.FlagsRandomized.value & (1 << i)) == 0;
+                controllerData.FlagsRandomized.set(controllerData.FlagsRandomized.value & ~(x ? 0 : 1 << i) | (x ? 1 << i : 0))
+              }}
+            >{translate("vehiclePlate.allowRandomizeDigitLabel")}</button>
+
           </div>;
         }
         )
@@ -100,8 +105,8 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
     </div>
     {previewPlates.length > 0 && <div className="vehiclePlatePreview">
       <h3>{translate("vehiclePlate.preview")}</h3>
-      <div style={{ display: "flex", gap: "10rem", flexWrap: "wrap" }}>
-        {previewPlates.map((plate, i) => <span key={i} style={{ fontFamily: "monospace", fontSize: "120%", padding: "2rem 6rem", backgroundColor: "var(--panelColorDarker)" }}>{plate}</span>)}
+      <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap" }}>
+        {previewPlates.map((plate, i) => <div key={i} className="neutralBtn">{plate}</div>)}
       </div>
     </div>}
   </>;
@@ -123,7 +128,7 @@ const CharsAllowedInput = ({ controllerData, i }: {
       onRevert(); return;
     }
     const newArr = controllerData.LettersAllowed.value;
-    newArr[i] = Object.keys([...typingText].reduce((p, n) => { p[n] = true; return p; }, {})).join("");
+    newArr[i] = Object.keys([...typingText].reduce((p, n) => { p[n] = true; return p; }, {} as Record<string, boolean>)).join("");
     controllerData.LettersAllowed.set(newArr);
     refTextArea.current.blur()
   }

@@ -20,7 +20,7 @@ export const AddressesInfoOptionsComponent = ({ onChange }: Props) => {
 
     useEffect(() => {
         loadOptions(entity)
-    }, [entity.Index])
+    }, [entity.Index, selectedInfo.titleSection$.value])
 
     const loadOptions = async (entity: Entity) => {
         if (!entity) {

@@ -14,8 +14,15 @@ const MOCK_BRAND = "SuperMart";
 
 const TOKENS = ["{number}", "{street}", "{district}", "{brand}"] as const;
 
-function applyPreview(pattern: string): string {
+function applyPreview(pattern: string, withBrand: boolean, withDistrict: boolean): string {
     if (!pattern) return "";
+    if (!withBrand) {
+        pattern = pattern.replace(/([^|}]|^)*\{brand\}([^{|]|$)*/g, "");
+    }
+    if (!withDistrict) {
+        pattern = pattern.replace(/([^|}]|^)*\{district\}([^{|]|$)*/g, "");
+    }
+    pattern = pattern.replace(/[|]/g, "").replace(/ +/g, " ");
     let result = pattern
         .replace("{number}", MOCK_NUMBER)
         .replace("{street}", MOCK_STREET)
@@ -57,7 +64,6 @@ export const AddressFormatTab = ({ currentSettings }: Props): JSX.Element => {
         NamingRulesService.setAddressFormatPattern("");
     };
 
-    const preview = applyPreview(currentPattern);
 
     return <>
         <Cs2FormLine title={translate("overrideSettings.addressFormat.patternLabel")}>
@@ -94,18 +100,22 @@ export const AddressFormatTab = ({ currentSettings }: Props): JSX.Element => {
         </Cs2FormLine>
 
         <Cs2FormLine title={translate("overrideSettings.addressFormat.previewLabel")}>
-            <div style={{ padding: "4rem 8rem", background: "rgba(0,0,0,0.2)", borderRadius: "2rem", fontStyle: "italic", opacity: 0.85 }}>
-                {preview || translate("overrideSettings.addressFormat.previewEmpty")}
-            </div>
+            {
+                [...new Array(4)].map((_, i) => {
+                    const withBrand = i % 2 === 0;
+                    const withDistrict = i < 2;
+                    const preview = applyPreview(currentPattern, withBrand, withDistrict);
+                    return <div key={i} style={{ padding: "4rem 8rem", background: "rgba(0,0,0,0.2)", borderRadius: "2rem", opacity: 0.85 }}>
+                        {preview || translate("overrideSettings.addressFormat.previewEmpty")}
+                    </div>;
+                })
+            }
         </Cs2FormLine>
 
         <Cs2FormLine title="">
-            <div
-                onClick={handleReset}
-                style={{ cursor: "pointer", color: "rgba(200,200,255,0.8)", textDecoration: "underline", fontSize: "11rem" }}
-            >
+            <button className="negativeBtn" onClick={handleReset}>
                 {translate("overrideSettings.addressFormat.resetToDefault")}
-            </div>
+            </button>
         </Cs2FormLine>
     </>;
 };
