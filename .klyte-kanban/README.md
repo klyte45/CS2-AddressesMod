@@ -40,7 +40,7 @@ The subfolder `_auxFiles/` contains shared auxiliary files that can help with th
 The `changelog.md` file should follow the following format:
 
 ```markdown
-# vX.Y.ZrW - DD-MMM-YY
+# vX.Y.ZrW (DD-MMM-YY)
 - Behavior change 1
 - Behavior change 2
 - New feature 1
@@ -57,9 +57,10 @@ The `changelog.md` file should follow the following format:
 #### Explaining sections from the changelog
 
 - The top section (before the first `## FROM`) describes the changes introduced in the current version.
-- The `## FROM` section describes the changes from the previous version to the current version as it was previously on the changelog, just replacing the `#` header with `## FROM` to indicate that these are the changes that were in the previous version before the current one.
-  - NOTE: This section shall only be kept if the previous version was released up to 1 month ago. After that, it should be removed to keep the changelog concise and focused on recent changes.
-  - The `## FROM` token is used to allow automated tools to easily identify and remove the previous version's changes when publishing to Paradox Mods, since the changelog there should only contain the current version's changes.
+- About previous versions:
+    - If the previous version was released more than 1 month ago, the file shall be cleaned before start.
+    - If the previous version was released within 1 month, the old `#` that starts the file shall be replaced with `## FROM`.
+    - The `## FROM` token is used to allow automated tools to easily identify and remove the previous version's changes when publishing to Paradox Mods, since the changelog there should only contain the current version's changes.
 - The order of changes inside the version shall be: Behavior changes (changes that break compatibility or change existing features), new features, bug fixes. Important changes can be highlighted with bold section markers. No emojis.
 - MMM shall always be 3 letters, capitalized. Example: `15-JUN-24`. Month names always in English, regardless of locale.  
 
