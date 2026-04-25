@@ -5,7 +5,6 @@ using Colossal.Serialization.Entities;
 using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
-using UnityEngine;
 using Hash128 = Colossal.Hash128;
 
 
@@ -219,10 +218,14 @@ namespace BelzontAdr
                     }
                     else
                     {
-                        var leadingZeroes = m_buildingIdLength - Mathf.FloorToInt(Mathf.Log10(buildingSerial)) - 1;
-                        for (int i = 0; i < leadingZeroes; i++)
+                        var value = buildingSerial;
+                        for (int i = 0; i < m_buildingIdLength - 1; i++)
                         {
-                            result.Append(new Unicode.Rune('0'));
+                            if (value < 10)
+                            {
+                                result.Append(new Unicode.Rune('0'));
+                            }
+                            value /= 10;
                         }
                         result.Append(buildingSerial);
                     }
