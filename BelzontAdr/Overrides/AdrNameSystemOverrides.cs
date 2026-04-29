@@ -223,11 +223,11 @@ namespace BelzontAdr
         {
             if (brand.IsNullOrWhitespace())
             {
-                formatPattern = Regex.Replace(formatPattern, @"([^|}]|^)*\{brand\}([^{|]|$)*", "");
+                formatPattern = new Regex(@"([^|}]|^)*\{brand\}([^{|]|$)*").Replace(formatPattern, "");
             }
             if (district.IsNullOrWhitespace())
             {
-                formatPattern = Regex.Replace(formatPattern, @"([^|}]|^)*\{district\}([^{|]|$)*", "");
+                formatPattern = new Regex(@"([^|}]|^)*\{district\}([^{|]|$)*").Replace(formatPattern, "");
             }
             formatPattern = Regex.Replace(formatPattern, @"[|]", "");
             formatPattern = Regex.Replace(formatPattern, @" +", " ");
