@@ -1,5 +1,8 @@
-# v0.2.4r0 (06-APR-26)
+# v0.2.4r1 (29-APR-26)
+- Fixed issues with regex pattern cache that could cause address parsing errors.
+- Fixed leading zeroes not appearing on vehicle prefix numbers.
 
+## FROM v0.2.4r0 (06-APR-26)
 - **Custom address format:** new "Address Format" tab in Override Settings lets you define a custom address pattern using tokens {number}, {street}, {district}, {brand}; clickable token chips insert at cursor and a live preview updates in real time; applies to both buildings and transport stops
 - Added 3 new road qualifier rule conditions: elevation state (bridge/tunnel/at road level), car lane count range, and road width range
 - Road qualifier condition fields now show tooltips describing what each setting controls
