@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Unity.Entities;
 using Unity.Mathematics;
+using static Colossal.IO.AssetDatabase.AtlasFrame;
 using static Game.UI.NameSystem;
 using AreaType = Game.Zones.AreaType;
 using CargoTransportStation = Game.Buildings.CargoTransportStation;
@@ -184,8 +185,7 @@ namespace BelzontAdr
             string roadName = GetAggregateName(out var pattern, out var genName, aggregateEntity)
                 ? Original_GetName(m_nameSystem, aggregateEntity).Translate()
                 : pattern.Replace("{name}", genName);
-            ZonePrefab prefab = prefabSystem.GetPrefab<ZonePrefab>(zone);
-            bool hasBrandCapability = !omitBrand && prefab.m_AreaType != AreaType.Residential;
+            bool hasBrandCapability = !omitBrand && entityManager.TryGetComponent<ZoneData>(zone, out var prefab) && prefab.m_AreaType != AreaType.Residential;
             string brandId = hasBrandCapability ? GetBrandId(building) : null;
 
             var customFmt = adrMainSystem?.CurrentCitySettings?.AddressFormatPattern;

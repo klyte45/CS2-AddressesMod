@@ -1,4 +1,5 @@
-﻿using Belzont.Utils;
+﻿using Belzont.Interfaces;
+using Belzont.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -140,7 +141,7 @@ namespace BelzontAdr
                 AdrNameFile file = new(name, fileContents.Select(x => x?.Trim()).Where(x => !string.IsNullOrEmpty(x)).ToArray(), filename);
                 result[file.Id] = file;
                 filesToRemove.Remove(file.Id);
-                LogUtils.DoLog($"LOADED Files at {path} ({filename} - GUID: {file.Id}) QTT: {result[file.Id].Values.Count}");
+                if (BasicIMod.DebugMode) LogUtils.DoLog($"LOADED Files at {path} ({filename} - GUID: {file.Id}) QTT: {result[file.Id].Values.Count}");
             }
             foreach (var id in filesToRemove)
             {

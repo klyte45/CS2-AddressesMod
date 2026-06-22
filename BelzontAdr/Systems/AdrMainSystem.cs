@@ -2,15 +2,12 @@
 using Belzont.Utils;
 using Colossal;
 using Colossal.Entities;
-using Colossal.Mathematics;
 using Colossal.Serialization.Entities;
 using Game;
 using Game.Areas;
-using Game.Buildings;
+using Game.Common;
 using Game.Net;
-using Game.Rendering;
 using Game.SceneFlow;
-using Game.UI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,6 +23,7 @@ namespace BelzontAdr
         private AdrDistrictsSystem districtsSystem;
         private Queue<Action> actionsToGoOnUpdate;
         private AdrNamesetSystem namesetSystem;
+        private EntityQuery m_LabelQuery;
 
         public AdrCitywideSettings CurrentCitySettings { get; private set; } = new();
 
@@ -98,7 +96,20 @@ namespace BelzontAdr
             districtsSystem = World.GetOrCreateSystemManaged<AdrDistrictsSystem>();
             actionsToGoOnUpdate = new Queue<Action>();
             namesetSystem = World.GetOrCreateSystemManaged<AdrNamesetSystem>();
-
+            m_LabelQuery = base.GetEntityQuery(new EntityQueryDesc[]
+            {
+                new EntityQueryDesc
+                {
+                    All = new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<LabelMaterial>()
+                    },
+                    None = new ComponentType[]
+                    {
+                        ComponentType.ReadOnly<Deleted>()
+                    }
+                }
+            });
         }
 
         private void EnqueueToRunOnUpdate(Action a)
@@ -112,14 +123,14 @@ namespace BelzontAdr
         private void ResetRoadsCache()
         {
             if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Run action typeof(AggregateMeshSystem).GetMethod(\"OnDictionaryChanged\",...)");
-            typeof(AggregateMeshSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags).Invoke(World.GetExistingSystemManaged<AggregateMeshSystem>(), new object[0]);
+            EntityManager.AddComponent<Updated>(m_LabelQuery);
             isDirtyRoads = false;
         }
 
         private void ResetDistrictsCache()
         {
             if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Run action typeof(AreaBufferSystem).GetMethod(\"OnDictionaryChanged\", ...)");
-            typeof(AreaBufferSystem).GetMethod("OnDictionaryChanged", ReflectionUtils.allFlags).Invoke(World.GetExistingSystemManaged<AreaBufferSystem>(), new object[0]);
+            EntityManager.AddComponent<Updated>(m_LabelQuery);
             isDirtyDistricts = false;
         }
 
