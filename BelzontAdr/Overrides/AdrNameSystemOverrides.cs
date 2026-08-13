@@ -72,6 +72,12 @@ namespace BelzontAdr
         private static NameSystem m_nameSystem;
         private static AdrHighwayRoutesSystem m_adrHighwayRoutesSystem;
 
+        private static readonly Regex RemoveBrandSegment =
+            new(@"([^|}]|^)*\{brand\}([^{|]|$)*", RegexOptions.Compiled);
+        private static readonly Regex RemoveDistrictSegment =
+            new(@"([^|}]|^)*\{district\}([^{|]|$)*", RegexOptions.Compiled);
+        private static bool s_loggedAddressFormatFailure;
+
 
         public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
         {
@@ -221,24 +227,35 @@ namespace BelzontAdr
 
         private static string ApplyCustomAddressFormat(string formatPattern, string number, string street, string district, string brand)
         {
-            if (brand.IsNullOrWhitespace())
+            try
             {
-                formatPattern = new Regex(@"([^|}]|^)*\{brand\}([^{|]|$)*").Replace(formatPattern, "");
+                if (brand.IsNullOrWhitespace())
+                {
+                    formatPattern = RemoveBrandSegment.Replace(formatPattern, _ => string.Empty);
+                }
+                if (district.IsNullOrWhitespace())
+                {
+                    formatPattern = RemoveDistrictSegment.Replace(formatPattern, _ => string.Empty);
+                }
+                formatPattern = formatPattern.Replace("|", "");
+                string result = formatPattern
+                    .Replace("{number}", number ?? "")
+                    .Replace("{street}", street ?? "")
+                    .Replace("{district}", district ?? "")
+                    .Replace("{brand}", brand ?? "");
+                while (result.Contains("  "))
+                    result = result.Replace("  ", " ");
+                return result.Trim();
             }
-            if (district.IsNullOrWhitespace())
+            catch (Exception e)
             {
-                formatPattern = new Regex(@"([^|}]|^)*\{district\}([^{|]|$)*").Replace(formatPattern, "");
+                if (!s_loggedAddressFormatFailure)
+                {
+                    s_loggedAddressFormatFailure = true;
+                    LogUtils.DoErrorLog($"ApplyCustomAddressFormat failed; using fallback. Pattern='{formatPattern}' Exception={e}");
+                }
+                return $"{number ?? ""} {street ?? ""}".Trim();
             }
-            formatPattern = Regex.Replace(formatPattern, @"[|]", "");
-            formatPattern = Regex.Replace(formatPattern, @" +", " ");
-            string result = formatPattern
-                .Replace("{number}", number ?? "")
-                .Replace("{street}", street ?? "")
-                .Replace("{district}", district ?? "")
-                .Replace("{brand}", brand ?? "");
-            while (result.Contains("  "))
-                result = result.Replace("  ", " ");
-            return result.Trim();
         }
 
         private static string GetBrandId(Entity building)
