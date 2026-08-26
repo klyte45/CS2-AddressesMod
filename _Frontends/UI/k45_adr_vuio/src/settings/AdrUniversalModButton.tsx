@@ -1,4 +1,5 @@
 import { VanillaComponentResolver } from "@klyte45/vuio-commons";
+import { FocusDisabled } from "cs2/input";
 import { AdrSettingsPanelId } from "./AdrSettingsPanelId";
 import styles from "./AdrUniversalModButton.module.scss";
 
@@ -8,12 +9,10 @@ export const AdrUniversalModButton = () => {
     };
 
     return (
-        <button type="button" className={styles.modButton} onClick={openSettings}>
-            <img className={styles.icon} src="coui://adr.k45/UI/images/ADR.svg" alt="" />
-            <div className={styles.text}>
-                <div className={styles.title}>Addresses & Names</div>
-                <div className={styles.description}>Mod for CS2</div>
-            </div>
-        </button>
+        <FocusDisabled>
+            <button type="button" className={styles.modButton} onClick={openSettings}>
+                <img className={styles.icon} src="coui://adr.k45/UI/images/ADR.svg" alt="" />
+            </button>
+        </FocusDisabled>
     );
 };

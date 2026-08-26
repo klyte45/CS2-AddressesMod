@@ -98,6 +98,8 @@ type NavEntry =
 
 Map to `listItems`: sections as `{ section: title }`, tabs as `{ displayName, value }`. Right pane renders the selected subtab component.
 
+**Do not** add EUIS-style screen **title + subtitle** above tab content (e.g. `DefaultPanelScreen` / `overrideSettings.title` + `overrideSettings.subtitle`). Root `TabBar` labels and nested list labels already identify the active tab; the right pane is **form content only**. Same rule for namesets, road prefix, region, and future settings tabs.
+
 ### Region horizontal tabs
 
 Replace `Tab` / `TabList` / `TabPanel` from `react-tabs` with two buttons or a small local tab strip. Do not pull `react-tabs` into VUIO webpack.

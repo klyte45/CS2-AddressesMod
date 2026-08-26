@@ -82,11 +82,11 @@ export const RoadMarkSettings = () => {
             onChange={x => routesSystem.InfoPanel_PylonMaterial.set(x).then(x => setBuildIdx(buildIdx + 1))}
             value={routesSystem.InfoPanel_PylonMaterial.value}
         /></div>} />
-        <VR.InfoRow left={<>{translate(LocalizationStrings.poleHeight)}</>} right={<VW.FloatInputStandalone className={editorModule.input}
+        <VR.InfoRow left={<>{translate(LocalizationStrings.poleHeight)}</>} right={<VW.FloatSlider
             onChange={x => routesSystem.InfoPanel_PylonHeight.set(x).then(x => setBuildIdx(buildIdx + 1))}
             value={routesSystem.InfoPanel_PylonHeight.value}
-            style={{ maxWidth: "150rem", textAlign: "right" }}
             min={0.25} max={10}
+            fractionDigits={2}
         />} />
         <VR.InfoRow left={<>{translate(LocalizationStrings.useDoublePole)}</>} right={<VW.Checkbox
             onChange={x => routesSystem.InfoPanel_PylonCount.set(x ? 2 : 1).then(x => setBuildIdx(buildIdx + 1))}
@@ -94,11 +94,11 @@ export const RoadMarkSettings = () => {
         />} />
         {
             routesSystem.InfoPanel_PylonCount.value == 2 &&
-            <VR.InfoRow left={<>{translate(LocalizationStrings.poleSpacing)}</>} right={<VW.FloatInputStandalone className={editorModule.input}
+            <VR.InfoRow left={<>{translate(LocalizationStrings.poleSpacing)}</>} right={<VW.FloatSlider
                 onChange={x => routesSystem.InfoPanel_PylonSpacing.set(x).then(x => setBuildIdx(buildIdx + 1))}
                 value={routesSystem.InfoPanel_PylonSpacing.value}
-                style={{ maxWidth: "150rem", textAlign: "right" }}
                 min={0.05} max={3}
+                fractionDigits={2}
             />} />
         }
         <div style={{ height: "20rem" }} />
@@ -163,11 +163,20 @@ function mountMetadataOptionsTool({ validOptions, setStoredValues, storedValues 
                 value={storedValues[x[0]]}
             /></div>} />
             :
-            <VR.InfoRow left={<div style={style}>{engine.translate(x[1].localization)}</div>} right={<VW.IntInputStandalone className={editorModule.input}
-                value={storedValues[x[0]]} onChange={y => setStoredValues(x[0], y * 1)}
-                min={x[1].min} max={x[1].max}
-                style={{ maxWidth: "150rem", textAlign: "right" }}
-            />} />
+            <VR.InfoRow left={<div style={style}>{engine.translate(x[1].localization)}</div>} right={
+                typeof x[1].min === "number" && typeof x[1].max === "number"
+                    ? <VW.IntSlider
+                        value={storedValues[x[0]]}
+                        onChange={(y) => setStoredValues(x[0], y)}
+                        min={x[1].min}
+                        max={x[1].max}
+                    />
+                    : <VW.IntInputStandalone className={editorModule.input}
+                        value={storedValues[x[0]]} onChange={y => setStoredValues(x[0], y * 1)}
+                        min={x[1].min} max={x[1].max}
+                        style={{ maxWidth: "150rem", textAlign: "right" }}
+                    />
+            } />
         )}
     </VR.InfoSection>;
 }

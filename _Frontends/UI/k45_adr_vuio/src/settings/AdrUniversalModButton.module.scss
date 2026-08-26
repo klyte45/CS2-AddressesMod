@@ -1,41 +1,20 @@
 .modButton {
     display: flex;
-    flex-direction: row;
     align-items: center;
-    width: 100%;
-    min-height: 72rem;
-    padding: 8rem 12rem;
-    margin-bottom: 4rem;
-    border: 2rem solid var(--menuBorderColor2, rgba(255, 255, 255, 0.15));
-    background-color: var(--menuPanel2, rgba(20, 27, 34, 0.85));
-    color: var(--normalTextColor, #eaf1f4);
-    text-align: left;
-}
-
-.modButton:hover {
-    background-color: var(--menuHoverColor, rgba(255, 255, 255, 0.08));
-}
-
-.icon {
-    width: 48rem;
-    height: 48rem;
-    margin-right: 12rem;
+    justify-content: center;
+    width: 64rem;
+    height: 64rem;
+    padding: 6rem;
+    border: 2rem solid var(--menuBorderColor2);
+    background-color: var(--menuPanel2);
     flex-shrink: 0;
 }
 
-.text {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    min-width: 0;
+.modButton:hover {
+    background-color: var(--menuHoverColor);
 }
 
-.title {
-    font-size: calc(16rem * var(--fontScale, 1));
-    color: var(--normalTextColor, #eaf1f4);
-}
-
-.description {
-    font-size: calc(12rem * var(--fontScale, 1));
-    color: var(--normalTextColorDim, rgba(234, 241, 244, 0.7));
+.icon {
+    width: 100%;
+    height: 100%;
 }

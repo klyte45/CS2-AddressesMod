@@ -1,5 +1,5 @@
 import { AdrCitywideSettings, NamingRulesService } from "@klyte45/adr-commons";
-import { FormLine } from "@klyte45/vuio-commons";
+import { FormLine, VanillaWidgets } from "@klyte45/vuio-commons";
 import { useRef, useState } from "react";
 import { translate } from "../../translate";
 import styles from "../../styles/addressFormatTab.module.scss";
@@ -33,8 +33,10 @@ function applyPreview(pattern: string, withBrand: boolean, withDistrict: boolean
 }
 
 export const AddressFormatTab = ({ currentSettings }: Props) => {
-    const inputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
     const [localValue, setLocalValue] = useState<string | undefined>(undefined);
+    const StringInput = VanillaWidgets.instance.StringInputField;
+    const editorModule = VanillaWidgets.instance.editorItemModule;
 
     const currentPattern = localValue !== undefined ? localValue : (currentSettings?.AddressFormatPattern ?? "");
 
@@ -66,21 +68,20 @@ export const AddressFormatTab = ({ currentSettings }: Props) => {
 
     return <>
         <FormLine title={translate("overrideSettings.addressFormat.patternLabel")}>
-            <input
-                ref={inputRef}
-                type="text"
-                className={styles.patternInput}
+            <StringInput
+                ref={inputRef as any}
                 value={currentPattern}
-                onChange={(e) => handleChange(e.target.value)}
-                placeholder={translate("overrideSettings.addressFormat.patternPlaceholder")}
+                onChange={handleChange}
+                className={editorModule.input}
+                maxLength={256}
             />
         </FormLine>
         <FormLine title={translate("overrideSettings.addressFormat.tokensLabel")}>
             <div className={styles.tokenRow}>
                 {TOKENS.map((token) => (
-                    <div key={token} className={styles.tokenChip} onClick={() => insertToken(token)}>
+                    <button key={token} type="button" className={`neutralBtn ${styles.tokenChip}`} onClick={() => insertToken(token)}>
                         {token}
-                    </div>
+                    </button>
                 ))}
             </div>
         </FormLine>

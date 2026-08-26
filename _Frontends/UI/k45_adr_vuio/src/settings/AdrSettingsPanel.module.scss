@@ -9,6 +9,7 @@
     flex-grow: 1;
     min-height: 0;
     height: 100%;
+    color: var(--menuText1Normal);
 }
 
 .cityGate {
@@ -26,6 +27,6 @@
     justify-content: center;
     width: 100%;
     height: 100%;
-    color: var(--normalTextColorDim, rgba(234, 241, 244, 0.7));
-    font-size: calc(14rem * var(--fontScale, 1));
+    color: var(--normalTextColorDim);
+    font-size: calc(14rem * var(--fontScale));
 }

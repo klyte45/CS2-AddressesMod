@@ -7,7 +7,7 @@ import {
     VanillaWidgets,
 } from "@klyte45/vuio-commons";
 import { DropdownItem } from "cs2/bindings";
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { translate } from "../../translate";
 import styles from "../../styles/vehiclePlateController.module.scss";
 
@@ -80,9 +80,7 @@ export const VehicleSerialControllerComponent = ({ type }: Props) => {
             />
         </FormLine>
         <FormLine title={translate("vehiclePlate.digitsQuantity")}>
-            <VW.IntInputStandalone
-                className={editorModule.input}
-                style={{ maxWidth: "80rem", textAlign: "right" }}
+            <VW.IntSlider
                 min={1}
                 max={9}
                 value={controllerData.LettersAllowed.value?.length ?? 1}
@@ -119,45 +117,32 @@ export const VehicleSerialControllerComponent = ({ type }: Props) => {
 };
 
 const CharsAllowedInput = ({ controllerData, i }: { controllerData: SerialBindings; i: number }) => {
-    const refTextArea = useRef() as MutableRefObject<HTMLTextAreaElement>;
+    const VW = VanillaWidgets.instance;
+    const StringInput = VW.StringInputField;
+    const editorModule = VW.editorItemModule;
+    const [typingText, setTypingText] = useState(controllerData.LettersAllowed.value[i] ?? "");
 
     useEffect(() => {
-        if (refTextArea.current) {
-            refTextArea.current.value = controllerData.LettersAllowed.value[i];
-        }
+        setTypingText(controllerData.LettersAllowed.value[i] ?? "");
     }, [controllerData.LettersAllowed.value[i]]);
 
-    const onSuccessChange = () => {
-        const typingText = refTextArea.current.value;
+    const commit = () => {
         if (!typingText) {
-            onRevert();
+            setTypingText(controllerData.LettersAllowed.value[i] ?? "");
             return;
         }
         const newArr = [...controllerData.LettersAllowed.value];
         newArr[i] = Object.keys([...typingText].reduce((p, n) => { p[n] = true; return p; }, {} as Record<string, boolean>)).join("");
         controllerData.LettersAllowed.set(newArr);
-        refTextArea.current.blur();
-    };
-
-    const onRevert = () => {
-        refTextArea.current.value = controllerData.LettersAllowed.value[i];
     };
 
     return (
-        <textarea
-            ref={refTextArea}
-            className={styles.lettersSet}
-            onBlur={onRevert}
-            onKeyDown={(x) => {
-                if (x.key == "Escape") {
-                    (x.target as HTMLTextAreaElement).blur();
-                    x.preventDefault();
-                    onRevert();
-                } else if (x.key == "Enter") {
-                    x.preventDefault();
-                    onSuccessChange();
-                }
-            }}
+        <StringInput
+            className={`${editorModule.input} ${editorModule.multilineText} ${styles.lettersSet}`}
+            value={typingText}
+            multiline={6}
+            onChange={setTypingText}
+            onChangeEnd={commit}
         />
     );
 };

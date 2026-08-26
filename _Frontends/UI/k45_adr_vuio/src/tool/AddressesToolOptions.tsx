@@ -103,8 +103,9 @@ const AdrRoadMarkerToolOptions = () => {
         </VCR.Section>
         <VCR.Section title={translate(LocalizationStrings.poleHeight)}>
             <FocusDisabled>
-                <VW.FloatInputStandalone style={{ flexShrink: 1, textAlign: "right", width: "auto", flexGrow: 2, marginRight: "7rem" }} className={editorModule.input}
+                <VW.FloatSlider
                     min={0.25} max={10}
+                    fractionDigits={2}
                     value={routesSystem.Tool_PylonHeight.value} onChange={(x) => routesSystem.Tool_PylonHeight.set(x).then(x => setBuildIdx(buildIdx + 1))} />
             </FocusDisabled>
         </VCR.Section>
@@ -120,9 +121,10 @@ const AdrRoadMarkerToolOptions = () => {
         {routesSystem.Tool_PylonCount.value > 1 &&
             <VCR.Section title={translate(LocalizationStrings.poleSpacing)}>
                 <FocusDisabled>
-                    <VW.FloatInputStandalone style={{ flexShrink: 1, textAlign: "right", width: "auto", flexGrow: 2, marginRight: "7rem" }} className={editorModule.input}
+                    <VW.FloatSlider
                         value={routesSystem.Tool_PylonSpacing.value} onChange={(x) => routesSystem.Tool_PylonSpacing.set(x).then(x => setBuildIdx(buildIdx + 1))}
                         max={3} min={0.05}
+                        fractionDigits={2}
                     />
                 </FocusDisabled>
             </VCR.Section>
@@ -187,8 +189,16 @@ function mountMetadataOptionsTool({ validOptions, setStoredValues, storedValues 
         </> : <>
             <VCR.Section title={engine.translate(x[1].localization)}>
                 <FocusDisabled>
-                    <VW.IntInputStandalone style={{ flexShrink: 4, textAlign: "right", maxWidth: "105rem", width: "auto", flexGrow: 2, marginRight: "7rem" }} className={editorModule.input}
-                        value={storedValues[x[0]]} onChange={y => setStoredValues(x[0], y * 1)} min={x[1].min} max={x[1].max} />
+                    {typeof x[1].min === "number" && typeof x[1].max === "number"
+                        ? <VW.IntSlider
+                            value={storedValues[x[0]]}
+                            onChange={(y) => setStoredValues(x[0], y)}
+                            min={x[1].min}
+                            max={x[1].max}
+                        />
+                        : <VW.IntInputStandalone style={{ flexShrink: 4, textAlign: "right", maxWidth: "105rem", width: "auto", flexGrow: 2, marginRight: "7rem" }} className={editorModule.input}
+                            value={storedValues[x[0]]} onChange={y => setStoredValues(x[0], y * 1)} min={x[1].min} max={x[1].max} />
+                    }
                 </FocusDisabled>
             </VCR.Section>
         </>)}

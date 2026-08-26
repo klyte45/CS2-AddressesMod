@@ -1,5 +1,6 @@
 import { AdrMainService } from "@klyte45/adr-commons";
 import { ErrorBoundary, VanillaComponentResolver } from "@klyte45/vuio-commons";
+import { FocusDisabled } from "cs2/input";
 import { getModule } from "cs2/modding";
 import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { translate } from "./translate";
@@ -68,7 +69,7 @@ export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
     };
 
     const header = (
-        <>
+        <FocusDisabled>
             <PanelTitleBar icon="coui://adr.k45/UI/images/ADR.svg">
                 Addresses & Names
             </PanelTitleBar>
@@ -84,7 +85,7 @@ export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
                     </Tab>
                 ))}
             </TabBar>
-        </>
+        </FocusDisabled>
     );
 
     const tabBody = (() => {
@@ -110,9 +111,11 @@ export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
                 header={header}
                 onClose={onClose}
             >
-                <ErrorBoundary>
-                    <div className={styles.panelBody}>{body}</div>
-                </ErrorBoundary>
+                <FocusDisabled>
+                    <ErrorBoundary>
+                        <div className={styles.panelBody}>{body}</div>
+                    </ErrorBoundary>
+                </FocusDisabled>
             </GamePanel>
         </div>
     );

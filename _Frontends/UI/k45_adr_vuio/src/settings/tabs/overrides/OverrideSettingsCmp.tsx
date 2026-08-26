@@ -70,24 +70,27 @@ export const OverrideSettingsCmp = () => {
         setInnerContextSimpleFiles([defaultSettingRoadByDistrict(), ...files]);
     };
 
+    // Locale keys match EUIS Cs2SideTabs: i18nTitlePrefix + tabId → overrideSettings.tabCitizen (no dot).
+    const tabLabel = (tab: OverrideTabs) => translate(`overrideSettings.tab${tab}`);
+
     const listItems = useMemo((): ListItem[] => [
-        { displayName: translate("overrideSettings.tab.Citizen"), value: OverrideTabs.Citizen },
-        { displayName: translate("overrideSettings.tab.RoadsDistricts"), value: OverrideTabs.RoadsDistricts },
-        { displayName: translate("overrideSettings.tab.AddressFormat"), value: OverrideTabs.AddressFormat },
+        { displayName: tabLabel(OverrideTabs.Citizen), value: OverrideTabs.Citizen },
+        { displayName: tabLabel(OverrideTabs.RoadsDistricts), value: OverrideTabs.RoadsDistricts },
+        { displayName: tabLabel(OverrideTabs.AddressFormat), value: OverrideTabs.AddressFormat },
         { section: translate("overrideSettings.subCategory.vehicleIdentifiers") },
-        { displayName: translate("overrideSettings.tab.RoadPlates"), value: OverrideTabs.RoadPlates },
-        { displayName: translate("overrideSettings.tab.RailPlates"), value: OverrideTabs.RailPlates },
-        { displayName: translate("overrideSettings.tab.WaterPlates"), value: OverrideTabs.WaterPlates },
-        { displayName: translate("overrideSettings.tab.AirPlates"), value: OverrideTabs.AirPlates },
+        { displayName: tabLabel(OverrideTabs.RoadPlates), value: OverrideTabs.RoadPlates },
+        { displayName: tabLabel(OverrideTabs.RailPlates), value: OverrideTabs.RailPlates },
+        { displayName: tabLabel(OverrideTabs.WaterPlates), value: OverrideTabs.WaterPlates },
+        { displayName: tabLabel(OverrideTabs.AirPlates), value: OverrideTabs.AirPlates },
         { section: translate("overrideSettings.subCategory.roadVehicleSerial") },
-        { displayName: translate("overrideSettings.tab.BusSerial"), value: OverrideTabs.BusSerial },
-        { displayName: translate("overrideSettings.tab.TaxiSerial"), value: OverrideTabs.TaxiSerial },
-        { displayName: translate("overrideSettings.tab.PoliceSerial"), value: OverrideTabs.PoliceSerial },
-        { displayName: translate("overrideSettings.tab.FiretruckSerial"), value: OverrideTabs.FiretruckSerial },
-        { displayName: translate("overrideSettings.tab.AmbulanceSerial"), value: OverrideTabs.AmbulanceSerial },
-        { displayName: translate("overrideSettings.tab.GarbageSerial"), value: OverrideTabs.GarbageSerial },
-        { displayName: translate("overrideSettings.tab.PostalSerial"), value: OverrideTabs.PostalSerial },
-        { displayName: translate("overrideSettings.tab.DeathcareSerial"), value: OverrideTabs.DeathcareSerial },
+        { displayName: tabLabel(OverrideTabs.BusSerial), value: OverrideTabs.BusSerial },
+        { displayName: tabLabel(OverrideTabs.TaxiSerial), value: OverrideTabs.TaxiSerial },
+        { displayName: tabLabel(OverrideTabs.PoliceSerial), value: OverrideTabs.PoliceSerial },
+        { displayName: tabLabel(OverrideTabs.FiretruckSerial), value: OverrideTabs.FiretruckSerial },
+        { displayName: tabLabel(OverrideTabs.AmbulanceSerial), value: OverrideTabs.AmbulanceSerial },
+        { displayName: tabLabel(OverrideTabs.GarbageSerial), value: OverrideTabs.GarbageSerial },
+        { displayName: tabLabel(OverrideTabs.PostalSerial), value: OverrideTabs.PostalSerial },
+        { displayName: tabLabel(OverrideTabs.DeathcareSerial), value: OverrideTabs.DeathcareSerial },
     ], []);
 
     const content = (() => {
@@ -125,19 +128,13 @@ export const OverrideSettingsCmp = () => {
     if (!currentSettings) return null;
 
     return (
-        <div className={styles.overrideRoot}>
-            <div className={styles.header}>
-                <h2>{translate("overrideSettings.title")}</h2>
-                <div className={styles.subtitle}>{translate("overrideSettings.subtitle")}</div>
-            </div>
-            <ListWithContentTab
-                className={styles.overrideNav}
-                listItems={listItems}
-                selectedKey={currentTab}
-                onChangeSelection={(key) => setCurrentTab(key as OverrideTabs)}
-            >
-                <div className={styles.overrideBody}>{content}</div>
-            </ListWithContentTab>
-        </div>
+        <ListWithContentTab
+            className={styles.overrideNav}
+            listItems={listItems}
+            selectedKey={currentTab}
+            onChangeSelection={(key) => setCurrentTab(key as OverrideTabs)}
+        >
+            <div className={styles.overrideBody}>{content}</div>
+        </ListWithContentTab>
     );
 };

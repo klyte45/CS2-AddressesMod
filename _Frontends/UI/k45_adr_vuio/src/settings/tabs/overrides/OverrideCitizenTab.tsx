@@ -12,7 +12,6 @@ type Props = {
 
 export const OverrideCitizenTab = ({ simpleFiles, indexedSimpleFiles, currentSettings }: Props) => {
     const VW = VanillaWidgets.instance;
-    const editorModule = VW.editorItemModule;
 
     return <>
         <NamesetSelectLine
@@ -40,9 +39,7 @@ export const OverrideCitizenTab = ({ simpleFiles, indexedSimpleFiles, currentSet
             />
         </FormLine>
         <FormLine title={translate("overrideSettings.maximumGeneratedGivenNames")}>
-            <VW.IntInputStandalone
-                className={editorModule.input}
-                style={{ maxWidth: "80rem", textAlign: "right" }}
+            <VW.IntSlider
                 min={1}
                 max={5}
                 value={currentSettings.MaximumGeneratedGivenNames ?? 1}
@@ -50,9 +47,7 @@ export const OverrideCitizenTab = ({ simpleFiles, indexedSimpleFiles, currentSet
             />
         </FormLine>
         <FormLine title={translate("overrideSettings.maximumGeneratedSurnames")}>
-            <VW.IntInputStandalone
-                className={editorModule.input}
-                style={{ maxWidth: "80rem", textAlign: "right" }}
+            <VW.IntSlider
                 min={1}
                 max={5}
                 value={currentSettings.MaximumGeneratedSurnames ?? 1}

@@ -5,10 +5,9 @@ import {
     MultiUIValueBinding,
     MultiUIValueBindingTools,
     VanillaWidgets,
-    replaceArgs,
 } from "@klyte45/vuio-commons";
 import { DropdownItem } from "cs2/bindings";
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { translate } from "../../translate";
 import styles from "../../styles/vehiclePlateController.module.scss";
 
@@ -28,6 +27,45 @@ type Props = {
 type PlateBindings = ConstructorObjectToInstancesObject<typeof BasePlatesController>;
 
 const digitSourceOptions = [0, 1, 2];
+
+const monthDropdownItems: DropdownItem<number>[] = [...Array(12)].map((_, i) => ({
+    value: i,
+    displayName: { __Type: LocElementType.String, value: engine.translate("Common.MONTH:" + i) },
+}));
+
+const MonthsFromEpochField = ({ value, onChange }: { value: number; onChange: (v: number) => void }) => {
+    const VW = VanillaWidgets.instance;
+    const NumberDD = VW.DropdownField<number>();
+    const editorModule = VW.editorItemModule;
+    const safeValue = Math.max(0, value ?? 0);
+    const month = safeValue % 12;
+    const year = Math.floor(safeValue / 12);
+
+    useEffect(() => {
+        if ((value ?? 0) < 0) {
+            onChange(0);
+        }
+    }, [value, onChange]);
+
+    return (
+        <div className={styles.monthYearRow}>
+            <div className={styles.monthDropdown}>
+                <NumberDD
+                    items={monthDropdownItems}
+                    value={month}
+                    onChange={(m) => onChange(year * 12 + m)}
+                />
+            </div>
+            <span className={styles.monthYearSep}>/</span>
+            <VW.IntInputStandalone
+                className={`${editorModule.input} ${styles.yearInput}`}
+                min={0}
+                value={year}
+                onChange={(y) => onChange(Math.max(0, y) * 12 + month)}
+            />
+        </div>
+    );
+};
 
 export const VehiclePlateControllerComponent = ({ type }: Props) => {
     const [controllerData, setControllerData] = useState<PlateBindings>();
@@ -74,16 +112,8 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
     };
 
     return <>
-        <FormLine
-            title={translate("vehiclePlate.monthsOffsetForGenerator")}
-            subtitle={replaceArgs(translate("vehiclePlate.monthsOffsetForGenerator.subTitleTemplate"), {
-                value: engine.translate("Common.MONTH:" + (controllerData.MonthsFromEpochOffset.value % 12))
-                    + "/" + Math.floor(controllerData.MonthsFromEpochOffset.value / 12),
-            })}
-        >
-            <VW.IntInputStandalone
-                className={editorModule.input}
-                style={{ maxWidth: "120rem", textAlign: "right" }}
+        <FormLine title={translate("vehiclePlate.monthsOffsetForGenerator")}>
+            <MonthsFromEpochField
                 value={controllerData.MonthsFromEpochOffset.value ?? 0}
                 onChange={(x) => controllerData.MonthsFromEpochOffset.set(x)}
             />
@@ -98,9 +128,7 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
             />
         </FormLine>
         <FormLine title={translate("vehiclePlate.digitsQuantity")}>
-            <VW.IntInputStandalone
-                className={editorModule.input}
-                style={{ maxWidth: "80rem", textAlign: "right" }}
+            <VW.IntSlider
                 min={1}
                 max={9}
                 value={controllerData.LettersAllowed.value?.length ?? 1}
@@ -160,45 +188,32 @@ export const VehiclePlateControllerComponent = ({ type }: Props) => {
 };
 
 const CharsAllowedInput = ({ controllerData, i }: { controllerData: PlateBindings; i: number }) => {
-    const refTextArea = useRef() as MutableRefObject<HTMLTextAreaElement>;
+    const VW = VanillaWidgets.instance;
+    const StringInput = VW.StringInputField;
+    const editorModule = VW.editorItemModule;
+    const [typingText, setTypingText] = useState(controllerData.LettersAllowed.value[i] ?? "");
 
     useEffect(() => {
-        if (refTextArea.current) {
-            refTextArea.current.value = controllerData.LettersAllowed.value[i];
-        }
+        setTypingText(controllerData.LettersAllowed.value[i] ?? "");
     }, [controllerData.LettersAllowed.value[i]]);
 
-    const onSuccessChange = () => {
-        const typingText = refTextArea.current.value;
+    const commit = () => {
         if (!typingText) {
-            onRevert();
+            setTypingText(controllerData.LettersAllowed.value[i] ?? "");
             return;
         }
         const newArr = [...controllerData.LettersAllowed.value];
         newArr[i] = Object.keys([...typingText].reduce((p, n) => { p[n] = true; return p; }, {} as Record<string, boolean>)).join("");
         controllerData.LettersAllowed.set(newArr);
-        refTextArea.current.blur();
-    };
-
-    const onRevert = () => {
-        refTextArea.current.value = controllerData.LettersAllowed.value[i];
     };
 
     return (
-        <textarea
-            ref={refTextArea}
-            className={styles.lettersSet}
-            onBlur={onRevert}
-            onKeyDown={(x) => {
-                if (x.key == "Escape") {
-                    (x.target as HTMLTextAreaElement).blur();
-                    x.preventDefault();
-                    onRevert();
-                } else if (x.key == "Enter") {
-                    x.preventDefault();
-                    onSuccessChange();
-                }
-            }}
+        <StringInput
+            className={`${editorModule.input} ${editorModule.multilineText} ${styles.lettersSet}`}
+            value={typingText}
+            multiline={6}
+            onChange={setTypingText}
+            onChangeEnd={commit}
         />
     );
 };

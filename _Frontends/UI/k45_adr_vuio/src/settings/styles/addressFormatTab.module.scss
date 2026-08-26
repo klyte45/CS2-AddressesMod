@@ -4,30 +4,18 @@
 }
 
 .tokenChip {
-    cursor: pointer;
-    padding: 2rem 8rem;
     margin-right: 4rem;
     margin-bottom: 4rem;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 4rem;
     font-family: monospace;
+    text-transform: none;
     font-size: 12rem;
-    user-select: none;
-}
-
-.patternInput {
-    width: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    padding: 4rem 8rem;
-    border: 1rem solid rgba(255, 255, 255, 0.2);
-    border-radius: 2rem;
 }
 
 .previewRow {
     padding: 4rem 8rem;
     margin-bottom: 4rem;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--panelColorNormal);
     border-radius: 2rem;
+    color: var(--menuText1Normal);
     opacity: 0.85;
 }
