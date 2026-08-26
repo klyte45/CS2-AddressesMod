@@ -61,3 +61,19 @@ This pack is **documentation only**. It does not migrate product code. A later i
 | EUIS iframe shell | `gamePanelComponents` + `centerLeftLayout` (TransportationOverview pattern) |
 | `MainSideTabMenuComponent` | GamePanel `Panel` + side list (`ListWithContentTab` pattern) |
 | `translate` → `K45::ADR.main[...]` | **Same keys** (settings UI may keep main namespace) |
+
+## Agent rules (when implementing from this pack)
+
+Follow project Cursor rules; this pack does not override them:
+
+| Rule | Implication for this migration |
+|------|--------------------------------|
+| `frontend-mcp-research` / `backend-research` | Research game UI / Managed APIs via **kcs2m MCP only** — do not browse game install or extracted UI dumps |
+| `frontend-cohtml` | No CSS `gap` / Grid; prefer rem + patterns already in `_Frontends`; ask before new web features |
+| `i18n-entries` | **Never** edit `BelzontAdr/i18n/i18n.csv` — new strings go in `*_entries.txt` (7 columns) or locale `.md` |
+| `build-workflow` | Agents may `npm run build` frontend; ask the user to compile the C# solution |
+| `klyte-kanban` | This pack lives under `RefsLibrary/` only; do not create board tasks unless asked |
+
+## Open questions
+
+None — all product decisions in **Confirmed decisions** were settled (AskQuestion rounds). Revisit only if implementation uncovers a new blocker; then add a subject block here before coding around it.

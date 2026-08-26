@@ -2,9 +2,16 @@
 
 ## Confirmed i18n decision
 
-**Keep `K45::ADR.main[...]` keys** during the migration. No CSV churn required for cutover.
+**Keep `K45::ADR.main[...]` keys** during the migration. No locale CSV edits required for cutover if existing keys cover the ported UI.
 
 Optional rename to `K45::ADR.settings[...]` is a **future follow-up only** (not part of big-bang).
+
+Agents must follow `.cursor/rules/i18n-entries.mdc`:
+
+- **Never** edit `BelzontAdr/i18n/i18n.csv`, `i18n.xlsm`, or locale CSVs — humans merge via Excel macros.
+- **New short strings** → append `BelzontAdr/i18n/{feature}_entries.txt` (7 tab-separated columns).
+- **Long-form bodies** → `BelzontAdr/i18n/{langCode}/{key}.md` with frontmatter `key:`.
+- Do **not** pass fallbacks to `translate` / `engine.translate` for new entries unless the user explicitly asks.
 
 ## Current namespaces
 
@@ -13,7 +20,7 @@ Optional rename to `K45::ADR.settings[...]` is a **future follow-up only** (not 
 | EUIS `main` | `main/src/utility/translate.ts` | `K45::ADR.main[${key}]` |
 | VUIO contextual | `k45_adr_vuio/src/utility/translate.ts` | `K45::ADR.vuio[${key}]` |
 
-CSV source: `BelzontAdr/i18n/*.csv` (and any packaging that copies them).
+Locale source of truth for humans: `BelzontAdr/i18n/*.csv` (agents only write `*_entries.txt` / lang `.md`).
 
 ## Settings UI translate helper
 
@@ -26,7 +33,7 @@ Options (pick one in implementation):
 
 Recommended: option 1 for minimal diff from current main components.
 
-Missing-key tracking via `window.K45_MISSING_I18N` can remain.
+Missing-key tracking via `window.K45_MISSING_I18N` can remain. Call `translate(key)` **without** English fallbacks for new keys.
 
 ## Keys that must keep working
 
@@ -34,7 +41,7 @@ All keys currently used under `main` — including but not limited to:
 
 - Shell: `loadACityWarningH2`, root tab titles (`namesetManagement.title`, `overrideSettings.title`, `roadPrefixSettings.title`, `regionSettings.title`)
 - Nameset flows: `cityNamesetsLibrary.*`, `namesetsLibrary.*`, `githubLibrary.*`, `githubListing.*` (rate-limit / error strings), `namesetsImport.*`, `namesetEditor.*`, `namesetDelete.*`, …
-- GitHub error modal buttons: reuse `githubLibrary.visitRepository` (or add a dedicated Cancel key under `githubListing.*` if none exists)
+- GitHub error modal buttons: reuse `githubLibrary.visitRepository` (or add a dedicated Cancel key via `*_entries.txt` under `githubListing.*` if none exists — never edit CSV)
 - Overrides: `overrideSettings.*`, `vehicleSerial.*`, plate strings
 - Road prefix: `roadPrefixSettings.*`
 - Region: `regionSettings.*`, highway / city editor keys
@@ -45,7 +52,7 @@ All keys currently used under `main` — including but not limited to:
 
 If later renaming to `K45::ADR.settings[...]`:
 
-1. CSV: duplicate or move keys
+1. Propose key moves via `*_entries.txt` / human CSV merge — **do not** edit `i18n.csv` in-agent
 2. Replace settings `translate.ts` namespace
 3. Grep for `ADR.main[` leftovers in settings folder
 4. Keep contextual `ADR.vuio` unchanged
@@ -73,5 +80,6 @@ If later renaming to `K45::ADR.settings[...]`:
 - [ ] Settings `translate` still resolves `K45::ADR.main[...]`
 - [ ] Contextual VUIO still uses `K45::ADR.vuio[...]`
 - [ ] ADR.svg and outsideConnections.svg still packaged
-- [ ] No new CSV required for cutover
+- [ ] Cutover needs no CSV edits; any new Cancel/etc. keys landed only via `*_entries.txt`
+- [ ] New `translate` calls have no fallbacks
 - [ ] Changelog mentions Universal Mod Menu location for players who looked for EUIS app

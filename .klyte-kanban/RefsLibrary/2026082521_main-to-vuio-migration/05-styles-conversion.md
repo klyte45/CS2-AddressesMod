@@ -33,13 +33,16 @@
 
 ## Rules for implementers
 
+Cohtml / Gameface (see `.cursor/rules/frontend-cohtml.mdc`) — unsupported CSS is often **silently ignored**:
+
 1. **No global class leakage** into game UI — always CSS modules for custom ADR settings styles.
-2. **Prefer game variables** over hard-coded colors. When unsure, query via `kcs2m_css_lookup` (property name) against game `index.css`.
-3. **Keep rem units** for most internal layout (match existing VUIO). Exception: settings panel outer size uses viewport units — **`width: 80vw; height: 70vh`** (see [03](03-shell-and-umm.md)); revisit if Gameface handles `vh`/`vw` poorly.
-4. **Do not** import `euis-components/src/styles/cs2-form-style.scss` into VUIO.
-5. **react-select** container rules in `main.scss` die with react-select — replace with vanilla dropdown styling.
-6. **react-tabs** selectors in `regionEditor.scss` must be rewritten for the new tab control.
-7. Prefer `centerLeftLayout` / GamePanel layout classes over absolute positioning. Inline styles are fine for one-off gaps inside the panel, but reusable spacing goes in modules.
+2. **Prefer game variables** over hard-coded colors. When unsure, query via `kcs2m_css_lookup` (property name). Do not browse game `index.css` on disk as a substitute for MCP.
+3. **Keep rem units** for most internal layout (match existing VUIO). Outer settings size may use **`width: 80vw; height: 70vh`** (see [03](03-shell-and-umm.md)); `vh` already appears in vuio-commons (`FilePickerDialog`). Revisit / ask if Gameface misbehaves.
+4. **Do not** use CSS **`gap` / `row-gap` / `column-gap`**, **`display: grid` / `grid-*`**, or Flex `order`. Space children with **margins** (or existing layout classes), not flex/grid gap.
+5. **Do not** import `euis-components/src/styles/cs2-form-style.scss` into VUIO.
+6. **react-select** container rules in `main.scss` die with react-select — replace with vanilla dropdown styling.
+7. **react-tabs** selectors in `regionEditor.scss` must be rewritten for the new tab control.
+8. Prefer `centerLeftLayout` / GamePanel layout classes over absolute positioning. One-off **spacing** via margins/padding in the panel is fine; reusable spacing goes in modules. Ask before introducing CSS/JS features not already used in `_Frontends`.
 
 ## Collision / specificity risks
 

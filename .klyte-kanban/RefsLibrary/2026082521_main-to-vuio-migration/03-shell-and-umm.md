@@ -152,7 +152,7 @@ Sizing (target for a large settings surface):
 | Height | **`70vh`** | Viewport-relative; apply on the settings `Panel` (or its root wrapper) |
 | Width | **`80vw`** | Same |
 
-This is the **initial size contract** for implementers. It may be tuned later during development (e.g. clamp min/max, or switch to rem if Gameface viewport units misbehave) — revisit in UI polish, do not block M0 on perfect fit.
+This is the **initial size contract** for implementers. `vh` is already used in vuio-commons (`FilePickerDialog` at `40vh`), so viewport units are an established `_Frontends` pattern — still may be tuned later (clamp min/max, or rem) if layout misbehaves. Do not block M0 on perfect fit.
 
 Prefer setting size on the ADR panel root (CSS module) rather than fighting `centerLeftLayout` alone; keep the layout wrapper for GamePanel hosting, then size the inner `Panel`.
 

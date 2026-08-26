@@ -40,7 +40,7 @@ _Frontends/UI/k45_adr_vuio/src/
       …
 ```
 
-Shared services remain in `@klyte45/adr-commons` (after EUIS retarget — [08](08-shared-libs.md)).
+Shared services: prefer **Path A** — inline under `settings/` or `src/adr/` after `main` is gone ([08](08-shared-libs.md)). Path B keeps `@klyte45/adr-commons` only if retargeted off EUIS.
 
 Suggested new vuio-commons widgets (if needed globally):
 

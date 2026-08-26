@@ -55,8 +55,8 @@ Search ADR for:
 |------|--------|
 | `main/package.json` | Gone with folder |
 | Root scripts referencing `@k45/adr-main` | Remove |
-| `k45_adr_vuio` deps | Ensure adr-commons + vuio-commons only (no euis) |
-| adr-commons EUIS tarball deps | Clean per [08](08-shared-libs.md) |
+| `k45_adr_vuio` deps | **Path A:** vuio-commons only (adr sources inlined). **Path B:** adr-commons + vuio-commons. Never euis |
+| adr-commons package | Delete if Path A; else strip EUIS tarball deps per [08](08-shared-libs.md) |
 
 ## Player-facing / docs
 

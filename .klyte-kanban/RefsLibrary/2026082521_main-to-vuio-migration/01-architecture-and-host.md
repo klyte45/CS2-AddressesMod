@@ -32,15 +32,16 @@ flowchart TB
     UMM -->|"toggleGamePanel"| GPR[GamePanelRenderer]
     GPR --> Settings[AdrSettings GamePanel]
     VuioMod2 --> Contextual[selection / editor / tools]
-    Settings --> Commons2[adr-commons]
-    Contextual --> Commons2
-    Commons2 --> CSharp2["C# k45::adr.* bindables"]
+    Settings --> AdrDomain["adr domain (inlined or package)"]
+    Contextual --> AdrDomain
+    AdrDomain --> CSharp2["C# k45::adr.* bindables"]
   end
 ```
 
 - **One** UI module: `k45_adr_vuio`
 - Settings become an **additive** surface inside that module
 - EUIS is **not** required; `main` is deleted from shipping
+- Prefer **inlining** former `adr-commons` into the VUIO module after `main` is gone ([08](08-shared-libs.md)); package Path B is optional
 
 ## Registration today vs target
 
@@ -149,7 +150,7 @@ Do **not** recreate `MainSideTabMenuComponent` (EUIS icon rail). Do **not** use 
 
 ## Binding contracts stay stable
 
-Do not rename C# prefixes as part of this migration. Services in `adr-commons` continue to call `k45::adr.*`. UI host change must be transparent to C# systems.
+Do not rename C# prefixes as part of this migration. ADR domain services (inlined or package) continue to call `k45::adr.*`. UI host change must be transparent to C# systems. Backend research of game Managed APIs, if needed, goes through **kcs2m backend MCP** only.
 
 ## Related files
 
