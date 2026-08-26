@@ -10,10 +10,10 @@ ADR settings opens from Universal Mod Menu via GamePanel; four root tabs with pl
 
 - **Sprint number**: 004
 - **Start date**: 2026-08-25 23:03 -0300
-- **End date**:
+- **End date**: 2026-08-25 23:07 -0300
 - **Original tasks**: 03
 - **Original task IDs**: [0036], [0037], [0038]
-- **Delivered tasks (from original)**:
+- **Delivered tasks (from original)**: 3
 - **Added tasks**: 0
-- **Delivered tasks (from added)**:
-- **Total delivered tasks**:
+- **Delivered tasks (from added)**: 0
+- **Total delivered tasks**: 3

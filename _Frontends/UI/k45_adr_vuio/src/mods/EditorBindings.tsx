@@ -34,7 +34,7 @@ export const EditorBindings = () => {
     }, [])
 
 
-    const setCustomName = async (x: ChangeEvent<PropsEllipsesTextInput>) => {
+    const setCustomName = async (x: { target: { value: string } }) => {
         if (entity) await EditorUISystemService.setEntityCustomName(toEntityTyped(entity), x.target.value);
         return updateEntityData(entity);
     };
