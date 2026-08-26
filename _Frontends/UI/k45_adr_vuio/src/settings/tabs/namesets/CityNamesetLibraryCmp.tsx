@@ -1,12 +1,17 @@
-import {
+﻿import {
     ExtendedSimpleNameEntry,
     NamesetService,
 } from "@klyte45/adr-commons";
-import { FilePickerDialog, ListWithContentTab } from "@klyte45/vuio-commons";
+import {
+    FilePickerDialog,
+    ListActionTypeArray,
+    ListWithContentTab,
+    VanillaComponentResolver,
+} from "@klyte45/vuio-commons";
+import { ConfirmationDialog, Portal } from "cs2/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { translate } from "../../translate";
 import styles from "../../styles/namesetLibrary.module.scss";
-import { NamesetDeletingCmp } from "./NamesetDeletingCmp";
 import { NamesetEditorCmp } from "./NamesetEditorCmp";
 import {
     generateGitHubNamesetDataProvider,
@@ -16,34 +21,33 @@ import {
 } from "./namesetGitHubDataProvider";
 import { NamesetGitHubErrorDialog } from "./NamesetGitHubErrorDialog";
 import { NamesetImportingCmp } from "./NamesetImportingCmp";
-import { NamesetViewingCmp } from "./NamesetViewingCmp";
 import { namesetDisplayName } from "./namesetUtils";
 import { NamesetWordsContainer } from "./NamesetWordsContainer";
-
+const i_importFromDisk = "coui://uil/Standard/PaperWithArrow.svg";
+const i_importFromGitHub = "coui://adr.k45/UI/images/GitHub.svg";
+const i_createNameset = "coui://uil/Standard/Plus.svg";
+const i_openLibraryFolder = "coui://uil/Standard/Folder.svg";
 enum Screen {
     DEFAULT,
     IMPORTING_NAMESET,
     AWAITING_ACTION,
-    DELETE_CONFIRM,
     EDIT_NAMESET,
-    VIEWING_NAMESET,
 }
-
 export const CityNamesetLibraryCmp = () => {
+    const FocusDisabled = VanillaComponentResolver.instance.FOCUS_DISABLED;
+    const buttonClass = VanillaComponentResolver.instance.toolButtonTheme.button;
     const [availableNamesets, setAvailableNamesets] = useState([] as ExtendedSimpleNameEntry[]);
     const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
     const [currentScreen, setCurrentScreen] = useState(Screen.DEFAULT);
     const [namesetBeingImported, setNamesetBeingImported] = useState(undefined! as ExtendedSimpleNameEntry);
-    const [namesetBeingDeleted, setNamesetBeingDeleted] = useState(undefined! as ExtendedSimpleNameEntry);
+    const [namesetBeingDeleted, setNamesetBeingDeleted] = useState(null as ExtendedSimpleNameEntry | null);
     const [namesetBeingEdited, setNamesetBeingEdited] = useState(undefined! as ExtendedSimpleNameEntry);
-    const [lastMessage, setLastMessage] = useState(undefined as string | JSX.Element | undefined);
+    const [exportedPath, setExportedPath] = useState(null as string | null);
+    const [exportFailed, setExportFailed] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
-
     const [diskPickerOpen, setDiskPickerOpen] = useState(false);
     const [githubPickerOpen, setGithubPickerOpen] = useState(false);
     const [githubError, setGithubError] = useState(null as GitHubPickerError | null);
-    const [isLibraryLoading, setIsLibraryLoading] = useState(false);
-
     const updateNamesets = useCallback(() => {
         NamesetService.listCityNamesets().then((namesets) => {
             const sorted = [...namesets].sort((a, b) =>
@@ -56,18 +60,15 @@ export const CityNamesetLibraryCmp = () => {
             });
         });
     }, []);
-
     useEffect(() => {
         updateNamesets();
         NamesetService.doOnCityNamesetsUpdated(updateNamesets);
         return () => NamesetService.offCityNamesetsUpdated();
     }, [updateNamesets]);
-
     const selectedNameset = useMemo(
         () => availableNamesets.find((x) => x.IdString === selectedId),
         [availableNamesets, selectedId],
     );
-
     const listItems = useMemo(
         () => availableNamesets.map((n) => ({
             displayName: namesetDisplayName(n),
@@ -75,64 +76,41 @@ export const CityNamesetLibraryCmp = () => {
         })),
         [availableNamesets],
     );
-
     const goToEdit = (x?: ExtendedSimpleNameEntry) => {
         setNamesetBeingEdited(x ?? { ValuesAlternative: [], Values: [], Name: "<?>", IdString: null as any });
         setCurrentScreen(Screen.EDIT_NAMESET);
     };
-
-    const goToView = (x: ExtendedSimpleNameEntry) => {
-        setNamesetBeingEdited(x);
-        setCurrentScreen(Screen.VIEWING_NAMESET);
-    };
-
-    const goToDelete = (x: ExtendedSimpleNameEntry) => {
-        setNamesetBeingDeleted(x);
-        setCurrentScreen(Screen.DELETE_CONFIRM);
-    };
-
     const doDelete = async (x: ExtendedSimpleNameEntry) => {
+        setNamesetBeingDeleted(null);
         setCurrentScreen(Screen.AWAITING_ACTION);
         await NamesetService.deleteNamesetFromCity(x.IdString);
         setCurrentScreen(Screen.DEFAULT);
     };
-
     const doExport = async (x: ExtendedSimpleNameEntry) => {
         setIsExporting(true);
         const exportResult = await NamesetService.exportFromCityToLibrary(x.IdString);
+        setIsExporting(false);
         if (exportResult == null) {
-            setIsExporting(false);
-            setLastMessage(<div style={{ color: "var(--warningColor)" }}>{translate("cityNamesetsLibrary.anErrorHasOccurredOnExporting")}</div>);
-            setTimeout(() => setLastMessage(undefined), 7000);
+            setExportFailed(true);
         } else {
-            setIsExporting(false);
-            setLastMessage(
-                <div>
-                    {translate("cityNamesetsLibrary.fileExportedToLocation")}
-                    <br />
-                    <div style={{ color: "var(--positiveColor)" }}>{exportResult}</div>
-                </div>,
-            );
-            setTimeout(() => setLastMessage(undefined), 7000);
+            setExportedPath(exportResult);
         }
     };
-
     const doImportNameset = async (namesetData: ExtendedSimpleNameEntry, namesetNameImport: string) => {
         setCurrentScreen(Screen.AWAITING_ACTION);
         await NamesetService.sendNamesetForCity(namesetNameImport, namesetData.Values, namesetData.ValuesAlternative);
         setCurrentScreen(Screen.DEFAULT);
     };
-
     const doUpdate = async (namesetData: Omit<ExtendedSimpleNameEntry, "ChecksumString">) => {
         setCurrentScreen(Screen.AWAITING_ACTION);
+        const name = namesetData.Name || "<?>";
         if (namesetData.IdString) {
-            await NamesetService.updateNameset(namesetData.IdString, namesetData.Name, namesetData.Values, namesetData.ValuesAlternative);
+            await NamesetService.updateNameset(namesetData.IdString, name, namesetData.Values, namesetData.ValuesAlternative);
         } else {
-            await NamesetService.sendNamesetForCity(namesetData.Name, namesetData.Values, namesetData.ValuesAlternative);
+            await NamesetService.sendNamesetForCity(name, namesetData.Values, namesetData.ValuesAlternative);
         }
         setCurrentScreen(Screen.DEFAULT);
     };
-
     const handleDiskImportPick = async (path?: string) => {
         if (!path) return;
         setCurrentScreen(Screen.AWAITING_ACTION);
@@ -144,7 +122,6 @@ export const CityNamesetLibraryCmp = () => {
             setCurrentScreen(Screen.DEFAULT);
         }
     };
-
     const handleGithubImportPick = async (encodedPath?: string) => {
         if (!encodedPath) return;
         setCurrentScreen(Screen.AWAITING_ACTION);
@@ -156,24 +133,11 @@ export const CityNamesetLibraryCmp = () => {
             setCurrentScreen(Screen.DEFAULT);
         }
     };
-
-    const handleReloadLibrary = async () => {
-        const loading = await NamesetService.reloadLibraryNamesets();
-        if (loading) {
-            setIsLibraryLoading(true);
-            NamesetService.onLibraryReloaded(() => {
-                setIsLibraryLoading(false);
-                NamesetService.offLibraryReloaded();
-            });
-        }
-    };
-
     const diskDataProvider = useCallback(
         (folder: string, allowedExtension: string) =>
             NamesetService.listNamesetFolderFiles(folder, allowedExtension),
         [],
     );
-
     const githubDataProvider = useCallback(async (folder: string, allowedExtension: string) => {
         const { items, error } = await generateGitHubNamesetDataProvider(folder, allowedExtension);
         if (error) {
@@ -182,7 +146,41 @@ export const CityNamesetLibraryCmp = () => {
         }
         return items;
     }, []);
-
+    const listActions: ListActionTypeArray = [
+        {
+            isContext: false,
+            onSelect: () => setDiskPickerOpen(true),
+            src: i_importFromDisk,
+            tooltip: translate("cityNamesetsLibrary.importFromLibrary"),
+            focusKey: FocusDisabled,
+            className: buttonClass,
+        },
+        {
+            isContext: false,
+            onSelect: () => setGithubPickerOpen(true),
+            src: i_importFromGitHub,
+            tooltip: translate("cityNamesetsLibrary.importFromGitHub"),
+            focusKey: FocusDisabled,
+            className: buttonClass,
+        },
+        {
+            isContext: false,
+            onSelect: () => goToEdit(),
+            src: i_createNameset,
+            tooltip: translate("cityNamesetsLibrary.createNewNameset"),
+            focusKey: FocusDisabled,
+            className: buttonClass,
+        },
+        null,
+        {
+            isContext: false,
+            onSelect: () => { void NamesetService.goToDiskSimpleNamesFolder(); },
+            src: i_openLibraryFolder,
+            tooltip: translate("namesetsLibrary.goToLibraryFolder"),
+            focusKey: FocusDisabled,
+            className: buttonClass,
+        },
+    ];
     if (currentScreen === Screen.AWAITING_ACTION) {
         return <div className={styles.loadingMsg}>{translate("main.loadingDataPleaseWait")}</div>;
     }
@@ -195,18 +193,6 @@ export const CityNamesetLibraryCmp = () => {
             />
         );
     }
-    if (currentScreen === Screen.VIEWING_NAMESET) {
-        return <NamesetViewingCmp namesetData={namesetBeingEdited} onBack={() => setCurrentScreen(Screen.DEFAULT)} />;
-    }
-    if (currentScreen === Screen.DELETE_CONFIRM) {
-        return (
-            <NamesetDeletingCmp
-                namesetData={namesetBeingDeleted}
-                onBack={() => setCurrentScreen(Screen.DEFAULT)}
-                onOk={doDelete}
-            />
-        );
-    }
     if (currentScreen === Screen.EDIT_NAMESET) {
         return (
             <NamesetEditorCmp
@@ -216,57 +202,34 @@ export const CityNamesetLibraryCmp = () => {
             />
         );
     }
-
     return (
         <div className={`${styles.libraryRoot} k45_btnHost`}>
             <div className={styles.libraryContent}>
-                {availableNamesets.length === 0 ? (
-                    <div className={styles.emptyMsg}>
-                        <h2>
-                            {translate("cityNamesetsLibrary.noNamesetsMsg")}{" "}
-                            <button type="button" className="neutralBtn" onClick={() => setDiskPickerOpen(true)}>{translate("cityNamesetsLibrary.clickToImport")}</button>{" "}
-                            <button type="button" className="neutralBtn" onClick={() => goToEdit()}>{translate("cityNamesetsLibrary.clickToCreate")}</button>
-                        </h2>
+                <ListWithContentTab
+                    className={styles.libraryNav}
+                    listItems={listItems}
+                    selectedKey={selectedId ?? null}
+                    onChangeSelection={setSelectedId}
+                    listActions={listActions}
+                    emptyListMsg={translate("cityNamesetsLibrary.noNamesetsMsg")}
+                >
+                    <div className={styles.libraryBody}>
+                        {selectedNameset && <>
+                            <div className={styles.wordsPreview}>
+                                <NamesetWordsContainer
+                                    values={selectedNameset.Values}
+                                    valuesAlternative={selectedNameset.ValuesAlternative}
+                                />
+                            </div>
+                            <div className={styles.actionRow}>
+                                <button type="button" className="negativeBtn" onClick={() => setNamesetBeingDeleted(selectedNameset)}>{translate("cityNamesetsLibrary.deleteNameset")}</button>
+                                <button type="button" className="neutralBtn" onClick={() => goToEdit(selectedNameset)}>{translate("cityNamesetsLibrary.editNameset")}</button>
+                                <button type="button" className="neutralBtn" disabled={isExporting} onClick={() => doExport(selectedNameset)}>{translate("cityNamesetsLibrary.exportNameset")}</button>
+                            </div>
+                        </>}
                     </div>
-                ) : (
-                    <ListWithContentTab
-                        className={styles.libraryNav}
-                        listItems={listItems}
-                        selectedKey={selectedId ?? null}
-                        onChangeSelection={setSelectedId}                        
-                    >
-                        <div className={styles.libraryBody}>
-                            {selectedNameset && <>
-                                <div className={styles.wordsPreview}>
-                                    <NamesetWordsContainer
-                                        values={selectedNameset.Values}
-                                        valuesAlternative={selectedNameset.ValuesAlternative}
-                                    />
-                                </div>
-                                <div className={styles.actionRow}>
-                                    <button type="button" className="negativeBtn" onClick={() => goToDelete(selectedNameset)}>{translate("cityNamesetsLibrary.deleteNameset")}</button>
-                                    <button type="button" className="neutralBtn" onClick={() => goToEdit(selectedNameset)}>{translate("cityNamesetsLibrary.editNameset")}</button>
-                                    <button type="button" className="neutralBtn" onClick={() => goToView(selectedNameset)}>{translate("cityNamesetsLibrary.viewNameset")}</button>
-                                    <button type="button" className="neutralBtn" disabled={isExporting} onClick={() => doExport(selectedNameset)}>{translate("cityNamesetsLibrary.exportNameset")}</button>
-                                </div>
-                            </>}
-                        </div>
-                    </ListWithContentTab>
-                )}
+                </ListWithContentTab>
             </div>
-
-            <div className={styles.bottomBar}>
-                <button type="button" className="positiveBtn" onClick={() => setDiskPickerOpen(true)}>{translate("cityNamesetsLibrary.importFromLibrary")}</button>
-                <button type="button" className="positiveBtn" onClick={() => setGithubPickerOpen(true)}>{translate("cityNamesetsLibrary.importFromGitHub")}</button>
-                <button type="button" className="positiveBtn" onClick={() => goToEdit()}>{translate("cityNamesetsLibrary.createNewNameset")}</button>
-                <button type="button" className="neutralBtn" onClick={handleReloadLibrary} disabled={isLibraryLoading}>
-                    {isLibraryLoading ? translate("namesetsLibrary.reloadingFiles") : translate("namesetsLibrary.reloadFiles")}
-                </button>
-                <button type="button" className="neutralBtn" onClick={() => NamesetService.goToDiskSimpleNamesFolder()}>{translate("namesetsLibrary.goToLibraryFolder")}</button>
-                <div className={styles.bottomBarSpacer} />
-                <div className={styles.bottomBarMessage}>{lastMessage}</div>
-            </div>
-
             <FilePickerDialog
                 isActive={diskPickerOpen}
                 setIsActive={setDiskPickerOpen}
@@ -278,7 +241,6 @@ export const CityNamesetLibraryCmp = () => {
                 generateDataProvider={diskDataProvider}
                 actionOnSuccess={handleDiskImportPick}
             />
-
             <FilePickerDialog
                 isActive={githubPickerOpen}
                 setIsActive={setGithubPickerOpen}
@@ -290,8 +252,45 @@ export const CityNamesetLibraryCmp = () => {
                 generateDataProvider={githubDataProvider}
                 actionOnSuccess={handleGithubImportPick}
             />
-
             <NamesetGitHubErrorDialog error={githubError} onClose={() => setGithubError(null)} />
+            {namesetBeingDeleted && (
+                <Portal>
+                    <ConfirmationDialog
+                        title={translate("namesetDelete.title")}
+                        message={translate("namesetDelete.subtitle")}
+                        confirm={translate("namesetDelete.yes")}
+                        cancel={translate("namesetDelete.no")}
+                        onConfirm={() => { void doDelete(namesetBeingDeleted); }}
+                        onCancel={() => setNamesetBeingDeleted(null)}
+                    />
+                </Portal>
+            )}
+            {exportedPath && (
+                <Portal>
+                    <ConfirmationDialog
+                        title={translate("cityNamesetsLibrary.exportNameset")}
+                        message={translate("cityNamesetsLibrary.fileExportedToLocation") + "\n" + exportedPath.replaceAll("\\", "\\\\").replaceAll("<", "\\<").replaceAll(">", "\\>")}
+                        confirm={translate("namesetsLibrary.goToLibraryFolder")}
+                        cancel={engine.translate("Common.OK")}
+                        onConfirm={() => {
+                            void NamesetService.goToDiskSimpleNamesFolder();
+                            setExportedPath(null);
+                        }}
+                        onCancel={() => setExportedPath(null)}
+                    />
+                </Portal>
+            )}
+            {exportFailed && (
+                <Portal>
+                    <ConfirmationDialog
+                        title={translate("cityNamesetsLibrary.exportNameset")}
+                        message={translate("cityNamesetsLibrary.anErrorHasOccurredOnExporting")}
+                        confirm={engine.translate("Common.OK")}
+                        cancellable={false}
+                        onConfirm={() => setExportFailed(false)}
+                    />
+                </Portal>
+            )}
         </div>
     );
 };

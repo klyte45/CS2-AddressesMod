@@ -15,12 +15,16 @@
     margin: 5rem 4rem;
     background-color: var(--selectedColorDark);
     position: relative;
+    max-height: 20rem;
 
     &.double {
         background-color: #7a2727;
     }
 }
 
+.wordsRoot {
+    flex-shrink: 1;
+}
 .value {
     display: flex;
 }

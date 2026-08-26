@@ -69,13 +69,11 @@
     margin-bottom: 4rem;
 }
 
-.emptyMsg {
-    padding: 16rem;
-    text-align: center;
-}
-
-.emptyMsg button {
-    margin: 0 4rem;
+.statusMessage {
+    display: flex;
+    align-items: center;
+    padding: 4rem 0;
+    color: var(--menuText1Normal);
 }
 
 .screenRoot {
@@ -87,6 +85,7 @@
 
 .screenBody {
     flex-grow: 1;
+    flex-shrink: 1;
     min-height: 0;
     overflow: auto;
     padding: 8rem;

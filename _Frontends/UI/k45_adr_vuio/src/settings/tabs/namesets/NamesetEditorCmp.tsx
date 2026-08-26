@@ -26,22 +26,35 @@ export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
     }, [entryData]);
 
     const commitText = () => {
-        setNamesetData(parseNamesetText(textValue, namesetData.Name));
+        setNamesetData((prev) => {
+            const parsed = parseNamesetText(textValue, prev);
+            return { ...prev, Values: parsed.Values, ValuesAlternative: parsed.ValuesAlternative };
+        });
+    };
+
+    const save = () => {
+        const parsed = parseNamesetText(textValue, namesetData);
+        onOk({
+            ...namesetData,
+            Name: namesetData.Name || "<?>",
+            Values: parsed.Values,
+            ValuesAlternative: parsed.ValuesAlternative,
+        });
     };
 
     return (
         <div className={`${styles.screenRoot} k45_btnHost`}>
             <div className={styles.screenBody}>
-                <div className={styles.namesetTitle}>{namesetData.Name.split("/").pop()}</div>
+                <div className={styles.namesetTitle}>{(namesetData.Name || "<?>").split("/").pop()}</div>
                 <div className={styles.divider} />
                 <FormLine title={translate("namesetsImport.pathToNameset")}>
                     <StringInput
                         className={editorModule.input}
-                        value={namesetData.Name}
-                        onChange={(x) => setNamesetData({ ...namesetData, Name: x })}
+                        value={namesetData.Name ?? ""}
+                        onChange={(x) => setNamesetData({ ...namesetData, Name: x ?? "" })}
                     />
                 </FormLine>
-                <Scrollable>
+                <Scrollable style={{ flexShrink: 1 }}>
                     <StringInput
                         className={`${editorModule.input} ${editorModule.multilineText} ${styles.textEditor}`}
                         value={textValue}
@@ -53,7 +66,7 @@ export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
             </div>
             <div className={styles.bottomBar}>
                 <button type="button" className="negativeBtn" onClick={onBack}>{translate("namesetEditor.cancel")}</button>
-                <button type="button" className="positiveBtn" onClick={() => onOk(parseNamesetText(textValue, namesetData.Name))}>{translate("namesetEditor.save")}</button>
+                <button type="button" className="positiveBtn" onClick={save}>{translate("namesetEditor.save")}</button>
             </div>
         </div>
     );
