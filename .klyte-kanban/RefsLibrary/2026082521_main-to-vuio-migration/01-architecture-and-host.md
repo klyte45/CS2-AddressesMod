@@ -29,7 +29,8 @@ flowchart TB
   subgraph target [Target]
     GameUI2[Game React UI] --> VuioMod2[k45_adr_vuio]
     VuioMod2 --> UMM[UniversalModMenu button]
-    VuioMod2 --> Settings[settings Panel]
+    UMM -->|"toggleGamePanel"| GPR[GamePanelRenderer]
+    GPR --> Settings[AdrSettings GamePanel]
     VuioMod2 --> Contextual[selection / editor / tools]
     Settings --> Commons2[adr-commons]
     Contextual --> Commons2
@@ -58,8 +59,8 @@ flowchart TB
 ### Target — VUIO only
 
 1. Keep `AddUIModule` for `k45_adr_vuio`
-2. Add `moduleRegistry.append('UniversalModMenu', AdrUniversalModButton)`
-3. Button toggles a custom settings `Panel` (not an EUIS iframe)
+2. Register ADR settings as a **GamePanel** (same host path as Transportation Overview)
+3. Add `moduleRegistry.append('UniversalModMenu', AdrUniversalModButton)` — button calls `toggleGamePanel(AdrSettingsPanelId)`
 4. Remove EUIS registration entirely (see [09-euis-decommission.md](09-euis-decommission.md))
 
 ## Why Universal Mod Menu (not override a vanilla window)
@@ -68,6 +69,7 @@ Game evidence (UI modules cache):
 
 - `UniversalModPanel` renders `ModdingHook` with `name: 'UniversalModMenu'`
 - `RightMenu` shows the Paradox Mods glyph **only if** `hasAppend('UniversalModMenu')` is true
+- `ModsMenu` itself is also a `GamePanelType` entry rendered by `GamePanelRenderer`
 
 So appending to `UniversalModMenu`:
 
@@ -75,18 +77,64 @@ So appending to `UniversalModMenu`:
 2. Places ADR’s button inside the Universal Mod Panel button list
 3. Avoids hijacking Options, Pause menu, or other vanilla panels
 
-**Decision:** do **not** `override` / `extend` an existing game settings window for ADR city settings. Own panel + UMM entry only.
+**Decision:** do **not** `override` / `extend` an existing vanilla settings window (Economy, City Info, …) for ADR city settings. Own **GamePanel** + UMM entry only.
 
-## Why custom Panel (not EUIS look-alike)
+## Settings shell = GamePanel (not EditorBindings Portal)
 
-Confirmed UX: **vanilla-first**.
+Confirmed UX: **vanilla-first**, on the **main game** panel host.
 
-Reuse patterns already in VUIO:
+### Why EditorBindings `Portal` is wrong here
 
-- [`EditorBindings.tsx`](../../../_Frontends/UI/k45_adr_vuio/src/mods/EditorBindings.tsx) — `Portal` + `cs2/ui` `Panel` + `PanelSection`
-- [`ListWithContentTab`](../../../_Frontends/UI/_shared/vuio-commons/src/components/ListWithContentTab.tsx) — left list + right content
+[`EditorBindings.tsx`](../../../_Frontends/UI/k45_adr_vuio/src/mods/EditorBindings.tsx) mounts via `moduleRegistry.append('Editor', …)` and uses `Portal` + `cs2/ui` `Panel`. That path is for the **asset editor** overlay. It is **not** how main-game overview windows are hosted: they do not participate in `activeGamePanel$`, layout slots (`centerLeftLayout`), or mutual exclusivity with Transportation / Economy / ModsMenu.
 
-Do **not** recreate `MainSideTabMenuComponent` (icon rail + expandable header from EUIS).
+### Vanilla reference — Transportation Overview
+
+From game UI modules:
+
+1. Toolbar toggle → `useGamePanelState(GamePanelType.TransportationOverview)` → `toggleGamePanel(...)`
+2. `GamePanelRenderer` looks up `gamePanelComponents[panel.__Type]`
+3. Entry for transportation wraps content in `centerLeftLayout` and renders `TransportationOverviewPanel` with `{ selectedTab, onClose }`
+4. Panel chrome is `game-ui/common/panel/panel.tsx` (`Panel` with `header`, `theme`, `onClose`, transition sounds) — **not** a free-floating Portal
+
+```mermaid
+flowchart TB
+  Toggle[Toolbar / UMM button] --> ToggleGP["toggleGamePanel panelId"]
+  ToggleGP --> Active["activeGamePanel$"]
+  Active --> Main[GameMainScreen]
+  Main --> GPR[GamePanelRenderer]
+  GPR --> Map["gamePanelComponents type"]
+  Map --> Layout["centerLeftLayout wrapper"]
+  Layout --> Panel["common Panel + ADR content"]
+```
+
+### Sibling mod pattern (copy this)
+
+Vehicle Skins / Write Everywhere already do the correct registration:
+
+```ts
+moduleRegistry.extend(
+  "game-ui/game/data-binding/game-bindings.ts",
+  "GamePanelType",
+  (input) => { input["K45_ADR"] = AdrSettingsPanelId; return input; }
+);
+moduleRegistry.extend(
+  "game-ui/game/components/game-panel-renderer.tsx",
+  "gamePanelComponents",
+  (input) => { input[AdrSettingsPanelId] = AdrSettingsPanel; return input; }
+);
+moduleRegistry.append("UniversalModMenu", AdrUniversalModButton);
+// button: VanillaComponentResolver.instance.toggleGamePanel(AdrSettingsPanelId)
+```
+
+WE main UI also wraps with `gameMainScreenModule.centerLeftLayout` (same layout class Transportation Overview uses). Prefer that for a dense settings window.
+
+### Content chrome inside the GamePanel
+
+- Outer: GamePanel registration + `centerLeftLayout` (or equivalent layout div from `game-main-screen.module.scss`)
+- Inner: `cs2/ui` / common `Panel` with `onClose` from renderer props; `PanelTitleBar` via `VanillaComponentResolver`
+- Navigation: [`ListWithContentTab`](../../../_Frontends/UI/_shared/vuio-commons/src/components/ListWithContentTab.tsx) for the 4 root tabs
+
+Do **not** recreate `MainSideTabMenuComponent` (EUIS icon rail). Do **not** use Editor `Portal` for this surface.
 
 ## Host / build differences implementers must respect
 
@@ -108,5 +156,8 @@ Do not rename C# prefixes as part of this migration. Services in `adr-commons` c
 |------|------|
 | `BelzontAdr/AddressesCs2Mod.cs` | EUIS apps + VUIO `AddUIModule` |
 | `_Frontends/UI/main/src/react-app.tsx` | single-spa entry (to delete) |
-| `_Frontends/UI/k45_adr_vuio/src/index.tsx` | ModRegistrar (extend with UMM) |
+| `_Frontends/UI/k45_adr_vuio/src/index.tsx` | ModRegistrar (extend GamePanel + UMM) |
 | `_Frontends/UI/k45_adr_vuio/types/modding.d.ts` | `AppendHookTargets` typing (extend for UniversalModMenu) |
+| `game-ui/.../game-panel-renderer.tsx` | Vanilla `gamePanelComponents` map (extend) |
+| `game-ui/.../transportation-overview-panel.tsx` | Reference overview shell |
+| Vehicle Skins / WE `index.tsx` | Sibling GamePanel registration pattern |

@@ -6,13 +6,14 @@ Ordered implementation guide for the big-bang port. Target: finish all rows befo
 
 ```
 _Frontends/UI/k45_adr_vuio/src/
-  index.tsx                          # + UniversalModMenu append
-  mods/                              # UNCHANGED (selection / editor wiring)
+  index.tsx                          # + GamePanelType + gamePanelComponents + UniversalModMenu
+  mods/                              # UNCHANGED (selection / editor wiring; Editor Portal stays here only)
   tool/                              # UNCHANGED
   components/                        # UNCHANGED contextual UI
   settings/                          # NEW
-    AdrUniversalModButton.tsx
-    AdrSettingsPanel.tsx
+    AdrUniversalModButton.tsx        # toggleGamePanel(AdrSettingsPanelId)
+    AdrSettingsPanel.tsx             # GamePanel component (onClose + centerLeftLayout)
+    AdrSettingsPanelId.ts            # or export const from panel file
     AdrSettingsNav.tsx               # optional: wrap ListWithContentTab
     translate.ts                     # OR import shared helper that uses K45::ADR.main
     tabs/
@@ -57,11 +58,12 @@ Work left-to-right; later milestones may start scaffolding earlier, but **do not
 | Task | Source | Target |
 |------|--------|--------|
 | Typings `UniversalModMenu` | modding.d.ts | vuio + vuio-commons |
-| Append + button | — | `AdrUniversalModButton.tsx` |
-| Empty panel + city gate | `root.component.tsx` | `AdrSettingsPanel.tsx` |
+| Extend `GamePanelType` + `gamePanelComponents` | VS/WE pattern; TransportOverview host | `index.tsx` + `AdrSettingsPanel.tsx` |
+| UMM button → `toggleGamePanel` | — | `AdrUniversalModButton.tsx` |
+| Empty panel + `centerLeftLayout` + city gate | `root.component.tsx` | `AdrSettingsPanel.tsx` |
 | Side list for 4 tabs (placeholders) | — | nav using `ListWithContentTab` |
 
-Exit: Mods glyph + UMM button open/close panel; gate message.
+Exit: Mods glyph + UMM button open/close ADR **GamePanel** (not Portal); gate message; panel closes when another overview opens.
 
 ### M1 — Overrides (forms-heavy, no map)
 

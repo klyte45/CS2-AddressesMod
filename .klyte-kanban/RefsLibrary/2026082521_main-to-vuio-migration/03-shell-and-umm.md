@@ -2,30 +2,44 @@
 
 ## Goal
 
-Register an ADR button on the vanilla Universal Mod Menu that opens/closes a custom settings `Panel` hosting all former `main` content.
+Register an ADR button on the vanilla Universal Mod Menu that toggles an ADR **GamePanel** hosting all former `main` content — same host path as Transportation Overview, not an Editor `Portal`.
 
 ## Game plumbing (verified)
 
 ```mermaid
 flowchart LR
   RM[RightMenu] -->|"hasAppend UniversalModMenu"| Glyph[Paradox Mods icon]
-  Glyph --> UMP[UniversalModPanel]
-  UMP --> Hook["ModdingHook name=UniversalModMenu"]
+  Glyph --> UMP["ModsMenu GamePanel"]
+  UMP --> Hook["ModdingHook UniversalModMenu"]
   Hook --> AdrBtn[AdrUniversalModButton]
-  AdrBtn -->|"toggle"| Panel[AdrSettingsPanel]
+  AdrBtn -->|"toggleGamePanel"| Active["activeGamePanel$"]
+  Active --> GPR[GamePanelRenderer]
+  GPR --> AdrPanel[AdrSettingsPanel]
 ```
 
-- Append target string: **`UniversalModMenu`** (not in current `AppendHookTargets` union — update typings)
-- Hook component renders all appended children in a scrollable button container
-- Right-menu Mods button appears when **any** mod has appended to this hook
+Related vanilla pieces:
+
+| Piece | Path / API |
+|-------|------------|
+| Panel type enum | `game-ui/game/data-binding/game-bindings.ts` → `GamePanelType` |
+| Toggle / show / close | `toggleGamePanel` / `showGamePanel` / `closeGamePanel` |
+| Visibility hook | `useGamePanelState(panelType)` |
+| Component map | `game-ui/game/components/game-panel-renderer.tsx` → `gamePanelComponents` |
+| Transport reference | `TransportationOverview` → `centerLeftLayout` + `TransportationOverviewPanel` |
+| Common chrome | `game-ui/common/panel/panel.tsx` (`Panel` with `onClose`) |
+
+- Append target string for UMM button list: **`UniversalModMenu`** (add to `AppendHookTargets` typings)
+- Right-menu Mods glyph appears when **any** mod has appended to this hook
+- Settings **content** is **not** parented under UniversalModPanel; UMM only opens the ADR GamePanel
 
 ## Registration sketch
 
-In `_Frontends/UI/k45_adr_vuio/src/index.tsx`:
+In `_Frontends/UI/k45_adr_vuio/src/index.tsx` (pattern from Vehicle Skins / Write Everywhere):
 
 ```ts
 import { ModRegistrar } from "cs2/modding";
 import { AdrUniversalModButton } from "settings/AdrUniversalModButton";
+import { AdrSettingsPanel, AdrSettingsPanelId } from "settings/AdrSettingsPanel";
 // ... existing imports
 
 const register: ModRegistrar = (moduleRegistry) => {
@@ -41,55 +55,97 @@ const register: ModRegistrar = (moduleRegistry) => {
         AddressesToolOptions
     );
 
-    // NEW
+    // NEW — GamePanel registration (main game UI host)
+    moduleRegistry.extend(
+        "game-ui/game/data-binding/game-bindings.ts",
+        "GamePanelType",
+        (input) => {
+            input["K45_ADR"] = AdrSettingsPanelId;
+            return input;
+        }
+    );
+    moduleRegistry.extend(
+        "game-ui/game/components/game-panel-renderer.tsx",
+        "gamePanelComponents",
+        (input) => {
+            input[AdrSettingsPanelId] = AdrSettingsPanel;
+            return input;
+        }
+    );
+
+    // NEW — UMM entry button
     moduleRegistry.append("UniversalModMenu", AdrUniversalModButton);
 };
 
 export default register;
 ```
 
-### Typing update
-
-[`types/modding.d.ts`](../../../_Frontends/UI/k45_adr_vuio/types/modding.d.ts) and [`vuio-commons/.../modding.d.ts`](../../../_Frontends/UI/_shared/vuio-commons/src/types/modding.d.ts) currently declare:
+Suggested panel id (stable string, same style as siblings):
 
 ```ts
-export type AppendHookTargets =
-  | "Menu" | "Editor" | "Game"
-  | "GameTopLeft" | "GameTopRight" | "GameBottomRight";
+export const AdrSettingsPanelId = "BelzontAdr.UI.AdrSettingsPanel";
 ```
 
-Add **`"UniversalModMenu"`** to that union (and keep the string overload of `append` working).
+### Typing update
+
+[`types/modding.d.ts`](../../../_Frontends/UI/k45_adr_vuio/types/modding.d.ts) and [`vuio-commons/.../modding.d.ts`](../../../_Frontends/UI/_shared/vuio-commons/src/types/modding.d.ts):
+
+Add **`"UniversalModMenu"`** to `AppendHookTargets`.
+
+`toggleGamePanel` is already on `VanillaComponentResolver` in vuio-commons.
 
 ## Button component (`AdrUniversalModButton`)
 
 Responsibilities:
 
 1. Render a clickable row/button suitable for Universal Mod Panel (icon + title + short description)
-2. Toggle visibility of `AdrSettingsPanel` (React state or small shared store/module singleton)
+2. On select: `VanillaComponentResolver.instance.toggleGamePanel(AdrSettingsPanelId)` — **not** local Portal state
 3. Prefer ADR branding: `coui://adr.k45/UI/images/ADR.svg`
-4. Localized label: reuse existing title strings under `K45::ADR.main[...]` (e.g. mod title / “Addresses & Names”)
+4. Localized label: reuse existing title strings under `K45::ADR.main[...]`
 
 UX notes:
 
-- Closing Universal Mod Panel should **not** necessarily destroy the settings panel (decide explicitly: recommended — settings panel is independent; UMM button only opens/focuses it)
-- Selected state on the UMM button when ADR panel is open (if the hook’s button API supports it; otherwise ignore)
+- Opening ADR settings closes other GamePanels (vanilla mutual exclusivity via `activeGamePanel$`) — expected
+- Closing Universal Mod Panel does not require closing ADR settings (ModsMenu and ADR are separate GamePanel types)
+- Optional: reflect selected state with `useGamePanelState(AdrSettingsPanelId)` if the UMM button chrome supports it
 
 ## Settings panel shell (`AdrSettingsPanel`)
 
-### Structure (vanilla-first)
+### Do not use EditorBindings Portal
+
+Wrong for main game:
+
+```tsx
+// Editor-only pattern — DO NOT use for ADR settings on main UI
+<Portal>
+  <Panel style={{ position: "absolute", ... }}>...</Panel>
+</Portal>
+```
+
+That mounts outside `GamePanelRenderer`, skips `centerLeftLayout`, and fights the game’s panel stack.
+
+### Correct structure (vanilla-first GamePanel)
+
+Props from renderer: `{ onClose: () => void }` (and optionally `selectedTab` if you add tabbed panel data later).
 
 ```
-Portal
-└─ Panel (header = mod title / close)
+div.centerLeftLayout   ← gameMainScreenModule.centerLeftLayout (see WE / TransportationOverview)
+└─ Panel (common / cs2/ui; header + onClose)
    └─ ListWithContentTab (or equivalent)
         ├─ list: 4 root tabs
         │    Namesets | Overrides | Road prefixes | Region
         └─ body: selected tab content
 ```
 
-Reference: [`EditorBindings.tsx`](../../../_Frontends/UI/k45_adr_vuio/src/mods/EditorBindings.tsx) for `Portal` + `Panel` sizing (`rem` units).
+Reference implementations:
 
-Suggested sizing: wider than editor panel (settings are dense). Start around `900rem`–`1200rem` width; height constrained with scrollable body.
+| Reference | Takeaway |
+|-----------|----------|
+| `TransportationOverviewPanel` | `Panel` + header/tabs + `onClose`; hosted under `centerLeftLayout` by renderer map |
+| Write Everywhere `WEMainPanel` | Explicit `centerLeftLayout` wrapper + `Panel` + `PanelTitleBar` + `toggleGamePanel` on close |
+| Vehicle Skins `VSMainPanel` | GamePanel component receives `onClose`; uses `cs2/ui` `Panel` |
+
+Sizing: match overview density (wide left-center slot). Prefer layout class over absolute `rem` positioning.
 
 ### Root tabs (replace `MainSideTabMenuComponent`)
 
@@ -112,18 +168,19 @@ In VUIO:
 
 - Gate **panel body**, not the UMM button
 - When not loaded: show centered warning using `translate("loadACityWarningH2")` (same key namespace)
-- Re-check on open and on scene change if a binding/event exists; otherwise poll once on mount + when panel becomes visible
+- Re-check on open and on scene change if a binding/event exists; otherwise poll once on mount + when panel becomes visible (`useGamePanelState` / panel mount)
 
 ## Open / close / lifecycle
 
 | Event | Expected behavior |
 |-------|-------------------|
-| UMM button click | Open panel if closed; optionally focus/bring-to-front if open |
-| Panel close (X / Escape if supported) | Unmount or hide; unsubscribe `engine.on` listeners |
+| UMM button click | `toggleGamePanel(AdrSettingsPanelId)` |
+| Panel close (X / Escape via common Panel) | `onClose` from renderer → closes active GamePanel; unsubscribe listeners |
+| Another GamePanel opens | ADR unmounts via panel stack — cleanup must run |
 | City unload | Clear dirty local state; show gate warning if panel still open |
-| Hot reload / mod reload | Safe: no singleton assuming EUIS mount |
+| Hot reload / mod reload | Safe: registration only via ModRegistrar |
 
-**Critical:** every `engine.on` / `NamesetService.doOnCityNamesetsUpdated` / `DistrictRelativeService.onDistrictChanged` must clean up in `useEffect` return. EUIS unmount was per-app; VUIO panel hide must not leak listeners.
+**Critical:** every `engine.on` / `NamesetService.doOnCityNamesetsUpdated` / `DistrictRelativeService.onDistrictChanged` must clean up in `useEffect` return. GamePanel unmount (including when another overview opens) must not leak listeners.
 
 ## Error boundary
 
@@ -136,17 +193,22 @@ Recommend option 1 in [04-widget-conversion-map.md](04-widget-conversion-map.md)
 
 ## What not to do
 
+- Do **not** host settings with Editor `Portal` + absolute `Panel` (EditorBindings pattern)
 - Do not register a second UI module asset just for settings
 - Do not keep EUIS `main` app “for backup” (hard cut)
-- Do not append to `GameTopLeft` / `Game` as the primary entry (UMM is the product entry)
+- Do not treat UMM as the content host — it only toggles the GamePanel
 - Do not recreate EUIS `MainSideTabMenuComponent` SCSS chrome
+- Do not override Economy / CityInfo / TransportationOverview panels for ADR content
 
 ## Checklist for implementers
 
 - [ ] Typings include `UniversalModMenu`
+- [ ] `GamePanelType` + `gamePanelComponents` extended with `AdrSettingsPanelId`
 - [ ] `append('UniversalModMenu', …)` in `index.tsx`
-- [ ] UMM button visible in-game; right-menu Mods glyph present
-- [ ] Panel opens with 4 root tabs
-- [ ] City-not-loaded gate works from menu / editor / game
-- [ ] Panel close unsubscribes all engine listeners
+- [ ] Button calls `toggleGamePanel`, not Portal state
+- [ ] Panel uses `centerLeftLayout` (or renderer-equivalent) + common `Panel` + `onClose`
+- [ ] UMM button visible; right-menu Mods glyph present
+- [ ] Panel opens with 4 root tabs; closes when another GamePanel opens
+- [ ] City-not-loaded gate works
+- [ ] Unmount unsubscribes all engine listeners
 - [ ] Existing Editor / selected-info / tool registrations unchanged

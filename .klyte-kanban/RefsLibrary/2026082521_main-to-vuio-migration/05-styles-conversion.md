@@ -39,7 +39,7 @@
 4. **Do not** import `euis-components/src/styles/cs2-form-style.scss` into VUIO.
 5. **react-select** container rules in `main.scss` die with react-select — replace with vanilla dropdown styling.
 6. **react-tabs** selectors in `regionEditor.scss` must be rewritten for the new tab control.
-7. Inline styles are acceptable for one-off layout (match `EditorBindings`), but reusable spacing goes in modules.
+7. Prefer `centerLeftLayout` / GamePanel layout classes over absolute positioning. Inline styles are fine for one-off gaps inside the panel, but reusable spacing goes in modules.
 
 ## Collision / specificity risks
 

@@ -9,7 +9,7 @@ This pack is **documentation only**. It does not migrate product code. A later i
 | In scope | Out of scope |
 |----------|--------------|
 | Kill EUIS `main` app completely (hard cut) | Shipping TS/C# migration in this pack |
-| Host settings in `k45_adr_vuio` via UMM + custom `Panel` | Overriding an existing vanilla game window for settings |
+| Host settings in `k45_adr_vuio` via UMM + **GamePanel** | Overriding Economy/CityInfo/etc.; Editor `Portal` host |
 | Convert euis-components → vuio-commons / `cs2/*` | Changing C# `k45::adr.*` binding contracts |
 | Full feature parity including Region map | Kanban sprint/task creation (follow-up) |
 | Retarget `adr-commons` off EUIS typings | Deleting `main` on disk before code sprint |
@@ -19,7 +19,7 @@ This pack is **documentation only**. It does not migrate product code. A later i
 | Decision | Choice |
 |----------|--------|
 | Rollout | **Big-bang** — UMM panel complete; EUIS `main` retired in same sprint |
-| Settings shell UX | **Vanilla-first** — `Portal` + `Panel`; `ListWithContentTab` / side-list nav |
+| Settings shell UX | **Vanilla-first GamePanel** — `GamePanelType` + `gamePanelComponents` + `centerLeftLayout`; `ListWithContentTab` nav (not Editor Portal) |
 | Override subtabs | **Rebuild with vanilla** — do not port `Cs2SideTabs` |
 | i18n | **Keep `K45::ADR.main[...]`** — no CSV churn; optional rename later |
 | Region editor | **Same milestone** — full map parity before killing `main` |
@@ -42,7 +42,8 @@ This pack is **documentation only**. It does not migrate product code. A later i
 ## Success criteria (implementation sprint)
 
 - [ ] `moduleRegistry.append('UniversalModMenu', …)` registers an ADR button; right-menu Mods icon appears when any mod appends UMM
-- [ ] Custom settings `Panel` exposes all four root tabs with feature parity to current `main`
+- [ ] ADR settings registered as GamePanel (`GamePanelType` + `gamePanelComponents`); UMM button calls `toggleGamePanel`
+- [ ] Settings GamePanel exposes all four root tabs with feature parity to current `main`
 - [ ] No `@klyte45/euis-components` imports remain in ADR UI packages
 - [ ] `UseEuisRegister` / `EuisIsMandatory` / `EuisApps` removed or disabled; mod loads without EUIS
 - [ ] `_Frontends/UI/main/` deleted from product shipping path
@@ -56,6 +57,7 @@ This pack is **documentation only**. It does not migrate product code. A later i
 |-------|----------|
 | `_Frontends/UI/main/` (single-spa EUIS) | `_Frontends/UI/k45_adr_vuio/src/settings/` |
 | `@klyte45/euis-components` | `@klyte45/vuio-commons` + `cs2/ui` / `VanillaComponentResolver` |
-| `EuisApps["main"]` | `moduleRegistry.append('UniversalModMenu', …)` |
-| `MainSideTabMenuComponent` | `Panel` + side list (`ListWithContentTab` pattern) |
+| `EuisApps["main"]` | UMM button → `toggleGamePanel(AdrSettingsPanelId)` |
+| EUIS iframe shell | `gamePanelComponents` + `centerLeftLayout` (TransportationOverview pattern) |
+| `MainSideTabMenuComponent` | GamePanel `Panel` + side list (`ListWithContentTab` pattern) |
 | `translate` → `K45::ADR.main[...]` | **Same keys** (settings UI may keep main namespace) |

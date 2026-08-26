@@ -6,8 +6,8 @@ EUIS widgets used by `main` → VUIO / vanilla replacements. Confirmed strategy:
 
 | From `@klyte45/euis-components` | Used in `main` for | Target replacement | Action |
 |--------------------------------|--------------------|--------------------|--------|
-| `MainSideTabMenuComponent` / `MenuItem` | Root 4-tab shell | `Panel` + `ListWithContentTab` (or custom side list) | Rebuild |
-| `DefaultPanelScreen` | Almost every sub-screen title/subtitle/buttons | `PanelSection` + title row + action `ToolButton`s | Rebuild thin helper in vuio-commons if repeated |
+| `DefaultPanelScreen` | Almost every sub-screen title/subtitle/buttons | Inside GamePanel: title row + action `ToolButton`s / `PanelSection` | Rebuild thin helper in vuio-commons if repeated |
+| `MainSideTabMenuComponent` / `MenuItem` | Root 4-tab shell | **GamePanel** (`centerLeftLayout` + common `Panel`) + `ListWithContentTab` | Rebuild — see [03](03-shell-and-umm.md); **not** Editor `Portal` |
 | `Cs2SideTabs` | Override 14 tabs + H2 headers | Vanilla selectable list + `section` rows (`ListWithContentTab` already supports section headers) | **Rebuild — do not port** |
 | `Cs2FormLine` / `Cs2FormBoundaries` | Form rows everywhere | `InfoRow` / editor item theme / new `FormLine` in vuio-commons | Prefer new thin FormLine matching game rem layout |
 | `Cs2Select` + patched `react-select` | Nameset & plate dropdowns | Vanilla dropdown via `VanillaComponentResolver` **or** `DropdownDialog` | Drop react-select from ADR |
@@ -95,7 +95,8 @@ Keep them generic (no ADR branding) so other K45 VUIO mods can reuse them.
 
 | EUIS piece | Reason |
 |------------|--------|
-| `MainSideTabMenuComponent` + `mainSideTabs.scss` | Wrong host chrome; vanilla-first decision |
+| `MainSideTabMenuComponent` + `mainSideTabs.scss` | Wrong host chrome; vanilla GamePanel decision |
+| Editor `Portal` + absolute `Panel` for settings | Editor-only; breaks main `GamePanelRenderer` stack — use [03](03-shell-and-umm.md) |
 | `Cs2SideTabs` | Rebuild with list patterns |
 | Patched `react-select` tarball | Cohtml hacks for EUIS; use vanilla |
 | `react-tabs` | Not a game external; replace |

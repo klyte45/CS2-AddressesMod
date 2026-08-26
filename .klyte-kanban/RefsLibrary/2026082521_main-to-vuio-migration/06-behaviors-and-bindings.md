@@ -130,7 +130,7 @@ Still: local React `useState` / `useEffect` / `useMemo` only. No Redux.
 
 Screen enums for namesets stay. Tab indices for overrides/region stay as local state inside the settings panel.
 
-Optional: tiny module-level store for “settings panel open” shared by UMM button and `Portal` host — keep minimal.
+Optional: rely on `useGamePanelState(AdrSettingsPanelId)` / `activeGamePanel$` for open state — no custom Portal store.
 
 ---
 
