@@ -1,7 +1,7 @@
+**End time:** 2026-08-25 23:07 -0300
 # [0038] add-settings-shell-empty-root-tabs-and-translate
 
-**Developed by:** 
-
+**Developed by:** Composer (cursor-agent@klyte.local)
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/11-sprint-roadmap.md — S1 exit criteria

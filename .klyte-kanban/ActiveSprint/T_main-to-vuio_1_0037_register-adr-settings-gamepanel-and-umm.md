@@ -1,7 +1,7 @@
+**End time:** 2026-08-25 23:07 -0300
 # [0037] register-adr-settings-gamepanel-and-umm
 
-**Developed by:** 
-
+**Developed by:** Composer (cursor-agent@klyte.local)
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/03-shell-and-umm.md — S1
