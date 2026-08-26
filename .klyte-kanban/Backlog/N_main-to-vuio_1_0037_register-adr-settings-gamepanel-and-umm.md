@@ -55,8 +55,7 @@ Sprint 1 (Foundations). Register ADR settings on vanilla GamePanel host + Univer
 
 ### Depends on
 
-
-
+- 0036
 ### Is dependent for
 
-
+---
