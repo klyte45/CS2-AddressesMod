@@ -4,6 +4,7 @@ import { FocusDisabled } from "cs2/input";
 import { getModule } from "cs2/modding";
 import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { translate } from "./translate";
+import { CityNamesetLibraryCmp } from "./tabs/namesets/CityNamesetLibraryCmp";
 import { OverrideSettingsCmp } from "./tabs/overrides/OverrideSettingsCmp";
 import styles from "./AdrSettingsPanel.module.scss";
 
@@ -24,7 +25,6 @@ type GamePanelProps = {
 const rootTabs: RootTabKey[] = ["namesets", "overrides", "roadPrefix", "region"];
 
 const tabPlaceholders: Partial<Record<RootTabKey, string>> = {
-    namesets: "Namesets — Sprint 3",
     roadPrefix: "Road prefix — Sprint 4",
     region: "Region — Sprint 5–6",
 };
@@ -89,6 +89,9 @@ export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
     );
 
     const tabBody = (() => {
+        if (selectedTab === "namesets") {
+            return <CityNamesetLibraryCmp />;
+        }
         if (selectedTab === "overrides") {
             return <OverrideSettingsCmp />;
         }

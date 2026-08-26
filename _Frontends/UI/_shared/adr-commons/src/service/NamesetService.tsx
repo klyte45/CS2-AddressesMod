@@ -13,6 +13,12 @@ export class NamesetService {
 
     static async listCityNamesets(): Promise<SimpleNameEntry[]> { return await engine.call("k45::adr.namesets.listCityNamesets"); }
     static async listLibraryNamesets(): Promise<SimpleNameEntry[]> { return await engine.call("k45::adr.namesets.listLibraryNamesets"); }
+    static async listNamesetFolderFiles(folder: string, allowedExtension: string): Promise<{ displayName: string; directory: boolean; fullPath: string }[]> {
+        return await engine.call("k45::adr.namesets.file.listFiles", folder, allowedExtension);
+    }
+    static async readNamesetFromDisk(path: string): Promise<SimpleNameEntry> {
+        return await engine.call("k45::adr.namesets.readNamesetFromDisk", path);
+    }
     static async reloadLibraryNamesets(): Promise<boolean> { return await engine.call("k45::adr.namesets.reloadLibraryNamesets"); }
     static async isLibraryLoading(): Promise<boolean> { return await engine.call("k45::adr.namesets.isLibraryLoading"); }
     static onLibraryReloaded(event: (namesets: SimpleNameEntry[]) => void) { engine.on("k45::adr.namesets.onLibraryReloaded", event); }

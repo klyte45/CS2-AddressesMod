@@ -1,0 +1,108 @@
+.libraryRoot {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.toolbar {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 8rem;
+    flex-shrink: 0;
+}
+
+.toolbarSpacer {
+    flex-grow: 1;
+}
+
+.toolbarMessage {
+    display: flex;
+    align-items: center;
+    padding-left: 10rem;
+    color: var(--menuText1Normal);
+}
+
+.libraryNav {
+    flex-grow: 1;
+    min-height: 0;
+    height: 100%;
+}
+
+.libraryBody {
+    height: 100%;
+    overflow: auto;
+    padding: 8rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.entryMeta {
+    font-size: 75%;
+    color: var(--textColorDim);
+    margin-bottom: 8rem;
+}
+
+.actionRow {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    margin-bottom: 12rem;
+}
+
+.actionRow button {
+    margin-left: 6rem;
+    margin-bottom: 4rem;
+}
+
+.emptyMsg {
+    padding: 16rem;
+    text-align: center;
+}
+
+.emptyMsg button {
+    margin: 0 4rem;
+}
+
+.screenRoot {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.screenBody {
+    flex-grow: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 8rem;
+}
+
+.namesetTitle {
+    text-align: center;
+    width: 100%;
+    font-size: 30rem;
+    margin-bottom: 8rem;
+}
+
+.divider {
+    margin-top: 5rem;
+    margin-bottom: 5rem;
+    width: 100%;
+    height: 0;
+    border-top-style: solid;
+    border-top-width: 3rem;
+    color: var(--dividerColor);
+}
+
+.textEditor {
+    width: 100%;
+    min-height: 12em;
+}
+
+.loadingMsg {
+    padding: 16rem;
+    text-align: center;
+}

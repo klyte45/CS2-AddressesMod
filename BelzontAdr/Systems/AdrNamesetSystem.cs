@@ -60,6 +60,57 @@ namespace BelzontAdr
             eventCaller("namesets.goToSimpleNamesFolder", () => RemoteProcess.OpenFolder(AdrNameFilesManager.NamesetsFolder));
             eventCaller("namesets.sortValues", SortValues);
             eventCaller("namesets.goToGitHubRepo", () => Application.OpenURL("https://github.com/klyte45/AddressesFiles"));
+            eventCaller("namesets.getNamesetsFolder", () => AdrNameFilesManager.NamesetsFolder.Replace('\\', '/') + "/");
+            eventCaller("namesets.file.listFiles", (Func<string, string, object[]>)ListNamesetFolderFiles);
+            eventCaller("namesets.readNamesetFromDisk", (Func<string, AdrNameFile>)ReadNamesetFromDisk);
+        }
+
+        private static object[] ListNamesetFolderFiles(string folder, string allowedExtension)
+        {
+            var root = Path.GetFullPath(AdrNameFilesManager.NamesetsFolder).Replace('\\', '/');
+            var targetFolder = string.IsNullOrEmpty(folder)
+                ? root
+                : Path.GetFullPath(folder.Replace('/', Path.DirectorySeparatorChar)).Replace('\\', '/');
+            if (!targetFolder.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+                targetFolder = root;
+            if (!Directory.Exists(targetFolder))
+                return Array.Empty<object>();
+
+            var pattern = string.IsNullOrEmpty(allowedExtension) ? "*.txt" : allowedExtension;
+            var list = new List<object>();
+            foreach (var dir in Directory.GetDirectories(targetFolder))
+            {
+                list.Add(new
+                {
+                    displayName = Path.GetFileName(dir),
+                    directory = true,
+                    fullPath = dir.Replace('\\', '/') + "/",
+                });
+            }
+            foreach (var file in Directory.GetFiles(targetFolder, pattern))
+            {
+                list.Add(new
+                {
+                    displayName = Path.GetFileName(file),
+                    directory = false,
+                    fullPath = file.Replace('\\', '/'),
+                });
+            }
+            return list.ToArray();
+        }
+
+        private static AdrNameFile ReadNamesetFromDisk(string path)
+        {
+            var fullPath = Path.GetFullPath(path.Replace('/', Path.DirectorySeparatorChar));
+            var root = Path.GetFullPath(AdrNameFilesManager.NamesetsFolder);
+            if (!fullPath.StartsWith(root, StringComparison.OrdinalIgnoreCase) || !File.Exists(fullPath))
+                throw new IOException($"Invalid nameset path: {path}");
+            var relative = fullPath.Substring(root.Length).TrimStart(Path.DirectorySeparatorChar, '/');
+            var name = relative.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)
+                ? relative[..^4].Replace('\\', '/')
+                : relative.Replace('\\', '/');
+            var fileContents = File.ReadAllLines(fullPath, Encoding.UTF8);
+            return new AdrNameFile(name, fileContents, fullPath);
         }
 
         private Action<string, object[]> eventCaller;
