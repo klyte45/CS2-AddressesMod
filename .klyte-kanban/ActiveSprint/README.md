@@ -14,6 +14,6 @@ Port city nameset library + import/export/editor/delete to VUIO GamePanel (M2)
 - **Original tasks**: 00
 - **Original task IDs**: (none)
 - **Delivered tasks (from original)**:
-- **Added tasks**: 0
+- **Added tasks**: 4
 - **Delivered tasks (from added)**:
 - **Total delivered tasks**:
