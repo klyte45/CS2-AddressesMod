@@ -57,8 +57,7 @@ Sprint 6 (Region map). Full map parity — hard gate before S7 cutover.
 
 ### Depends on
 
-
-
+- 0047
 ### Is dependent for
 
-
+---
