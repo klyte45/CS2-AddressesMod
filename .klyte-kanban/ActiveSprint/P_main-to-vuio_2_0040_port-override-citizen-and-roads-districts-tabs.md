@@ -26,11 +26,11 @@ Sprint 2 (Overrides). Port citizen and roads/districts override tabs.
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] OverrideCitizenTab ported with selects, checkboxes, number inputs
-- [ ] OverrideRoadsDistrictsTab ported with per-district list
-- [ ] Values persist via existing k45::adr binders
-- [ ] Nameset dropdowns refresh on city nameset change
-- [ ] No euis-components imports in overrides folder
+- [x] OverrideCitizenTab ported with selects, checkboxes, number inputs
+- [x] OverrideRoadsDistrictsTab ported with per-district list
+- [x] Values persist via existing k45::adr binders
+- [x] Nameset dropdowns refresh on city nameset change
+- [x] No euis-components imports in overrides folder
 
 ---
 
