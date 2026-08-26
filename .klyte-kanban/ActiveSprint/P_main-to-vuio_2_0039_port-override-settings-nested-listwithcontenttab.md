@@ -26,10 +26,10 @@ Sprint 2 (Overrides). Port OverrideSettingsCmp shell with nested ListWithContent
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] OverrideSettingsCmp ported under settings/tabs/overrides/
-- [ ] Nested ListWithContentTab: left list = 14 tabs + H2 section headers
-- [ ] No Cs2SideTabs or euis-components imports
-- [ ] Override root tab reachable from settings shell
+- [x] OverrideSettingsCmp ported under settings/tabs/overrides/
+- [x] Nested ListWithContentTab: left list = 14 tabs + H2 section headers
+- [x] No Cs2SideTabs or euis-components imports
+- [x] Override root tab reachable from settings shell
 
 ---
 
