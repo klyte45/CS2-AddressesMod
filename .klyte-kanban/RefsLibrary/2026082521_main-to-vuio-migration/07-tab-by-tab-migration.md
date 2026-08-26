@@ -1,0 +1,164 @@
+# 07 — Tab-by-tab migration plan
+
+Ordered implementation guide for the big-bang port. Target: finish all rows before enabling EUIS hard cut.
+
+## Target folder layout
+
+```
+_Frontends/UI/k45_adr_vuio/src/
+  index.tsx                          # + UniversalModMenu append
+  mods/                              # UNCHANGED (selection / editor wiring)
+  tool/                              # UNCHANGED
+  components/                        # UNCHANGED contextual UI
+  settings/                          # NEW
+    AdrUniversalModButton.tsx
+    AdrSettingsPanel.tsx
+    AdrSettingsNav.tsx               # optional: wrap ListWithContentTab
+    translate.ts                     # OR import shared helper that uses K45::ADR.main
+    tabs/
+      namesets/
+        CityNamesetLibraryCmp.tsx
+        Nameset*.tsx                 # ported fileManagement/*
+        categorizeFiles.tsx
+      overrides/
+        OverrideSettingsCmp.tsx
+        OverrideCitizenTab.tsx
+        OverrideRoadsDistrictsTab.tsx
+        AddressFormatTab.tsx
+        VehiclePlateControllerComponent.tsx
+        VehicleSerialControllerComponent.tsx
+      roadPrefix/
+        RoadPrefixCmp.tsx
+      region/
+        RegionEditor.tsx
+        MapDiv.tsx
+        subpages/
+          HighwayRegisterManagement.tsx
+          RegionCitiesManagement.tsx
+          _GenericListing.tsx
+    styles/                          # CSS modules for migrated features
+      …
+```
+
+Shared services remain in `@klyte45/adr-commons` (after EUIS retarget — [08](08-shared-libs.md)).
+
+Suggested new vuio-commons widgets (if needed globally):
+
+- `FormLine` / `TriCheckbox` / `ErrorBoundary` / color input — see [04](04-widget-conversion-map.md)
+
+---
+
+## Milestone order
+
+Work left-to-right; later milestones may start scaffolding earlier, but **do not ship / cut EUIS** until M5 is green.
+
+### M0 — Shell + UMM (no feature tabs)
+
+| Task | Source | Target |
+|------|--------|--------|
+| Typings `UniversalModMenu` | modding.d.ts | vuio + vuio-commons |
+| Append + button | — | `AdrUniversalModButton.tsx` |
+| Empty panel + city gate | `root.component.tsx` | `AdrSettingsPanel.tsx` |
+| Side list for 4 tabs (placeholders) | — | nav using `ListWithContentTab` |
+
+Exit: Mods glyph + UMM button open/close panel; gate message.
+
+### M1 — Overrides (forms-heavy, no map)
+
+| Source under `main/src/components/overrides/` | Notes |
+|-----------------------------------------------|-------|
+| `OverrideSettingsCmp.tsx` | Replace `Cs2SideTabs` with vanilla side list + H2 section rows |
+| `OverrideCitizenTab.tsx` | Selects + checkboxes + number inputs |
+| `OverrideRoadsDistrictsTab.tsx` | Per-district list |
+| `AddressFormatTab.tsx` | Pattern preview |
+| `VehiclePlateControllerComponent.tsx` | MultiUI bindings from **vuio-commons** |
+| `VehicleSerialControllerComponent.tsx` | Same |
+| `vehiclePlateController.scss` | → CSS module |
+
+Exit: all 14 subtabs editable; bindings persist; nameset dropdowns update on city nameset change.
+
+### M2 — Namesets (screen machine + trees)
+
+| Source under `main/src/components/fileManagement/` | Replacement notes |
+|----------------------------------------------------|-------------------|
+| `CityNamesetLibraryCmp.tsx` | Keep screen enum |
+| `NamesetLibrarySelectorCmp.tsx` | `DefaultPanelScreen` → panel sections / dialogs |
+| `NamesetGitHubSelectorCmp.tsx` | Verify XHR from game UI |
+| `NamesetImportingCmp.tsx` / `NamesetEditorCmp.tsx` / `NamesetViewingCmp.tsx` / `NamesetDeletingCmp.tsx` | Dialogs: prefer `StringInputDialog` / `FilePickerDialog` patterns where fit |
+| `NamesetCategoryCmp.tsx` / `NamesetGitHubCategoryCmp.tsx` | `EuisTreeView` → `K45HierarchyMenu` |
+| `NamesetLineViewer.tsx` / `NamesetGitHubLineViewer.tsx` | Form rows |
+| `NamesetWordsContainer.tsx` | `GameScrollComponent` → `EditorScrollable` |
+| `utility/categorizeFiles.tsx` | Move as-is |
+
+Exit: full CRUD + disk library + GitHub import + export.
+
+### M3 — Road prefix
+
+| Source | Notes |
+|--------|-------|
+| `RoadPrefixCmp.tsx` | Needs **TriCheckbox** in vuio-commons first |
+| `styles/roadPrefixRuleEditor.scss` | CSS module |
+
+Exit: rule reorder, flag tri-states, save/load defaults XML.
+
+### M4 — Region (list editors without map polish)
+
+| Source | Notes |
+|--------|-------|
+| `RegionEditor.tsx` shell | Replace `react-tabs` with vanilla tab strip |
+| `HighwayRegisterManagement.tsx` | Listing + form |
+| `RegionCitiesManagement.tsx` | Color input port |
+| `_GenericListing.tsx` | Scrollable list |
+
+Exit: highways + cities editable; map can be stubbed with “select on map” disabled if needed **only during development** — not for cutover.
+
+### M5 — Region map (parity gate for big-bang)
+
+| Source | Notes |
+|--------|-------|
+| `MapDiv.tsx` | Highest risk |
+| `map.scss`, `regionEditor.scss`, overlays | CSS modules; Gameface SVG/mask quirks |
+| `utility/svgutils.ts` | Port helper |
+
+**Must work before cutting EUIS:**
+
+- [ ] Pan / zoom
+- [ ] Double-click point selection feeds highway start ref / city tools
+- [ ] Outside connection markers
+- [ ] Highway / rail / urban overlays
+- [ ] Neighborhood sector overlays (None/Land/Water/Air)
+- [ ] Reload + coordinate HUD
+- [ ] Highlight selected highway path
+
+### M6 — Hard cut (same sprint after M5)
+
+See [09-euis-decommission.md](09-euis-decommission.md).
+
+---
+
+## Porting rules (apply to every file)
+
+1. Replace `@klyte45/euis-components` imports per [04](04-widget-conversion-map.md)
+2. Replace `#utility/translate` with settings translate helper that still uses **`K45::ADR.main[...]`**
+3. Keep `@klyte45/adr-commons` service calls unchanged
+4. Prefer CSS modules; no global EUIS form SCSS import
+5. Do not bundle `react` / `react-dom` / `react-tabs` / `react-select` into VUIO (externals / replace)
+6. Fix listener cleanup on every screen
+
+## Suggested PR / commit slicing (implementation sprint)
+
+1. Shell + UMM + empty tabs
+2. Overrides
+3. Namesets
+4. Road prefix (+ TriCheckbox in vuio-commons)
+5. Region lists
+6. Region map
+7. EUIS decommission + delete `main`
+
+Big-bang means these land before a player-facing release that removes EUIS — not that they must be one git commit.
+
+## Explicit non-goals during port
+
+- Do not move selection-info / tool / editor into `settings/`
+- Do not rename `k45::adr.*` binders
+- Do not rename i18n keys in this sprint ([10](10-i18n-and-assets.md))
