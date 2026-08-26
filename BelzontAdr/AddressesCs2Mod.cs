@@ -27,6 +27,7 @@ namespace BelzontAdr
             updateSystem.UpdateAfter<AdrDistrictsSystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAfter<AdrMainSystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAfter<AdrEditorUISystem>(SystemUpdatePhase.UIUpdate);
+            updateSystem.UpdateAfter<AdrSettingsUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<AdrNamesetSystem>(SystemUpdatePhase.Modification2B);
             updateSystem.UpdateAt<AdrVehicleSystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RoadVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);

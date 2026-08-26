@@ -1,6 +1,6 @@
 .adrSettingsPanel {
     width: 80vw;
-    height: 70vh;
+    height: 80vh;
 }
 
 .panelBody {
@@ -28,8 +28,4 @@
     height: 100%;
     color: var(--normalTextColorDim, rgba(234, 241, 244, 0.7));
     font-size: calc(14rem * var(--fontScale, 1));
-}
-
-.settingsNav {
-    height: 100%;
 }
