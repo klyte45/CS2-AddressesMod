@@ -18,6 +18,7 @@ import { NamesetGitHubErrorDialog } from "./NamesetGitHubErrorDialog";
 import { NamesetImportingCmp } from "./NamesetImportingCmp";
 import { NamesetViewingCmp } from "./NamesetViewingCmp";
 import { namesetDisplayName } from "./namesetUtils";
+import { NamesetWordsContainer } from "./NamesetWordsContainer";
 
 enum Screen {
     DEFAULT,
@@ -218,7 +219,43 @@ export const CityNamesetLibraryCmp = () => {
 
     return (
         <div className={`${styles.libraryRoot} k45_btnHost`}>
-            <div className={styles.toolbar}>
+            <div className={styles.libraryContent}>
+                {availableNamesets.length === 0 ? (
+                    <div className={styles.emptyMsg}>
+                        <h2>
+                            {translate("cityNamesetsLibrary.noNamesetsMsg")}{" "}
+                            <button type="button" className="neutralBtn" onClick={() => setDiskPickerOpen(true)}>{translate("cityNamesetsLibrary.clickToImport")}</button>{" "}
+                            <button type="button" className="neutralBtn" onClick={() => goToEdit()}>{translate("cityNamesetsLibrary.clickToCreate")}</button>
+                        </h2>
+                    </div>
+                ) : (
+                    <ListWithContentTab
+                        className={styles.libraryNav}
+                        listItems={listItems}
+                        selectedKey={selectedId ?? null}
+                        onChangeSelection={setSelectedId}                        
+                    >
+                        <div className={styles.libraryBody}>
+                            {selectedNameset && <>
+                                <div className={styles.wordsPreview}>
+                                    <NamesetWordsContainer
+                                        values={selectedNameset.Values}
+                                        valuesAlternative={selectedNameset.ValuesAlternative}
+                                    />
+                                </div>
+                                <div className={styles.actionRow}>
+                                    <button type="button" className="negativeBtn" onClick={() => goToDelete(selectedNameset)}>{translate("cityNamesetsLibrary.deleteNameset")}</button>
+                                    <button type="button" className="neutralBtn" onClick={() => goToEdit(selectedNameset)}>{translate("cityNamesetsLibrary.editNameset")}</button>
+                                    <button type="button" className="neutralBtn" onClick={() => goToView(selectedNameset)}>{translate("cityNamesetsLibrary.viewNameset")}</button>
+                                    <button type="button" className="neutralBtn" disabled={isExporting} onClick={() => doExport(selectedNameset)}>{translate("cityNamesetsLibrary.exportNameset")}</button>
+                                </div>
+                            </>}
+                        </div>
+                    </ListWithContentTab>
+                )}
+            </div>
+
+            <div className={styles.bottomBar}>
                 <button type="button" className="positiveBtn" onClick={() => setDiskPickerOpen(true)}>{translate("cityNamesetsLibrary.importFromLibrary")}</button>
                 <button type="button" className="positiveBtn" onClick={() => setGithubPickerOpen(true)}>{translate("cityNamesetsLibrary.importFromGitHub")}</button>
                 <button type="button" className="positiveBtn" onClick={() => goToEdit()}>{translate("cityNamesetsLibrary.createNewNameset")}</button>
@@ -226,40 +263,9 @@ export const CityNamesetLibraryCmp = () => {
                     {isLibraryLoading ? translate("namesetsLibrary.reloadingFiles") : translate("namesetsLibrary.reloadFiles")}
                 </button>
                 <button type="button" className="neutralBtn" onClick={() => NamesetService.goToDiskSimpleNamesFolder()}>{translate("namesetsLibrary.goToLibraryFolder")}</button>
-                <div className={styles.toolbarSpacer} />
-                <div className={styles.toolbarMessage}>{lastMessage}</div>
+                <div className={styles.bottomBarSpacer} />
+                <div className={styles.bottomBarMessage}>{lastMessage}</div>
             </div>
-
-            {availableNamesets.length === 0 ? (
-                <div className={styles.emptyMsg}>
-                    <h2>
-                        {translate("cityNamesetsLibrary.noNamesetsMsg")}{" "}
-                        <button type="button" className="neutralBtn" onClick={() => setDiskPickerOpen(true)}>{translate("cityNamesetsLibrary.clickToImport")}</button>{" "}
-                        <button type="button" className="neutralBtn" onClick={() => goToEdit()}>{translate("cityNamesetsLibrary.clickToCreate")}</button>
-                    </h2>
-                </div>
-            ) : (
-                <ListWithContentTab
-                    className={styles.libraryNav}
-                    listItems={listItems}
-                    selectedKey={selectedId ?? null}
-                    onChangeSelection={setSelectedId}
-                >
-                    <div className={styles.libraryBody}>
-                        {selectedNameset && <>
-                            <div className={styles.entryMeta}>
-                                {`${translate("namesetLine.entriesCountLbl")} ${selectedNameset.Values.length}`}
-                            </div>
-                            <div className={styles.actionRow}>
-                                <button type="button" className="negativeBtn" onClick={() => goToDelete(selectedNameset)}>{translate("cityNamesetsLibrary.deleteNameset")}</button>
-                                <button type="button" className="neutralBtn" onClick={() => goToEdit(selectedNameset)}>{translate("cityNamesetsLibrary.editNameset")}</button>
-                                <button type="button" className="neutralBtn" onClick={() => goToView(selectedNameset)}>{translate("cityNamesetsLibrary.viewNameset")}</button>
-                                <button type="button" className="neutralBtn" disabled={isExporting} onClick={() => doExport(selectedNameset)}>{translate("cityNamesetsLibrary.exportNameset")}</button>
-                            </div>
-                        </>}
-                    </div>
-                </ListWithContentTab>
-            )}
 
             <FilePickerDialog
                 isActive={diskPickerOpen}

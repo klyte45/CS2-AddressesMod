@@ -5,23 +5,30 @@
     min-height: 0;
 }
 
-.toolbar {
+.libraryContent {
+    flex-grow: 1;
+    min-height: 0;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+}
+
+.bottomBar {
+    display: flex;
+    flex-direction: row-reverse;
     flex-wrap: wrap;
     align-items: center;
-    padding: 8rem;
+    padding: 5rem 8rem;
     flex-shrink: 0;
 }
 
-.toolbarSpacer {
+.bottomBarSpacer {
     flex-grow: 1;
 }
 
-.toolbarMessage {
+.bottomBarMessage {
     display: flex;
     align-items: center;
-    padding-left: 10rem;
+    padding-right: 10rem;
     color: var(--menuText1Normal);
 }
 
@@ -33,16 +40,21 @@
 
 .libraryBody {
     height: 100%;
-    overflow: auto;
+    min-height: 0;
     padding: 8rem;
     display: flex;
     flex-direction: column;
 }
 
-.entryMeta {
-    font-size: 75%;
-    color: var(--textColorDim);
-    margin-bottom: 8rem;
+.wordsPreview {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    >div {
+        max-height: 100%;
+    }
 }
 
 .actionRow {
@@ -78,6 +90,8 @@
     min-height: 0;
     overflow: auto;
     padding: 8rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .namesetTitle {

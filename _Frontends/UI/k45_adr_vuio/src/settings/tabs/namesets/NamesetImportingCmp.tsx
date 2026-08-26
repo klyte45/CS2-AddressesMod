@@ -18,10 +18,6 @@ export const NamesetImportingCmp = ({ namesetData, onBack, onOk }: Props) => {
 
     return (
         <div className={`${styles.screenRoot} k45_btnHost`}>
-            <div className={styles.toolbar}>
-                <button type="button" className="negativeBtn" onClick={onBack}>{translate("namesetsImport.cancel")}</button>
-                <button type="button" className="positiveBtn" onClick={() => onOk(namesetData, namesetNameImport)}>{translate("namesetsImport.import")}</button>
-            </div>
             <div className={styles.screenBody}>
                 <FormLine title={translate("namesetsImport.cityImportName")}>
                     <StringInput
@@ -31,6 +27,10 @@ export const NamesetImportingCmp = ({ namesetData, onBack, onOk }: Props) => {
                     />
                 </FormLine>
                 <NamesetWordsContainer values={namesetData.Values} valuesAlternative={namesetData.ValuesAlternative} />
+            </div>
+            <div className={styles.bottomBar}>
+                <button type="button" className="negativeBtn" onClick={onBack}>{translate("namesetsImport.cancel")}</button>
+                <button type="button" className="positiveBtn" onClick={() => onOk(namesetData, namesetNameImport)}>{translate("namesetsImport.import")}</button>
             </div>
         </div>
     );

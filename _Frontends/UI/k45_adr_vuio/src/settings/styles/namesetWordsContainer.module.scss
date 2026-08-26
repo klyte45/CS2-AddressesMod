@@ -1,6 +1,9 @@
 .wordsContainer {
+    flex-grow: 1;
+    min-height: 0;
     display: flex;
     flex-wrap: wrap;
+    align-content: flex-start;
     padding-top: 4rem;
 }
 

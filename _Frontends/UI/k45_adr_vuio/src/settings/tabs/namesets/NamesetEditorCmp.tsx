@@ -31,10 +31,6 @@ export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
 
     return (
         <div className={`${styles.screenRoot} k45_btnHost`}>
-            <div className={styles.toolbar}>
-                <button type="button" className="negativeBtn" onClick={onBack}>{translate("namesetEditor.cancel")}</button>
-                <button type="button" className="positiveBtn" onClick={() => onOk(parseNamesetText(textValue, namesetData.Name))}>{translate("namesetEditor.save")}</button>
-            </div>
             <div className={styles.screenBody}>
                 <div className={styles.namesetTitle}>{namesetData.Name.split("/").pop()}</div>
                 <div className={styles.divider} />
@@ -54,6 +50,10 @@ export const NamesetEditorCmp = ({ entryData, onBack, onOk }: Props) => {
                         onChangeEnd={commitText}
                     />
                 </Scrollable>
+            </div>
+            <div className={styles.bottomBar}>
+                <button type="button" className="negativeBtn" onClick={onBack}>{translate("namesetEditor.cancel")}</button>
+                <button type="button" className="positiveBtn" onClick={() => onOk(parseNamesetText(textValue, namesetData.Name))}>{translate("namesetEditor.save")}</button>
             </div>
         </div>
     );

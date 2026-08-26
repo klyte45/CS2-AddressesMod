@@ -11,12 +11,12 @@ type Props = {
 
 export const NamesetDeletingCmp = ({ namesetData, onBack, onOk }: Props) => (
     <div className={`${styles.screenRoot} k45_btnHost`}>
-        <div className={styles.toolbar}>
-            <button type="button" className="negativeBtn" onClick={() => onOk(namesetData)}>{translate("namesetDelete.yes")}</button>
-            <button type="button" className="darkestBtn" onClick={onBack}>{translate("namesetDelete.no")}</button>
-        </div>
         <div className={styles.screenBody}>
             <NamesetWordsContainer values={namesetData.Values} valuesAlternative={namesetData.ValuesAlternative} />
+        </div>
+        <div className={styles.bottomBar}>
+            <button type="button" className="negativeBtn" onClick={() => onOk(namesetData)}>{translate("namesetDelete.yes")}</button>
+            <button type="button" className="darkestBtn" onClick={onBack}>{translate("namesetDelete.no")}</button>
         </div>
     </div>
 );
