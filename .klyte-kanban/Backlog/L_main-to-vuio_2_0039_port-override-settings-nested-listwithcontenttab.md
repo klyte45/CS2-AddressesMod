@@ -52,8 +52,7 @@ Sprint 2 (Overrides). Port OverrideSettingsCmp shell with nested ListWithContent
 
 ### Depends on
 
-
-
+- 0038
 ### Is dependent for
 
-
+---

@@ -53,8 +53,7 @@ Sprint 1 (Foundations). Complete empty settings shell: four root tabs, city gate
 
 ### Depends on
 
-
-
+- 0037
 ### Is dependent for
 
-
+---
