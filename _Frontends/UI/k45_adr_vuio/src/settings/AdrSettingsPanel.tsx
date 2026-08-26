@@ -3,6 +3,7 @@ import { ErrorBoundary, VanillaComponentResolver } from "@klyte45/vuio-commons";
 import { getModule } from "cs2/modding";
 import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { translate } from "./translate";
+import { OverrideSettingsCmp } from "./tabs/overrides/OverrideSettingsCmp";
 import styles from "./AdrSettingsPanel.module.scss";
 
 type RootTabKey = "namesets" | "overrides" | "roadPrefix" | "region";
@@ -21,9 +22,8 @@ type GamePanelProps = {
 
 const rootTabs: RootTabKey[] = ["namesets", "overrides", "roadPrefix", "region"];
 
-const tabPlaceholders: Record<RootTabKey, string> = {
+const tabPlaceholders: Partial<Record<RootTabKey, string>> = {
     namesets: "Namesets — Sprint 3",
-    overrides: "Overrides — Sprint 2",
     roadPrefix: "Road prefix — Sprint 4",
     region: "Region — Sprint 5–6",
 };
@@ -67,7 +67,6 @@ export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
         setSelectedTab(tab as RootTabKey);
     };
 
-    // Economy pattern: title bar (close via Panel context) + TabBar as header siblings — not nested.
     const header = (
         <>
             <PanelTitleBar icon="coui://adr.k45/UI/images/ADR.svg">
@@ -88,11 +87,18 @@ export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
         </>
     );
 
+    const tabBody = (() => {
+        if (selectedTab === "overrides") {
+            return <OverrideSettingsCmp />;
+        }
+        return <div className={styles.tabPlaceholder}>{tabPlaceholders[selectedTab]}</div>;
+    })();
+
     const body = !isReady
         ? <div className={styles.cityGate}>{translate("loadACityWarningH2")}</div>
         : (
             <TabNav tabs={rootTabs} selectedTab={selectedTab} onSelect={selectTab as any}>
-                <div className={styles.tabPlaceholder}>{tabPlaceholders[selectedTab]}</div>
+                {tabBody}
             </TabNav>
         );
 
