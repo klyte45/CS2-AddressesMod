@@ -26,11 +26,11 @@ Sprint 2 (Overrides). Port address format, vehicle plate, vehicle serial tabs + 
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AddressFormatTab ported (if not already in VUIO)
-- [ ] VehiclePlateControllerComponent and VehicleSerialControllerComponent use vuio-commons MultiUI bindings
-- [ ] vehiclePlateController.scss converted to CSS module under settings/styles/
-- [ ] All 14 override subtabs editable with parity to main
-- [ ] Contextual VUIO (selection/editor/tool) unchanged
+- [x] AddressFormatTab ported (if not already in VUIO)
+- [x] VehiclePlateControllerComponent and VehicleSerialControllerComponent use vuio-commons MultiUI bindings
+- [x] vehiclePlateController.scss converted to CSS module under settings/styles/
+- [x] All 14 override subtabs editable with parity to main
+- [x] Contextual VUIO (selection/editor/tool) unchanged
 
 ---
 
