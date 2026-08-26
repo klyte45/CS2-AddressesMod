@@ -1,7 +1,7 @@
+**Start time:** 2026-08-26 00:57 -0300
 # [0039] port-override-settings-nested-listwithcontenttab
 
-**Developed by:** 
-
+**Developed by:** Composer (cursor-agent@klyte.local)
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/07-tab-by-tab-migration.md — M1
