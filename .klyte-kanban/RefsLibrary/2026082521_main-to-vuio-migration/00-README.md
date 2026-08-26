@@ -2,7 +2,7 @@
 
 Guide for retiring the EUIS app at `_Frontends/UI/main/` and recreating its full settings UI inside `_Frontends/UI/k45_adr_vuio/`, opened from the vanilla Universal Mod Menu.
 
-This pack is **documentation only**. It does not migrate product code. A later implementation sprint should follow these files in order.
+This pack is **documentation only**. It does not migrate product code. Implementation follows the multi-sprint plan in [11-sprint-roadmap.md](11-sprint-roadmap.md) (S7 cutover removes `main` and `adr-commons`).
 
 ## Scope
 
@@ -12,13 +12,13 @@ This pack is **documentation only**. It does not migrate product code. A later i
 | Host settings in `k45_adr_vuio` via UMM + **GamePanel** | Overriding Economy/CityInfo/etc.; Editor `Portal` host |
 | Convert euis-components → vuio-commons / `cs2/*` | Changing C# `k45::adr.*` binding contracts |
 | Full feature parity including Region map | Kanban sprint/task creation (follow-up) |
-| Retarget or **inline** `adr-commons` (prefer inline into vuio after `main` gone) | Deleting `main` on disk before code sprint |
+| **Inline** `adr-commons` into vuio; delete package in final sprint | Deleting `main` / `adr-commons` before feature parity |
 
 ## Confirmed decisions
 
 | Decision | Choice |
 |----------|--------|
-| Rollout | **Big-bang** — UMM panel complete; EUIS `main` retired in same sprint |
+| Rollout | **Hard cut in S7** — no player release until S7; EUIS `main` + `adr-commons` removed in S7 ([11](11-sprint-roadmap.md)) |
 | Settings shell UX | **Vanilla-first GamePanel** — `GamePanelType` + `gamePanelComponents` + `centerLeftLayout`; size **70vh × 80vw** (review later); `ListWithContentTab` nav (not Editor Portal) |
 | Override subtabs | **Another `ListWithContentTab`** — left list = 14 tabs + H2 section headers; right = tab body. Do not port `Cs2SideTabs` |
 | i18n | **Keep `K45::ADR.main[...]`** — no CSV churn; optional rename later |
@@ -38,17 +38,18 @@ This pack is **documentation only**. It does not migrate product code. A later i
 8. [08-shared-libs.md](08-shared-libs.md) — adr-commons / vuio-commons / kill list
 9. [09-euis-decommission.md](09-euis-decommission.md) — C# / npm / packaging checklist
 10. [10-i18n-and-assets.md](10-i18n-and-assets.md) — keys, icons, assets
+11. [11-sprint-roadmap.md](11-sprint-roadmap.md) — **implementation strategy** (S1–S7; S7 deletes `main` + `adr-commons`)
 
-## Success criteria (implementation sprint)
+## Success criteria (end of roadmap / S7)
 
 - [ ] `moduleRegistry.append('UniversalModMenu', …)` registers an ADR button; right-menu Mods icon appears when any mod appends UMM
 - [ ] ADR settings registered as GamePanel (`GamePanelType` + `gamePanelComponents`); UMM button calls `toggleGamePanel`
 - [ ] Settings GamePanel opens at roughly **70vh × 80vw** (size may be adjusted later in development)
 - [ ] Settings GamePanel exposes all four root tabs with feature parity to current `main`
-- [ ] `UseEuisRegister` / `EuisIsMandatory` / `EuisApps` removed or disabled; mod loads without EUIS
-- [ ] `_Frontends/UI/main/` deleted from product shipping path
-- [ ] `adr-commons` either inlined into `k45_adr_vuio` **or** retargeted off `_replacements/euis-components` (prefer inline — see [08](08-shared-libs.md))
 - [ ] Region map (pan/zoom/overlays/selection) works from VUIO panel
+- [ ] `UseEuisRegister` / `EuisIsMandatory` / `EuisApps` removed or disabled; mod loads without EUIS
+- [ ] `_Frontends/UI/main/` **deleted**
+- [ ] `adr-commons` **inlined** into `k45_adr_vuio` and `_Frontends/UI/_shared/adr-commons/` **deleted** ([08](08-shared-libs.md) Path A)
 - [ ] Existing selection-info / editor / tool VUIO surfaces still work unchanged
 
 ## Source ↔ target cheat sheet
@@ -76,4 +77,4 @@ Follow project Cursor rules; this pack does not override them:
 
 ## Open questions
 
-None — all product decisions in **Confirmed decisions** were settled (AskQuestion rounds). Revisit only if implementation uncovers a new blocker; then add a subject block here before coding around it.
+Product decisions in **Confirmed decisions** were settled earlier. **Implementation sequencing** is locked in [11-sprint-roadmap.md](11-sprint-roadmap.md) (S1–S7; all open questions cleared).
