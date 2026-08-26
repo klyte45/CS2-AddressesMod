@@ -54,8 +54,7 @@ Sprint 7 Phase A. Inline adr-commons into k45_adr_vuio before EUIS cut.
 
 ### Depends on
 
-
-
+- 0048
 ### Is dependent for
 
-
+---
