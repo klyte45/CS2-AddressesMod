@@ -145,7 +145,34 @@ Reference implementations:
 | Write Everywhere `WEMainPanel` | Explicit `centerLeftLayout` wrapper + `Panel` + `PanelTitleBar` + `toggleGamePanel` on close |
 | Vehicle Skins `VSMainPanel` | GamePanel component receives `onClose`; uses `cs2/ui` `Panel` |
 
-Sizing: match overview density (wide left-center slot). Prefer layout class over absolute `rem` positioning.
+Sizing (target for a large settings surface):
+
+| Dimension | Target | Notes |
+|-----------|--------|-------|
+| Height | **`70vh`** | Viewport-relative; apply on the settings `Panel` (or its root wrapper) |
+| Width | **`80vw`** | Same |
+
+This is the **initial size contract** for implementers. It may be tuned later during development (e.g. clamp min/max, or switch to rem if Gameface viewport units misbehave) — revisit in UI polish, do not block M0 on perfect fit.
+
+Prefer setting size on the ADR panel root (CSS module) rather than fighting `centerLeftLayout` alone; keep the layout wrapper for GamePanel hosting, then size the inner `Panel`.
+
+```tsx
+// illustrative — exact class names left to implementers
+<div className={gameMainScreenModule.centerLeftLayout}>
+  <Panel className={styles.adrSettingsPanel} onClose={onClose} header={…}>
+    …
+  </Panel>
+</div>
+```
+
+```scss
+// settings panel root — review later in development
+.adrSettingsPanel {
+  width: 80vw;
+  height: 70vh;
+}
+```
+
 
 ### Root tabs (replace `MainSideTabMenuComponent`)
 
@@ -207,6 +234,7 @@ Recommend option 1 in [04-widget-conversion-map.md](04-widget-conversion-map.md)
 - [ ] `append('UniversalModMenu', …)` in `index.tsx`
 - [ ] Button calls `toggleGamePanel`, not Portal state
 - [ ] Panel uses `centerLeftLayout` (or renderer-equivalent) + common `Panel` + `onClose`
+- [ ] Panel sized **70vh × 80vw** (tunable later in development)
 - [ ] UMM button visible; right-menu Mods glyph present
 - [ ] Panel opens with 4 root tabs; closes when another GamePanel opens
 - [ ] City-not-loaded gate works

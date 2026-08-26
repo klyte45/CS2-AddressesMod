@@ -9,7 +9,7 @@ Source: `main/src/root.component.tsx`
 | # | Tab key | Translate key | Component | Notes |
 |---|---------|---------------|-----------|-------|
 | 1 | Namesets | `namesetManagement.title` | `CityNamesetLibraryCmp` | Screen state machine |
-| 2 | Overrides | `overrideSettings.title` | `OverrideSettingsCmp` | Nested side tabs |
+| 2 | Overrides | `overrideSettings.title` | `OverrideSettingsCmp` | Nested **`ListWithContentTab`** (subtabs + sections) |
 | 3 | Road prefix | `roadPrefixSettings.title` | `RoadPrefixCmp` | Rule list + editor |
 | 4 | Region | `regionSettings.title` | `RegionEditor` | Map + 2 data tabs |
 
@@ -25,9 +25,9 @@ Source folder: `main/src/components/fileManagement/`
 
 | Screen | Component | User actions |
 |--------|-----------|--------------|
-| `DEFAULT` | Category tree of city namesets | Import library, Import GitHub, Create; per-row delete / edit / view / export |
-| `NAMESET_IMPORT_LIB` | `NamesetLibrarySelectorCmp` | Browse disk library; pick nameset to import |
-| `NAMESET_IMPORT_GITHUB` | `NamesetGitHubSelectorCmp` | Browse GitHub `klyte45/AddressesFiles` tree |
+| `DEFAULT` | Flat list of city namesets | Import library, Import GitHub, Create; select row → view/edit/delete/export actions |
+| `NAMESET_IMPORT_LIB` | `NamesetLibrarySelectorCmp` | Browse disk library; pick nameset — **`FilePickerDialog`** + disk provider |
+| `NAMESET_IMPORT_GITHUB` | `NamesetGitHubSelectorCmp` | Browse GitHub via **`FilePickerDialog`** + GitHub provider; on fetch/rate-limit errors → **modal with Open GitHub + Cancel** |
 | `IMPORTING_NAMESET` | `NamesetImportingCmp` | Confirm path/name then import |
 | `EDIT_NAMESET` | `NamesetEditorCmp` | Edit name path + values textarea |
 | `VIEWING_NAMESET` | `NamesetViewingCmp` | Read-only word list |
@@ -38,19 +38,25 @@ Source folder: `main/src/components/fileManagement/`
 
 | File | Purpose |
 |------|---------|
-| `NamesetCategoryCmp.tsx` | Hierarchical folder tree (city) via `EuisTreeView` |
-| `NamesetGitHubCategoryCmp.tsx` | Recursive GitHub tree |
-| `NamesetLineViewer.tsx` | Row actions for a city nameset |
-| `NamesetGitHubLineViewer.tsx` | Row for a GitHub `.txt` blob |
-| `NamesetWordsContainer.tsx` | Scrollable dual-value word list |
+| `NamesetCategoryCmp.tsx` | **Do not port** — city namesets are a **flat raw-name list** on the left (`ListWithContentTab`), not a hierarchy |
+| `NamesetLineViewer.tsx` | Row actions may fold into list selection + right-pane / toolbar actions |
+| `NamesetGitHubCategoryCmp.tsx` / `NamesetGitHubLineViewer.tsx` | **Superseded for browse/pick** by GitHub-backed `FilePickerDialog` |
+| `NamesetWordsContainer.tsx` | Scrollable dual-value word list (detail pane) |
+
+### City nameset list UX (VUIO simplification)
+
+- **Left:** flat list of nameset **raw names** (full path/name string as stored — no folder tree / `K45HierarchyMenu`)
+- **Right:** content for the selected nameset (view/edit) or empty state
+- Prefer `ListWithContentTab` / `ListWithPreviewTab`
+- **Do not** port `categorizeFiles` / `NamesetCategoryCmp` / `EuisTreeView` for this screen — simplifies data handling (plain array from `NamesetService.listCityNamesets`)
 
 ### Utilities / services
 
 | Piece | Role |
 |-------|------|
-| `utility/categorizeFiles.tsx` | Paths → folder tree |
+| `utility/categorizeFiles.tsx` | **Drop** for VUIO city library (hierarchy not used) |
 | `NamesetService` | CRUD / list / export / change events |
-| `GitHubAddressesFilesService` | GitHub API + `main.atob` bridge |
+| `GitHubAddressesFilesService` | GitHub API + `atob` bridge |
 
 ---
 
@@ -58,7 +64,14 @@ Source folder: `main/src/components/fileManagement/`
 
 Source folder: `main/src/components/overrides/`
 
-Host: `OverrideSettingsCmp` with `Cs2SideTabs` + H2 headers.
+Host today: `OverrideSettingsCmp` with `Cs2SideTabs` + H2 headers.
+
+**VUIO:** nest a second **`ListWithContentTab`** inside the Overrides root-tab body:
+
+- **Left:** subtab entries + non-selectable `{ section: … }` headers (Vehicle identifiers / Road vehicle serial)
+- **Right:** active subtab content (`OverrideCitizenTab`, plates, serials, …)
+
+Do not port `Cs2SideTabs`.
 
 ### Subtabs
 
@@ -94,7 +107,7 @@ Styles: `styles/roadPrefixRuleEditor.scss`
 | Per-rule editor | Pattern, min/max speed, road flags (tri-state), bridge/elevated, car lanes, width |
 | Defaults IO | Save/load XML (`DefaultRoadPrefixRules.xml`) via NamingRulesService |
 
-Uses `Cs2TriCheckbox` extensively (no VUIO equivalent yet — new control required).
+Uses road-prefix flags that today go through EUIS `Cs2TriCheckbox`. **VUIO:** use game `Checkbox` with `multistate` (already in `game-ui/common/input/toggle/checkbox`; statistics panel uses it). vuio-commons currently types only boolean `checked` — **expose multistate** rather than inventing a new control.
 
 ---
 

@@ -12,15 +12,15 @@ This pack is **documentation only**. It does not migrate product code. A later i
 | Host settings in `k45_adr_vuio` via UMM + **GamePanel** | Overriding Economy/CityInfo/etc.; Editor `Portal` host |
 | Convert euis-components → vuio-commons / `cs2/*` | Changing C# `k45::adr.*` binding contracts |
 | Full feature parity including Region map | Kanban sprint/task creation (follow-up) |
-| Retarget `adr-commons` off EUIS typings | Deleting `main` on disk before code sprint |
+| Retarget or **inline** `adr-commons` (prefer inline into vuio after `main` gone) | Deleting `main` on disk before code sprint |
 
 ## Confirmed decisions
 
 | Decision | Choice |
 |----------|--------|
 | Rollout | **Big-bang** — UMM panel complete; EUIS `main` retired in same sprint |
-| Settings shell UX | **Vanilla-first GamePanel** — `GamePanelType` + `gamePanelComponents` + `centerLeftLayout`; `ListWithContentTab` nav (not Editor Portal) |
-| Override subtabs | **Rebuild with vanilla** — do not port `Cs2SideTabs` |
+| Settings shell UX | **Vanilla-first GamePanel** — `GamePanelType` + `gamePanelComponents` + `centerLeftLayout`; size **70vh × 80vw** (review later); `ListWithContentTab` nav (not Editor Portal) |
+| Override subtabs | **Another `ListWithContentTab`** — left list = 14 tabs + H2 section headers; right = tab body. Do not port `Cs2SideTabs` |
 | i18n | **Keep `K45::ADR.main[...]`** — no CSV churn; optional rename later |
 | Region editor | **Same milestone** — full map parity before killing `main` |
 | EUIS dependency | **Hard cut** — no fallback period; VUIO-only mod |
@@ -43,11 +43,11 @@ This pack is **documentation only**. It does not migrate product code. A later i
 
 - [ ] `moduleRegistry.append('UniversalModMenu', …)` registers an ADR button; right-menu Mods icon appears when any mod appends UMM
 - [ ] ADR settings registered as GamePanel (`GamePanelType` + `gamePanelComponents`); UMM button calls `toggleGamePanel`
+- [ ] Settings GamePanel opens at roughly **70vh × 80vw** (size may be adjusted later in development)
 - [ ] Settings GamePanel exposes all four root tabs with feature parity to current `main`
-- [ ] No `@klyte45/euis-components` imports remain in ADR UI packages
 - [ ] `UseEuisRegister` / `EuisIsMandatory` / `EuisApps` removed or disabled; mod loads without EUIS
 - [ ] `_Frontends/UI/main/` deleted from product shipping path
-- [ ] `adr-commons` no longer references `_replacements/euis-components`
+- [ ] `adr-commons` either inlined into `k45_adr_vuio` **or** retargeted off `_replacements/euis-components` (prefer inline — see [08](08-shared-libs.md))
 - [ ] Region map (pan/zoom/overlays/selection) works from VUIO panel
 - [ ] Existing selection-info / editor / tool VUIO surfaces still work unchanged
 

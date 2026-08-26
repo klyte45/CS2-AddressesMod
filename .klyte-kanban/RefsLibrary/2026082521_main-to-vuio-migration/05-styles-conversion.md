@@ -35,7 +35,7 @@
 
 1. **No global class leakage** into game UI — always CSS modules for custom ADR settings styles.
 2. **Prefer game variables** over hard-coded colors. When unsure, query via `kcs2m_css_lookup` (property name) against game `index.css`.
-3. **Keep rem units** as in existing VUIO (`width: "400rem"`, etc.).
+3. **Keep rem units** for most internal layout (match existing VUIO). Exception: settings panel outer size uses viewport units — **`width: 80vw; height: 70vh`** (see [03](03-shell-and-umm.md)); revisit if Gameface handles `vh`/`vw` poorly.
 4. **Do not** import `euis-components/src/styles/cs2-form-style.scss` into VUIO.
 5. **react-select** container rules in `main.scss` die with react-select — replace with vanilla dropdown styling.
 6. **react-tabs** selectors in `regionEditor.scss` must be rewritten for the new tab control.

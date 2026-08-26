@@ -132,6 +132,7 @@ WE main UI also wraps with `gameMainScreenModule.centerLeftLayout` (same layout 
 
 - Outer: GamePanel registration + `centerLeftLayout` (or equivalent layout div from `game-main-screen.module.scss`)
 - Inner: `cs2/ui` / common `Panel` with `onClose` from renderer props; `PanelTitleBar` via `VanillaComponentResolver`
+- **Size:** **`70vh` height × `80vw` width** on the settings panel root (large workspace for dense tabs). Tunable later in development — see [03](03-shell-and-umm.md)
 - Navigation: [`ListWithContentTab`](../../../_Frontends/UI/_shared/vuio-commons/src/components/ListWithContentTab.tsx) for the 4 root tabs
 
 Do **not** recreate `MainSideTabMenuComponent` (EUIS icon rail). Do **not** use Editor `Portal` for this surface.

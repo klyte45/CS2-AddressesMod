@@ -64,29 +64,60 @@ Anti-pattern to fix during port: registering `doOn*` at render body without clea
 
 ## GitHub nameset import
 
-Today: XHR to GitHub API + `AdrMainService`/`main.atob` for blob decode + open-repo helper.
+Today: XHR to GitHub API + `AdrMainService`/`main.atob` for blob decode + open-repo helper + custom tree UI (`NamesetGitHubSelectorCmp`). Rate-limit today shows inline error text (`githubListing.errorLoadingRateLimit` / `errorLoadingMsg`) plus a separate “visit repository” button on the selector screen.
+
+**UI rule:** GitHub folder navigation and `.txt` selection use the **same** vuio-commons **`FilePickerDialog`** as disk import. Supply a `generateDataProvider` that calls `GitHubAddressesFilesService.listAtTreePoint` and maps trees/blobs to `DataProviderItem`. After confirm, keep existing blob fetch + parse + import screen.
+
+### Fetch / rate-limit error modal (required)
+
+When listing fails (HTTP errors, free-tier rate limits, `GitHubResponseContainer.success === false`):
+
+| Element | Behavior |
+|---------|----------|
+| Host | The **FilePickerDialog** itself becomes / shows a **blocking error modal** (not a silent empty list) |
+| Message | Rate-limit: `githubListing.errorLoadingRateLimit` + `resetTime` when present; else `githubListing.errorLoadingMsg` |
+| Button 1 | **Open GitHub in browser** → `GitHubAddressesFilesService.goToRepository()` |
+| Button 2 | **Cancel** → close dialog and abort import (`setIsActive(false)`) |
+
+Do not rely on toast-only or inline-only error text without those two actions.
 
 Review:
 
 | Topic | Question to verify in VUIO |
 |-------|----------------------------|
 | Network | Does game Cohtml allow GitHub HTTPS from UI module context? (Expect yes; confirm) |
-| Rate limits | Existing UX for 403/rate-limit must still surface |
+| Rate limits | Error modal with Open-repo + Cancel appears on limit / listing failure |
 | CORS / headers | Same as EUIS or stricter? |
 | `atob` bridge | Still required? Keep C# binder |
 | Dev logging | `process.env.NODE_ENV` may differ under VUIO webpack — check define plugin |
+| Provider mapping | Tree → `directory: true`; blob `.txt` → selectable file; nested navigation via folder clicks |
+| Provider errors | Provider must surface failure (throw or structured error) so the dialog can enter error-modal mode |
+
+Retest:
+
+- [ ] Open GitHub import via `FilePickerDialog`
+- [ ] Navigate nested folders; pick `.txt`; import succeeds
+- [ ] Force / wait for rate-limit: **error modal** with **Open GitHub** + **Cancel** only
+- [ ] Open GitHub opens browser/repo; Cancel closes picker without import
+- [ ] No leftover EUIS GitHub tree components in the shipped UI
+
 
 ---
 
 ## Disk library / file IO
 
-Nameset disk library and road-prefix XML defaults go through C# binders (open folder, reload, save/load). Host change should be transparent; retest:
+Nameset disk library and road-prefix XML defaults go through C# binders (list dir, open folder, reload, save/load). Host change should be transparent.
 
-- [ ] Open library folder
+**UI rule:** any interactive browse/pick — **disk or GitHub** — uses **`FilePickerDialog`** from `@klyte45/vuio-commons` (disk/`BaseFileService` or GitHub-backed `generateDataProvider`). Do not port EUIS custom folder/tree browsers for picking.
+
+Retest:
+
+- [ ] Open / browse disk library via `FilePickerDialog`
+- [ ] Open / browse GitHub library via **same** `FilePickerDialog` + GitHub provider
 - [ ] Reload library list
 - [ ] Import to city
 - [ ] Export from city
-- [ ] Save/load `DefaultRoadPrefixRules.xml`
+- [ ] Save/load `DefaultRoadPrefixRules.xml` (picker if path selection is UI-driven)
 
 ---
 
@@ -161,7 +192,7 @@ Settings code must not break `index.tsx` extend/append order for those hooks.
 | Area | Cases |
 |------|-------|
 | Shell | Open/close; gate; reopen after city load |
-| Namesets | Create/edit/view/delete; disk import; GitHub import; export; tree folders |
+| Namesets | Create/edit/view/delete; disk import; GitHub import; export; **flat raw-name list** (no folder tree) |
 | Overrides | Each subtab save; district override; address preview; all plates/serials |
 | Road prefix | Add/reorder/delete; tri-state flags; defaults save/load |
 | Region | Map interactions above; highway CRUD; city CRUD + color |

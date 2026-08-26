@@ -33,7 +33,8 @@ Missing-key tracking via `window.K45_MISSING_I18N` can remain.
 All keys currently used under `main` — including but not limited to:
 
 - Shell: `loadACityWarningH2`, root tab titles (`namesetManagement.title`, `overrideSettings.title`, `roadPrefixSettings.title`, `regionSettings.title`)
-- Nameset flows: `cityNamesetsLibrary.*`, `namesetsLibrary.*`, `githubLibrary.*`, `namesetsImport.*`, `namesetEditor.*`, `namesetDelete.*`, …
+- Nameset flows: `cityNamesetsLibrary.*`, `namesetsLibrary.*`, `githubLibrary.*`, `githubListing.*` (rate-limit / error strings), `namesetsImport.*`, `namesetEditor.*`, `namesetDelete.*`, …
+- GitHub error modal buttons: reuse `githubLibrary.visitRepository` (or add a dedicated Cancel key under `githubListing.*` if none exists)
 - Overrides: `overrideSettings.*`, `vehicleSerial.*`, plate strings
 - Road prefix: `roadPrefixSettings.*`
 - Region: `regionSettings.*`, highway / city editor keys

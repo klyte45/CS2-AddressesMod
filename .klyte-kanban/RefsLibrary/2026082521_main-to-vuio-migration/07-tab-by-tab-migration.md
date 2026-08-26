@@ -19,8 +19,7 @@ _Frontends/UI/k45_adr_vuio/src/
     tabs/
       namesets/
         CityNamesetLibraryCmp.tsx
-        Nameset*.tsx                 # ported fileManagement/*
-        categorizeFiles.tsx
+        Nameset*.tsx                 # ported fileManagement/* (no CategoryCmp / categorizeFiles)
       overrides/
         OverrideSettingsCmp.tsx
         OverrideCitizenTab.tsx
@@ -45,7 +44,7 @@ Shared services remain in `@klyte45/adr-commons` (after EUIS retarget — [08](0
 
 Suggested new vuio-commons widgets (if needed globally):
 
-- `FormLine` / `TriCheckbox` / `ErrorBoundary` / color input — see [04](04-widget-conversion-map.md)
+- `FormLine` / expose multistate `Checkbox` / `ErrorBoundary` / color input — see [04](04-widget-conversion-map.md)
 
 ---
 
@@ -60,7 +59,7 @@ Work left-to-right; later milestones may start scaffolding earlier, but **do not
 | Typings `UniversalModMenu` | modding.d.ts | vuio + vuio-commons |
 | Extend `GamePanelType` + `gamePanelComponents` | VS/WE pattern; TransportOverview host | `index.tsx` + `AdrSettingsPanel.tsx` |
 | UMM button → `toggleGamePanel` | — | `AdrUniversalModButton.tsx` |
-| Empty panel + `centerLeftLayout` + city gate | `root.component.tsx` | `AdrSettingsPanel.tsx` |
+| Empty panel + `centerLeftLayout` + city gate | `root.component.tsx` | `AdrSettingsPanel.tsx` sized **70vh × 80vw** (tunable later) |
 | Side list for 4 tabs (placeholders) | — | nav using `ListWithContentTab` |
 
 Exit: Mods glyph + UMM button open/close ADR **GamePanel** (not Portal); gate message; panel closes when another overview opens.
@@ -69,7 +68,7 @@ Exit: Mods glyph + UMM button open/close ADR **GamePanel** (not Portal); gate me
 
 | Source under `main/src/components/overrides/` | Notes |
 |-----------------------------------------------|-------|
-| `OverrideSettingsCmp.tsx` | Replace `Cs2SideTabs` with vanilla side list + H2 section rows |
+| `OverrideSettingsCmp.tsx` | Replace `Cs2SideTabs` with nested **`ListWithContentTab`** (H2 → `{ section }`; 14 tabs on left; content on right) |
 | `OverrideCitizenTab.tsx` | Selects + checkboxes + number inputs |
 | `OverrideRoadsDistrictsTab.tsx` | Per-district list |
 | `AddressFormatTab.tsx` | Pattern preview |
@@ -79,27 +78,29 @@ Exit: Mods glyph + UMM button open/close ADR **GamePanel** (not Portal); gate me
 
 Exit: all 14 subtabs editable; bindings persist; nameset dropdowns update on city nameset change.
 
-### M2 — Namesets (screen machine + trees)
+### M2 — Namesets (screen machine + flat list)
 
 | Source under `main/src/components/fileManagement/` | Replacement notes |
 |----------------------------------------------------|-------------------|
-| `CityNamesetLibraryCmp.tsx` | Keep screen enum |
-| `NamesetLibrarySelectorCmp.tsx` | `DefaultPanelScreen` → panel sections / dialogs |
-| `NamesetGitHubSelectorCmp.tsx` | Verify XHR from game UI |
-| `NamesetImportingCmp.tsx` / `NamesetEditorCmp.tsx` / `NamesetViewingCmp.tsx` / `NamesetDeletingCmp.tsx` | Dialogs: prefer `StringInputDialog` / `FilePickerDialog` patterns where fit |
-| `NamesetCategoryCmp.tsx` / `NamesetGitHubCategoryCmp.tsx` | `EuisTreeView` → `K45HierarchyMenu` |
-| `NamesetLineViewer.tsx` / `NamesetGitHubLineViewer.tsx` | Form rows |
+| `CityNamesetLibraryCmp.tsx` | Keep screen enum; **DEFAULT** = `ListWithContentTab` (or equivalent) with **flat raw names** on the left — no hierarchy |
+| `NamesetLibrarySelectorCmp.tsx` | **`FilePickerDialog`** + disk `generateDataProvider`; keep only ADR confirm flow after pick if needed |
+| `NamesetGitHubSelectorCmp.tsx` | **Same `FilePickerDialog`** + GitHub `generateDataProvider`; on listing/rate-limit failure → **error modal** with Open GitHub (`goToRepository`) + Cancel; verify XHR from game UI |
+| `NamesetImportingCmp.tsx` / `NamesetEditorCmp.tsx` / `NamesetViewingCmp.tsx` / `NamesetDeletingCmp.tsx` | String prompts → `StringInputDialog` / overrides; browse/pick → `FilePickerDialog` only |
+| `NamesetCategoryCmp.tsx` | **Do not port** — hierarchy not used |
+| `NamesetGitHubCategoryCmp.tsx` / `NamesetGitHubLineViewer.tsx` | Drop browse UI in favor of GitHub `FilePickerDialog` |
+| `NamesetLineViewer.tsx` | Fold into list selection + actions toolbar / right pane |
 | `NamesetWordsContainer.tsx` | `GameScrollComponent` → `EditorScrollable` |
-| `utility/categorizeFiles.tsx` | Move as-is |
+| `utility/categorizeFiles.tsx` | **Do not port** — flat `listCityNamesets()` array is enough |
 
-Exit: full CRUD + disk library + GitHub import + export.
+Exit: full CRUD + disk library + GitHub import + export; city library shows **raw names** flat on the left.
 
 ### M3 — Road prefix
 
 | Source | Notes |
 |--------|-------|
-| `RoadPrefixCmp.tsx` | Needs **TriCheckbox** in vuio-commons first |
+| `RoadPrefixCmp.tsx` | Needs game **`Checkbox` + `multistate`** exposed in vuio-commons first (map `null`↔`undefined` if needed) |
 | `styles/roadPrefixRuleEditor.scss` | CSS module |
+| Defaults save/load UI | If user picks an XML path on disk, use **`FilePickerDialog`** (`allowedExtensions` for `.xml`); do not invent a picker |
 
 Exit: rule reorder, flag tri-states, save/load defaults XML.
 
@@ -152,7 +153,7 @@ See [09-euis-decommission.md](09-euis-decommission.md).
 1. Shell + UMM + empty tabs
 2. Overrides
 3. Namesets
-4. Road prefix (+ TriCheckbox in vuio-commons)
+4. Road prefix (+ expose multistate `Checkbox` in vuio-commons)
 5. Region lists
 6. Region map
 7. EUIS decommission + delete `main`
