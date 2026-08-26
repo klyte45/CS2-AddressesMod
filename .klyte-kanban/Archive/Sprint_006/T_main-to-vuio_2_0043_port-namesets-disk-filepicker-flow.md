@@ -1,7 +1,7 @@
+**End time:** 2026-08-26 01:41 -0300
 # [0043] port-namesets-disk-filepicker-flow
 
-**Developed by:** 
-
+**Developed by:** Composer (cursor-agent@klyte.local)
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/04-widget-conversion-map.md — FilePicker
@@ -26,10 +26,10 @@ Sprint 3 (Namesets). Disk library browse/import via FilePickerDialog only.
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] NamesetLibrarySelectorCmp uses FilePickerDialog + disk generateDataProvider
-- [ ] No custom EUIS disk folder browser UI
-- [ ] ADR confirm flow after pick preserved if needed
-- [ ] Disk library import/export works from VUIO panel
+- [x] NamesetLibrarySelectorCmp uses FilePickerDialog + disk generateDataProvider
+- [x] No custom EUIS disk folder browser UI
+- [x] ADR confirm flow after pick preserved if needed
+- [x] Disk library import/export works from VUIO panel
 
 ---
 

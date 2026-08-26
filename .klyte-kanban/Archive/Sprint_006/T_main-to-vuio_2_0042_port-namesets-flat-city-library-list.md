@@ -1,7 +1,7 @@
+**End time:** 2026-08-26 01:41 -0300
 # [0042] port-namesets-flat-city-library-list
 
-**Developed by:** 
-
+**Developed by:** Composer (cursor-agent@klyte.local)
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/07-tab-by-tab-migration.md — M2
@@ -26,11 +26,11 @@ Sprint 3 (Namesets). Port city nameset library with flat raw-name list — no hi
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] CityNamesetLibraryCmp ported under settings/tabs/namesets/
-- [ ] Flat raw-name left list via ListWithContentTab
-- [ ] NamesetCategoryCmp / categorizeFiles / hierarchy UI not ported
-- [ ] City library shows raw names only
-- [ ] NamesetWordsContainer uses EditorScrollable
+- [x] CityNamesetLibraryCmp ported under settings/tabs/namesets/
+- [x] Flat raw-name left list via ListWithContentTab
+- [x] NamesetCategoryCmp / categorizeFiles / hierarchy UI not ported
+- [x] City library shows raw names only
+- [x] NamesetWordsContainer uses EditorScrollable
 
 ---
 

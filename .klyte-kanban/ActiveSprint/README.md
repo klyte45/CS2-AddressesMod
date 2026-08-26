@@ -1,19 +1,19 @@
-# Sprint 006 (Sprint 006)
+# Sprint 007 (Sprint 004 (Road prefix))
 
-Namesets tab — flat city library, disk/GitHub FilePickerDialog, CRUD flows
+(Sprint description to be added.)
 
 ## Objective
 
-Port city nameset library + import/export/editor/delete to VUIO GamePanel (M2)
+(Sprint objective to be added.)
 
 ## Metadata
 
-- **Sprint number**: 006
+- **Sprint number**: 007
 - **Start date**: 2026-08-26 01:41 -0300
 - **End date**:
 - **Original tasks**: 00
 - **Original task IDs**: (none)
 - **Delivered tasks (from original)**:
-- **Added tasks**: 4
+- **Added tasks**: 0
 - **Delivered tasks (from added)**:
 - **Total delivered tasks**:

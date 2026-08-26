@@ -1,7 +1,7 @@
+**End time:** 2026-08-26 01:41 -0300
 # [0044] port-namesets-github-filepicker-and-error-modal
 
-**Developed by:** 
-
+**Developed by:** Composer (cursor-agent@klyte.local)
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/07-tab-by-tab-migration.md — M2 GitHub
@@ -26,11 +26,11 @@ Sprint 3 (Namesets). GitHub browse via FilePickerDialog; rate-limit error modal.
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] NamesetGitHubSelectorCmp uses FilePickerDialog + GitHub generateDataProvider
-- [ ] GitHub listing/rate-limit failure shows error modal with Open GitHub + Cancel
-- [ ] Cancel string added via *_entries.txt if missing (never edit i18n.csv)
-- [ ] No NamesetGitHubCategoryCmp / custom GitHub browse UI
-- [ ] GitHub import works from VUIO panel
+- [x] NamesetGitHubSelectorCmp uses FilePickerDialog + GitHub generateDataProvider
+- [x] GitHub listing/rate-limit failure shows error modal with Open GitHub + Cancel
+- [x] Cancel string added via *_entries.txt if missing (never edit i18n.csv)
+- [x] No NamesetGitHubCategoryCmp / custom GitHub browse UI
+- [x] GitHub import works from VUIO panel
 
 ---
 

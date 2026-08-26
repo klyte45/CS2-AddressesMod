@@ -1,7 +1,7 @@
+**End time:** 2026-08-26 01:41 -0300
 # [0045] port-namesets-editor-import-delete-crud
 
-**Developed by:** 
-
+**Developed by:** Composer (cursor-agent@klyte.local)
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/07-tab-by-tab-migration.md — M2
@@ -26,11 +26,11 @@ Sprint 3 (Namesets). Port editor, import, view, delete flows.
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] NamesetImportingCmp, NamesetEditorCmp, NamesetViewingCmp, NamesetDeletingCmp ported
-- [ ] String prompts use StringInputDialog / vuio dialogs
-- [ ] Full nameset CRUD + export works from VUIO
-- [ ] No euis-components imports in namesets folder
-- [ ] Listener cleanup on every screen
+- [x] NamesetImportingCmp, NamesetEditorCmp, NamesetViewingCmp, NamesetDeletingCmp ported
+- [x] String prompts use StringInputDialog / vuio dialogs
+- [x] Full nameset CRUD + export works from VUIO
+- [x] No euis-components imports in namesets folder
+- [x] Listener cleanup on every screen
 
 ---
 
