@@ -26,11 +26,11 @@ Sprint 1 (Foundations). Complete empty settings shell: four root tabs, city gate
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ListWithContentTab nav with 4 root tabs (namesets, overrides, roadPrefix, region) and placeholder bodies
-- [ ] City-loaded gate message matches main behavior
-- [ ] settings/translate.ts resolves K45::ADR.main[...] (not vuio namespace)
-- [ ] Panel closes when another GamePanel opens
-- [ ] EUIS main still in repo
+- [x] ListWithContentTab nav with 4 root tabs (namesets, overrides, roadPrefix, region) and placeholder bodies
+- [x] City-loaded gate message matches main behavior
+- [x] settings/translate.ts resolves K45::ADR.main[...] (not vuio namespace)
+- [x] Panel closes when another GamePanel opens
+- [x] EUIS main still in repo
 
 ---
 
@@ -39,6 +39,10 @@ Sprint 1 (Foundations). Complete empty settings shell: four root tabs, city gate
 1. Add AdrSettingsNav or inline ListWithContentTab in AdrSettingsPanel
 2. Port city gate from root.component.tsx
 3. Add settings/translate.ts per 10-i18n-and-assets.md
+4. ListWithContentTab 4 tabs with sprint placeholders
+5. settings/translate.ts uses K45::ADR.main[...]
+6. City gate via AdrMainService.isCityOrEditorLoaded
+7. Panel 70vh x 80vw via AdrSettingsPanel.module.scss
 
 ---
 
