@@ -26,12 +26,12 @@ Sprint 1 (Foundations). Register ADR settings on vanilla GamePanel host + Univer
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] UniversalModMenu in vuio + vuio-commons AppendHookTargets typings
-- [ ] GamePanelType extended with AdrSettingsPanelId
-- [ ] gamePanelComponents maps AdrSettingsPanel
-- [ ] AdrUniversalModButton calls toggleGamePanel(AdrSettingsPanelId)
-- [ ] Right-menu Mods glyph appears when ADR appends UMM
-- [ ] UMM button opens/closes GamePanel (not Portal)
+- [x] UniversalModMenu in vuio + vuio-commons AppendHookTargets typings
+- [x] GamePanelType extended with AdrSettingsPanelId
+- [x] gamePanelComponents maps AdrSettingsPanel
+- [x] AdrUniversalModButton calls toggleGamePanel(AdrSettingsPanelId)
+- [x] Right-menu Mods glyph appears when ADR appends UMM
+- [x] UMM button opens/closes GamePanel (not Portal)
 
 ---
 
@@ -41,6 +41,9 @@ Sprint 1 (Foundations). Register ADR settings on vanilla GamePanel host + Univer
 2. Extend GamePanelType + gamePanelComponents in k45_adr_vuio index.tsx
 3. Add AdrUniversalModButton.tsx
 4. Add AdrSettingsPanel.tsx with centerLeftLayout + Panel at 70vh x 80vw
+5. GamePanelType K45_ADR + gamePanelComponents registration in index.tsx
+6. AdrUniversalModButton toggles toggleGamePanel(AdrSettingsPanelId)
+7. UniversalModMenu in modding.d.ts typings
 
 ---
 
