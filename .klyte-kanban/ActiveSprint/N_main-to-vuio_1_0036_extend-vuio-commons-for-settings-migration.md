@@ -26,11 +26,11 @@ Sprint 1 (Foundations). Extend vuio-commons with widgets required before Overrid
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] FormLine component available in vuio-commons
-- [ ] CheckboxProps exposes multistate + onMultistateChange
-- [ ] ErrorBoundary available for settings panel isolation
-- [ ] Optional ColorField / FilePicker error-modal prep landed or deferred with note
-- [ ] vuio-commons builds without TypeScript errors
+- [x] FormLine component available in vuio-commons
+- [x] CheckboxProps exposes multistate + onMultistateChange
+- [x] ErrorBoundary available for settings panel isolation
+- [x] Optional ColorField / FilePicker error-modal prep landed or deferred with note
+- [x] vuio-commons builds without TypeScript errors
 
 ---
 
@@ -40,6 +40,10 @@ Sprint 1 (Foundations). Extend vuio-commons with widgets required before Overrid
 2. Widen CheckboxProps for multistate
 3. Port or add ErrorBoundary
 4. Optional ColorField and FilePicker error-modal mode
+5. FormLine + ErrorBoundary exported from vuio-commons
+6. CheckboxProps widened for multistate/onMultistateChange
+7. ColorField already on VanillaWidgets; FilePicker error-modal deferred to S3
+8. vuio-commons npm install + k45_adr_vuio build green
 
 ---
 
