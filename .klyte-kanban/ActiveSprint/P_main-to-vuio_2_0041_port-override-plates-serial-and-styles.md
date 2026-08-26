@@ -1,7 +1,7 @@
+**Start time:** 2026-08-26 01:01 -0300
 # [0041] port-override-plates-serial-and-styles
 
-**Developed by:** 
-
+**Developed by:** Composer (cursor-agent@klyte.local)
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/07-tab-by-tab-migration.md — M1
