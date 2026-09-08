@@ -44,6 +44,7 @@
 
 .ruleSettings {
     flex-grow: 1;
+    flex-shrink: 1;
     min-width: 0;
     overflow: auto;
     padding-left: 8rem;
@@ -55,12 +56,16 @@
     color: black;
 }
 
-.buttonPlaceholder,
+.buttonPlaceholder {
+    width: 39rem;
+    height: 39rem;
+}
+
 .moveItemUp,
 .moveItemDown,
-.removeItem {
-    width: 35rem;
-    height: 35rem;
+.removeItem {    
+    width: 25rem;
+    height: 25rem;
 }
 
 .moveItemUp,
