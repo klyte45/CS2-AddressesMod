@@ -1,0 +1,92 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.topBar {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    padding: 8rem;
+}
+
+.topBar button {
+    margin-left: 6rem;
+    margin-bottom: 4rem;
+}
+
+.body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    padding: 0 8rem 8rem;
+}
+
+.ruleShell {
+    display: flex;
+    flex-grow: 1;
+    min-height: 0;
+    margin-top: 8rem;
+    border-top: 3rem solid var(--menuBorderColor1);
+    overflow: hidden;
+}
+
+.rulesList {
+    flex-basis: 40%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    background-color: var(--menuPanel1);
+    border-right: 3rem solid var(--menuBorderColor1);
+}
+
+.ruleSettings {
+    flex-grow: 1;
+    min-width: 0;
+    overflow: auto;
+    padding-left: 8rem;
+    background-color: var(--menuPanel1);
+}
+
+.selectedItem {
+    background-color: var(--menuBorderColor2);
+    color: black;
+}
+
+.buttonPlaceholder,
+.moveItemUp,
+.moveItemDown,
+.removeItem {
+    width: 35rem;
+    height: 35rem;
+}
+
+.moveItemUp,
+.moveItemDown,
+.removeItem {
+    mask-size: 100%;
+    background-color: var(--normalTextColor);
+}
+
+.moveItemUp {
+    mask-image: url(coui://uil/Standard/ArrowUpThickStroke.svg);
+}
+
+.moveItemDown {
+    mask-image: url(coui://uil/Standard/ArrowDownThickStroke.svg);
+}
+
+.removeItem {
+    mask-image: url(coui://uil/Standard/XClose.svg);
+}
+
+.sectionTitle {
+    margin: 12rem 0 6rem;
+}
+
+.numberInput {
+    max-width: 160rem;
+    text-align: right;
+}

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from
 import { translate } from "./translate";
 import { CityNamesetLibraryCmp } from "./tabs/namesets/CityNamesetLibraryCmp";
 import { OverrideSettingsCmp } from "./tabs/overrides/OverrideSettingsCmp";
+import { RoadPrefixCmp } from "./tabs/roadPrefix/RoadPrefixCmp";
 import styles from "./AdrSettingsPanel.module.scss";
 
 type RootTabKey = "namesets" | "overrides" | "roadPrefix" | "region";
@@ -94,6 +95,9 @@ export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
         }
         if (selectedTab === "overrides") {
             return <OverrideSettingsCmp />;
+        }
+        if (selectedTab === "roadPrefix") {
+            return <RoadPrefixCmp />;
         }
         return <div className={styles.tabPlaceholder}>{tabPlaceholders[selectedTab]}</div>;
     })();
