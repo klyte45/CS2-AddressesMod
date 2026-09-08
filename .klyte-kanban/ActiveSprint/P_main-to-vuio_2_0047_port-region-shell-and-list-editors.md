@@ -1,7 +1,7 @@
+**Start time:** 2026-09-08 19:22 -0300
 # [0047] port-region-shell-and-list-editors
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte <klyte45@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/11-sprint-roadmap.md — S5

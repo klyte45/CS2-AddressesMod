@@ -1,0 +1,118 @@
+.regionNav {
+    flex-grow: 1;
+    min-height: 0;
+    height: 100%;
+}
+
+.regionBody {
+    height: 100%;
+    overflow: auto;
+    padding: 8rem;
+}
+
+.editorForm {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+.editorForm :global(.cs2-form-item-label) {
+    max-width: 50%;
+}
+
+.positionRow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.positionRow > * {
+    margin-right: 6rem;
+    margin-bottom: 4rem;
+}
+
+.numberInput {
+    max-width: 160rem;
+    text-align: right;
+}
+
+.colorRow {
+    display: flex;
+    align-items: center;
+}
+
+.colorPreview {
+    width: 16rem;
+    height: 100%;
+    min-height: 32rem;
+    border-radius: 99rem;
+    margin-right: 10rem;
+    flex-shrink: 0;
+}
+
+.reachabilityRow {
+    display: flex;
+    align-items: center;
+}
+
+.reachabilityRow > * {
+    margin-right: 5rem;
+}
+
+.iconReachable,
+.filterButton {
+    width: 25rem;
+    height: 25rem;
+    background-size: 90% auto;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+}
+
+.filters {
+    display: flex;
+    align-items: center;
+}
+
+.filters > button {
+    margin-left: 10rem;
+}
+
+.filterButton {
+    background-color: #222222;
+    padding: 5rem;
+}
+
+.selected {
+    background-color: var(--accentColorDark);
+}
+
+.air {
+    background-image: url(assetdb://gameui/Media/Game/Icons/CargoAirplane.svg);
+}
+
+.water {
+    background-image: url(assetdb://gameui/Media/Game/Icons/Ship.svg);
+}
+
+.land {
+    background-image: url(assetdb://gameui/Media/Game/Icons/GenericVehicle.svg);
+}
+
+.formGap {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.bottomActions {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    padding-top: 10rem;
+}
+
+.bottomActions button {
+    margin-left: 6rem;
+    margin-bottom: 4rem;
+}
