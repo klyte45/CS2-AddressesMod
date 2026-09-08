@@ -14,6 +14,6 @@ Deliver full region map parity in the VUIO settings panel, with the map placed o
 - **Original tasks**: 01
 - **Original task IDs**: [0048]
 - **Delivered tasks (from original)**:
-- **Added tasks**: 0
+- **Added tasks**: 1
 - **Delivered tasks (from added)**:
 - **Total delivered tasks**:
