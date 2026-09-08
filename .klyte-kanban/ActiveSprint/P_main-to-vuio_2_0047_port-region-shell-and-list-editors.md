@@ -26,12 +26,12 @@ Sprint 5 (Region lists). Port RegionEditor shell and list editors; map may be st
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] RegionEditor ported without react-tabs (ListWithContentTab or vanilla strip)
-- [ ] HighwayRegisterManagement and RegionCitiesManagement ported
-- [ ] _GenericListing ported with EditorScrollable
-- [ ] Color input works for region cities
-- [ ] Highways + cities editable from VUIO list UI
-- [ ] Map stub acceptable for this sprint exit only
+- [x] RegionEditor ported without react-tabs (ListWithContentTab or vanilla strip)
+- [x] HighwayRegisterManagement and RegionCitiesManagement ported
+- [x] _GenericListing ported with EditorScrollable
+- [x] Color input works for region cities
+- [x] Highways + cities editable from VUIO list UI
+- [x] Map stub acceptable for this sprint exit only
 
 ---
 
