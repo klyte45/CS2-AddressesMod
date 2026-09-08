@@ -1,3 +1,230 @@
+.loadmapWait {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 70rem;
+    height: 100%;
+}
+
+.regionEditor {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+.mapSide {
+    display: flex;
+    position: relative;
+    width: 100vh;
+    max-width: 45%;
+    min-width: 420rem;
+    height: 100%;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+
+.reloadButton {
+    position: absolute;
+    top: 10rem;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+.toggleMapMode {
+    position: absolute;
+    top: 10rem;
+    right: 10rem;
+}
+
+.cityMapTopographic {
+    display: flex;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 16000rem;
+    height: 16000rem;
+    background-size: cover;
+    transform: translate(-50%, -50%);
+}
+
+.waterLayer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-size: cover;
+    filter: brightness(50.3%) sepia(0.9) hue-rotate(148.5deg) contrast(2.3);
+}
+
+.cityArea {
+    filter: brightness(0.8) contrast(1.2);
+}
+
+.cityName {
+    font-size: 500rem;
+    fill: white;
+}
+
+.pathsOverlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.mapHighway {
+    stroke-width: 15;
+    stroke: #284f74;
+    fill: transparent;
+}
+
+.mapUrbanRoads {
+    stroke-width: 6;
+    stroke: rgba(31, 32, 32, 0.4);
+    fill: transparent;
+}
+
+.mapTrainTrack {
+    stroke-width: 10;
+    stroke: #9b371e;
+    fill: transparent;
+}
+
+.pathsOverlay :global(.hwId_hover) {
+    stroke: magenta;
+    animation: flash linear 1s infinite;
+}
+
+@keyframes flash {
+    0% { opacity: 1; }
+    40% { opacity: 0.6; }
+    50% { opacity: 0.1; }
+    60% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+.starHw {
+    fill: #ffde59;
+    stroke: #000;
+}
+
+.selectedPoint {
+    position: absolute;
+    width: calc(220rem / var(--currentZoom));
+    height: calc(220rem / var(--currentZoom));
+    transform: translate(-50%, 50%);
+    border-radius: 9999rem;
+    box-sizing: border-box;
+    background-color: black;
+    border-top-width: calc(25rem / var(--currentZoom));
+    border-right-width: calc(25rem / var(--currentZoom));
+    border-bottom-width: calc(25rem / var(--currentZoom));
+    border-left-width: calc(25rem / var(--currentZoom));
+    border-top-style: solid;
+    border-right-style: solid;
+    border-bottom-style: solid;
+    border-left-style: solid;
+    border-top-color: rgba(255, 0, 0, 1);
+    border-right-color: rgba(255, 0, 0, 1);
+    border-bottom-color: rgba(255, 0, 0, 1);
+    border-left-color: rgba(255, 0, 0, 1);
+}
+
+.outsideConnectionPoint {
+    position: absolute;
+    width: calc(120rem / var(--currentZoom));
+    height: calc(120rem / var(--currentZoom));
+    transform: translate(-50%, 50%);
+    border-radius: 50%;
+    border: 1px solid var(--modalColorDark);
+    background-color: var(--modalColor);
+}
+
+.name {
+    position: absolute;
+    left: 150%;
+    font-size: calc(1600% / var(--currentZoom));
+    white-space: nowrap;
+    overflow-x: hidden;
+    max-width: calc(2400rem / var(--currentZoom));
+}
+
+.leftName {
+    left: auto;
+    right: 150%;
+}
+
+.Road {
+    --modalColor: #6868a8;
+    --modalColorDark: #000040;
+}
+
+.Pipe {
+    --modalColor: #66bff3;
+    --modalColorDark: #051e4d;
+}
+
+.Rail {
+    --modalColor: #bd3200;
+    --modalColorDark: #802200;
+}
+
+.Waterway {
+    --modalColor: #bda000;
+    --modalColorDark: #423800;
+}
+
+.Electricity {
+    --modalColor: #bd3600;
+    --modalColorDark: #420000;
+}
+
+.Airway {
+    --modalColor: #bd00bd;
+    --modalColorDark: #420042;
+}
+
+.hoverPositionBox,
+.selectedPositionBox {
+    z-index: 1;
+    background-color: var(--menuPanel1);
+    position: absolute;
+    bottom: 10rem;
+    padding: 4rem;
+}
+
+.hoverPositionBox {
+    right: 10rem;
+}
+
+.selectedPositionBox {
+    left: 10rem;
+    display: flex;
+    align-items: center;
+}
+
+.circleLegend {
+    width: 20rem;
+    height: 20rem;
+    background-color: rgba(0, 0, 0, 1);
+    border-radius: 9999rem;
+    border: 2rem solid rgba(255, 0, 0, 1);
+    margin-right: 10rem;
+    margin-bottom: 2rem;
+}
+
+.dataSide {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
 .regionNav {
     flex-grow: 1;
     min-height: 0;
@@ -36,20 +263,6 @@
 .numberInput {
     max-width: 160rem;
     text-align: right;
-}
-
-.colorRow {
-    display: flex;
-    align-items: center;
-}
-
-.colorPreview {
-    width: 16rem;
-    height: 100%;
-    min-height: 32rem;
-    border-radius: 99rem;
-    margin-right: 10rem;
-    flex-shrink: 0;
 }
 
 .reachabilityRow {

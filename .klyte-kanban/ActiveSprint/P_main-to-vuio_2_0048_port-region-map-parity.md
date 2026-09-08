@@ -1,7 +1,7 @@
+**Start time:** 2026-09-08 19:51 -0300
 # [0048] port-region-map-parity
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte <klyte45@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/07-tab-by-tab-migration.md — M5 checklist

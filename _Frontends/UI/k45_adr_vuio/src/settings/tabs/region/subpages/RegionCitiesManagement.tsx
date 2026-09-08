@@ -8,7 +8,11 @@ import { GenericListing, ListItemData } from "./_GenericListing";
 
 const REGION_CITY_EDITOR = "regionCityEditor";
 
-export function RegionCitiesManagement() {
+type RegionCitiesManagementProps = {
+    onCitiesChanged?: () => void;
+};
+
+export function RegionCitiesManagement({ onCitiesChanged }: RegionCitiesManagementProps) {
     const [selectedCity, setSelectedCity] = useState<Partial<RegionCityEditingDTO>>();
     const [reloadToken, setReloadToken] = useState(0);
 
@@ -22,6 +26,7 @@ export function RegionCitiesManagement() {
                     await RegionService.saveRegionCity(selectedCity as RegionCityEditingDTO);
                     setSelectedCity(undefined);
                     setReloadToken((x) => x + 1);
+                    onCitiesChanged?.();
                 }}
             />
         );
@@ -240,7 +245,7 @@ function RegionCityRegisterForm({ onCancel, onSave, selectedCity, setSelectedCit
             </FormLine>
             <FormLine title={translate(`${REGION_CITY_EDITOR}.cityColor`)}>
                 <ColorField
-                    //className={editorModule.input}
+                    className={editorModule.input}
                     focusKey={noFocus}
                     value={ColorUtils.toColor01(selectedCity.mapColor ?? "#ffffff")}
                     alpha={false}
