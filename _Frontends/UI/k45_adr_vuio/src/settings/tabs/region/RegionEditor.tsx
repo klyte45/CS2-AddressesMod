@@ -1,5 +1,5 @@
 import { CityResponseData, Entity, EnumValueType, RegionService } from "@klyte45/adr-commons";
-import { ListWithContentTab } from "@klyte45/vuio-commons";
+import { VanillaComponentResolver } from "@klyte45/vuio-commons";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { translate } from "../../translate";
 import styles from "../../styles/regionEditor.module.scss";
@@ -43,10 +43,10 @@ interface AggregationData {
     highwayId: string;
 }
 
-export type ExtraSvgPath = {
-    d: string;
+export type ExtraMapPoint = {
+    x: number;
+    y: number;
     classNames?: string[];
-    style?: CSSProperties;
     id: string;
 };
 
@@ -77,8 +77,7 @@ export const RegionEditor = () => {
     const [position, setPosition] = useState([0, 0]);
     const [mouseInfo, setMouseInfo] = useState<PointerSnapshot>();
     const [mapPointSelectionInfo, setMapPointSelectionInfo] = useState<PointerSnapshot>();
-    const [extraSvgPaths, setExtraSvgPaths] = useState<ExtraSvgPath[]>([]);
-    const refDiv = useRef<HTMLDivElement>(null);
+    const [extraMapPoints, setExtraMapPoints] = useState<ExtraMapPoint[]>([]);
     const mapRef = useRef<HTMLDivElement>(null);
 
     const loadMapData = async () => {
@@ -156,9 +155,12 @@ export const RegionEditor = () => {
     }, [mapOffset, mapPointSelectionInfo, mapSize]);
 
     const listItems = useMemo(() => [
-        { displayName: translate("highwayRegisterEditor.tabTitle"), value: "highways" },
-        { displayName: translate("regionCityEditor.tabTitle"), value: "cities" },
+        { displayName: translate("highwayRegisterEditor.tabTitle"), value: "highways" as RegionTabKey },
+        { displayName: translate("regionCityEditor.tabTitle"), value: "cities" as RegionTabKey },
     ], []);
+    const VR = VanillaComponentResolver.instance;
+    const TabBar = VR.TabBar;
+    const Tab = VR.Tab;
 
     if (buildIdx < 1 || isLoading) {
         return <div className={styles.loadmapWait}>{translate("regionSettings.loadmap")}</div>;
@@ -173,7 +175,7 @@ export const RegionEditor = () => {
             <HighwayRegisterManagement
                 selectionPosition={selectionPosition}
                 mapSizeY={mapSize[2]}
-                setExtraPaths={setExtraSvgPaths}
+                setExtraPoints={setExtraMapPoints}
             />
         )
         : <RegionCitiesManagement onCitiesChanged={() => void reloadNeighborhoods()} />;
@@ -187,7 +189,6 @@ export const RegionEditor = () => {
                 onMouseLeave={() => setMouseInfo(undefined)}
                 onDoubleClick={(event) => setMapPointSelectionInfo({ clientX: event.clientX, clientY: event.clientY })}
                 onMouseMove={onMouseMove}
-                ref={refDiv}
             >
                 <MapDiv
                     ref={mapRef}
@@ -215,8 +216,19 @@ export const RegionEditor = () => {
                         {urbanRoads.map((item, i) => <path key={`urban_${i}`} d={item.curves.map((curve) => `M ${curve[0][0]} ${curve[0][2]} C ${curve[1][0]} ${curve[1][2]}, ${curve[2][0]} ${curve[2][2]}, ${curve[3][0]} ${curve[3][2]}`).join(" ")} className={[styles.mapUrbanRoads, `hwId_${item.highwayId}`].join(" ")} id={`rd_${item.entity.Index}_${item.entity.Version}`} />)}
                         {trainTracks.map((item, i) => <path key={`train_${i}`} d={item.curves.map((curve) => `M ${curve[0][0]} ${curve[0][2]} C ${curve[1][0]} ${curve[1][2]}, ${curve[2][0]} ${curve[2][2]}, ${curve[3][0]} ${curve[3][2]}`).join(" ")} className={[styles.mapTrainTrack, `hwId_${item.highwayId}`].join(" ")} id={`hw_${item.entity.Index}_${item.entity.Version}`} />)}
                         {highways.map((item, i) => <path key={`highway_${i}`} d={item.curves.map((curve) => `M ${curve[0][0]} ${curve[0][2]} C ${curve[1][0]} ${curve[1][2]}, ${curve[2][0]} ${curve[2][2]}, ${curve[3][0]} ${curve[3][2]}`).join(" ")} className={[styles.mapHighway, `hwId_${item.highwayId}`].join(" ")} id={`tr_${item.entity.Index}_${item.entity.Version}`} />)}
-                        {extraSvgPaths.map((item, i) => <path key={`${i}_${item.id}`} d={item.d} className={item.classNames?.join(" ")} id={item.id} style={item.style} />)}
                     </svg>
+                    {extraMapPoints.map((item, i) => {
+                        const { bottom, left } = asRelativePosition(item, mapOffset, mapSize);
+                        return (
+                            <div
+                                key={`${i}_${item.id}`}
+                                className={[styles.extraMapPoint, ...(item.classNames ?? [])].join(" ")}
+                                style={{ left: `${left}%`, bottom: `${100 - bottom}%` }}
+                            >
+                                <div className={styles.extraMapPointLabel}>★</div>
+                            </div>
+                        );
+                    })}
                     {selectionPosition && (() => {
                         const { bottom, left } = asRelativePosition(selectionPosition, mapOffset, mapSize);
                         return <div className={styles.selectedPoint} style={{ left: `${left}%`, bottom: `${100 - bottom}%` }} />;
@@ -258,19 +270,27 @@ export const RegionEditor = () => {
                 <button type="button" onClick={() => setSelectedRegionMapType((selectedRegionMapType + 1) % 4)} className={["neutralBtn", styles.toggleMapMode].join(" ")}>{translate(`regionSettings.mapModeName.${selectedRegionMapType}`)}</button>
             </div>
             <div className={styles.dataSide}>
-                <ListWithContentTab
-                    className={styles.regionNav}
-                    listItems={listItems}
-                    selectedKey={currentTab}
-                    onChangeSelection={(key) => {
-                        setExtraSvgPaths([]);
-                        setCurrentTab(key as RegionTabKey);
-                    }}
-                >
+                <div className={styles.regionNav}>
+                    <TabBar className={styles.rightPaneTabs}>
+                        {listItems.map((item) => (
+                            <Tab
+                                key={item.value}
+                                id={item.value}
+                                selectedId={currentTab}
+                                className={styles.rightPaneTab}
+                                onSelect={(key) => {
+                                    setExtraMapPoints([]);
+                                    setCurrentTab(key as RegionTabKey);
+                                }}
+                            >
+                                {item.displayName}
+                            </Tab>
+                        ))}
+                    </TabBar>
                     <div className={styles.regionBody}>
                         {content}
                     </div>
-                </ListWithContentTab>
+                </div>
             </div>
         </div>
     );

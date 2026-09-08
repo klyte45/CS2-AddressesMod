@@ -4,23 +4,22 @@ import { useEffect, useState } from "react";
 import { translate } from "../../../translate";
 import shared from "../../../styles/regionEditor.module.scss";
 import { GenericListing, ListItemData } from "./_GenericListing";
-import type { ExtraSvgPath } from "../RegionEditor";
-import { getStarPathD } from "../svgutils";
+import type { ExtraMapPoint } from "../RegionEditor";
 
 type Props = {
     selectionPosition?: { x: number; y: number } | null;
     mapSizeY?: number;
-    setExtraPaths: (paths: ExtraSvgPath[]) => void;
+    setExtraPoints: (paths: ExtraMapPoint[]) => void;
 };
 
-export function HighwayRegisterManagement({ selectionPosition, mapSizeY = 0, setExtraPaths }: Props) {
+export function HighwayRegisterManagement({ selectionPosition, mapSizeY = 0, setExtraPoints }: Props) {
     const [selectedHw, setSelectedHw] = useState<Partial<HighwayData>>();
     const [reloadToken, setReloadToken] = useState(0);
 
     useEffect(() => () => {
         document.querySelectorAll(`.${shared.pathsOverlay} .hwId_hover`).forEach((el) => el.classList.remove("hwId_hover"));
-        setExtraPaths([]);
-    }, [setExtraPaths]);
+        setExtraPoints([]);
+    }, [setExtraPoints]);
 
     if (selectedHw) {
         return (
@@ -29,10 +28,14 @@ export function HighwayRegisterManagement({ selectionPosition, mapSizeY = 0, set
                 setSelectedHw={setSelectedHw}
                 selectionPosition={selectionPosition}
                 mapSizeY={mapSizeY}
-                setExtraPaths={setExtraPaths}
-                onCancel={() => setSelectedHw(undefined)}
+                setExtraPoints={setExtraPoints}
+                onCancel={() => {
+                    setExtraPoints([]);
+                    setSelectedHw(undefined);
+                }}
                 onSave={async () => {
                     await HighwayRoutesService.saveHighwayData(selectedHw as HighwayData);
+                    setExtraPoints([]);
                     setSelectedHw(undefined);
                     setReloadToken((x) => x + 1);
                 }}
@@ -40,7 +43,7 @@ export function HighwayRegisterManagement({ selectionPosition, mapSizeY = 0, set
         );
     }
 
-    return <HighwayListing onSelectItem={setSelectedHw} reloadToken={reloadToken} mapSizeY={mapSizeY} setExtraPaths={setExtraPaths} />;
+    return <HighwayListing onSelectItem={setSelectedHw} reloadToken={reloadToken} mapSizeY={mapSizeY} setExtraPoints={setExtraPoints} />;
 }
 
 type HighwayRegisterFormProps = {
@@ -50,22 +53,18 @@ type HighwayRegisterFormProps = {
     onCancel: () => void;
     selectionPosition?: { x: number; y: number } | null;
     mapSizeY: number;
-    setExtraPaths: (paths: ExtraSvgPath[]) => void;
+    setExtraPoints: (paths: ExtraMapPoint[]) => void;
 };
 
-function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel, selectionPosition, mapSizeY, setExtraPaths }: HighwayRegisterFormProps) {
+function HighwayRegisterForm({ selectedHw, setSelectedHw, onSave, onCancel, selectionPosition, mapSizeY, setExtraPoints }: HighwayRegisterFormProps) {
     const VW = VanillaWidgets.instance;
     const editorModule = VW.editorItemModule;
     const FloatInput = VW.FloatInputStandalone;
 
     useEffect(() => {
-        setExtraPaths([{
-            classNames: [shared.starHw],
-            style: { strokeWidth: mapSizeY * 0.001 },
-            d: getStarPathD(selectedHw.refStartPoint?.[0] ?? 0, selectedHw.refStartPoint?.[1] ?? 0, mapSizeY * 0.025),
-            id: `selectedHw_${selectedHw.Id ?? "new"}`,
-        }]);
-    }, [mapSizeY, selectedHw, setExtraPaths]);
+        const markerPoint = getReferenceMarkerPoint(selectedHw.refStartPoint, mapSizeY, `selectedHw_${selectedHw.Id ?? "new"}`);
+        setExtraPoints(markerPoint ? [markerPoint] : []);
+    }, [mapSizeY, selectedHw, setExtraPoints]);
 
     return (
         <div className={`${shared.editorForm} k45_btnHost`}>
@@ -130,10 +129,10 @@ type HighwayListingProps = {
     onSelectItem: (x: Partial<HighwayData>) => void;
     reloadToken: number;
     mapSizeY: number;
-    setExtraPaths: (paths: ExtraSvgPath[]) => void;
+    setExtraPoints: (paths: ExtraMapPoint[]) => void;
 };
 
-function HighwayListing({ onSelectItem, reloadToken, mapSizeY, setExtraPaths }: HighwayListingProps) {
+function HighwayListing({ onSelectItem, reloadToken, mapSizeY, setExtraPoints }: HighwayListingProps) {
     const [highways, setHighways] = useState([] as HighwayData[]);
     const [hoveredHw, setHoveredHw] = useState<HighwayData>();
 
@@ -150,16 +149,12 @@ function HighwayListing({ onSelectItem, reloadToken, mapSizeY, setExtraPaths }: 
 
         if (hoveredHw) {
             document.querySelectorAll(`.${shared.pathsOverlay} .hwId_${hoveredHw.Id}`).forEach((el) => el.classList.add("hwId_hover"));
-            setExtraPaths([{
-                classNames: [shared.starHw],
-                style: { strokeWidth: mapSizeY * 0.001 },
-                d: getStarPathD(hoveredHw.refStartPoint?.[0] ?? 0, hoveredHw.refStartPoint?.[1] ?? 0, mapSizeY * 0.025),
-                id: `hoveredHw_${hoveredHw.Id}`,
-            }]);
+            const markerPoint = getReferenceMarkerPoint(hoveredHw.refStartPoint, mapSizeY, `hoveredHw_${hoveredHw.Id}`);
+            setExtraPoints(markerPoint ? [markerPoint] : []);
         } else {
-            setExtraPaths([]);
+            setExtraPoints([]);
         }
-    }, [hoveredHw, mapSizeY, setExtraPaths]);
+    }, [hoveredHw, mapSizeY, setExtraPoints]);
 
     const items: ListItemData[] = highways.map((x) => ({
         key: x.Id,
@@ -168,7 +163,10 @@ function HighwayListing({ onSelectItem, reloadToken, mapSizeY, setExtraPaths }: 
         actions: [
             {
                 label: translate("highwayRegisterEditor.editBtn"),
-                onClick: () => onSelectItem(x),
+                onClick: () => {
+                    setHoveredHw(undefined);
+                    onSelectItem(x);
+                },
             },
         ],
         onMouseEnter: () => setHoveredHw(x),
@@ -184,8 +182,25 @@ function HighwayListing({ onSelectItem, reloadToken, mapSizeY, setExtraPaths }: 
             title={translate("highwayRegisterEditor.titleList")}
             items={items}
             noItemsMessage={translate("highwayRegisterEditor.noHighwaysRegisteredMessage")}
-            onAdd={() => onSelectItem({ refStartPoint: [0, 0] })}
+            onAdd={() => {
+                setHoveredHw(undefined);
+                onSelectItem({ refStartPoint: [0, 0] });
+            }}
             addBtnLabel={translate("highwayRegisterEditor.addBtn")}
         />
     );
+}
+
+function getReferenceMarkerPoint(refStartPoint: number[] | undefined, mapSizeY: number, id: string): ExtraMapPoint | null {
+    const x = refStartPoint?.[0];
+    const y = refStartPoint?.[1];
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(mapSizeY) || mapSizeY <= 0) {
+        return null;
+    }
+    return {
+        x: x as number,
+        y: y as number,
+        id,
+        classNames: [shared.starHwPoint],
+    };
 }

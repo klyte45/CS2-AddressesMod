@@ -76,6 +76,7 @@
     right: 0;
     top: 0;
     bottom: 0;
+    pointer-events: none;
 }
 
 .mapHighway {
@@ -102,16 +103,41 @@
 }
 
 @keyframes flash {
-    0% { opacity: 1; }
-    40% { opacity: 0.6; }
-    50% { opacity: 0.1; }
-    60% { opacity: 0.6; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+
+    40% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 0.1;
+    }
+
+    60% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
-.starHw {
-    fill: #ffde59;
-    stroke: #000;
+.extraMapPoint {
+    position: absolute;
+    transform: translate(-50%, 50%);
+    pointer-events: none;
+}
+
+.extraMapPointLabel {
+    font-size: calc(3200% / var(--currentZoom));
+    line-height: 1;
+    text-shadow: 0 0 4rem #000, 0 0 8rem #000;
+}
+
+.starHwPoint .extraMapPointLabel {
+    color: #ffde59;
 }
 
 .selectedPoint {
@@ -119,6 +145,7 @@
     width: calc(220rem / var(--currentZoom));
     height: calc(220rem / var(--currentZoom));
     transform: translate(-50%, 50%);
+    pointer-events: none;
     border-radius: 9999rem;
     box-sizing: border-box;
     background-color: black;
@@ -141,6 +168,7 @@
     width: calc(120rem / var(--currentZoom));
     height: calc(120rem / var(--currentZoom));
     transform: translate(-50%, 50%);
+    pointer-events: none;
     border-radius: 50%;
     border: 1px solid var(--modalColorDark);
     background-color: var(--modalColor);
@@ -149,6 +177,7 @@
 .name {
     position: absolute;
     left: 150%;
+    pointer-events: none;
     font-size: calc(1600% / var(--currentZoom));
     white-space: nowrap;
     overflow-x: hidden;
@@ -221,20 +250,39 @@
 
 .dataSide {
     flex-grow: 1;
+    flex-shrink: 1;
     min-width: 0;
     min-height: 0;
 }
 
 .regionNav {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 1;
     flex-grow: 1;
     min-height: 0;
     height: 100%;
 }
 
+.rightPaneTabs {
+    flex-shrink: 0;
+}
+
+.rightPaneTab {
+    min-width: 0;
+}
+
 .regionBody {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
     height: 100%;
     overflow: auto;
-    padding: 8rem;
+    margin-left: 8rem;
+    margin-right: 8rem;
+    padding: 4rem;
+    border-radius: 8rem;
+    background-color: rgba(0, 0, 0, 0.15);
 }
 
 .editorForm {
@@ -255,7 +303,7 @@
     flex-wrap: wrap;
 }
 
-.positionRow > * {
+.positionRow>* {
     margin-right: 6rem;
     margin-bottom: 4rem;
 }
@@ -270,7 +318,7 @@
     align-items: center;
 }
 
-.reachabilityRow > * {
+.reachabilityRow>* {
     margin-right: 5rem;
 }
 
@@ -288,7 +336,7 @@
     align-items: center;
 }
 
-.filters > button {
+.filters>button {
     margin-left: 10rem;
 }
 

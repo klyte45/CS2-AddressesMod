@@ -9,7 +9,7 @@ import { GenericListing, ListItemData } from "./_GenericListing";
 const REGION_CITY_EDITOR = "regionCityEditor";
 
 type RegionCitiesManagementProps = {
-    onCitiesChanged?: () => void;
+    onCitiesChanged?: () => Promise<void> | void;
 };
 
 export function RegionCitiesManagement({ onCitiesChanged }: RegionCitiesManagementProps) {
@@ -24,23 +24,25 @@ export function RegionCitiesManagement({ onCitiesChanged }: RegionCitiesManageme
                 onCancel={() => setSelectedCity(undefined)}
                 onSave={async () => {
                     await RegionService.saveRegionCity(selectedCity as RegionCityEditingDTO);
+                    await waitForRegionCityMutation();
                     setSelectedCity(undefined);
                     setReloadToken((x) => x + 1);
-                    onCitiesChanged?.();
+                    await onCitiesChanged?.();
                 }}
             />
         );
     }
 
-    return <RegionCityListing onSelectItem={setSelectedCity} reloadToken={reloadToken} />;
+    return <RegionCityListing onCitiesChanged={onCitiesChanged} onSelectItem={setSelectedCity} reloadToken={reloadToken} />;
 }
 
 type RegionCityListProps = {
+    onCitiesChanged?: () => Promise<void> | void;
     onSelectItem: (city: Partial<RegionCityEditingDTO>) => void;
     reloadToken: number;
 };
 
-function RegionCityListing({ onSelectItem, reloadToken }: RegionCityListProps) {
+function RegionCityListing({ onCitiesChanged, onSelectItem, reloadToken }: RegionCityListProps) {
     const [cities, setCities] = useState([] as RegionCityEditingDTO[]);
     const [airFilter, setAirFilter] = useState(true);
     const [landFilter, setLandFilter] = useState(true);
@@ -77,7 +79,9 @@ function RegionCityListing({ onSelectItem, reloadToken }: RegionCityListProps) {
                 className: "negativeBtn",
                 onClick: async () => {
                     await RegionService.removeRegionCity(x.entity);
+                    await waitForRegionCityMutation();
                     setCities((prev) => prev.filter((c) => c.entity.Index !== x.entity.Index));
+                    await onCitiesChanged?.();
                 },
             },
         ],
@@ -245,7 +249,6 @@ function RegionCityRegisterForm({ onCancel, onSave, selectedCity, setSelectedCit
             </FormLine>
             <FormLine title={translate(`${REGION_CITY_EDITOR}.cityColor`)}>
                 <ColorField
-                    className={editorModule.input}
                     focusKey={noFocus}
                     value={ColorUtils.toColor01(selectedCity.mapColor ?? "#ffffff")}
                     alpha={false}
@@ -281,4 +284,10 @@ function RegionCityRegisterForm({ onCancel, onSave, selectedCity, setSelectedCit
             </div>
         </div>
     );
+}
+
+function waitForRegionCityMutation() {
+    return new Promise<void>((resolve) => {
+        setTimeout(resolve, 150);
+    });
 }

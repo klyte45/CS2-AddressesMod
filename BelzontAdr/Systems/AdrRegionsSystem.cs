@@ -712,6 +712,9 @@ namespace BelzontAdr
                     cmdBuffer.DestroyEntity(entity);
                 });
             }
+            m_cachedRegionLandNeighborhood = null;
+            m_cachedRegionWaterNeighborhood = null;
+            m_cachedRegionAirNeighborhood = null;
             runOnUpdate.Enqueue(() => m_modificationEndBarrier.CreateCommandBuffer().RemoveComponent<ADRRegionCityReference>(m_outsideConnectionsMapped, EntityQueryCaptureMode.AtPlayback));
         }
 
