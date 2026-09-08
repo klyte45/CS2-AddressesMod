@@ -26,11 +26,11 @@ Sprint 4 (Road prefix). Port RoadPrefixCmp with multistate Checkbox and XML defa
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] RoadPrefixCmp ported under settings/tabs/roadPrefix/
-- [ ] Tri-state flags use game Checkbox multistate (null↔undefined mapped if needed)
-- [ ] Defaults save/load uses FilePickerDialog for disk .xml paths
-- [ ] roadPrefixRuleEditor.scss converted to CSS module
-- [ ] Reorder, flags, save/load defaults work from VUIO panel
+- [x] RoadPrefixCmp ported under settings/tabs/roadPrefix/
+- [x] Tri-state flags use game Checkbox multistate (null↔undefined mapped if needed)
+- [x] Defaults save/load uses FilePickerDialog for disk .xml paths
+- [x] roadPrefixRuleEditor.scss converted to CSS module
+- [x] Reorder, flags, save/load defaults work from VUIO panel
 
 ---
 
