@@ -1,7 +1,7 @@
+**End time:** 2026-09-08 20:57 -0300
 # [0053] replace-region-right-pane-with-top-tabs
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte <klyte45@kwyt.com.br>
 ## User Story
 
 > Acting as **a developer**, I want **the region right-side pane to use top-based tabs instead of the inner left-side list**, so that I **the region editors can keep their current behavior while using the full width of the panel side**.
@@ -22,11 +22,11 @@ Sprint 6 add-on. Keep the map on the left and change only the right pane navigat
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Region right pane uses top-based tabs instead of left-side inner tabs
-- [ ] Highway and city inner content behavior remains unchanged
-- [ ] Selected tab content uses full width of the right pane
-- [ ] Map interactions and overlay resets still work when switching tabs
-- [ ] Frontend build passes
+- [x] Region right pane uses top-based tabs instead of left-side inner tabs
+- [x] Highway and city inner content behavior remains unchanged
+- [x] Selected tab content uses full width of the right pane
+- [x] Map interactions and overlay resets still work when switching tabs
+- [x] Frontend build passes
 
 ---
 
