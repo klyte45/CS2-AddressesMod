@@ -1,3 +1,4 @@
+**End time:** 2026-09-08 21:05 -0300
 **Start time:** 2026-09-08 21:00 -0300
 # [0049] inline-adr-commons-into-k45-adr-vuio
 
@@ -26,12 +27,12 @@ Sprint 7 Phase A. Inline adr-commons into k45_adr_vuio before EUIS cut.
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] adr-commons sources copied to k45_adr_vuio/src/adr/
-- [ ] Entity/name.utils/EnumValueType imported from vuio-commons
-- [ ] All VUIO imports updated off @klyte45/adr-commons
-- [ ] @klyte45/adr-commons removed from k45_adr_vuio/package.json
-- [ ] _Frontends/UI/_shared/adr-commons/ deleted
-- [ ] rg clean: no @klyte45/adr-commons in ADR product paths
+- [x] adr-commons sources copied to k45_adr_vuio/src/adr/
+- [x] Entity/name.utils/EnumValueType imported from vuio-commons
+- [x] All VUIO imports updated off @klyte45/adr-commons
+- [x] @klyte45/adr-commons removed from k45_adr_vuio/package.json
+- [x] _Frontends/UI/_shared/adr-commons/ deleted
+- [x] rg clean: no @klyte45/adr-commons in ADR product paths
 
 ---
 
