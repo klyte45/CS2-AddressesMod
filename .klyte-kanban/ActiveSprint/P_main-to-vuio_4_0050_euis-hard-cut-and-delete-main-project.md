@@ -26,11 +26,11 @@ Sprint 7 Phase B. EUIS hard cut: disable registration, stop packaging main, dele
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] UseEuisRegister / EuisIsMandatory / EuisApps removed or disabled in AddressesCs2Mod.cs
-- [ ] k45-adr-main.js/.css no longer packaged; main build hooks removed
-- [ ] _Frontends/UI/main/ deleted
-- [ ] ADR deps on @klyte45/euis-components / EUIS tarballs stripped
-- [ ] Mod loads without Extra UI Screens installed
+- [x] UseEuisRegister / EuisIsMandatory / EuisApps removed or disabled in AddressesCs2Mod.cs
+- [x] k45-adr-main.js/.css no longer packaged; main build hooks removed
+- [x] _Frontends/UI/main/ deleted
+- [x] ADR deps on @klyte45/euis-components / EUIS tarballs stripped
+- [x] Mod loads without Extra UI Screens installed
 
 ---
 
