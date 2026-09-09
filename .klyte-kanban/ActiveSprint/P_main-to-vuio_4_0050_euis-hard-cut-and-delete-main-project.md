@@ -1,7 +1,7 @@
+**Start time:** 2026-09-08 21:06 -0300
 # [0050] euis-hard-cut-and-delete-main-project
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte <klyte45@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/09-euis-decommission.md
