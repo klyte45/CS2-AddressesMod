@@ -1,7 +1,7 @@
+**Start time:** 2026-09-08 21:00 -0300
 # [0049] inline-adr-commons-into-k45-adr-vuio
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte <klyte45@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/08-shared-libs.md — Path A
