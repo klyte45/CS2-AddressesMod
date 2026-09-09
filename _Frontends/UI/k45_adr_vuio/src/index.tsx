@@ -1,4 +1,5 @@
 import { ModRegistrar } from "cs2/modding";
+import { AdrEditorToolbar } from "mods/AdrEditorToolbar";
 import { AddressesLayoutRegistering } from "mods/AddressesLayoutRegistering";
 import { EditorBindings } from "mods/EditorBindings";
 import { AdrSettingsPanel, AdrSettingsPanelId } from "settings/AdrSettingsPanel";
@@ -21,6 +22,7 @@ const register: ModRegistrar = (moduleRegistry) => {
         "selectedInfoSectionComponents",
         AddressesLayoutRegistering(() => { })
     );
+    moduleRegistry.extend("game-ui/editor/components/toolbar/toolbar.tsx", "Toolbar", AdrEditorToolbar as any);
     moduleRegistry.append("Editor", EditorBindings);
     moduleRegistry.extend(
         "game-ui/game/components/tool-options/mouse-tool-options/mouse-tool-options.tsx",

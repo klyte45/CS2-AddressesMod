@@ -1,4 +1,5 @@
 ﻿using Belzont.Interfaces;
+using BelzontAdr.UI;
 using Belzont.Utils;
 using Colossal.Entities;
 using Colossal.Mathematics;
@@ -11,6 +12,7 @@ using Game.Prefabs;
 using Game.Routes;
 using Game.Tools;
 using Game.UI;
+using Game.UI.Editor;
 using Game.UI.InGame;
 using System;
 using Unity.Entities;
@@ -36,6 +38,8 @@ namespace BelzontAdr
             }
         }
 
+        private bool m_EditorToolRegistered;
+
         protected override void OnCreate()
         {
             base.OnCreate();
@@ -43,6 +47,22 @@ namespace BelzontAdr
             m_NameSystem = World.GetOrCreateSystemManaged<NameSystem>();
 
             AddBinding(m_SelectedEntityBinding = new ValueBinding<Entity>("k45::ADR", "AdrEditorUISystem::selectedEntity", Entity.Null, null, null));
+        }
+
+        protected override void OnGamePreload(Colossal.Serialization.Entities.Purpose purpose, GameMode mode)
+        {
+            base.OnGamePreload(purpose, mode);
+            if (mode != GameMode.Editor || m_EditorToolRegistered)
+            {
+                return;
+            }
+
+            m_EditorToolRegistered = true;
+            EditorToolUISystem editorToolUISystem = World.GetExistingSystemManaged<EditorToolUISystem>();
+            var tools = editorToolUISystem.tools;
+            Array.Resize(ref tools, tools.Length + 1);
+            tools[^1] = new AdrEditorTool(World);
+            editorToolUISystem.tools = tools;
         }
 
         protected override void OnUpdate()

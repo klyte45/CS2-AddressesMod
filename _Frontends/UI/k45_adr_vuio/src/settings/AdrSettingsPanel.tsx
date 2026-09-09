@@ -2,6 +2,7 @@ import { AdrMainService } from "adr";
 import { ErrorBoundary, VanillaComponentResolver } from "@klyte45/vuio-commons";
 import { FocusDisabled } from "cs2/input";
 import { getModule } from "cs2/modding";
+import { JSX } from "react";
 import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
 import { translate } from "./translate";
 import { CityNamesetLibraryCmp } from "./tabs/namesets/CityNamesetLibraryCmp";
@@ -24,6 +25,16 @@ type GamePanelProps = {
     children?: ReactNode;
 };
 
+type AdrSettingsShellParts = {
+    header: ReactNode;
+    body: ReactNode;
+};
+
+type AdrSettingsShellProps = {
+    titleBar: ReactNode;
+    children: (parts: AdrSettingsShellParts) => JSX.Element;
+};
+
 const rootTabs: RootTabKey[] = ["namesets", "overrides", "roadPrefix", "region"];
 
 const tabPlaceholders: Partial<Record<RootTabKey, string>> = {
@@ -32,11 +43,11 @@ const tabPlaceholders: Partial<Record<RootTabKey, string>> = {
 };
 
 /** Same Panel instance as PanelTitleBar so PanelContext (theme + onClose) matches. */
-const GamePanel = getModule("game-ui/common/panel/panel.tsx", "Panel") as ComponentType<GamePanelProps>;
+export const GamePanel = getModule("game-ui/common/panel/panel.tsx", "Panel") as ComponentType<GamePanelProps>;
 /** Overview panels (Economy / City Info / Transportation) use this chrome. */
-const gamePanelTheme = getModule("game-ui/common/panel/themes/iceflake-panel.module.scss", "classes") as Record<string, string>;
+export const gamePanelTheme = getModule("game-ui/common/panel/themes/iceflake-panel.module.scss", "classes") as Record<string, string>;
 
-export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
+export const AdrSettingsShell = ({ titleBar, children }: AdrSettingsShellProps): JSX.Element => {
     const [isReady, setIsReady] = useState(false);
     const [selectedTab, setSelectedTab] = useState<RootTabKey>("namesets");
 
@@ -72,9 +83,7 @@ export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
 
     const header = (
         <FocusDisabled>
-            <PanelTitleBar icon="coui://adr.k45/UI/images/ADR.svg">
-                Addresses & Names
-            </PanelTitleBar>
+            {titleBar}
             <TabBar>
                 {rootTabs.map((tab) => (
                     <Tab
@@ -114,21 +123,39 @@ export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
             </TabNav>
         );
 
+    return children({ header, body });
+};
+
+export const AdrSettingsPanel = ({ onClose }: AdrSettingsPanelProps) => {
+    const VR = VanillaComponentResolver.instance;
+    const layoutClass = VR.gameMainScreenModule.centerPanelLayout;
+    const PanelTitleBar = VR.PanelTitleBar;
+
     return (
-        <div className={layoutClass}>
-            <GamePanel
-                className={styles.adrSettingsPanel}
-                theme={gamePanelTheme}
-                header={header}
-                onClose={onClose}
-            >
-                <FocusDisabled>
-                    <ErrorBoundary>
-                        <div className={styles.panelBody}>{body}</div>
-                    </ErrorBoundary>
-                </FocusDisabled>
-            </GamePanel>
-        </div>
+        <AdrSettingsShell
+            titleBar={(
+                <PanelTitleBar icon="coui://adr.k45/UI/images/ADR.svg">
+                    Addresses & Names
+                </PanelTitleBar>
+            )}
+        >
+            {({ header, body }) => (
+                <div className={layoutClass}>
+                    <GamePanel
+                        className={styles.adrSettingsPanel}
+                        theme={gamePanelTheme}
+                        header={header}
+                        onClose={onClose}
+                    >
+                        <FocusDisabled>
+                            <ErrorBoundary>
+                                <div className={styles.panelBody}>{body}</div>
+                            </ErrorBoundary>
+                        </FocusDisabled>
+                    </GamePanel>
+                </div>
+            )}
+        </AdrSettingsShell>
     );
 };
 
