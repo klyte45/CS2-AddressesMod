@@ -11,9 +11,10 @@ You can find several name files at [Addresses Files repository at GitHub](https:
 
 ## Current features
 
+- Settings available in the vanilla `Mods` menu through the Universal Mod Menu integration. Extra UI Screens is not required.
 - **Road marker asset:** store information of a road and don't lose it when the game regenerate the road names
 - **Highway settings editor:** register highways to be shown specially in the game, useful for Write Everywhere integration but also helpful without it. Requires the Road marker asset to associate the highway with the roads.
-- **Neighbor cities editor:** register neighbor cities to be used when retrieving the outside connection name. They can be reached by land, water, air or any combination of them. A map show all them on EUIS UI.
+- **Neighbor cities editor:** register neighbor cities to be used when retrieving the outside connection name. They can be reached by land, water, air or any combination of them. A map shows them in the in-game settings UI.
 - Edit names of any clickable object in the editor (and save changes to send with the maps created)
 - Change sources references for stations names and seeds for roads and districts names in the selected info panel
 - In-game filename viewer, showing the weight of each word.

@@ -33,10 +33,6 @@
   <ItemGroup>
     <ModTag Include="Code Mod" />
     <Screenshots Include="Screenshots/*.jpg" />
-    <Dependency Include="EUIS">
-      <ModId>74151</ModId>
-      <DisplayName>Extra UI Screens</DisplayName>
-    </Dependency>
   </ItemGroup>
   
 
