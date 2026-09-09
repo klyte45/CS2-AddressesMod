@@ -1,7 +1,7 @@
+**Start time:** 2026-09-09 19:02 -0300
 # [0055] T1 Road Grouping overlay centerlines and end circles
 
-**Developed by:** 
-
+**Developed by:** Composer (composer@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/10-road-grouping-overlay-render-system.md
