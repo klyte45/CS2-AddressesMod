@@ -6,6 +6,7 @@ import { EditorBindings } from "mods/EditorBindings";
 import { AdrSettingsPanel, AdrSettingsPanelId } from "settings/AdrSettingsPanel";
 import { AdrUniversalModButton } from "settings/AdrUniversalModButton";
 import { AddressesToolOptions } from "tool/AddressesToolOptions";
+import { RoadGroupingToolOptions, RoadGroupingToolOptionsVisibility } from "tool/RoadGroupingToolOptions";
 import "./style/whatsNew.scss";
 
 const extendGamePanelType = (gamePanelType: Record<string, string>) => {
@@ -38,9 +39,19 @@ const register: ModRegistrar = (moduleRegistry) => {
     moduleRegistry.extend("game-ui/menu/components/menu-ui.tsx", "MenuUI", AdrWhatsNewShell);
     moduleRegistry.append("Editor", EditorBindings);
     moduleRegistry.extend(
+        "game-ui/game/components/tool-options/tool-options-panel.tsx",
+        "useToolOptionsVisible",
+        RoadGroupingToolOptionsVisibility
+    );
+    moduleRegistry.extend(
         "game-ui/game/components/tool-options/mouse-tool-options/mouse-tool-options.tsx",
         "MouseToolOptions",
         AddressesToolOptions
+    );
+    moduleRegistry.extend(
+        "game-ui/game/components/tool-options/mouse-tool-options/mouse-tool-options.tsx",
+        "MouseToolOptions",
+        RoadGroupingToolOptions
     );
 
     moduleRegistry.extend(

@@ -1,6 +1,8 @@
 import { VanillaComponentResolver } from "@klyte45/vuio-commons";
 import { FocusDisabled } from "cs2/input";
 import { AdrSettingsPanelId } from "./AdrSettingsPanelId";
+import { RoadGroupingService } from "tool/RoadGroupingToolOptions";
+import { translate } from "utility/translate";
 import styles from "./AdrUniversalModButton.module.scss";
 
 export const AdrUniversalModButton = () => {
@@ -8,10 +10,22 @@ export const AdrUniversalModButton = () => {
         VanillaComponentResolver.instance.toggleGamePanel(AdrSettingsPanelId);
     };
 
+    const enableRoadGrouping = () => {
+        RoadGroupingService.enableTool();
+    };
+
     return (
         <FocusDisabled>
-            <button type="button" className={styles.modButton} onClick={openSettings}>
+            <button type="button" className={styles.modButton} onClick={openSettings} title={translate("umm.openSettings")}>
                 <img className={styles.icon} src="coui://adr.k45/UI/images/ADR.svg" alt="" />
+            </button>
+            <button
+                type="button"
+                className={styles.modButton}
+                onClick={enableRoadGrouping}
+                title={translate("umm.enableRoadGrouping")}
+            >
+                <img className={styles.icon} src="coui://uil/Standard/Road.svg" alt="" />
             </button>
         </FocusDisabled>
     );

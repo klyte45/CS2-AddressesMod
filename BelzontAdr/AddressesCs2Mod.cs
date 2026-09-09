@@ -1,4 +1,4 @@
-﻿#if !RELEASE 
+#if !RELEASE 
 //#define LOCAL
 #endif
 using Belzont.Interfaces;
@@ -37,6 +37,8 @@ namespace BelzontAdr
             updateSystem.UpdateAt<AdrHighwayRoutesSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<AdrHighwayRoutes2BSystem>(SystemUpdatePhase.Modification2B);
             updateSystem.UpdateAt<AdrRegionsSystem>(SystemUpdatePhase.ModificationEnd);
+            updateSystem.UpdateAt<AdrRoadGroupingController>(SystemUpdatePhase.ModificationEnd);
+            updateSystem.UpdateAt<AdrRoadGroupingUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateBefore<AdrClearSystem>(SystemUpdatePhase.Deserialize);
         }
 
