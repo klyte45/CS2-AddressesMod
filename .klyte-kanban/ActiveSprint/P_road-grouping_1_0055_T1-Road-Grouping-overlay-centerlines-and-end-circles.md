@@ -43,6 +43,7 @@ Phase T1. Draw selected Aggregate membership with OverlayRenderSystem.Buffer —
 3. Resolve terminals via degree-1 nodes within Aggregate edge set
 4. Starting width ~2-4 m; tune in playtest
 5. #006600 only when remainder set exists (may be unused until subset membership)
+6. AdrRoadGroupingOverlayRenderSystem draws #00FF00 centerlines + degree-1 end circles from AggregateElement; gated on active Road Grouping tool + selection. Awaiting in-game validation before closing.
 
 ---
 
