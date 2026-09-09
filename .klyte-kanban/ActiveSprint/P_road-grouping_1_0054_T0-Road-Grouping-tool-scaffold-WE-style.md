@@ -44,6 +44,7 @@ Phase T0 of the Road Grouping roadmap. ADR has IBelzontToolSystem but no gamepla
 2. Place tool under BelzontAdr/Tools/; controller beside WE pattern
 3. Register VUIO extends in k45_adr_vuio index like WE
 4. Do not implement overlay or membership logs in this task
+5. Scaffold landed: AdrRoadGroupingTool/Controller/UISystem + AdrModData keybinds + VUIO tool options/UMM button. Awaiting in-game validation before closing (Ctrl+Shift+G or UMM road button; LMB select; RMB exit).
 
 ---
 
