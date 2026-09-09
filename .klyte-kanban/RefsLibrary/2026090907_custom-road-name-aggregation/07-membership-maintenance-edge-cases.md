@@ -141,7 +141,7 @@ Use this as the implementation checklist. Columns: **Trigger** → **Expected AD
 | F1  | Hover replace preview                          | Do not commit ADR membership; optional visual only                                |
 | F2  | Apply commit                                   | Remap + gap-fill once                                                             |
 | F3  | Cancel / ToolClear                             | No permanent ADR change                                                           |
-| F4  | Selection highlight H1 CreationDefinition list | Uses **current** ADR membership (post-gap-fill); not a separate membership writer |
+| F4  | Selection highlight H1 CreationDefinition list | **Out of scope this wave** — tool overlays own edit visualization |
 
 
 ### G. Concurrency with highway / names
@@ -174,7 +174,7 @@ On applied net change affecting edges (not on load):
   3. Drop deleted edges with no successor
   4. Gap-fill per vanilla Aggregate between consecutive members where BOTH have preventPropagation == false
   5. If empty → teardown ADR aggregate
-  6. Dirty names / labels / highway cache / SIP
+  6. Dirty names / labels / highway cache / tool overlays
 
 On load / deserialize:
   Trust saved membership — no gap-fill repair

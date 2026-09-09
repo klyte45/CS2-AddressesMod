@@ -27,6 +27,7 @@ This pack is **documentation only**. It does not ship product code or create Kan
 | World labels (when ADR-associated) | **ADR-owned** thin labels + suppress conflicting vanilla labels — not Aggregation post-sync |
 | Label pick (click ADR labels) | **Fork** vanilla `RaycastLabelsJob` (~150 lines) as ADR Burst job; schedule via managed `RaycastSystem` hook — do not Harmony-patch the Burst job body |
 | Membership per edge | **`preventPropagation`** (default false) allows non-contiguous ADR; gap-fill only between propagating endpoints (live net apply only — **not** on load). **`numberOverrideActive`** (default false) + **`numberOverride`** (`int`, highway-marker style) |
+| Initial UX | **Net-only association tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. See [08](08-association-tool-first-ux.md) |
 | Pack depth | Analysis + design notes — **no** implementation backlog / Kanban board work in this pack |
 | Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR |
 
@@ -39,6 +40,7 @@ This pack is **documentation only**. It does not ship product code or create Kan
 5. [05-research-gaps-and-next.md](05-research-gaps-and-next.md) — remaining gaps + follow-up pack inputs
 6. [06-labels-vs-vanilla-sync-and-harmony.md](06-labels-vs-vanilla-sync-and-harmony.md) — ADR labels vs Aggregation sync; unattended branches; Harmony viability
 7. [07-membership-maintenance-edge-cases.md](07-membership-maintenance-edge-cases.md) — net remap + gap-fill continuity + edge-case matrix
+8. [08-association-tool-first-ux.md](08-association-tool-first-ux.md) — **start UX with net-only association tool** + world draw + node controls; impact on epic order
 
 ## Success criteria (this research pack)
 
@@ -50,6 +52,7 @@ This pack is **documentation only**. It does not ship product code or create Kan
 - [x] Follow-up gaps listed for a later implementation / Kanban plan
 - [x] Labels-vs-sync discussion and Harmony viability for leftover consumers documented ([06](06-labels-vs-vanilla-sync-and-harmony.md))
 - [x] Membership maintenance / gap-fill edge-case matrix documented ([07](07-membership-maintenance-edge-cases.md))
+- [x] Tool-first UX (net-only + world draw + node controls) and epic-order impact documented ([08](08-association-tool-first-ux.md))
 
 ## Related packs
 

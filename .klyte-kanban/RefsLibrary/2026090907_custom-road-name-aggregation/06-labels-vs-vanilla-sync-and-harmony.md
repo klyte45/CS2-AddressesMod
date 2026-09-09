@@ -194,12 +194,7 @@ Must for feature:
   + forked RaycastLabelsJob + RaycastSystem schedule hook (pick → ADR aggregate)
 
 Should for polish:
-  Harmony RoadSection + ADR highlight list job (H1):
-    same membership helper as SIP
-    S2 → full ADR elements; S1 → vanilla minus ADR-associated
-    rewrite CreationDefinition AggregateElement before GenerateAggregates
-  TitleSection locale / ImageSystem icon if S2 needs them
-
+  *(deferred — not this wave)* SIP RoadSection / TitleSection / DefaultTool H1
 Nice later:
   Traffic-routes affordance over ADR groups
   Optional constrained vanilla post-sync ONLY for geometry-legal same-type chains
@@ -208,6 +203,8 @@ Never:
   Burst AggregateSystem rewrite as primary association mechanism
   Harmony inside RaycastLabelsJob Burst body
 ```
+
+**Scope note (2026-09-09):** SIP stats/chrome and DefaultTool H1 are **out of the current implementation**. Deliver association via **tool overlays** + NameSystem/GetAddress + (later) world labels. Keep the RoadSection/H1 design above as archive for a future wave.
 
 ## Selection model
 
@@ -230,5 +227,5 @@ With the planned fork, default to **S2** for ADR-associated roads. Unassociated 
 
 1. Exact suppress rule: per-edge vs entire vanilla aggregate when any edge is ADR-associated.
 2. Whether ADR reuses vanilla `LabelPosition`/`LabelExtents` types on ADR entities or ADR-named duplicates of the same layout.
-3. SIP stats + highlight: ship together with shared membership helper; highlight path is **H1 only** (settled).
+3. SIP stats + DefaultTool H1: **out of current implementation** — revisit only in a later wave.
 4. How aggressively to share schedule dependency with vanilla label raycast (same `JobHandle` chain vs independent).

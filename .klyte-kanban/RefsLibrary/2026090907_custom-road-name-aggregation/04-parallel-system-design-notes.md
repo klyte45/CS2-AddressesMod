@@ -126,10 +126,11 @@ Address text remains correct via GetAddress / NameSystem patches independently o
 
 ## SIP / selection
 
-- Vanilla SIP `RoadSection` / selection highlight still key off vanilla `Aggregate` element lists unless Harmony remaps (polish — [06](06-labels-vs-vanilla-sync-and-harmony.md): S2 sums/highlights all ADR elements across vanilla Aggregates; S1 excludes ADR-associated edges from vanilla Aggregate sums **and** glow).
-- Clicking an **ADR** label should select the **ADR name-aggregate** (selection model **S2** when using the forked raycast job).
-- ADR SIP (`RoadAggregation` / seed UI): if edge has ADR association → ADR name-aggregate; else vanilla aggregate.
-- Station road-reference options should list ADR aggregates when present.
+**This implementation wave does not include SIP work** ([08](08-association-tool-first-ux.md)). No RoadSection / TitleSection / DefaultTool H1 / ADR SIP `RoadAggregation` panel.
+
+Vanilla SIP may continue to show vanilla Aggregates for length/flow while ADR owns naming via NameSystem/GetAddress and the association **tool**. Revisit SIP coherence only in a later wave ([06](06-labels-vs-vanilla-sync-and-harmony.md)).
+
+- Station road-reference options should list ADR aggregates when present (can follow tool/data; not SIP-panel work).
 
 ## Serialization
 
@@ -143,13 +144,14 @@ Net apply remaps edge ids; **gap-fill** keeps ADR spans contiguous within each v
 
 ## Testing checklist (for a future implementation sprint)
 
-- [ ] Custom-associated edges share one name in SIP title / address format
+- [ ] Custom-associated edges share one name in addresses / tool-focused name UI
 - [ ] House numbers increase along ADR element order, not vanilla split
 - [ ] Vanilla-only roads unchanged when ADR association absent
 - [ ] Net delete / replace remaps ADR links; gap-fill between remaining members on same vanilla Aggregate ([07](07-membership-maintenance-edge-cases.md))
 - [ ] Highway markers / mileage still work after migration (happy path)
 - [ ] Optional: old save with highway-on-vanilla Aggregate migrates when cheap (beta may break odd cases)
 - [ ] Pathfinding / traffic unchanged (smoke)
+- [ ] Association **tool** overlays + node controls edit membership
 - [ ] Vanilla labels suppressed on ADR-associated edges; ADR labels drawn along ADR element order
 - [ ] Clicking ADR labels selects ADR name-aggregate (forked `RaycastLabelsJob` + `RaycastSystem` schedule hook)
-- [ ] SIP RoadSection stats follow ADR group when polish Harmony is in (optional v1)
+- [ ] *(Later wave)* SIP RoadSection / H1 highlight — not required for this implementation
