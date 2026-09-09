@@ -1,3 +1,4 @@
+**End time:** 2026-09-08 21:22 -0300
 **Start time:** 2026-09-08 21:18 -0300
 # [0051] cutover-verification-and-player-release-docs
 
@@ -31,7 +32,7 @@ Sprint 7 Phase C. Final verification and first player-facing release docs.
 - [x] Contextual VUIO (selection/editor/tool) still works
 - [x] rg clean for euis-components, k45-adr-main, EuisApps, UseEuisRegister, @klyte45/adr-commons, main/
 - [x] Changelog and mod description updated: Universal Mod Menu entry; EUIS not required
-- [ ] First player-facing release after S7
+- [x] First player-facing release after S7
 
 ---
 
