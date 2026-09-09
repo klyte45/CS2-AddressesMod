@@ -29,12 +29,12 @@ Phase T0 of the Road Grouping roadmap. ADR has IBelzontToolSystem but no gamepla
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrRoadGroupingTool exists with toolID K45_ADR_AdrRoadGroupingTool
-- [ ] Select and RequestDisable set activeTool like WE
-- [ ] AdrRoadGroupingController has selectedAggregation binding and enableTool call
-- [ ] InitializeRaycast is TypeMask.Net; hover only Aggregated edges
-- [ ] Plain LMB with empty selection stores Aggregate Entity; clear on OnStopRunning/RequestDisable
-- [ ] VUIO extends useToolOptionsVisible and MouseToolOptions for the tool id
+- [x] AdrRoadGroupingTool exists with toolID K45_ADR_AdrRoadGroupingTool
+- [x] Select and RequestDisable set activeTool like WE
+- [x] AdrRoadGroupingController has selectedAggregation binding and enableTool call
+- [x] InitializeRaycast is TypeMask.Net; hover only Aggregated edges
+- [x] Plain LMB with empty selection stores Aggregate Entity; clear on OnStopRunning/RequestDisable
+- [x] VUIO extends useToolOptionsVisible and MouseToolOptions for the tool id
 
 ---
 
@@ -45,6 +45,7 @@ Phase T0 of the Road Grouping roadmap. ADR has IBelzontToolSystem but no gamepla
 3. Register VUIO extends in k45_adr_vuio index like WE
 4. Do not implement overlay or membership logs in this task
 5. Scaffold landed: AdrRoadGroupingTool/Controller/UISystem + AdrModData keybinds + VUIO tool options/UMM button. Awaiting in-game validation before closing (Ctrl+Shift+G or UMM road button; LMB select; RMB exit).
+6. Validated in-game: Ctrl+Shift+A / UMM activate; LMB select Aggregate; pipette re-pick; RMB exit; WE-style tool options (title body + actions gated on selection).
 
 ---
 
