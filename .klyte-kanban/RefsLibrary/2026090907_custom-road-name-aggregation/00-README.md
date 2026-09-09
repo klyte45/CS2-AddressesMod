@@ -16,6 +16,7 @@ This pack is **documentation only**. It does not ship product code or create Kan
 | Parallel-system design notes (name + house numbers; highway migrate) | Kanban sprint/task creation |
 | Gaps and follow-up implementation planning inputs | Frontend research via game UI dumps |
 | Labels-vs-Aggregation-sync discussion + Harmony viability for leftover UI | Implementing those Harmony patches |
+| Road Grouping tool / overlay specs + implementation roadmap ([09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md)) | Shipping product C# / VUIO for the tool (follows the roadmap later) |
 
 ## Confirmed decisions
 
@@ -27,9 +28,10 @@ This pack is **documentation only**. It does not ship product code or create Kan
 | World labels (when ADR-associated) | **ADR-owned** thin labels + suppress conflicting vanilla labels — not Aggregation post-sync |
 | Label pick (click ADR labels) | **Fork** vanilla `RaycastLabelsJob` (~150 lines) as ADR Burst job; schedule via managed `RaycastSystem` hook — do not Harmony-patch the Burst job body |
 | Membership per edge | **`preventPropagation`** (default false) allows non-contiguous ADR; gap-fill only between propagating endpoints (live net apply only — **not** on load). **`numberOverrideActive`** (default false) + **`numberOverride`** (`int`, highway-marker style) |
-| Initial UX | **Net-only association tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. See [08](08-association-tool-first-ux.md) |
-| Pack depth | Analysis + design notes — **no** implementation backlog / Kanban board work in this pack |
-| Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR |
+| Initial UX | **Net-only Road Grouping tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. Direction: [08](08-association-tool-first-ux.md); locked spec: [09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md) |
+| Tool naming | Product/code: **Road Grouping** (`AdrRoadGrouping*`). Doc [08](08-association-tool-first-ux.md) keeps historical “association” filename |
+| Pack depth | Analysis + design notes + **tool/overlay implementation specs** — **no** Kanban board work in this pack unless separately requested |
+| Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR; BelzontWE for tool scaffold |
 
 ## Reading order
 
@@ -40,7 +42,10 @@ This pack is **documentation only**. It does not ship product code or create Kan
 5. [05-research-gaps-and-next.md](05-research-gaps-and-next.md) — remaining gaps + follow-up pack inputs
 6. [06-labels-vs-vanilla-sync-and-harmony.md](06-labels-vs-vanilla-sync-and-harmony.md) — ADR labels vs Aggregation sync; unattended branches; Harmony viability
 7. [07-membership-maintenance-edge-cases.md](07-membership-maintenance-edge-cases.md) — net remap + gap-fill continuity + edge-case matrix
-8. [08-association-tool-first-ux.md](08-association-tool-first-ux.md) — **start UX with net-only association tool** + world draw + node controls; impact on epic order
+8. [08-association-tool-first-ux.md](08-association-tool-first-ux.md) — **start UX with net-only tool** + world draw + node controls; impact on epic order
+9. [09-road-grouping-tool-spec.md](09-road-grouping-tool-spec.md) — **Road Grouping** tool contract (WE scaffold, LMB gestures, stubs, number cards)
+10. [10-road-grouping-overlay-render-system.md](10-road-grouping-overlay-render-system.md) — opaque OverlayBuffer layer (#00FF00 / #006600)
+11. [11-road-grouping-tool-roadmap.md](11-road-grouping-tool-roadmap.md) — implementation phases T0–T5
 
 ## Success criteria (this research pack)
 
@@ -53,6 +58,9 @@ This pack is **documentation only**. It does not ship product code or create Kan
 - [x] Labels-vs-sync discussion and Harmony viability for leftover consumers documented ([06](06-labels-vs-vanilla-sync-and-harmony.md))
 - [x] Membership maintenance / gap-fill edge-case matrix documented ([07](07-membership-maintenance-edge-cases.md))
 - [x] Tool-first UX (net-only + world draw + node controls) and epic-order impact documented ([08](08-association-tool-first-ux.md))
+- [x] Road Grouping tool specification documented ([09](09-road-grouping-tool-spec.md))
+- [x] Road Grouping overlay render system documented ([10](10-road-grouping-overlay-render-system.md))
+- [x] Road Grouping implementation roadmap T0–T5 documented ([11](11-road-grouping-tool-roadmap.md))
 
 ## Related packs
 

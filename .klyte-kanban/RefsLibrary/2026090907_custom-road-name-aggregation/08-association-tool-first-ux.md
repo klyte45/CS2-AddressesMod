@@ -142,13 +142,17 @@ Not in this wave: SIP / DefaultTool H1
 | Node UX ambiguous | Spike one gesture (click adjacent edge from endpoint) before drag gizmos |
 | Thin backend must exist first | Optional: world-draw spike on vanilla Aggregates first; thin contract before real membership edits |
 
-## Open questions (tool-specific)
+## Open questions (tool-specific) — settled
 
-1. Gestures: click-to-toggle edge vs paint vs endpoint expand only?  
-2. Overlay tech: reuse `Highlighted`/`BatchesUpdated` for tool preview, custom overlay meshes, or both?  
-3. Can one tool session edit only one ADR aggregate at a time, or multi-select aggregates?  
-4. Toolbar placement / unlock (Addresses toolbar vs roads menu)?  
-5. First iteration: edge add/remove only, then node handles in v1.1 — or node handles required for first playable?
+Superseded by **Road Grouping** specs [09](09-road-grouping-tool-spec.md), [10](10-road-grouping-overlay-render-system.md), [11](11-road-grouping-tool-roadmap.md). Product/code name is **Road Grouping** (`AdrRoadGrouping*`); this file keeps its historical filename.
+
+| Former open question | Settled decision |
+|----------------------|------------------|
+| Gestures | Plain LMB = initial select only; **Ctrl+LMB** on **segment** = toggle (log stub); **LMB-drag** on **end node** = endpoint expand/shrink (log stub); RMB = cancel |
+| Overlay tech | Dedicated `OverlayRenderSystem.Buffer` system — **not** `Highlighted`. Belonging **#00FF00**, non-belonging **#006600** |
+| Multi-select | **Single** focused aggregate/group per session |
+| Toolbar / activation | WE-style `Select` / `enableTool` + ADR UI / optional keybind; VUIO tool-options when `K45_ADR_AdrRoadGroupingTool` active |
+| Endpoint handles in first stub wave | **Yes** — end circles + LMB-drag path stubs in T1–T2 ([11](11-road-grouping-tool-roadmap.md)) |
 
 ## Relation
 
@@ -156,3 +160,6 @@ Not in this wave: SIP / DefaultTool H1
 - [05](05-research-gaps-and-next.md) — epic list (update reading: tool-first)  
 - [06](06-labels-vs-vanilla-sync-and-harmony.md) — labels / future SIP+H1 reference (SIP **not** in this wave)  
 - [07](07-membership-maintenance-edge-cases.md) — mutations the tool must obey  
+- [09](09-road-grouping-tool-spec.md) — **Road Grouping** tool contract  
+- [10](10-road-grouping-overlay-render-system.md) — overlay system  
+- [11](11-road-grouping-tool-roadmap.md) — implementation roadmap  
