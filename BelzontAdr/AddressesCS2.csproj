@@ -101,6 +101,10 @@
       <HintPath>$(CSII_MANAGEDPATH)\Colossal.AssetPipeline.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Colossal.AssetPipeline.Native">
+      <HintPath>$(CSII_MANAGEDPATH)\Colossal.AssetPipeline.Native.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>$(CSII_MANAGEDPATH)\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
@@ -181,6 +185,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <EmbeddedResource Include="changelog.md" />
+    <EmbeddedResource Include="Properties\Thumbnail.png" />
   </ItemGroup>
 
 

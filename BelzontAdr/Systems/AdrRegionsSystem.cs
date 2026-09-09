@@ -391,12 +391,12 @@ namespace BelzontAdr
                 var waterArray = new NativeArray<CityJobData>(GetWaterRegionNeighborhood().Select(x => x.ToCityJobData()).ToArray(), Allocator.TempJob);
                 var airArray = new NativeArray<CityJobData>(GetAirRegionNeighborhood().Select(x => x.ToCityJobData()).ToArray(), Allocator.TempJob);
 
-                if (BasicIMod.DebugMode) LogUtils.DoLog($"land = {landArray.Length} | water = {waterArray.Length} | air = {airArray.Length}");
+                if (BasicIMod.DebugMode) LogUtils.DoDebugLog($"land = {landArray.Length} | water = {waterArray.Length} | air = {airArray.Length}");
                 if (BasicIMod.TraceMode)
                 {
-                    LogUtils.DoLog($"land = \n\t{string.Join("\n\t", landArray.Select(x => $"- E: {x.entity} | {x.azimuthAngleStart} => {x.azimuthAngleCenter} => {x.azimuthAngleEnd}"))}");
-                    LogUtils.DoLog($"water = \n\t{string.Join("\n\t", waterArray.Select(x => $"- E: {x.entity} | {x.azimuthAngleStart} => {x.azimuthAngleCenter} => {x.azimuthAngleEnd}"))}");
-                    LogUtils.DoLog($"air = \n\t{string.Join("\n\t", airArray.Select(x => $"- E: {x.entity} | {x.azimuthAngleStart} => {x.azimuthAngleCenter} => {x.azimuthAngleEnd}"))}");
+                    LogUtils.DoDebugLog($"land = \n\t{string.Join("\n\t", landArray.Select(x => $"- E: {x.entity} | {x.azimuthAngleStart} => {x.azimuthAngleCenter} => {x.azimuthAngleEnd}"))}");
+                    LogUtils.DoDebugLog($"water = \n\t{string.Join("\n\t", waterArray.Select(x => $"- E: {x.entity} | {x.azimuthAngleStart} => {x.azimuthAngleCenter} => {x.azimuthAngleEnd}"))}");
+                    LogUtils.DoDebugLog($"air = \n\t{string.Join("\n\t", airArray.Select(x => $"- E: {x.entity} | {x.azimuthAngleStart} => {x.azimuthAngleCenter} => {x.azimuthAngleEnd}"))}");
                 }
 
                 var job = new MapOutsideConnectionsJob
