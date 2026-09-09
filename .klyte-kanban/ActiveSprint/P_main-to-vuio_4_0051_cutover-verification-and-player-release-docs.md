@@ -1,7 +1,7 @@
+**Start time:** 2026-09-08 21:18 -0300
 # [0051] cutover-verification-and-player-release-docs
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte <klyte45@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026082521_main-to-vuio-migration/11-sprint-roadmap.md — S7 exit criteria
@@ -26,11 +26,11 @@ Sprint 7 Phase C. Final verification and first player-facing release docs.
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Fresh playset without EUIS: ADR loads; Mods glyph + UMM opens all four root tabs
-- [ ] No console errors about k45-adr-main / EUIS bridge
-- [ ] Contextual VUIO (selection/editor/tool) still works
-- [ ] rg clean for euis-components, k45-adr-main, EuisApps, UseEuisRegister, @klyte45/adr-commons, main/
-- [ ] Changelog and mod description updated: Universal Mod Menu entry; EUIS not required
+- [x] Fresh playset without EUIS: ADR loads; Mods glyph + UMM opens all four root tabs
+- [x] No console errors about k45-adr-main / EUIS bridge
+- [x] Contextual VUIO (selection/editor/tool) still works
+- [x] rg clean for euis-components, k45-adr-main, EuisApps, UseEuisRegister, @klyte45/adr-commons, main/
+- [x] Changelog and mod description updated: Universal Mod Menu entry; EUIS not required
 - [ ] First player-facing release after S7
 
 ---
