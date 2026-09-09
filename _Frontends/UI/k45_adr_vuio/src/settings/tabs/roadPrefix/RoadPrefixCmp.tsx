@@ -3,7 +3,7 @@ import {
     AdrRoadPrefixSetting,
     NamingRulesService,
     RoadFlags,
-} from "@klyte45/adr-commons";
+} from "adr";
 import { FormLine, VanillaWidgets } from "@klyte45/vuio-commons";
 import { useEffect, useMemo, useState } from "react";
 import { translate } from "../../translate";

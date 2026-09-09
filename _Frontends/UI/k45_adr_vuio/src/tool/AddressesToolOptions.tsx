@@ -9,7 +9,7 @@ import AdrHighwayRoutesSystem, { AdrFields, AdrFieldType, LocalizationStrings, P
 import routesSystem, { DisplayInformation, RouteDirection, RouteItem } from "service/AdrHighwayRoutesSystem";
 import { translate } from "utility/translate";
 import { MetadataMount, MountMetadataComponentProps } from "components/MetadataMount";
-import { HighwayRoutesService } from "@klyte45/adr-commons";
+import { HighwayRoutesService } from "adr";
 
 export const AddressesToolOptions: ModuleRegistryExtend = (Component: any) => {
     return () => {

@@ -1,5 +1,4 @@
-import { ExtendedSimpleNameEntry, GitHubFileItem } from "@klyte45/adr-commons";
-import { SimpleNameEntry } from "@klyte45/adr-commons";
+import { ExtendedSimpleNameEntry, GitHubFileItem, SimpleNameEntry } from "adr";
 
 export const entryToText = (entry: SimpleNameEntry) =>
     entry.Values.map((x, i) =>

@@ -1,4 +1,4 @@
-import { AdrMainService } from "@klyte45/adr-commons";
+import { AdrMainService } from "adr";
 import { ErrorBoundary, VanillaComponentResolver } from "@klyte45/vuio-commons";
 import { FocusDisabled } from "cs2/input";
 import { getModule } from "cs2/modding";

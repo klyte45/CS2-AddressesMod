@@ -1,4 +1,4 @@
-import { EnumValueType } from "@klyte45/adr-commons";
+import { EnumValueType } from "adr";
 import { Entity } from "@klyte45/vuio-commons";
 
 export default class {

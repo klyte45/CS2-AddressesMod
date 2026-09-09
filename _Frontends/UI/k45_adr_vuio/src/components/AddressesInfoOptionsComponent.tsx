@@ -1,4 +1,4 @@
-import { AdrEntityType, Entity, SelectInfoPanelService, SelectedInfoOptions, toEntityTyped } from "@klyte45/adr-commons";
+import { AdrEntityType, Entity, SelectInfoPanelService, SelectedInfoOptions, toEntityTyped } from "adr";
 import { VanillaComponentResolver } from '@klyte45/vuio-commons';
 import { ValueBinding } from "cs2/api";
 import { useEffect, useState } from "react";

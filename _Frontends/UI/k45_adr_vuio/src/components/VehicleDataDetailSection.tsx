@@ -1,4 +1,4 @@
-import { ADRVehicleData, Entity, VehicleService, SelectInfoPanelService, SelectedInfoOptions, replaceArgs, VehiclePlateCategory, toEntityTyped } from "@klyte45/adr-commons";
+import { ADRVehicleData, Entity, VehicleService, SelectInfoPanelService, SelectedInfoOptions, replaceArgs, VehiclePlateCategory, toEntityTyped } from "adr";
 import { VanillaComponentResolver } from '@klyte45/vuio-commons';
 import { selectedInfo } from "cs2/bindings";
 import { useEffect, useState } from "react";

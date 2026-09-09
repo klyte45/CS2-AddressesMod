@@ -1,4 +1,4 @@
-import { RegionCityEditingDTO, RegionService } from "@klyte45/adr-commons";
+import { RegionCityEditingDTO, RegionService } from "adr";
 import { ColorUtils, FormLine, LocElementType, VanillaComponentResolver, VanillaWidgets } from "@klyte45/vuio-commons";
 import { DropdownItem } from "cs2/bindings";
 import { useEffect, useMemo, useState } from "react";

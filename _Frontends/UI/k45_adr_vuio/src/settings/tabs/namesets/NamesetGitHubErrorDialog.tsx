@@ -1,4 +1,4 @@
-import { GitHubAddressesFilesService, replaceArgs } from "@klyte45/adr-commons";
+import { GitHubAddressesFilesService, replaceArgs } from "adr";
 import { VanillaComponentResolver } from "@klyte45/vuio-commons";
 import { Portal } from "cs2/ui";
 import { FocusDisabled } from "cs2/input";

@@ -1,5 +1,5 @@
 
-import { HighwayRoutesService, replaceArgs } from "@klyte45/adr-commons";
+import { HighwayRoutesService, replaceArgs } from "adr";
 import { LocElementType, VanillaComponentResolver, VanillaWidgets } from "@klyte45/vuio-commons";
 import { DropdownItem, LocElement, selectedInfo } from "cs2/bindings";
 import { useLocalization } from "cs2/l10n";

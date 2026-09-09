@@ -1,5 +1,5 @@
 import { translate } from "../../translate";
-import { SimpleNameEntry } from "@klyte45/adr-commons";
+import { SimpleNameEntry } from "adr";
 
 export const defaultSetting = (): SimpleNameEntry => ({
     IdString: null as any,

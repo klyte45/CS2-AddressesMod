@@ -1,4 +1,4 @@
-import { Entity, SelectInfoPanelService, SelectedInfoOptions, nameToString, replaceArgs } from "@klyte45/adr-commons";
+import { Entity, SelectInfoPanelService, SelectedInfoOptions, nameToString, replaceArgs } from "adr";
 import { VanillaComponentResolver } from '@klyte45/vuio-commons';
 import { useState } from "react";
 import { translate } from "utility/translate";

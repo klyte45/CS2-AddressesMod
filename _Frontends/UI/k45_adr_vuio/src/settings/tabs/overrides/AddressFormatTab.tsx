@@ -1,4 +1,4 @@
-import { AdrCitywideSettings, NamingRulesService } from "@klyte45/adr-commons";
+import { AdrCitywideSettings, NamingRulesService } from "adr";
 import { FormLine, VanillaWidgets } from "@klyte45/vuio-commons";
 import { useRef, useState } from "react";
 import { translate } from "../../translate";

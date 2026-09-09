@@ -1,4 +1,4 @@
-import { AdrEntityEditorData, EditorUISystemService, toEntityTyped, nameToString } from "@klyte45/adr-commons";
+import { AdrEntityEditorData, EditorUISystemService, toEntityTyped, nameToString } from "adr";
 import { PropsEllipsesTextInput, VanillaComponentResolver } from "@klyte45/vuio-commons";
 import { AddressesInfoOptionsComponent } from "components/AddressesInfoOptionsComponent";
 import { bindValue } from "cs2/api";

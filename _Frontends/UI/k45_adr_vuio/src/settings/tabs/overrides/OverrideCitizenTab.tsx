@@ -1,4 +1,4 @@
-import { AdrCitywideSettings, NamingRulesService, SimpleNameEntry } from "@klyte45/adr-commons";
+import { AdrCitywideSettings, NamingRulesService, SimpleNameEntry } from "adr";
 import { FormLine, VanillaWidgets } from "@klyte45/vuio-commons";
 import { translate } from "../../translate";
 import { defaultSetting } from "./overrideDefaults";

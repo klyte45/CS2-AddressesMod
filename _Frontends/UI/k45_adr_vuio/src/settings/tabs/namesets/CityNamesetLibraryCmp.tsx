@@ -1,7 +1,7 @@
 ﻿import {
     ExtendedSimpleNameEntry,
     NamesetService,
-} from "@klyte45/adr-commons";
+} from "adr";
 import {
     FilePickerDialog,
     ListActionTypeArray,

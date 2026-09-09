@@ -1,4 +1,4 @@
-import { GitHubAddressesFilesService } from "@klyte45/adr-commons";
+import { GitHubAddressesFilesService } from "adr";
 import { DataProvider } from "@klyte45/vuio-commons";
 
 export const GITHUB_NAMESETS_ROOT = "github://root";

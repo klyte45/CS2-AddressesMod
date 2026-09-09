@@ -1,4 +1,4 @@
-import { NamesetService } from "@klyte45/adr-commons";
+import { NamesetService } from "adr";
 import { VanillaWidgets } from "@klyte45/vuio-commons";
 import { useEffect, useMemo, useState } from "react";
 import { translate } from "../../translate";

@@ -1,4 +1,4 @@
-import { AdrCitywideSettings, DistrictListItem, DistrictRelativeService, NamingRulesService, SimpleNameEntry, nameToString } from "@klyte45/adr-commons";
+import { AdrCitywideSettings, DistrictListItem, DistrictRelativeService, NamingRulesService, SimpleNameEntry, nameToString } from "adr";
 import { FormLine, LocElementType, VanillaWidgets } from "@klyte45/vuio-commons";
 import { DropdownItem } from "cs2/bindings";
 import { useEffect, useState } from "react";

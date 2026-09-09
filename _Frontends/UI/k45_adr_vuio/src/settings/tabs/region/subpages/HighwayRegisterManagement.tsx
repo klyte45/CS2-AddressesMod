@@ -1,4 +1,4 @@
-import { HighwayData, HighwayRoutesService } from "@klyte45/adr-commons";
+import { HighwayData, HighwayRoutesService } from "adr";
 import { FormLine, VanillaWidgets } from "@klyte45/vuio-commons";
 import { useEffect, useState } from "react";
 import { translate } from "../../../translate";

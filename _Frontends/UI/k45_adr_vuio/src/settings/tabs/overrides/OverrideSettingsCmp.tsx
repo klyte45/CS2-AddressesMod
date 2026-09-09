@@ -6,7 +6,7 @@ import {
     nameToString,
     NamingRulesService,
     SimpleNameEntry,
-} from "@klyte45/adr-commons";
+} from "adr";
 import { ListWithContentTab } from "@klyte45/vuio-commons";
 import { useEffect, useMemo, useState } from "react";
 import { translate } from "../../translate";

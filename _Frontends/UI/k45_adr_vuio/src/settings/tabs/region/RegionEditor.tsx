@@ -1,4 +1,4 @@
-import { CityResponseData, Entity, EnumValueType, RegionService } from "@klyte45/adr-commons";
+import { CityResponseData, Entity, EnumValueType, RegionService } from "adr";
 import { VanillaComponentResolver } from "@klyte45/vuio-commons";
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { translate } from "../../translate";

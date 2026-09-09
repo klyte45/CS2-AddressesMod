@@ -1,4 +1,4 @@
-import { Entity, SelectInfoPanelService, SelectedInfoOptions, replaceArgs } from "@klyte45/adr-commons";
+import { Entity, SelectInfoPanelService, SelectedInfoOptions, replaceArgs } from "adr";
 import { toEntityTyped, VanillaComponentResolver } from '@klyte45/vuio-commons';
 import { DropdownItem, LocElement, selectedInfo } from "cs2/bindings";
 import { useState } from "react";

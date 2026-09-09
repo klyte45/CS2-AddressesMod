@@ -1,4 +1,4 @@
-import { ExtendedSimpleNameEntry, SimpleNameEntry } from "@klyte45/adr-commons";
+import { ExtendedSimpleNameEntry, SimpleNameEntry } from "adr";
 import { FormLine, VanillaWidgets } from "@klyte45/vuio-commons";
 import { useEffect, useState } from "react";
 import { translate } from "../../translate";
