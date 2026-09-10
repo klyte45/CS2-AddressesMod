@@ -41,6 +41,10 @@ Phase T2. Log-only membership stubs: Ctrl+LMB on segment toggles; LMB-drag on te
 1. Disambiguate apply/LMB by hit target: Ctrl+segment vs end-node
 2. Do not mutate AggregateElement or ADR membership yet
 3. Optional: skip overlay drag preview; logs only
+4. Ctrl+LMB on Edge while selected → Log.Info toggle stub (add/remove vs AggregateElement).
+5. LMB on end-handle circle (chain termini + degree-1; radius = EndHandleDiameter/2) starts endpoint drag; 0-1 BFS prefers prior-step Aggregate then hops; on release one info log per distinct would-add or would-remove edge.
+6. Overlay exposes EndHandleDiameter + CollectDragHandleNodes for hit testing.
+7. Overlay dual layer: while selected, #006600 wash on hovered non-selected Aggregate; live #006600 path ribbons during endpoint drag; brighter/larger end-handle circle on HoveredDragHandle. Separate belonging/preview materials+buffers so deferred draws do not clobber.
 
 ---
 
