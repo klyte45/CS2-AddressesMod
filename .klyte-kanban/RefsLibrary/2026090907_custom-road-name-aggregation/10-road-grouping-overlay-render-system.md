@@ -26,7 +26,7 @@ Class remains `AdrRoadGroupingOverlayRenderSystem` (name historical); implementa
 | Draw | `RenderPipelineManager.beginContextRendering` (same as `RouteRenderSystem`) |
 | Material | Clone of `RouteConfigurationPrefab.m_CarPathVisualization.m_Material` |
 | Mesh | Exact copy of `RouteRenderSystem.EnsureMesh` (68 verts / 192 indices) |
-| Gate | Tool active + selected Aggregate → `#00FF00`; no selection + hover Aggregate → `#006600` |
+| Gate | Tool active + selected Aggregate → base `#00BB00` ribbons + `#00FF00` end handles / drag path + `#006600` hovered non-member; no selection + hover Aggregate → `#006600` |
 
 ## Packing (mirror `RouteBufferSystem`)
 
@@ -48,8 +48,11 @@ Class remains `AdrRoadGroupingOverlayRenderSystem` (name historical); implementa
 
 | Layer | Color |
 |-------|-------|
-| Belonging (selected) | **#00FF00**, alpha 1, size × 1.333 (highlighted route style) |
-| Pick preview (hover, no selection) | **#006600**, same draw path, no end `AddNode` |
+| Belonging (selected, base) | **#00BB00**, alpha 1, size × 1.333 (route style) |
+| Highlights (end handles, endpoint-drag path) | **#00FF00**, same ribbon/DrawCircle path |
+| Hovered non-member (when selected) | **#006600**, same draw path, no end handles |
+| Pick preview (hover, no selection) | **#006600**, same draw path, no end handles |
+| Remainder (non-belonging in same Aggregate context when subset exists) | **#006600** |
 
 ## Relation
 

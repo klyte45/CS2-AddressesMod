@@ -147,9 +147,11 @@ Full contract in [10](10-road-grouping-overlay-render-system.md).
 
 When `selectedAggregation` is set and Road Grouping tool is `activeTool`:
 
-- Opaque centerlines on belonging segments: **#00FF00**.
+- Opaque centerlines on belonging segments: **#00BB00** (base membership).
 - Opaque centerlines on non-belonging segments in the same vanilla Aggregate context: **#006600**.
-- Terminal **#00FF00** circles on aggregation end **nodes**.
+- Terminal **#00FF00** circles on aggregation end **nodes** (highlights only).
+- Hovered non-member segment (selection set): **#006600**.
+- Drag-path segment highlights: **#00FF00** (live endpoint-drag path).
 
 No vanilla `Highlighted` for this feature.
 

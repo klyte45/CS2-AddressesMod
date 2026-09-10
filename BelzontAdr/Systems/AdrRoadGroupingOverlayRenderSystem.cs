@@ -38,8 +38,10 @@ namespace BelzontAdr
             public float m_Broken;
         }
 
-        private static readonly Color BelongingColor = new(0f, 1f, 0f, 1f);
-        private static readonly Color HoverPreviewColor = new(0f, 0.4f, 0f, 1f);
+        private static readonly Color BelongingColor = new(0f, 0x88 / 255f, 0f, 1f); 
+        private static readonly Color HighlightColor = new(0f, 0xBB / 255f, 0f, 1f); 
+        private static readonly Color HoverPreviewColor = new(0f, 0x44/ 255f, 0f, 1f); 
+        private static readonly Color EndHandleHoverColor = new(0f, 1f, 0f, 1f);
 
         private ToolSystem m_ToolSystem;
         private PrefabSystem m_PrefabSystem;
@@ -51,16 +53,23 @@ namespace BelzontAdr
         private EntityQuery m_RouteConfigQuery;
 
         private Mesh m_Mesh;
-        private Material m_Material;
+        private Material m_BelongingMaterial;
+        private Material m_PreviewMaterial;
         private int m_OriginalRenderQueue;
         private Vector4 m_RouteSize;
-        private ComputeBuffer m_SegmentBuffer;
-        private ComputeBuffer m_ArgsBuffer;
+        private ComputeBuffer m_BelongingBuffer;
+        private ComputeBuffer m_PreviewBuffer;
+        private ComputeBuffer m_BelongingArgsBuffer;
+        private ComputeBuffer m_PreviewArgsBuffer;
         private readonly List<uint> m_ArgsArray = new(5);
-        private NativeList<SegmentData> m_Segments;
-        private Bounds3 m_Bounds;
-        private Color m_DrawColor;
-        private bool m_HasDraw;
+        private NativeList<SegmentData> m_BelongingSegments;
+        private NativeList<SegmentData> m_PreviewSegments;
+        private Bounds3 m_BelongingBounds;
+        private Bounds3 m_PreviewBounds;
+        private bool m_HasBelonging;
+        private bool m_HasPreview;
+        private Color m_PreviewDrawColor = HoverPreviewColor;
+        private Entity m_HoveredEndHandle;
 
         private static readonly int RouteSegmentBufferId = Shader.PropertyToID("colossal_RouteSegmentBuffer");
         private static readonly int RouteColorId = Shader.PropertyToID("colossal_RouteColor");
@@ -77,17 +86,24 @@ namespace BelzontAdr
             m_Tool = World.GetOrCreateSystemManaged<AdrRoadGroupingTool>();
             m_Controller = World.GetOrCreateSystemManaged<AdrRoadGroupingController>();
             m_RouteConfigQuery = GetEntityQuery(ComponentType.ReadOnly<RouteConfigurationData>());
-            m_Segments = new NativeList<SegmentData>(64, Allocator.Persistent);
-            m_Bounds = new Bounds3(float.MaxValue, float.MinValue);
+            m_BelongingSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
+            m_PreviewSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
+            m_BelongingBounds = new Bounds3(float.MaxValue, float.MinValue);
+            m_PreviewBounds = new Bounds3(float.MaxValue, float.MinValue);
             RenderPipelineManager.beginContextRendering += Render;
         }
 
         protected override void OnDestroy()
         {
             RenderPipelineManager.beginContextRendering -= Render;
-            if (m_Segments.IsCreated)
+            if (m_BelongingSegments.IsCreated)
             {
-                m_Segments.Dispose();
+                m_BelongingSegments.Dispose();
+            }
+
+            if (m_PreviewSegments.IsCreated)
+            {
+                m_PreviewSegments.Dispose();
             }
 
             if (m_Mesh != null)
@@ -95,60 +111,129 @@ namespace BelzontAdr
                 UnityEngine.Object.Destroy(m_Mesh);
             }
 
-            if (m_Material != null)
+            if (m_BelongingMaterial != null)
             {
-                UnityEngine.Object.Destroy(m_Material);
+                UnityEngine.Object.Destroy(m_BelongingMaterial);
             }
 
-            m_SegmentBuffer?.Release();
-            m_ArgsBuffer?.Release();
+            if (m_PreviewMaterial != null)
+            {
+                UnityEngine.Object.Destroy(m_PreviewMaterial);
+            }
+
+            m_BelongingBuffer?.Release();
+            m_PreviewBuffer?.Release();
+            m_BelongingArgsBuffer?.Release();
+            m_PreviewArgsBuffer?.Release();
             base.OnDestroy();
         }
 
         protected override void OnUpdate()
         {
-            m_HasDraw = false;
-            m_Segments.Clear();
-            m_Bounds = new Bounds3(float.MaxValue, float.MinValue);
+            m_HasBelonging = false;
+            m_HasPreview = false;
+            m_BelongingSegments.Clear();
+            m_PreviewSegments.Clear();
+            m_BelongingBounds = new Bounds3(float.MaxValue, float.MinValue);
+            m_PreviewBounds = new Bounds3(float.MaxValue, float.MinValue);
+            m_HoveredEndHandle = Entity.Null;
+            m_PreviewDrawColor = HoverPreviewColor;
 
             if (m_ToolSystem.activeTool != m_Tool)
             {
                 return;
             }
 
-            var selected = m_Controller.SelectedAggregation?.Value ?? Entity.Null;
-            Entity drawAggregate = selected;
-            m_DrawColor = BelongingColor;
-            bool drawEndNodes = true;
-
-            if (drawAggregate == Entity.Null)
+            EnsureMaterial();
+            if (m_BelongingMaterial == null)
             {
-                if (!TryResolveHoveredAggregate(out drawAggregate))
+                return;
+            }
+
+            var selected = m_Controller.SelectedAggregation?.Value ?? Entity.Null;
+            m_HoveredEndHandle = m_Tool.HoveredDragHandle;
+
+            if (selected == Entity.Null)
+            {
+                // Pick preview: hovered Aggregate in #006600, no end handles.
+                if (!TryResolveHoveredAggregate(out Entity hoverAggregate)
+                    || !EntityManager.TryGetBuffer(hoverAggregate, true, out DynamicBuffer<AggregateElement> hoverElements)
+                    || hoverElements.Length == 0)
                 {
                     return;
                 }
 
-                m_DrawColor = HoverPreviewColor;
-                drawEndNodes = false;
+                m_PreviewDrawColor = HoverPreviewColor;
+                BuildRouteSegments(hoverAggregate, hoverElements, m_PreviewSegments, ref m_PreviewBounds, drawEndNodes: false);
+                m_HasPreview = m_PreviewSegments.Length > 0;
+                return;
             }
 
-            if (!EntityManager.TryGetBuffer(drawAggregate, true, out DynamicBuffer<AggregateElement> elements)
+            if (!EntityManager.TryGetBuffer(selected, true, out DynamicBuffer<AggregateElement> elements)
                 || elements.Length == 0)
             {
                 return;
             }
 
-            EnsureMaterial();
-            if (m_Material == null)
+            // Belonging membership (#00BB00) + #00FF00 end handles.
+            BuildRouteSegments(selected, elements, m_BelongingSegments, ref m_BelongingBounds, drawEndNodes: true);
+            m_HasBelonging = m_BelongingSegments.Length > 0;
+
+            // Preview layer: drag path (#00FF00) or hovered non-member (#006600).
+            BuildHighlightPreview(selected);
+        }
+
+        /// <summary>
+        /// Preview layer: live endpoint-drag path in #00FF00, else hovered non-member segment in #006600.
+        /// </summary>
+        private void BuildHighlightPreview(Entity selected)
+        {
+            if (m_Tool.IsEndpointDragging)
+            {
+                m_PreviewDrawColor = HighlightColor;
+                var path = m_Tool.PreviewPathEdges;
+                if (path == null || path.Count == 0)
+                {
+                    return;
+                }
+
+                for (int i = 0; i < path.Count; i++)
+                {
+                    AddEdgeSegment(path[i], m_PreviewSegments, ref m_PreviewBounds);
+                }
+
+                SaturateOpacities(m_PreviewSegments);
+                m_HasPreview = m_PreviewSegments.Length > 0;
+                return;
+            }
+
+            // Prefer end-handle hover feedback over non-member segment wash.
+            if (m_HoveredEndHandle != Entity.Null)
             {
                 return;
             }
 
-            BuildRouteSegments(drawAggregate, elements, drawEndNodes);
-            m_HasDraw = m_Segments.Length > 0;
+            Entity hoveredEdge = m_Tool.HoveredEdge;
+            if (hoveredEdge == Entity.Null
+                || !EntityManager.TryGetComponent(hoveredEdge, out Aggregated aggregated)
+                || aggregated.m_Aggregate == selected
+                || aggregated.m_Aggregate == Entity.Null)
+            {
+                return;
+            }
+
+            m_PreviewDrawColor = HoverPreviewColor;
+            AddEdgeSegment(hoveredEdge, m_PreviewSegments, ref m_PreviewBounds);
+            SaturateOpacities(m_PreviewSegments);
+            m_HasPreview = m_PreviewSegments.Length > 0;
         }
 
-        private void BuildRouteSegments(Entity aggregate, DynamicBuffer<AggregateElement> elements, bool drawEndNodes)
+        private void BuildRouteSegments(
+            Entity aggregate,
+            DynamicBuffer<AggregateElement> elements,
+            NativeList<SegmentData> dest,
+            ref Bounds3 bounds,
+            bool drawEndNodes)
         {
             var nodeDegrees = new NativeHashMap<Entity, int>(elements.Length * 2, Allocator.Temp);
             try
@@ -200,14 +285,14 @@ namespace BelzontAdr
                     }
 
                     float2 offset = new float2(distance, distance + length);
-                    int segmentIndex = AddSegment(bezier, offset, opacity, broken: 0f);
+                    int segmentIndex = AddSegment(dest, ref bounds, bezier, offset, opacity, broken: 0f);
                     distance = offset.y;
 
                     if (prevSegmentIndex >= 0 && segmentIndex >= 0)
                     {
                         // RouteBufferSystem joint size-factor match between consecutive segments.
-                        ref SegmentData prev = ref m_Segments.ElementAt(prevSegmentIndex);
-                        ref SegmentData cur = ref m_Segments.ElementAt(segmentIndex);
+                        ref SegmentData prev = ref dest.ElementAt(prevSegmentIndex);
+                        ref SegmentData cur = ref dest.ElementAt(segmentIndex);
                         float joint = math.max(prev.m_SizeFactor.z, cur.m_SizeFactor.x);
                         prev.m_SizeFactor.z = joint;
                         cur.m_SizeFactor.x = joint;
@@ -217,13 +302,106 @@ namespace BelzontAdr
                     prevSegmentIndex = segmentIndex;
                 }
 
-                DrawNodeMarkers(elements, nodeDegrees, drawEndNodes);
-
-                // RouteBufferSystem saturates opacity after joint pass.
-                for (int s = 0; s < m_Segments.Length; s++)
+                if (drawEndNodes)
                 {
-                    ref SegmentData seg = ref m_Segments.ElementAt(s);
-                    seg.m_Opacity = math.saturate(seg.m_Opacity);
+                    DrawNodeMarkers(elements, nodeDegrees, drawEndNodes: true);
+                }
+
+                SaturateOpacities(dest);
+            }
+            finally
+            {
+                nodeDegrees.Dispose();
+            }
+        }
+
+        private void AddEdgeSegment(Entity edgeEntity, NativeList<SegmentData> dest, ref Bounds3 bounds)
+        {
+            if (!EntityManager.TryGetComponent(edgeEntity, out Curve curve)
+                || !EntityManager.TryGetComponent(edgeEntity, out Edge edge))
+            {
+                return;
+            }
+
+            Bezier4x3 bezier = curve.m_Bezier;
+            SnapBezierEndsToNodes(ref bezier, edge, inverted: false);
+            float length = MathUtils.Length(bezier);
+            if (length < 0.01f)
+            {
+                return;
+            }
+
+            AddSegment(dest, ref bounds, bezier, new float2(0f, length), new float2(1f, 1f), broken: 0f);
+        }
+
+        private static void SaturateOpacities(NativeList<SegmentData> segments)
+        {
+            for (int s = 0; s < segments.Length; s++)
+            {
+                ref SegmentData seg = ref segments.ElementAt(s);
+                seg.m_Opacity = math.saturate(seg.m_Opacity);
+            }
+        }
+
+        /// <summary>
+        /// World diameter of selected end / drag-handle circles (matches Overlay <c>DrawCircle</c>).
+        /// Fallback when route material size is not ready yet.
+        /// </summary>
+        public float EndHandleDiameter
+        {
+            get
+            {
+                float baseSize = m_RouteSize.x * (4f / 3f);
+                return baseSize < 0.01f ? 8f : baseSize * 2f;
+            }
+        }
+
+        /// <summary>
+        /// Nodes that show full-size drag circles for the selected Aggregate
+        /// (chain termini + any leftover degree-1 nodes).
+        /// </summary>
+        public void CollectDragHandleNodes(Entity aggregate, HashSet<Entity> dest)
+        {
+            if (dest == null
+                || aggregate == Entity.Null
+                || !EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<AggregateElement> elements)
+                || elements.Length == 0)
+            {
+                return;
+            }
+
+            var nodeDegrees = new NativeHashMap<Entity, int>(elements.Length * 2, Allocator.Temp);
+            try
+            {
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    if (!EntityManager.TryGetComponent(elements[i].m_Edge, out Edge edge))
+                    {
+                        continue;
+                    }
+
+                    IncrementDegree(ref nodeDegrees, edge.m_Start);
+                    IncrementDegree(ref nodeDegrees, edge.m_End);
+                }
+
+                Entity start = GetChainStartNode(elements);
+                Entity end = GetChainEndNode(elements);
+                if (start != Entity.Null)
+                {
+                    dest.Add(start);
+                }
+
+                if (end != Entity.Null)
+                {
+                    dest.Add(end);
+                }
+
+                foreach (var pair in nodeDegrees)
+                {
+                    if (pair.Value == 1)
+                    {
+                        dest.Add(pair.Key);
+                    }
                 }
             }
             finally
@@ -236,21 +414,21 @@ namespace BelzontAdr
         /// Absolute Overlay circles at node height.
         /// End / drag handles: AggregateElement chain termini (always when selected — including loops).
         /// Joint pads: same DrawCircle path at half end diameter on multi-edge nodes.
+        /// Hovered end-handle uses a brighter, larger circle.
         /// </summary>
         private void DrawNodeMarkers(
             DynamicBuffer<AggregateElement> elements,
             NativeHashMap<Entity, int> nodeDegrees,
             bool drawEndNodes)
         {
-            // Highlighted route draw uses size.x *= 4/3; end handles are 2× that, joints half of ends.
-            float baseSize = m_RouteSize.x * (4f / 3f);
-            if (baseSize < 0.01f)
+            float endSize = EndHandleDiameter;
+            if (endSize < 0.01f)
             {
                 return;
             }
 
-            float endSize = baseSize * 2f;
             float jointSize = endSize * 0.5f;
+            float hoverSize = endSize * 1.35f;
 
             JobHandle dependencies;
             OverlayRenderSystem.Buffer buffer = m_OverlayRenderSystem.GetBuffer(out dependencies);
@@ -267,7 +445,11 @@ namespace BelzontAdr
                     {
                         if (endEntity != Entity.Null && EntityManager.TryGetComponent(endEntity, out Node endNode))
                         {
-                            buffer.DrawCircle(m_DrawColor, endNode.m_Position, endSize);
+                            bool hovered = endEntity == m_HoveredEndHandle;
+                            buffer.DrawCircle(
+                                hovered ? EndHandleHoverColor : HighlightColor,
+                                endNode.m_Position,
+                                hovered ? hoverSize : endSize);
                         }
                     }
                 }
@@ -281,13 +463,26 @@ namespace BelzontAdr
 
                     if (pair.Value >= 2)
                     {
-                        buffer.DrawCircle(m_DrawColor, node.m_Position, jointSize);
+                        buffer.DrawCircle(BelongingColor, node.m_Position, jointSize);
                     }
                     else if (drawEndNodes && pair.Value == 1)
                     {
                         // Extra dead-end not captured as buffer terminus.
-                        buffer.DrawCircle(m_DrawColor, node.m_Position, endSize);
+                        bool hovered = pair.Key == m_HoveredEndHandle;
+                        buffer.DrawCircle(
+                            hovered ? EndHandleHoverColor : HighlightColor,
+                            node.m_Position,
+                            hovered ? hoverSize : endSize);
                     }
+                }
+
+                // Dragging toward a non-handle node: still show hover feedback at that tip.
+                if (m_HoveredEndHandle != Entity.Null
+                    && !endHandles.Contains(m_HoveredEndHandle)
+                    && (!nodeDegrees.TryGetValue(m_HoveredEndHandle, out int deg) || deg != 1)
+                    && EntityManager.TryGetComponent(m_HoveredEndHandle, out Node hoverNode))
+                {
+                    buffer.DrawCircle(EndHandleHoverColor, hoverNode.m_Position, hoverSize);
                 }
             }
             finally
@@ -322,7 +517,13 @@ namespace BelzontAdr
         }
 
         /// <summary>Exact copy of <c>RouteBufferSystem.AddSegment</c> curve matrix packing (non-shared path).</summary>
-        private int AddSegment(Bezier4x3 curve, float2 offset, float2 opacity, float broken)
+        private static int AddSegment(
+            NativeList<SegmentData> dest,
+            ref Bounds3 bounds,
+            Bezier4x3 curve,
+            float2 offset,
+            float2 opacity,
+            float broken)
         {
             float3 mid = math.lerp(curve.a, curve.d, 0.5f);
             var value = new SegmentData
@@ -340,22 +541,62 @@ namespace BelzontAdr
                 m_DividedOpacity = new float2(1f, 1f),
                 m_Broken = broken
             };
-            int index = m_Segments.Length;
-            m_Segments.Add(value);
-            m_Bounds |= MathUtils.Bounds(curve);
+            int index = dest.Length;
+            dest.Add(value);
+            bounds |= MathUtils.Bounds(curve);
             return index;
         }
 
         private void Render(ScriptableRenderContext context, List<Camera> cameras)
         {
-            if (!m_HasDraw || m_Segments.Length == 0 || m_Material == null)
+            if ((!m_HasBelonging && !m_HasPreview) || m_BelongingMaterial == null)
             {
                 return;
             }
 
             EnsureMesh();
-            EnsureArgsBuffer();
-            UploadSegments();
+
+            if (m_HasBelonging)
+            {
+                DrawLayer(
+                    cameras,
+                    m_BelongingSegments,
+                    ref m_BelongingBuffer,
+                    ref m_BelongingArgsBuffer,
+                    m_BelongingBounds,
+                    m_BelongingMaterial,
+                    BelongingColor);
+            }
+
+            if (m_HasPreview && m_PreviewMaterial != null)
+            {
+                DrawLayer(
+                    cameras,
+                    m_PreviewSegments,
+                    ref m_PreviewBuffer,
+                    ref m_PreviewArgsBuffer,
+                    m_PreviewBounds,
+                    m_PreviewMaterial,
+                    m_PreviewDrawColor);
+            }
+        }
+
+        private void DrawLayer(
+            List<Camera> cameras,
+            NativeList<SegmentData> segments,
+            ref ComputeBuffer buffer,
+            ref ComputeBuffer argsBuffer,
+            Bounds3 layerBounds,
+            Material material,
+            Color layerColor)
+        {
+            if (segments.Length == 0)
+            {
+                return;
+            }
+
+            UploadSegments(segments, ref buffer);
+            EnsureArgsBuffer(ref argsBuffer);
 
             uint indexCount = m_Mesh.GetIndexCount(0);
             uint indexStart = m_Mesh.GetIndexStart(0);
@@ -363,23 +604,23 @@ namespace BelzontAdr
 
             m_ArgsArray.Clear();
             m_ArgsArray.Add(indexCount);
-            m_ArgsArray.Add((uint)m_Segments.Length);
+            m_ArgsArray.Add((uint)segments.Length);
             m_ArgsArray.Add(indexStart);
             m_ArgsArray.Add(baseVertex);
             m_ArgsArray.Add(0u);
-            m_ArgsBuffer.SetData(m_ArgsArray, 0, 0, m_ArgsArray.Count);
+            argsBuffer.SetData(m_ArgsArray, 0, 0, m_ArgsArray.Count);
 
             // Highlighted route style (opaque + slightly wider).
-            var color = m_DrawColor;
+            var color = layerColor;
             color.a = 1f;
             Vector4 size = m_RouteSize;
             size.x *= 1.3333334f;
-            m_Material.renderQueue = m_OriginalRenderQueue + 1;
-            m_Material.SetBuffer(RouteSegmentBufferId, m_SegmentBuffer);
-            m_Material.SetColor(RouteColorId, color);
-            m_Material.SetVector(RouteSizeId, size);
+            material.renderQueue = m_OriginalRenderQueue + 1;
+            material.SetBuffer(RouteSegmentBufferId, buffer);
+            material.SetColor(RouteColorId, color);
+            material.SetVector(RouteSizeId, size);
 
-            Bounds bounds = RenderingUtils.ToBounds(m_Bounds);
+            Bounds bounds = RenderingUtils.ToBounds(layerBounds);
             bounds.Expand(size.x);
 
             foreach (Camera camera in cameras)
@@ -389,9 +630,9 @@ namespace BelzontAdr
                     Graphics.DrawMeshInstancedIndirect(
                         m_Mesh,
                         0,
-                        m_Material,
+                        material,
                         bounds,
-                        m_ArgsBuffer,
+                        argsBuffer,
                         0,
                         null,
                         ShadowCastingMode.Off,
@@ -402,42 +643,42 @@ namespace BelzontAdr
             }
         }
 
-        private unsafe void UploadSegments()
+        private unsafe void UploadSegments(NativeList<SegmentData> segments, ref ComputeBuffer buffer)
         {
-            int count = m_Segments.Length;
+            int count = segments.Length;
             int stride = UnsafeUtility.SizeOf<SegmentData>();
-            if (m_SegmentBuffer != null && (m_SegmentBuffer.count != count || m_SegmentBuffer.stride != stride))
+            if (buffer != null && (buffer.count != count || buffer.stride != stride))
             {
-                m_SegmentBuffer.Release();
-                m_SegmentBuffer = null;
+                buffer.Release();
+                buffer = null;
             }
 
-            if (m_SegmentBuffer == null)
+            if (buffer == null)
             {
                 // Exact Game path: new ComputeBuffer(length, sizeof(SegmentData)) — default buffer type.
-                m_SegmentBuffer = new ComputeBuffer(count, stride);
-                m_SegmentBuffer.name = "ADR RoadGrouping route segment buffer";
+                buffer = new ComputeBuffer(count, stride);
+                buffer.name = "ADR RoadGrouping route segment buffer";
             }
 
             NativeArray<SegmentData> data = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<SegmentData>(
-                m_Segments.GetUnsafeReadOnlyPtr(), count, Allocator.None);
-            m_SegmentBuffer.SetData(data);
+                segments.GetUnsafeReadOnlyPtr(), count, Allocator.None);
+            buffer.SetData(data);
         }
 
-        private void EnsureArgsBuffer()
+        private static void EnsureArgsBuffer(ref ComputeBuffer argsBuffer)
         {
-            if (m_ArgsBuffer != null)
+            if (argsBuffer != null)
             {
                 return;
             }
 
-            m_ArgsBuffer = new ComputeBuffer(5, 4, ComputeBufferType.IndirectArguments);
-            m_ArgsBuffer.name = "ADR RoadGrouping route args buffer";
+            argsBuffer = new ComputeBuffer(5, 4, ComputeBufferType.IndirectArguments);
+            argsBuffer.name = "ADR RoadGrouping route args buffer";
         }
 
         private void EnsureMaterial()
         {
-            if (m_Material != null || m_RouteConfigQuery.IsEmptyIgnoreFilter)
+            if (m_BelongingMaterial != null || m_RouteConfigQuery.IsEmptyIgnoreFilter)
             {
                 return;
             }
@@ -449,9 +690,11 @@ namespace BelzontAdr
                 return;
             }
 
-            m_Material = new Material(routePrefab.m_Material);
-            m_Material.name = "ADR RoadGrouping Routes (" + routePrefab.name + ")";
-            m_OriginalRenderQueue = m_Material.renderQueue;
+            m_BelongingMaterial = new Material(routePrefab.m_Material);
+            m_BelongingMaterial.name = "ADR RoadGrouping Routes belonging (" + routePrefab.name + ")";
+            m_PreviewMaterial = new Material(routePrefab.m_Material);
+            m_PreviewMaterial.name = "ADR RoadGrouping Routes preview (" + routePrefab.name + ")";
+            m_OriginalRenderQueue = m_BelongingMaterial.renderQueue;
             m_RouteSize = new Vector4(routePrefab.m_Width, routePrefab.m_Width * 0.25f, routePrefab.m_SegmentLength, 0f);
         }
 

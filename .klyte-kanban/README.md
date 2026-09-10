@@ -1,4 +1,4 @@
-<!-- kk-workspace-version: 1.4.3 -->
+<!-- kk-workspace-version: 1.4.4 -->
 # Task project workspace  - Klyte Kanban CLI format
 
 This folder is used to organize all actionable improvement tasks to be done on the project.
