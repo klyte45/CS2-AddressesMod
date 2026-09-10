@@ -28,11 +28,11 @@ Phase T2. Log-only membership stubs: Ctrl+LMB on segment toggles; LMB-drag on te
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Ctrl+LMB on hovered segment while selected emits Log.Info toggle stub with edge and aggregate ids
-- [ ] LMB press/drag starts only on terminal end-nodes (end-circle hit)
-- [ ] Path prefers same vanilla Aggregate as prior step; hops to adjacent Aggregate when none share
-- [ ] One info log per distinct segment that would be added or removed
-- [ ] Plain LMB does not reselect while group focused; RMB cancel clears
+- [x] Ctrl+LMB on hovered segment while selected emits Log.Info toggle stub with edge and aggregate ids
+- [x] LMB press/drag starts only on terminal end-nodes (end-circle hit)
+- [x] Path prefers same vanilla Aggregate as prior step; hops to adjacent Aggregate when none share
+- [x] One info log per distinct segment that would be added or removed
+- [x] Plain LMB does not reselect while group focused; RMB cancel clears
 
 ---
 
@@ -45,6 +45,9 @@ Phase T2. Log-only membership stubs: Ctrl+LMB on segment toggles; LMB-drag on te
 5. LMB on end-handle circle (chain termini + degree-1; radius = EndHandleDiameter/2) starts endpoint drag; 0-1 BFS prefers prior-step Aggregate then hops; on release one info log per distinct would-add or would-remove edge.
 6. Overlay exposes EndHandleDiameter + CollectDragHandleNodes for hit testing.
 7. Overlay dual layer: while selected, #006600 wash on hovered non-selected Aggregate; live #006600 path ribbons during endpoint drag; brighter/larger end-handle circle on HoveredDragHandle. Separate belonging/preview materials+buffers so deferred draws do not clobber.
+8. Mixed endpoint-drag paths classify member edges as would-remove and non-members as would-add; remove ribbons #FF8800, add #00BB00.
+9. Double-click member segment pins fixed membership (#FFFF00 + mid square); BFS cannot traverse the pin; at most one pin, cleared with selection.
+10. No dedicated FixMembership ProxyAction — double-click timing on Apply.
 
 ---
 
