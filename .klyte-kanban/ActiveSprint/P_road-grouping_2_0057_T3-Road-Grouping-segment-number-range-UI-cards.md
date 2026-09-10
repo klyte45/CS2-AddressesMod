@@ -1,7 +1,7 @@
+**Start time:** 2026-09-10 20:41 -0300
 # [0057] T3 Road Grouping segment number-range UI cards
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/09-road-grouping-tool-spec.md
