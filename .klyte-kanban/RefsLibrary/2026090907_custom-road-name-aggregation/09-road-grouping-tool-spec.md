@@ -76,11 +76,12 @@ AdrRoadGroupingTool  ──writes──►  AdrRoadGroupingController
 | Gesture | When | Effect (v0) |
 |---------|------|-------------|
 | **Plain LMB** | `selectedAggregation` **empty**; hovered eligible edge | Set `selectedAggregation` to that edge’s Aggregate Entity |
-| **Plain LMB** | Group already selected | **No-op** on edges (edit gestures only). To pick another group: RMB cancel, then plain LMB |
+| **Plain LMB** | Group already selected | **No-op** on edges (edit gestures only). To pick another group: RMB/Esc clear selection, then plain LMB |
 | **Ctrl+LMB** | Selected; hit **segment** | `Log.Info` membership toggle stub (edge + aggregate ids) |
 | **LMB press/drag** | Selected; hit **terminal end-node** (green circle) | Endpoint drag stub; path walk; **one info log per distinct segment** that would be added or removed |
-| **RMB** | Anytime tool active | Cancel (WE-style): clear selection and/or exit tool |
-| Esc / `RequestDisable` | | Same as cancel / leave tool |
+| **RMB** / **Esc** | Aggregation selected | Clear selection only (stay in tool) |
+| **RMB** / **Esc** | No aggregation selected | Exit tool (`RequestDisable`) |
+| `RequestDisable` / tool stop | Anytime | Clear selection and leave tool |
 
 ### Hit-target disambiguation
 

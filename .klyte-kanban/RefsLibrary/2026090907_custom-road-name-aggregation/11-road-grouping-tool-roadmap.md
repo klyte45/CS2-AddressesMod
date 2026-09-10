@@ -11,7 +11,7 @@ Ship a playable **Road Grouping** tool scaffolded like BelzontWE, with opaque ov
 | Phase | Outcome | Depends on |
 |-------|---------|------------|
 | **T0** | Scaffold after WE: `AdrRoadGroupingTool` + `AdrRoadGroupingController` + `toolID` `K45_ADR_AdrRoadGroupingTool` + `Select` / `RequestDisable` + VUIO `useToolOptionsVisible` / `MouseToolOptions` panel + net raycast + Aggregated hover filter + plain LMB → `selectedAggregation` (clear on stop) | Commons `IBelzontToolSystem`; WE as reference |
-| **T1** | `AdrRoadGroupingOverlayRenderSystem` — opaque **#00FF00** centerlines + end circles from vanilla Aggregate; **#006600** when remainder exists; not `Highlighted` | T0 |
+| **T1** | `AdrRoadGroupingOverlayRenderSystem` — opaque **#00FF00** centerlines + end circles from selected Aggregate; **#006600** pick-preview of hovered Aggregate when selection empty; **#006600** remainder when subset exists; not `Highlighted` | T0 |
 | **T2** | Ctrl+LMB segment toggle **log**; endpoint LMB-drag with Aggregate-preference path + **per-segment logs**; hit-target disambiguation (segment vs end-node) | T0–T1 |
 | **T3** | Segment number-range helper (ADR rules / GetAddress family) + MultiUI binding + React cards: 120% viewport cull, camera-delta / **8-frame** throttle, aggregation-change invalidate, stable sort, frontend cache + tool-options toggle | T0 (+ selection); can parallel T2 |
 | **T4** | Swap overlay/selection source to ADR thin contract ([04](04-parallel-system-design-notes.md)); keep same tool/controller surface and `selectedAggregation` field | Thin contract + T0–T1 |
@@ -57,7 +57,8 @@ Register overlay in mod `DoOnCreateWorld` Rendering phase before `OverlayRenderS
 ### T1
 
 - With selection: opaque green centerlines + end circles; no Highlighted wash for membership.
-- Inactive tool / null selection → no draws.
+- With empty selection: #006600 pick-preview of the hovered Aggregated edge’s Aggregate; no hover → no draws.
+- Inactive tool → no draws.
 
 ### T2
 

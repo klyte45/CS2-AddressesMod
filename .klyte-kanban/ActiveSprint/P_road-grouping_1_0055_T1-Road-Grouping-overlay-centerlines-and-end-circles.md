@@ -28,13 +28,13 @@ Phase T1. Draw selected Aggregate membership with OverlayRenderSystem.Buffer —
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrRoadGroupingOverlayRenderSystem runs in Rendering before OverlayRenderSystem
-- [ ] When tool active and selectedAggregation set: opaque #00FF00 centerlines on AggregateElement edges
-- [ ] Terminal end-nodes get #00FF00 DrawCircle
-- [ ] No Highlighted used for membership layer
-- [ ] Inactive tool draws nothing
-- [ ] When tool active and selection null: hovered Aggregated edge's Aggregate draws opaque #006600 centerlines (pick preview)
-- [ ] Hover preview clears when nothing eligible is hovered
+- [x] AdrRoadGroupingOverlayRenderSystem runs in Rendering before OverlayRenderSystem
+- [x] When tool active and selectedAggregation set: opaque #00FF00 centerlines on AggregateElement edges
+- [x] Terminal end-nodes get #00FF00 DrawCircle
+- [x] No Highlighted used for membership layer
+- [x] Inactive tool draws nothing
+- [x] When tool active and selection null: hovered Aggregated edge's Aggregate draws opaque #006600 centerlines (pick preview)
+- [x] Hover preview clears when nothing eligible is hovered
 
 ---
 
@@ -47,6 +47,7 @@ Phase T1. Draw selected Aggregate membership with OverlayRenderSystem.Buffer —
 5. #006600 only when remainder set exists (may be unused until subset membership)
 6. AdrRoadGroupingOverlayRenderSystem draws #00FF00 centerlines + degree-1 end circles from AggregateElement; gated on active Road Grouping tool + selection. Awaiting in-game validation before closing.
 7. Pick preview: no selection + HoveredEdge -> Aggregated.m_Aggregate drawn #006600; selection still #00FF00 + end circles. Same FlattenBezierFacingUp.
+8. Closed after playtest: route GPU ribbons (#00FF00/#006600), Overlay DrawCircle end handles (chain termini + degree-1) and half-size joint circles; cancel clears then exits. No Highlighted.
 
 ---
 
