@@ -65,6 +65,7 @@ Register overlay in mod `DoOnCreateWorld` Rendering phase before `OverlayRenderS
 - Ctrl+LMB on segment → one info log (toggle intent).
 - LMB-drag from terminal node → path prefers same Aggregate, hops when needed; one log per distinct would-add/remove segment.
 - Mixed pivot (path walks tip then hops): both would-remove (members on path) and would-add (non-members); remove painted **#FF8800**, add **#00BB00**.
+- Double-click member → fixed pin (**#FFFF00** + mid square); pathfinding cannot traverse it; only one pin.
 
 ### T3
 

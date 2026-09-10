@@ -78,20 +78,33 @@ AdrRoadGroupingTool  ──writes──►  AdrRoadGroupingController
 | **Plain LMB** | `selectedAggregation` **empty**; hovered eligible edge | Set `selectedAggregation` to that edge’s Aggregate Entity |
 | **Plain LMB** | Group already selected | **No-op** on edges (edit gestures only). To pick another group: RMB/Esc clear selection, then plain LMB |
 | **Ctrl+LMB** | Selected; hit **segment** | `Log.Info` membership toggle stub (edge + aggregate ids) |
+| **Double-click LMB** | Selected; hit **member segment** | Toggle **fixed membership** pin (one at a time; replace on another member; same segment unfixes). Detected in-tool on Apply |
 | **LMB press/drag** | Selected; hit **terminal end-node** (green circle) | Endpoint drag stub; path walk; **one info log per distinct segment** that would be added or removed |
-| **RMB** / **Esc** | Aggregation selected | Clear selection only (stay in tool) |
+| **RMB** / **Esc** | Aggregation selected | Clear selection only (stay in tool); clears fixed pin |
 | **RMB** / **Esc** | No aggregation selected | Exit tool (`RequestDisable`) |
-| `RequestDisable` / tool stop | Anytime | Clear selection and leave tool |
+| `RequestDisable` / tool stop | Anytime | Clear selection / fixed pin and leave tool |
 
 ### Hit-target disambiguation
 
-While a group is focused, apply/LMB is shared by Ctrl+toggle and endpoint drag:
+While a group is focused, apply/LMB is shared by Ctrl+toggle, double-click fix, and endpoint drag:
 
-1. **Ctrl+LMB** + raycast hit on **segment** → toggle stub.
-2. **LMB** without Ctrl on **terminal end-node** (end-circle hit radius) → start/continue endpoint drag.
-3. Otherwise plain LMB does nothing while selected.
+1. **Double-click LMB** + raycast hit on **member segment** → toggle fixed membership pin.
+2. **Ctrl+LMB** + raycast hit on **segment** → toggle stub.
+3. **LMB** without Ctrl on **terminal end-node** (end-circle hit radius) → start/continue endpoint drag.
+4. Otherwise plain LMB does nothing while selected.
 
 Document end-circle vs edge hit-testing radii in implementation; playtest in T2.
+
+## Fixed membership pin
+
+At most **one** member edge may be pinned while a group is focused:
+
+- Double-click a member → pin (yellow ribbon + yellow mid-curve square).
+- Double-click another member → replace the pin.
+- Double-click the pinned member → unpin.
+- Cleared when selection clears / tool exits.
+- Endpoint-drag pathfinding **cannot traverse** the pinned edge, so shrink/pivot cannot remove past it.
+- Classify never puts the pinned edge in would-remove.
 
 ## Endpoint drag path algorithm
 
@@ -102,10 +115,11 @@ While dragging toward a hovered **edge-node** (not the edge itself):
 1. Walk connected net edges step by step.
 2. **Prefer** a connected edge whose `Aggregated.m_Aggregate` equals the **previous step’s** Aggregate.
 3. If **no** connected candidate shares that Aggregate, **hop** onto a connected edge belonging to a **different** Aggregate.
-4. Classify every distinct path edge vs focused membership:
+4. If a **fixed membership** pin exists, **do not traverse** that edge.
+5. Classify every distinct path edge vs focused membership:
    - **non-member** → would-**add**
-   - **member** → would-**remove** (tip shrink, including when the new direction pivots through the Aggregate before the old end — mixed add+remove on one drag)
-5. On release (and live preview): emit **one info log per distinct segment** that would be added or removed; paint would-add vs would-remove separately (see overlay colors).
+   - **member** (and not fixed) → would-**remove** (tip shrink, including when the new direction pivots through the Aggregate before the old end — mixed add+remove on one drag)
+6. On release (and live preview): emit **one info log per distinct segment** that would be added or removed; paint would-add vs would-remove separately (see overlay colors).
 
 v0 does **not** mutate membership — logs only.
 
@@ -156,6 +170,7 @@ When `selectedAggregation` is set and Road Grouping tool is `activeTool`:
 - Hovered non-member segment (selection set): **#004400**.
 - Endpoint-drag would-**add** path: **#00BB00**.
 - Endpoint-drag would-**remove** path: **#FF8800**.
+- Fixed membership pin: **#FFFF00** ribbon + yellow **Plane** square at curve midpoint.
 
 No vanilla `Highlighted` for this feature.
 

@@ -44,7 +44,7 @@ This pack is **documentation only**. It does not ship product code or create Kan
 7. [07-membership-maintenance-edge-cases.md](07-membership-maintenance-edge-cases.md) — net remap + gap-fill continuity + edge-case matrix
 8. [08-association-tool-first-ux.md](08-association-tool-first-ux.md) — **start UX with net-only tool** + world draw + node controls; impact on epic order
 9. [09-road-grouping-tool-spec.md](09-road-grouping-tool-spec.md) — **Road Grouping** tool contract (WE scaffold, LMB gestures, stubs, number cards)
-10. [10-road-grouping-overlay-render-system.md](10-road-grouping-overlay-render-system.md) — opaque route-ribbon layer (#008800 base / #00BB00 highlights / #004400 preview / #FF8800 remove)
+10. [10-road-grouping-overlay-render-system.md](10-road-grouping-overlay-render-system.md) — opaque route-ribbon layer (#008800 base / #00BB00 highlights / #004400 preview / #FF8800 remove / #FFFF00 fixed)
 11. [11-road-grouping-tool-roadmap.md](11-road-grouping-tool-roadmap.md) — implementation phases T0–T5
 
 ## Success criteria (this research pack)

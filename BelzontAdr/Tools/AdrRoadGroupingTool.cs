@@ -38,6 +38,12 @@ namespace BelzontAdr
         /// <summary>Path edges already in focused membership — would be removed on release (tip shrink / pivot).</summary>
         public IReadOnlyList<Entity> PreviewRemoveEdges => m_PreviewRemoveEdges;
 
+        /// <summary>
+        /// At most one member edge pinned against endpoint-drag removal.
+        /// Double-click a member toggles / replaces it.
+        /// </summary>
+        public Entity FixedMembershipEdge { get; private set; }
+
         private ProxyAction m_ApplyAction;
         private ProxyAction m_CancelAction;
         private ProxyAction m_ToggleAction;
@@ -47,6 +53,9 @@ namespace BelzontAdr
         private bool m_Dragging;
         private Entity m_DragStartNode;
         private Entity m_DragHoverNode;
+        private Entity m_PendingFixEdge;
+        private float m_PendingFixTime;
+        private const float DoubleClickSeconds = 0.35f;
         private readonly HashSet<Entity> m_DragHandles = new();
         private readonly HashSet<Entity> m_MembershipEdges = new();
         private readonly List<Entity> m_PathEdges = new();
@@ -91,6 +100,7 @@ namespace BelzontAdr
             cancelAction.shouldBeEnabled = false;
             HoveredEdge = Entity.Null;
             HoveredDragHandle = Entity.Null;
+            ClearFixedMembership();
             ClearDrag();
             m_Controller.ClearSelection();
         }
@@ -103,6 +113,7 @@ namespace BelzontAdr
         public void RequestDisable()
         {
             ClearDrag();
+            ClearFixedMembership();
             m_Controller.ClearSelection();
             m_ToolSystem.activeTool = m_DefaultToolSystem;
         }
@@ -121,6 +132,7 @@ namespace BelzontAdr
             if (m_Controller.SelectedAggregation != null
                 && m_Controller.SelectedAggregation.Value != Entity.Null)
             {
+                ClearFixedMembership();
                 m_Controller.ClearSelection();
                 return;
             }
@@ -160,6 +172,16 @@ namespace BelzontAdr
             Entity selected = m_Controller.SelectedAggregation?.Value ?? Entity.Null;
             bool overUi = InputManager.instance.mouseOverUI;
             HoveredDragHandle = Entity.Null;
+
+            if (selected == Entity.Null)
+            {
+                ClearFixedMembership();
+            }
+            else if (FixedMembershipEdge != Entity.Null
+                     && !IsMemberEdge(FixedMembershipEdge, selected))
+            {
+                ClearFixedMembership();
+            }
 
             if (selected != Entity.Null && !overUi && collide)
             {
@@ -209,9 +231,11 @@ namespace BelzontAdr
                 return inputDeps;
             }
 
-            // Group focused: dedicated Ctrl+Apply binding toggles; plain Apply starts end-handle drag.
+            // Group focused: dedicated Ctrl+Apply binding toggles; plain Apply starts end-handle drag
+            // or double-clicks a member to pin/unpin fixed membership.
             if (m_ToggleAction.WasPressedThisFrame())
             {
+                ClearPendingFixClick();
                 if (eligibleEdge != Entity.Null
                     && EntityManager.HasComponent<Edge>(entity))
                 {
@@ -228,10 +252,40 @@ namespace BelzontAdr
 
             if (HoveredDragHandle != Entity.Null)
             {
+                ClearPendingFixClick();
                 BeginEndpointDrag(selected, HoveredDragHandle);
+                return inputDeps;
+            }
+
+            if (eligibleEdge != Entity.Null
+                && EntityManager.HasComponent<Edge>(eligibleEdge)
+                && IsMemberEdge(eligibleEdge, selected)
+                && IsDoubleClickOn(eligibleEdge))
+            {
+                ToggleFixedMembership(eligibleEdge, selected);
             }
 
             return inputDeps;
+        }
+
+        private bool IsDoubleClickOn(Entity edge)
+        {
+            float now = UnityEngine.Time.unscaledTime;
+            if (edge == m_PendingFixEdge && now - m_PendingFixTime <= DoubleClickSeconds)
+            {
+                ClearPendingFixClick();
+                return true;
+            }
+
+            m_PendingFixEdge = edge;
+            m_PendingFixTime = now;
+            return false;
+        }
+
+        private void ClearPendingFixClick()
+        {
+            m_PendingFixEdge = Entity.Null;
+            m_PendingFixTime = 0f;
         }
 
         private void RefreshLivePathPreview(Entity selectedAggregate)
@@ -339,19 +393,7 @@ namespace BelzontAdr
 
         private void LogToggleStub(Entity edge, Entity aggregate)
         {
-            bool currentlyMember = false;
-            if (EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<AggregateElement> elements))
-            {
-                for (int i = 0; i < elements.Length; i++)
-                {
-                    if (elements[i].m_Edge == edge)
-                    {
-                        currentlyMember = true;
-                        break;
-                    }
-                }
-            }
-
+            bool currentlyMember = IsMemberEdge(edge, aggregate);
             LogUtils.DoInfoLog(
                 "RoadGrouping membership toggle stub: edge={0}:{1} aggregate={2}:{3} would={4}",
                 edge.Index,
@@ -361,10 +403,60 @@ namespace BelzontAdr
                 currentlyMember ? "remove" : "add");
         }
 
+        private void ToggleFixedMembership(Entity edge, Entity aggregate)
+        {
+            if (FixedMembershipEdge == edge)
+            {
+                ClearFixedMembership();
+                LogUtils.DoInfoLog(
+                    "RoadGrouping fix membership: edge={0}:{1} aggregate={2}:{3} state=unfixed",
+                    edge.Index,
+                    edge.Version,
+                    aggregate.Index,
+                    aggregate.Version);
+                return;
+            }
+
+            FixedMembershipEdge = edge;
+            LogUtils.DoInfoLog(
+                "RoadGrouping fix membership: edge={0}:{1} aggregate={2}:{3} state=fixed",
+                edge.Index,
+                edge.Version,
+                aggregate.Index,
+                aggregate.Version);
+        }
+
+        public void ClearFixedMembership()
+        {
+            FixedMembershipEdge = Entity.Null;
+            ClearPendingFixClick();
+        }
+
+        private bool IsMemberEdge(Entity edge, Entity aggregate)
+        {
+            if (edge == Entity.Null
+                || aggregate == Entity.Null
+                || !EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<AggregateElement> elements))
+            {
+                return false;
+            }
+
+            for (int i = 0; i < elements.Length; i++)
+            {
+                if (elements[i].m_Edge == edge)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Split path into would-add (non-members) and would-remove (members).
         /// Mixed paths happen when the new tip pivots through the current Aggregate
         /// (walk back along the tip, then hop onto a different direction) — both lists apply.
+        /// Fixed membership edge is never removed.
         /// </summary>
         private void ClassifyPathMembership(
             List<Entity> pathEdges,
@@ -384,7 +476,10 @@ namespace BelzontAdr
 
                 if (m_MembershipEdges.Contains(edge))
                 {
-                    removeOut.Add(edge);
+                    if (edge != FixedMembershipEdge)
+                    {
+                        removeOut.Add(edge);
+                    }
                 }
                 else
                 {
@@ -461,6 +556,12 @@ namespace BelzontAdr
                 for (int i = 0; i < connected.Length; i++)
                 {
                     Entity edgeEntity = connected[i].m_Edge;
+                    // Fixed pin blocks traversal so endpoint drag cannot shrink past it.
+                    if (FixedMembershipEdge != Entity.Null && edgeEntity == FixedMembershipEdge)
+                    {
+                        continue;
+                    }
+
                     if (!EntityManager.TryGetComponent(edgeEntity, out Edge edge))
                     {
                         continue;

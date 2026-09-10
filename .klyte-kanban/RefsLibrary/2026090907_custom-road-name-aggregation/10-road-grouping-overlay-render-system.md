@@ -56,6 +56,7 @@ Synced to `AdrRoadGroupingOverlayRenderSystem` constants:
 | Hovered non-member (when selected) | **#004400**, same draw path, no end handles |
 | Pick preview (hover, no selection) | **#004400**, same draw path, no end handles |
 | Endpoint-drag would-remove | **#FF8800**, dedicated remove material/buffer |
+| Fixed membership pin | **#FFFF00** ribbon + Overlay `DrawCustomMesh` Plane square at mid-curve |
 | Remainder (non-belonging in same Aggregate context when subset exists) | **#004400** |
 
 ## Relation
