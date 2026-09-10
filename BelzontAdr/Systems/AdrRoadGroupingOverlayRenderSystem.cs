@@ -38,9 +38,10 @@ namespace BelzontAdr
             public float m_Broken;
         }
 
-        private static readonly Color BelongingColor = new(0f, 0x88 / 255f, 0f, 1f); 
-        private static readonly Color HighlightColor = new(0f, 0xBB / 255f, 0f, 1f); 
-        private static readonly Color HoverPreviewColor = new(0f, 0x44/ 255f, 0f, 1f); 
+        private static readonly Color BelongingColor = new(0f, 0x88 / 255f, 0f, 1f);
+        private static readonly Color HighlightColor = new(0f, 0xBB / 255f, 0f, 1f);
+        private static readonly Color HoverPreviewColor = new(0f, 0x44 / 255f, 0f, 1f);
+        private static readonly Color RemovePreviewColor = new(1f, 0x88 / 255f, 0f, 1f); // #FF8800 would-remove
         private static readonly Color EndHandleHoverColor = new(0f, 1f, 0f, 1f);
 
         private ToolSystem m_ToolSystem;
@@ -55,19 +56,25 @@ namespace BelzontAdr
         private Mesh m_Mesh;
         private Material m_BelongingMaterial;
         private Material m_PreviewMaterial;
+        private Material m_RemoveMaterial;
         private int m_OriginalRenderQueue;
         private Vector4 m_RouteSize;
         private ComputeBuffer m_BelongingBuffer;
         private ComputeBuffer m_PreviewBuffer;
+        private ComputeBuffer m_RemoveBuffer;
         private ComputeBuffer m_BelongingArgsBuffer;
         private ComputeBuffer m_PreviewArgsBuffer;
+        private ComputeBuffer m_RemoveArgsBuffer;
         private readonly List<uint> m_ArgsArray = new(5);
         private NativeList<SegmentData> m_BelongingSegments;
         private NativeList<SegmentData> m_PreviewSegments;
+        private NativeList<SegmentData> m_RemoveSegments;
         private Bounds3 m_BelongingBounds;
         private Bounds3 m_PreviewBounds;
+        private Bounds3 m_RemoveBounds;
         private bool m_HasBelonging;
         private bool m_HasPreview;
+        private bool m_HasRemove;
         private Color m_PreviewDrawColor = HoverPreviewColor;
         private Entity m_HoveredEndHandle;
 
@@ -88,8 +95,10 @@ namespace BelzontAdr
             m_RouteConfigQuery = GetEntityQuery(ComponentType.ReadOnly<RouteConfigurationData>());
             m_BelongingSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
             m_PreviewSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
+            m_RemoveSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
             m_BelongingBounds = new Bounds3(float.MaxValue, float.MinValue);
             m_PreviewBounds = new Bounds3(float.MaxValue, float.MinValue);
+            m_RemoveBounds = new Bounds3(float.MaxValue, float.MinValue);
             RenderPipelineManager.beginContextRendering += Render;
         }
 
@@ -104,6 +113,11 @@ namespace BelzontAdr
             if (m_PreviewSegments.IsCreated)
             {
                 m_PreviewSegments.Dispose();
+            }
+
+            if (m_RemoveSegments.IsCreated)
+            {
+                m_RemoveSegments.Dispose();
             }
 
             if (m_Mesh != null)
@@ -121,10 +135,17 @@ namespace BelzontAdr
                 UnityEngine.Object.Destroy(m_PreviewMaterial);
             }
 
+            if (m_RemoveMaterial != null)
+            {
+                UnityEngine.Object.Destroy(m_RemoveMaterial);
+            }
+
             m_BelongingBuffer?.Release();
             m_PreviewBuffer?.Release();
+            m_RemoveBuffer?.Release();
             m_BelongingArgsBuffer?.Release();
             m_PreviewArgsBuffer?.Release();
+            m_RemoveArgsBuffer?.Release();
             base.OnDestroy();
         }
 
@@ -132,10 +153,13 @@ namespace BelzontAdr
         {
             m_HasBelonging = false;
             m_HasPreview = false;
+            m_HasRemove = false;
             m_BelongingSegments.Clear();
             m_PreviewSegments.Clear();
+            m_RemoveSegments.Clear();
             m_BelongingBounds = new Bounds3(float.MaxValue, float.MinValue);
             m_PreviewBounds = new Bounds3(float.MaxValue, float.MinValue);
+            m_RemoveBounds = new Bounds3(float.MaxValue, float.MinValue);
             m_HoveredEndHandle = Entity.Null;
             m_PreviewDrawColor = HoverPreviewColor;
 
@@ -155,7 +179,7 @@ namespace BelzontAdr
 
             if (selected == Entity.Null)
             {
-                // Pick preview: hovered Aggregate in #006600, no end handles.
+                // Pick preview: hovered Aggregate in hover-preview green, no end handles.
                 if (!TryResolveHoveredAggregate(out Entity hoverAggregate)
                     || !EntityManager.TryGetBuffer(hoverAggregate, true, out DynamicBuffer<AggregateElement> hoverElements)
                     || hoverElements.Length == 0)
@@ -175,35 +199,58 @@ namespace BelzontAdr
                 return;
             }
 
-            // Belonging membership (#00BB00) + #00FF00 end handles.
+            // Belonging membership + end handles.
             BuildRouteSegments(selected, elements, m_BelongingSegments, ref m_BelongingBounds, drawEndNodes: true);
             m_HasBelonging = m_BelongingSegments.Length > 0;
 
-            // Preview layer: drag path (#00FF00) or hovered non-member (#006600).
+            // Preview: drag add (highlight) + remove (orange), or hovered non-member.
             BuildHighlightPreview(selected);
         }
 
         /// <summary>
-        /// Preview layer: live endpoint-drag path in #00FF00, else hovered non-member segment in #006600.
+        /// Preview layer: endpoint-drag would-add / would-remove, else hovered non-member.
         /// </summary>
         private void BuildHighlightPreview(Entity selected)
         {
             if (m_Tool.IsEndpointDragging)
             {
-                m_PreviewDrawColor = HighlightColor;
-                var path = m_Tool.PreviewPathEdges;
-                if (path == null || path.Count == 0)
+                var addPath = m_Tool.PreviewAddEdges;
+                var removePath = m_Tool.PreviewRemoveEdges;
+                if ((addPath == null || addPath.Count == 0)
+                    && (removePath == null || removePath.Count == 0))
                 {
                     return;
                 }
 
-                for (int i = 0; i < path.Count; i++)
+                if (addPath != null)
                 {
-                    AddEdgeSegment(path[i], m_PreviewSegments, ref m_PreviewBounds);
+                    for (int i = 0; i < addPath.Count; i++)
+                    {
+                        AddEdgeSegment(addPath[i], m_PreviewSegments, ref m_PreviewBounds);
+                    }
+
+                    if (m_PreviewSegments.Length > 0)
+                    {
+                        SaturateOpacities(m_PreviewSegments);
+                        m_PreviewDrawColor = HighlightColor;
+                        m_HasPreview = true;
+                    }
                 }
 
-                SaturateOpacities(m_PreviewSegments);
-                m_HasPreview = m_PreviewSegments.Length > 0;
+                if (removePath != null)
+                {
+                    for (int i = 0; i < removePath.Count; i++)
+                    {
+                        AddEdgeSegment(removePath[i], m_RemoveSegments, ref m_RemoveBounds);
+                    }
+
+                    if (m_RemoveSegments.Length > 0)
+                    {
+                        SaturateOpacities(m_RemoveSegments);
+                        m_HasRemove = true;
+                    }
+                }
+
                 return;
             }
 
@@ -549,7 +596,7 @@ namespace BelzontAdr
 
         private void Render(ScriptableRenderContext context, List<Camera> cameras)
         {
-            if ((!m_HasBelonging && !m_HasPreview) || m_BelongingMaterial == null)
+            if ((!m_HasBelonging && !m_HasPreview && !m_HasRemove) || m_BelongingMaterial == null)
             {
                 return;
             }
@@ -566,6 +613,18 @@ namespace BelzontAdr
                     m_BelongingBounds,
                     m_BelongingMaterial,
                     BelongingColor);
+            }
+
+            if (m_HasRemove && m_RemoveMaterial != null)
+            {
+                DrawLayer(
+                    cameras,
+                    m_RemoveSegments,
+                    ref m_RemoveBuffer,
+                    ref m_RemoveArgsBuffer,
+                    m_RemoveBounds,
+                    m_RemoveMaterial,
+                    RemovePreviewColor);
             }
 
             if (m_HasPreview && m_PreviewMaterial != null)
@@ -694,6 +753,8 @@ namespace BelzontAdr
             m_BelongingMaterial.name = "ADR RoadGrouping Routes belonging (" + routePrefab.name + ")";
             m_PreviewMaterial = new Material(routePrefab.m_Material);
             m_PreviewMaterial.name = "ADR RoadGrouping Routes preview (" + routePrefab.name + ")";
+            m_RemoveMaterial = new Material(routePrefab.m_Material);
+            m_RemoveMaterial.name = "ADR RoadGrouping Routes remove (" + routePrefab.name + ")";
             m_OriginalRenderQueue = m_BelongingMaterial.renderQueue;
             m_RouteSize = new Vector4(routePrefab.m_Width, routePrefab.m_Width * 0.25f, routePrefab.m_SegmentLength, 0f);
         }

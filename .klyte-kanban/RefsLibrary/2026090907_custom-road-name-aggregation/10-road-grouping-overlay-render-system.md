@@ -24,9 +24,9 @@ Class remains `AdrRoadGroupingOverlayRenderSystem` (name historical); implementa
 | Class | `AdrRoadGroupingOverlayRenderSystem` |
 | Phase | `SystemUpdatePhase.Rendering` (`UpdateAt`) — builds segment list |
 | Draw | `RenderPipelineManager.beginContextRendering` (same as `RouteRenderSystem`) |
-| Material | Clone of `RouteConfigurationPrefab.m_CarPathVisualization.m_Material` |
+| Material | Clone of `RouteConfigurationPrefab.m_CarPathVisualization.m_Material` (belonging / preview / remove) |
 | Mesh | Exact copy of `RouteRenderSystem.EnsureMesh` (68 verts / 192 indices) |
-| Gate | Tool active + selected Aggregate → base `#00BB00` ribbons + `#00FF00` end handles / drag path + `#006600` hovered non-member; no selection + hover Aggregate → `#006600` |
+| Gate | Tool active + selected Aggregate → belonging ribbons + end handles + drag add/remove / non-member hover; no selection + hover Aggregate → pick-preview wash |
 
 ## Packing (mirror `RouteBufferSystem`)
 
@@ -46,13 +46,17 @@ Class remains `AdrRoadGroupingOverlayRenderSystem` (name historical); implementa
 
 ## Colors
 
+Synced to `AdrRoadGroupingOverlayRenderSystem` constants:
+
 | Layer | Color |
 |-------|-------|
-| Belonging (selected, base) | **#00BB00**, alpha 1, size × 1.333 (route style) |
-| Highlights (end handles, endpoint-drag path) | **#00FF00**, same ribbon/DrawCircle path |
-| Hovered non-member (when selected) | **#006600**, same draw path, no end handles |
-| Pick preview (hover, no selection) | **#006600**, same draw path, no end handles |
-| Remainder (non-belonging in same Aggregate context when subset exists) | **#006600** |
+| Belonging (selected, base) | **#008800**, alpha 1, size × 1.333 (route style) |
+| Highlights (end handles idle, endpoint-drag would-add) | **#00BB00**, same ribbon/DrawCircle path |
+| End-handle hover | **#00FF00** (brighter/larger circle) |
+| Hovered non-member (when selected) | **#004400**, same draw path, no end handles |
+| Pick preview (hover, no selection) | **#004400**, same draw path, no end handles |
+| Endpoint-drag would-remove | **#FF8800**, dedicated remove material/buffer |
+| Remainder (non-belonging in same Aggregate context when subset exists) | **#004400** |
 
 ## Relation
 

@@ -32,6 +32,12 @@ namespace BelzontAdr
         /// <summary>Live preferred path edges while endpoint-dragging (for overlay preview).</summary>
         public IReadOnlyList<Entity> PreviewPathEdges => m_PathEdges;
 
+        /// <summary>Path edges not in focused membership — would be added on release.</summary>
+        public IReadOnlyList<Entity> PreviewAddEdges => m_PreviewAddEdges;
+
+        /// <summary>Path edges already in focused membership — would be removed on release (tip shrink / pivot).</summary>
+        public IReadOnlyList<Entity> PreviewRemoveEdges => m_PreviewRemoveEdges;
+
         private ProxyAction m_ApplyAction;
         private ProxyAction m_CancelAction;
         private ProxyAction m_ToggleAction;
@@ -44,6 +50,9 @@ namespace BelzontAdr
         private readonly HashSet<Entity> m_DragHandles = new();
         private readonly HashSet<Entity> m_MembershipEdges = new();
         private readonly List<Entity> m_PathEdges = new();
+        private readonly List<Entity> m_PreviewAddEdges = new();
+        private readonly List<Entity> m_PreviewRemoveEdges = new();
+        private readonly HashSet<Entity> m_LoggedEdges = new();
         private readonly Dictionary<Entity, Entity> m_CameFromEdge = new();
         private readonly Dictionary<Entity, Entity> m_CameFromNode = new();
         private readonly Dictionary<Entity, Entity> m_PreferAggregateAtNode = new();
@@ -171,6 +180,8 @@ namespace BelzontAdr
                 else
                 {
                     m_PathEdges.Clear();
+                    m_PreviewAddEdges.Clear();
+                    m_PreviewRemoveEdges.Clear();
                 }
 
                 if (m_ApplyAction.WasReleasedThisFrame() || !m_ApplyAction.IsPressed())
@@ -226,6 +237,8 @@ namespace BelzontAdr
         private void RefreshLivePathPreview(Entity selectedAggregate)
         {
             m_PathEdges.Clear();
+            m_PreviewAddEdges.Clear();
+            m_PreviewRemoveEdges.Clear();
             if (selectedAggregate == Entity.Null
                 || m_DragStartNode == Entity.Null
                 || m_DragHoverNode == Entity.Null
@@ -234,7 +247,12 @@ namespace BelzontAdr
                 return;
             }
 
-            TryBuildPreferredPath(m_DragStartNode, m_DragHoverNode, selectedAggregate, m_PathEdges);
+            if (!TryBuildPreferredPath(m_DragStartNode, m_DragHoverNode, selectedAggregate, m_PathEdges))
+            {
+                return;
+            }
+
+            ClassifyPathMembership(m_PathEdges, m_PreviewAddEdges, m_PreviewRemoveEdges);
         }
 
         private void BeginEndpointDrag(Entity selectedAggregate, Entity handleNode)
@@ -278,8 +296,11 @@ namespace BelzontAdr
                 return;
             }
 
-            EmitPathMembershipLogs(selectedAggregate, m_PathEdges);
+            ClassifyPathMembership(m_PathEdges, m_PreviewAddEdges, m_PreviewRemoveEdges);
+            EmitPathMembershipLogs(selectedAggregate, m_PreviewAddEdges, m_PreviewRemoveEdges);
             m_MembershipEdges.Clear();
+            m_PreviewAddEdges.Clear();
+            m_PreviewRemoveEdges.Clear();
         }
 
         private void ClearDrag(bool keepMembership = false)
@@ -289,6 +310,8 @@ namespace BelzontAdr
             m_DragHoverNode = Entity.Null;
             m_DragHandles.Clear();
             m_PathEdges.Clear();
+            m_PreviewAddEdges.Clear();
+            m_PreviewRemoveEdges.Clear();
             m_CameFromEdge.Clear();
             m_CameFromNode.Clear();
             m_PreferAggregateAtNode.Clear();
@@ -338,50 +361,57 @@ namespace BelzontAdr
                 currentlyMember ? "remove" : "add");
         }
 
-        private void EmitPathMembershipLogs(Entity aggregate, List<Entity> pathEdges)
+        /// <summary>
+        /// Split path into would-add (non-members) and would-remove (members).
+        /// Mixed paths happen when the new tip pivots through the current Aggregate
+        /// (walk back along the tip, then hop onto a different direction) — both lists apply.
+        /// </summary>
+        private void ClassifyPathMembership(
+            List<Entity> pathEdges,
+            List<Entity> addOut,
+            List<Entity> removeOut)
         {
-            if (pathEdges.Count == 0)
-            {
-                return;
-            }
-
-            bool allMembers = true;
-            for (int i = 0; i < pathEdges.Count; i++)
-            {
-                if (!m_MembershipEdges.Contains(pathEdges[i]))
-                {
-                    allMembers = false;
-                    break;
-                }
-            }
-
-            if (allMembers)
-            {
-                // Shrink: all path edges sit on the focused Aggregate tip.
-                for (int i = 0; i < pathEdges.Count; i++)
-                {
-                    Entity edge = pathEdges[i];
-                    LogUtils.DoInfoLog(
-                        "RoadGrouping endpoint drag would-remove: edge={0}:{1} aggregate={2}:{3}",
-                        edge.Index,
-                        edge.Version,
-                        aggregate.Index,
-                        aggregate.Version);
-                }
-
-                return;
-            }
-
-            // Expand / hop: log distinct non-members that would be added.
-            var logged = new HashSet<Entity>();
+            addOut.Clear();
+            removeOut.Clear();
+            m_LoggedEdges.Clear();
             for (int i = 0; i < pathEdges.Count; i++)
             {
                 Entity edge = pathEdges[i];
-                if (m_MembershipEdges.Contains(edge) || !logged.Add(edge))
+                if (!m_LoggedEdges.Add(edge))
                 {
                     continue;
                 }
 
+                if (m_MembershipEdges.Contains(edge))
+                {
+                    removeOut.Add(edge);
+                }
+                else
+                {
+                    addOut.Add(edge);
+                }
+            }
+        }
+
+        private void EmitPathMembershipLogs(
+            Entity aggregate,
+            List<Entity> addEdges,
+            List<Entity> removeEdges)
+        {
+            for (int i = 0; i < removeEdges.Count; i++)
+            {
+                Entity edge = removeEdges[i];
+                LogUtils.DoInfoLog(
+                    "RoadGrouping endpoint drag would-remove: edge={0}:{1} aggregate={2}:{3}",
+                    edge.Index,
+                    edge.Version,
+                    aggregate.Index,
+                    aggregate.Version);
+            }
+
+            for (int i = 0; i < addEdges.Count; i++)
+            {
+                Entity edge = addEdges[i];
                 LogUtils.DoInfoLog(
                     "RoadGrouping endpoint drag would-add: edge={0}:{1} aggregate={2}:{3}",
                     edge.Index,

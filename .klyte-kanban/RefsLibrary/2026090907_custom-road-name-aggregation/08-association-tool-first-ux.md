@@ -149,7 +149,7 @@ Superseded by **Road Grouping** specs [09](09-road-grouping-tool-spec.md), [10](
 | Former open question | Settled decision |
 |----------------------|------------------|
 | Gestures | Plain LMB = initial select only; **Ctrl+LMB** on **segment** = toggle (log stub); **LMB-drag** on **end node** = endpoint expand/shrink (log stub); RMB = cancel |
-| Overlay tech | Dedicated `OverlayRenderSystem.Buffer` / route-ribbon system — **not** `Highlighted`. Belonging base **#00BB00**, highlights **#00FF00**, non-belonging / pick preview **#006600** |
+| Overlay tech | Dedicated `OverlayRenderSystem.Buffer` / route-ribbon system — **not** `Highlighted`. Belonging base **#008800**, highlights / would-add **#00BB00**, non-belonging / pick preview **#004400**, would-remove **#FF8800**, end-handle hover **#00FF00** |
 | Multi-select | **Single** focused aggregate/group per session |
 | Toolbar / activation | WE-style `Select` / `enableTool` + ADR UI / optional keybind; VUIO tool-options when `K45_ADR_AdrRoadGroupingTool` active |
 | Endpoint handles in first stub wave | **Yes** — end circles + LMB-drag path stubs in T1–T2 ([11](11-road-grouping-tool-roadmap.md)) |

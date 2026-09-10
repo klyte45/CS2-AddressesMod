@@ -102,7 +102,10 @@ While dragging toward a hovered **edge-node** (not the edge itself):
 1. Walk connected net edges step by step.
 2. **Prefer** a connected edge whose `Aggregated.m_Aggregate` equals the **previous step’s** Aggregate.
 3. If **no** connected candidate shares that Aggregate, **hop** onto a connected edge belonging to a **different** Aggregate.
-4. On release (and optionally continuous preview later): emit **one info log per distinct segment** that would be added or removed relative to the focused membership set.
+4. Classify every distinct path edge vs focused membership:
+   - **non-member** → would-**add**
+   - **member** → would-**remove** (tip shrink, including when the new direction pivots through the Aggregate before the old end — mixed add+remove on one drag)
+5. On release (and live preview): emit **one info log per distinct segment** that would be added or removed; paint would-add vs would-remove separately (see overlay colors).
 
 v0 does **not** mutate membership — logs only.
 
@@ -147,11 +150,12 @@ Full contract in [10](10-road-grouping-overlay-render-system.md).
 
 When `selectedAggregation` is set and Road Grouping tool is `activeTool`:
 
-- Opaque centerlines on belonging segments: **#00BB00** (base membership).
-- Opaque centerlines on non-belonging segments in the same vanilla Aggregate context: **#006600**.
-- Terminal **#00FF00** circles on aggregation end **nodes** (highlights only).
-- Hovered non-member segment (selection set): **#006600**.
-- Drag-path segment highlights: **#00FF00** (live endpoint-drag path).
+- Opaque centerlines on belonging segments: **#008800** (base membership).
+- Opaque centerlines on non-belonging segments in the same vanilla Aggregate context: **#004400**.
+- Terminal end-handle circles: **#00BB00** (idle) / **#00FF00** (hovered).
+- Hovered non-member segment (selection set): **#004400**.
+- Endpoint-drag would-**add** path: **#00BB00**.
+- Endpoint-drag would-**remove** path: **#FF8800**.
 
 No vanilla `Highlighted` for this feature.
 
