@@ -1,7 +1,7 @@
+**Start time:** 2026-09-09 21:08 -0300
 # [0056] T2 Road Grouping Ctrl+LMB toggle and endpoint drag log stubs
 
-**Developed by:** 
-
+**Developed by:** Composer (composer@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/09-road-grouping-tool-spec.md
