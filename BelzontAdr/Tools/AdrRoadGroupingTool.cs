@@ -42,6 +42,7 @@ namespace BelzontAdr
             base.OnStartRunning();
             m_ApplyAction.shouldBeEnabled = true;
             m_CancelAction.shouldBeEnabled = true;
+            cancelAction.shouldBeEnabled = true; // Escape (Tool "Cancel")
         }
 
         protected override void OnStopRunning()
@@ -49,6 +50,7 @@ namespace BelzontAdr
             base.OnStopRunning();
             m_ApplyAction.shouldBeEnabled = false;
             m_CancelAction.shouldBeEnabled = false;
+            cancelAction.shouldBeEnabled = false;
             HoveredEdge = Entity.Null;
             m_Controller.ClearSelection();
         }
@@ -64,6 +66,21 @@ namespace BelzontAdr
             m_ToolSystem.activeTool = m_DefaultToolSystem;
         }
 
+        /// <summary>
+        /// RMB / Escape: clear selection if focused; otherwise leave the tool.
+        /// </summary>
+        private void HandleCancel()
+        {
+            if (m_Controller.SelectedAggregation != null
+                && m_Controller.SelectedAggregation.Value != Entity.Null)
+            {
+                m_Controller.ClearSelection();
+                return;
+            }
+
+            RequestDisable();
+        }
+
         public override void InitializeRaycast()
         {
             base.InitializeRaycast();
@@ -76,9 +93,9 @@ namespace BelzontAdr
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (m_CancelAction.WasPressedThisFrame())
+            if (m_CancelAction.WasPressedThisFrame() || cancelAction.WasPressedThisFrame())
             {
-                RequestDisable();
+                HandleCancel();
                 return inputDeps;
             }
 

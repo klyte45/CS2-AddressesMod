@@ -1,4 +1,4 @@
-#if !RELEASE 
+﻿#if !RELEASE 
 //#define LOCAL
 #endif
 using Belzont.Interfaces;
@@ -7,6 +7,7 @@ using Colossal.Core;
 using Colossal.IO.AssetDatabase;
 using Game;
 using Game.Modding;
+using Game.Rendering;
 using Game.SceneFlow;
 using Unity.Entities;
 
@@ -39,6 +40,8 @@ namespace BelzontAdr
             updateSystem.UpdateAt<AdrRegionsSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<AdrRoadGroupingController>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<AdrRoadGroupingUISystem>(SystemUpdatePhase.UIUpdate);
+            // Route-style GPU ribbons + Overlay absolute node markers (squares/circles).
+            updateSystem.UpdateBefore<AdrRoadGroupingOverlayRenderSystem, OverlayRenderSystem>(SystemUpdatePhase.Rendering);
             updateSystem.UpdateBefore<AdrClearSystem>(SystemUpdatePhase.Deserialize);
         }
 
