@@ -1,7 +1,7 @@
+**Start time:** 2026-09-11 13:21 -0300
 # [0062] ACT-02-Markers-visual-only-WE-placeholders
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/12-activation-change-map.md §C
