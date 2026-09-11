@@ -38,7 +38,8 @@ namespace BelzontAdr
             updateSystem.UpdateAt<AdrHighwayRoutesSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<AdrHighwayRoutes2BSystem>(SystemUpdatePhase.Modification2B);
             updateSystem.UpdateAt<AdrRegionsSystem>(SystemUpdatePhase.ModificationEnd);
-            updateSystem.UpdateAt<AdrRoadGroupingController>(SystemUpdatePhase.ModificationEnd);
+            // UIUpdate: segment number-card projection tracks camera like SelectedInfoUISystem.
+            updateSystem.UpdateAt<AdrRoadGroupingController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<AdrRoadGroupingUISystem>(SystemUpdatePhase.UIUpdate);
             // Route-style GPU ribbons + Overlay absolute node markers (squares/circles).
             updateSystem.UpdateBefore<AdrRoadGroupingOverlayRenderSystem, OverlayRenderSystem>(SystemUpdatePhase.Rendering);

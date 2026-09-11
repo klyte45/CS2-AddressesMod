@@ -6,6 +6,7 @@ import { EditorBindings } from "mods/EditorBindings";
 import { AdrSettingsPanel, AdrSettingsPanelId } from "settings/AdrSettingsPanel";
 import { AdrUniversalModButton } from "settings/AdrUniversalModButton";
 import { AddressesToolOptions } from "tool/AddressesToolOptions";
+import { RoadGroupingNumberCardsHost } from "tool/RoadGroupingNumberCards";
 import { RoadGroupingToolOptions, RoadGroupingToolOptionsVisibility } from "tool/RoadGroupingToolOptions";
 import "./style/whatsNew.scss";
 
@@ -68,6 +69,11 @@ const register: ModRegistrar = (moduleRegistry) => {
         "game-ui/game/components/game-main-screen.tsx",
         "GameMainScreen",
         AdrWhatsNewShell,
+    );
+    moduleRegistry.extend(
+        "game-ui/game/components/game-main-screen.tsx",
+        "GameMainScreen",
+        RoadGroupingNumberCardsHost,
     );
     moduleRegistry.append("UniversalModMenu", AdrUniversalModButton);
 };

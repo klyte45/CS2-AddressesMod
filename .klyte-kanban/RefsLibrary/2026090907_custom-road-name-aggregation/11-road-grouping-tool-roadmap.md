@@ -70,7 +70,8 @@ Register overlay in mod `DoOnCreateWorld` Rendering phase before `OverlayRenderS
 ### T3
 
 - Toggle shows cards for segments whose midpoints fall in 120% viewport.
-- Cards refresh on aggregation change immediately; on camera move at most every 8 frames; stable order; cache between refreshes.
+- Cards refresh on aggregation change immediately; viewport projection every frame; stable order; cache between refreshes.
+- **Shipped (0057):** `AdrRoadAddressNumbering` + `AdrRoadGroupingController.SegmentCards` (ranges + viewport); VUIO `RoadGroupingNumberCardsHost` caches payload between pushes.
 
 ### T4
 

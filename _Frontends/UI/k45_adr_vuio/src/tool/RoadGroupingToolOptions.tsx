@@ -1,4 +1,4 @@
-import { MultiUIValueBinding, MultiUIValueBindingTools, VanillaComponentResolver } from "@klyte45/vuio-commons";
+import { Entity, MultiUIValueBinding, MultiUIValueBindingTools, VanillaComponentResolver } from "@klyte45/vuio-commons";
 import { useValue } from "cs2/api";
 import { tool } from "cs2/bindings";
 import { FocusDisabled } from "cs2/input";
@@ -8,18 +8,33 @@ import { translate } from "utility/translate";
 
 export const ROAD_GROUPING_TOOL_ID = "K45_ADR_AdrRoadGroupingTool";
 
-type EntityRef = { Index: number; Version: number };
+export type RoadGroupingSegmentCard = {
+    edge: Entity;
+    sortKey: number;
+    numberLow: number;
+    numberHigh: number;
+    midX: number;
+    midY: number;
+    midZ: number;
+    viewportX: number;
+    viewportY: number;
+    visible?: boolean;
+};
 
-const isNullEntity = (e?: EntityRef | null) => !e || (e.Index === 0 && e.Version === 0);
+export const isNullEntity = (e?: Entity | null) =>
+    !e || (e.Index === 0 && e.Version === 0);
+
+export const entityEquals = (a?: Entity | null, b?: Entity | null) =>
+    !!a && !!b && a.Index === b.Index && a.Version === b.Version;
 
 const i_ShowNumberCards = "coui://uil/Standard/GridTextView.svg";
 const i_PickAnother = "coui://uil/Standard/PickerPipette.svg";
-const nullEntity: EntityRef = { Index: 0, Version: 0 };
 
 const RoadGroupingBindings = {
     _prefix: "k45::adr.roadGrouping",
-    SelectedAggregation: MultiUIValueBinding<EntityRef>,
+    SelectedAggregation: MultiUIValueBinding<Entity>,
     ShowNumberCards: MultiUIValueBinding<boolean>,
+    SegmentCards: MultiUIValueBinding<RoadGroupingSegmentCard[]>,
 };
 
 export const RoadGroupingService = {
@@ -50,6 +65,7 @@ const RoadGroupingToolPanel = () => {
 
     useEffect(() => {
         const bump = async () => setTick((x) => x + 1);
+        // Subscribe after reactivate — reactivate() clears the subscription list.
         RoadGroupingService.SelectedAggregation.reactivate();
         RoadGroupingService.ShowNumberCards.reactivate();
         RoadGroupingService.SelectedAggregation.subscribe(bump);
@@ -83,7 +99,7 @@ const RoadGroupingToolPanel = () => {
                         />
                         <div style={{ width: "10rem" }} />
                         <VCR.ToolButton
-                            onSelect={() => RoadGroupingService.SelectedAggregation.set(nullEntity)}
+                            onSelect={() => RoadGroupingService.SelectedAggregation.set({ Index: 0, Version: 0 })}
                             src={i_PickAnother}
                             focusKey={VCR.FOCUS_DISABLED}
                             className={VCR.toolButtonTheme.button}
