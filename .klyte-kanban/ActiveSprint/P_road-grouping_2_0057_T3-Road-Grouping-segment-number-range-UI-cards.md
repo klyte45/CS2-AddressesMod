@@ -29,13 +29,15 @@ Phase T3. Per-segment house-number range cards in React, ranges from C# ADR numb
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] C# publishes per-segment number ranges for selected Aggregate using ADR numbering rules
-- [ ] Tool options toggle showNumberCards
-- [ ] React world-anchored cards for visible segments
-- [ ] Refresh on aggregation change immediately
-- [ ] Refresh on camera position change at most every 8 frames
-- [ ] 120% viewport (10% margin) cull on midpoint projection
-- [ ] Stable sort by edge/buffer index; frontend cache between refreshes
+- [x] C# publishes per-segment number ranges for selected Aggregate using ADR numbering rules
+- [x] Tool options toggle showNumberCards
+- [x] React world-anchored cards for visible segments
+- [x] Refresh on aggregation change immediately
+- [x] 120% viewport (10% margin) cull on midpoint projection
+- [x] Stable sort by edge/buffer index; frontend cache between refreshes
+- [x] Viewport projection refresh every frame while cards shown
+- [ ] When >10 segments in 120% viewport, half-km/mi mileage markers (locale decimals) instead of per-segment ranges
+- [ ] Cards offset above/below midpoint with connector line + anchor circle; non-overlapping pack
 
 ---
 
@@ -44,6 +46,8 @@ Phase T3. Per-segment house-number range cards in React, ranges from C# ADR numb
 1. Not Overlay DrawText — React cards
 2. Cache segment list + projected coords on frontend
 3. Invalidate on LMB select/cancel and later membership edits
+4. BindingsReleased resets m_initialized so MultiUIValueBinding re-registers after UI reload
+5. Mileage mode threshold is visible-segment count in 120% viewport, not total aggregate length
 
 ---
 
