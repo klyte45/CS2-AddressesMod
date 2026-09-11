@@ -28,11 +28,11 @@ Workstream 2. After Aggregate highway host is gone, markers must not carry route
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ADRHighwayMarkerData no longer serializes or uses routeDataIndex, routeDirection, displayInformation, numericCustomParam1, numericCustomParam2, overrideMileage, newMileage, reverseMileageCounting
-- [ ] Pylon fields kept: pylonCount, pylonSpacing, pylonMaterial, pylonFormat, pylonHeight; version bump discards stripped fields on migrate
-- [ ] AdrHighwayRoutesSystem marker dirty pipeline only applies remaining visual fields; no Aggregate coupling
-- [ ] AddressesToolOptions / RoadMarkSettings / AdrHighwayRoutesSystem.ts drop route/mileage UI and bindings
-- [ ] K45_ADR_HighwayMarker.wedefault.xml keeps formula tags; live formulae replaced with [Feature Name] placeholders; XML comments document old formulae
+- [ ] ADRHighwayMarkerData no longer serializes or uses routeDataIndex, routeDirection, overrideMileage, newMileage, reverseMileageCounting (displayInformation + numericCustomParam1/2 kept as visuals)
+- [ ] Pylon fields kept: pylonCount, pylonSpacing, pylonMaterial, pylonFormat, pylonHeight; version bump discards stripped highway fields on migrate
+- [ ] AdrHighwayRoutesSystem marker dirty pipeline applies visual fields only (pylons + display/custom params); no Aggregate coupling
+- [ ] AddressesToolOptions / RoadMarkSettings / AdrHighwayRoutesSystem.ts drop route/mileage UI and bindings; keep display/pylon UI
+- [ ] K45_ADR_HighwayMarker.wedefault.xml keeps live displayInformation formulae (visual); no route/mileage formulae to placeholder
 - [ ] RoadMarkerInfoBridge and TempRoadMarkerTooltip no longer resolve route names or mileage-driven address hacks
 - [ ] Prefab ADRRoadMarkerObject / K45_ADR_HighwayMarker remains as visual prop
 
@@ -40,12 +40,12 @@ Workstream 2. After Aggregate highway host is gone, markers must not carry route
 
 ## Implementation Notes
 
-1. Strip fields: routeDataIndex (Hash128), routeDirection (enum), displayInformation (enum), numericCustomParam1 (int), numericCustomParam2 (int), overrideMileage (bool), newMileage (float), reverseMileageCounting (bool)
-2. Keep fields: pylonCount (byte), pylonSpacing (float), pylonMaterial (PylonMaterial), pylonFormat (PylonFormat), pylonHeight (float)
-3. Bump ADRHighwayMarkerData CURRENT_VERSION; on deserialize discard stripped highway fields
-4. Remove Tool_/InfoPanel_ route/mileage binders in AdrHighwayRoutesSystem.cs and .ts
-5. WE: replace formulae with literals like [Route ID], [Mileage]; comment old formulae for future Aggregation reimpl
-6. Gut RoadMarkerInfoBridge.DesconstructRoadMarkerData route resolution and TempRoadMarkerTooltip mileage coupling
+1. Strip highway identity fields: routeDataIndex, routeDirection, overrideMileage, newMileage, reverseMileageCounting
+2. Keep visual fields: displayInformation, numericCustomParam1/2, pylonCount, pylonSpacing, pylonMaterial, pylonFormat, pylonHeight
+3. Bump ADRHighwayMarkerData CURRENT_VERSION; on deserialize discard stripped highway fields while preserving display/custom params
+4. Remove Tool_/InfoPanel_ route/mileage binders; keep display/custom + pylon binders
+5. WE: keep live displayInformation formulae
+6. Gut RoadMarkerInfoBridge route resolution and TempRoadMarkerTooltip mileage coupling
 
 ---
 
