@@ -14,7 +14,7 @@ Ship a playable **Road Grouping** tool scaffolded like BelzontWE, with opaque ov
 | **T1** | Overlay — belonging / pick-preview / end circles (route-ribbon; not `Highlighted`) | **Shipped** |
 | **T2** | Ctrl+LMB / endpoint-drag **logs**; fixed pin; path preview colors | **Shipped** |
 | **T3** | Segment number cards + tool-options toggle | **Shipped** |
-| **T4** *(superseded)* | Was: thin contract swap | → **ACT-03 / ACT-04** ([13](13-activation-sprint-roadmap.md)) |
+| **T4** *(superseded)* | Was: thin contract swap | → **ACT-03a…ACT-03c / ACT-04** ([13](13-activation-sprint-roadmap.md)) |
 | **T5** *(superseded)* | Was: real mutations + gap-fill | → **ACT-05 / ACT-06** |
 
 ## Post-T3: activation sprint
@@ -25,10 +25,12 @@ Do **not** implement a separate “thin contract.” Use full architecture in **
 |-------|------|-----------|-----|
 | 1 | ACT-01 | Strip Aggregate highway | [12](12-activation-change-map.md) §B |
 | 2 | ACT-02 | Markers visual-only | [12](12-activation-change-map.md) §C |
-| 3 | ACT-03 | ADR components + ForkFromVanilla | [12](12-activation-change-map.md) §A |
-| 4 | ACT-04 | Name/address prefer ADR | [12](12-activation-change-map.md) §D |
-| 5 | ACT-05 | Tool real mutations | [12](12-activation-change-map.md) §E |
-| 6 | ACT-06 | Membership maintenance | [07](07-membership-maintenance-edge-cases.md) |
+| 3 | ACT-03a | ADR components + serialize | [12](12-activation-change-map.md) §A1 |
+| 4 | ACT-03b | Membership service CRUD | [12](12-activation-change-map.md) §A2 |
+| 5 | ACT-03c | ForkFromVanilla + ADR seeding | [12](12-activation-change-map.md) §A3 |
+| 6 | ACT-04 | Name/address prefer ADR | [12](12-activation-change-map.md) §D |
+| 7 | ACT-05 | Tool real mutations | [12](12-activation-change-map.md) §E |
+| 8 | ACT-06 | Membership maintenance | [07](07-membership-maintenance-edge-cases.md) |
 
 ## Dependency notes (historical T0–T3)
 
@@ -37,7 +39,7 @@ T0 ──► T1 ──► T2     (SHIPPED)
  │
  └──► T3             (SHIPPED)
 
-Activation (one sprint): ACT-01 → ACT-02; ACT-01 → ACT-03 → ACT-04 → ACT-05 → ACT-06
+Activation (one sprint): ACT-01 → ACT-02; ACT-01 → ACT-03a → ACT-03b → ACT-03c → ACT-04 → ACT-05 → ACT-06
 ```
 
 ## Suggested code locations
@@ -63,7 +65,7 @@ Tool id `K45_ADR_AdrRoadGroupingTool`; Aggregated-only hover; select / cancel; o
 
 ### T4 / T5 (do not implement as thin contract)
 
-See activation **ACT-03…ACT-06** in [13](13-activation-sprint-roadmap.md).
+See activation **ACT-03a…ACT-06** in [13](13-activation-sprint-roadmap.md).
 
 ## Out of this roadmap
 

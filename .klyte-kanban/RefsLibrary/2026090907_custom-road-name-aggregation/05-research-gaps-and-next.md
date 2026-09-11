@@ -58,10 +58,10 @@ Consumer audit focused on **Game.dll**. If other Managed DLLs reference Aggregat
 **Use the activation catalog** — do not invent a thin-contract epic:
 
 - Change map: [12](12-activation-change-map.md)
-- One activation sprint + documented Kanban tasks ACT-01…ACT-06: [13](13-activation-sprint-roadmap.md)
+- One activation sprint + documented Kanban tasks ACT-01…ACT-06 (ACT-03 split into 03a/03b/03c): [13](13-activation-sprint-roadmap.md)
 - Tool-first context: [08](08-association-tool-first-ux.md)
 
-Order: strip Aggregate highway (ACT-01) → markers visual-only (ACT-02) → full ADR components + ForkFromVanilla (ACT-03) → name/address (ACT-04) → Road Grouping mutations (ACT-05) → membership maintenance (ACT-06).
+Order: strip Aggregate highway (ACT-01) → markers visual-only (ACT-02) → ADR components (ACT-03a) → membership CRUD (ACT-03b) → ForkFromVanilla + seed (ACT-03c) → name/address (ACT-04) → Road Grouping mutations (ACT-05) → membership maintenance (ACT-06).
 
 **Later (after ACT-06):** highway reattach via tool; ADR labels + forked pick; `fixedAggregation` cleanup.
 

@@ -111,7 +111,7 @@ Fill `ADRNameAggregateElement` with a practical ordered walk (geometry / associa
 
 **Today:** `ADRHighwayAggregationData` (+ Dirty + Cache) live on **vanilla** `Aggregate`.
 
-**Activation wave ([12](12-activation-change-map.md) ACT-01 / ACT-02):** **Remove** Aggregate-hosted highway components. Markers become **visual-only** (strip route/mileage; keep pylons; WE `[Feature]` placeholders). **Keep** highway **registry** settings UI. Do **not** migrate highway onto ADR in this activation sprint.
+**Activation wave ([12](12-activation-change-map.md) ACT-01 / ACT-02 / ACT-03a…ACT-03c):** **Remove** Aggregate-hosted highway components. Markers become **visual-only** (strip route/mileage; keep pylons; WE `[Feature]` placeholders). Introduce ADR name-aggregate types (03a), membership CRUD (03b), then `ForkFromVanilla` + seeding (03c). **Keep** highway **registry** settings UI. Do **not** migrate highway onto ADR in this activation sprint.
 
 **Later epic:** reattach route/mileage onto `ADRNameAggregate` via Road Grouping tool; restore WE formulae from placeholders. Beta breakage on old Aggregate highway saves is acceptable when stripping.
 

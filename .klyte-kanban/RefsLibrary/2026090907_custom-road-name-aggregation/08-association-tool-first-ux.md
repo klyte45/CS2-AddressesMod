@@ -73,7 +73,7 @@ Implementation note: node picks still use net raycast; handles are **tool overla
 
 Road Grouping T0–T3 is shipped. Next backend work is **full** ADR Aggregate/Element/Aggregated + fork/seed + real mutations — not a minimal thin contract. File map: [12](12-activation-change-map.md). One sprint + tasks: [13](13-activation-sprint-roadmap.md).
 
-| In activation sprint (ACT-01…ACT-06) | Later epics |
+| In activation sprint (ACT-01…ACT-06, with ACT-03a/b/c) | Later epics |
 |--------------------------------------|-------------|
 | Strip Aggregate highway host; markers visual-only | Highway reattach via tool |
 | `ADRNameAggregate` / Element / Aggregated + serialize + ForkFromVanilla | World **name** labels + forked pick |
@@ -83,7 +83,7 @@ Road Grouping T0–T3 is shipped. Next backend work is **full** ADR Aggregate/El
 
 ### World-drawing-first — completed
 
-Tool scaffold + overlays + stubs + number cards landed against vanilla Aggregate. **Do not** invent a permanent preview-only membership format — switch data source to ADR (ACT-03…ACT-05).
+Tool scaffold + overlays + stubs + number cards landed against vanilla Aggregate. **Do not** invent a permanent preview-only membership format — switch data source to ADR (ACT-03a…ACT-05).
 
 ### Sequencing (updated 2026-09-10)
 
@@ -91,7 +91,9 @@ Tool scaffold + overlays + stubs + number cards landed against vanilla Aggregate
 0a–0b / T0–T3. Road Grouping tool + overlays + stubs + cards (SHIPPED)
 ACT-01. Strip Aggregate highway host
 ACT-02. Markers visual-only + WE placeholders
-ACT-03. Full ADR components + ForkFromVanilla + serialize
+ACT-03a. ADR name-aggregate components + serialize
+ACT-03b. Membership service CRUD
+ACT-03c. ForkFromVanilla + ADR seeding
 ACT-04. NameSystem / GetAddress / SIP seed prefer ADR
 ACT-05. Road Grouping mutations → ADR
 ACT-06. Membership maintenance (remap + gap-fill)
@@ -105,7 +107,7 @@ Not in this wave: SIP / DefaultTool H1
 | Earlier item | Impact |
 |--------------|--------|
 | Epic: Player association UX | **Shipped** as Road Grouping T0–T3; mutations in ACT-05 |
-| Epic: Thin ADR name aggregation | **Superseded** by full activation ACT-03 + ACT-04 |
+| Epic: Thin ADR name aggregation | **Superseded** by full activation ACT-03a…ACT-03c + ACT-04 |
 | Polish: SIP stats + H1 | **Out of scope this wave** (research kept in [06](06-labels-vs-vanilla-sync-and-harmony.md)) |
 | Epic / spike: ADR labels | Still after activation; do **not** confuse tool overlay with AggregateMesh-style name labels |
 | SIP as editor or inspect | **Excluded** from current implementation |
@@ -129,7 +131,7 @@ Not in this wave: SIP / DefaultTool H1
 | World overlay systems are non-trivial | Mitigated — T0–T3 shipped route-ribbon overlays |
 | Tool + maintenance + labels all draw nets | Clear layer ownership: tool preview vs persistent labels (no DefaultTool H1 this wave) |
 | Node UX ambiguous | Endpoint LMB-drag + fixed pin shipped as stubs; real writes in ACT-05 |
-| Backend before mutations | Full ADR components in ACT-03 (not thin contract); see [12](12-activation-change-map.md) |
+| Backend before mutations | Full ADR components in ACT-03a…ACT-03c (not thin contract); see [12](12-activation-change-map.md) |
 
 ## Open questions (tool-specific) — settled
 
@@ -151,6 +153,6 @@ Superseded by **Road Grouping** specs [09](09-road-grouping-tool-spec.md), [10](
 - [07](07-membership-maintenance-edge-cases.md) — mutations the tool must obey  
 - [09](09-road-grouping-tool-spec.md) — **Road Grouping** tool contract  
 - [10](10-road-grouping-overlay-render-system.md) — overlay system  
-- [11](11-road-grouping-tool-roadmap.md) — T0–T3 shipped; activation ACT-03…ACT-06
+- [11](11-road-grouping-tool-roadmap.md) — T0–T3 shipped; activation ACT-03a…ACT-06
 - [12](12-activation-change-map.md) — activation file map
 - [13](13-activation-sprint-roadmap.md) — one sprint + Kanban catalog (docs only)  

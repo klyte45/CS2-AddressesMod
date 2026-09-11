@@ -28,17 +28,34 @@ On first membership edit:
 
 ---
 
-## A. New core data — **ACT-03**
+## A. New core data — **ACT-03a / ACT-03b / ACT-03c**
+
+Split so components, CRUD, and fork ship as separate reviewable tasks ([13](13-activation-sprint-roadmap.md)).
+
+### A1. Components + serialize — **ACT-03a**
 
 | File / deliverable | Current role | Required change | Task |
 |--------------------|--------------|-----------------|--------|
-| `BelzontAdr/Components/ADRNameAggregate.cs` (new) | — | Tag component on ADR aggregate entity | ACT-03 |
-| `BelzontAdr/Components/ADRNameAggregateElement.cs` (new) | — | Ordered buffer: `m_Edge`, `preventPropagation`, `numberOverrideActive`, `numberOverride` | ACT-03 |
-| `BelzontAdr/Components/ADRNameAggregated.cs` (new) | — | Edge → ADR aggregate link (+ mirrored flags if useful) | ACT-03 |
-| Membership service / system (new) | — | Create/destroy ADR; add/remove/reorder; set flags; tear down empty; **`ForkFromVanilla`** (seed copy + vanilla `Redraw` + full buffer copy then edit) | ACT-03 |
-| Serialization | — | `ISerializable` on all three; register like other ADR components | ACT-03 |
-| [`AdrNamesetSystem.cs`](../../../BelzontAdr/Systems/AdrNamesetSystem.cs) | Seeds `ADRRandomizationData` on new vanilla `Aggregate` | Also seed new **ADR** aggregates | ACT-03 |
+| `BelzontAdr/Components/ADRNameAggregate.cs` (new) | — | Tag component on ADR aggregate entity (parallel to vanilla `Aggregate`). Seed lives on co-located `ADRRandomizationData`, not as fields on this tag. | ACT-03a |
+| `BelzontAdr/Components/ADRNameAggregateElement.cs` (new) | — | Ordered buffer entry fields: `m_Edge` (`Entity`), `preventPropagation` (`bool`, default `false`), `numberOverrideActive` (`bool`, default `false`), `numberOverride` (`int`, default `0`) | ACT-03a |
+| `BelzontAdr/Components/ADRNameAggregated.cs` (new) | — | On edge: link to ADR aggregate entity + mirrored flags as useful for queries (`preventPropagation`, `numberOverrideActive`, `numberOverride`) | ACT-03a |
+| Serialization | — | `ISerializable` on all three; register like other ADR components | ACT-03a |
 | [`ADREdgeData.cs`](../../../BelzontAdr/Components/ADREdgeData.cs) `fixedAggregation` | Dead stub | **Do not** use as link; leave inert or delete in later cleanup epic | — |
+
+### A2. Membership service CRUD — **ACT-03b**
+
+| File / deliverable | Current role | Required change | Task |
+|--------------------|--------------|-----------------|--------|
+| Membership service / system (new) | — | Create/destroy ADR aggregate entity; add/remove/reorder buffer members; set per-member flags; tear down empty aggregates; keep `ADRNameAggregated` in sync with buffer | ACT-03b |
+
+Does **not** include `ForkFromVanilla` or nameset seeding (those are ACT-03c).
+
+### A3. ForkFromVanilla + ADR seeding — **ACT-03c**
+
+| File / deliverable | Current role | Required change | Task |
+|--------------------|--------------|-----------------|--------|
+| Membership service — `ForkFromVanilla` | — | On first membership edit: copy vanilla `ADRRandomizationData` seed **S** → ADR; call vanilla Aggregate `Redraw()` → **S2**; full vanilla `AggregateElement` copy into `ADRNameAggregateElement`, **then** apply the edit; set `ADRNameAggregated` on members | ACT-03c |
+| [`AdrNamesetSystem.cs`](../../../BelzontAdr/Systems/AdrNamesetSystem.cs) | Seeds `ADRRandomizationData` on new vanilla `Aggregate` | Also seed new **ADR** aggregates | ACT-03c |
 
 ---
 
@@ -113,10 +130,12 @@ Workstream order inside the **single** activation sprint ([13](13-activation-spr
 |-------|----------|-------------|
 | 1 | B | ACT-01 |
 | 2 | C | ACT-02 |
-| 3 | A | ACT-03 |
-| 4 | D | ACT-04 |
-| 5 | E (tool mutations) | ACT-05 |
-| 6 | E (maintenance / gap-fill) | ACT-06 |
+| 3 | A1 | ACT-03a |
+| 4 | A2 | ACT-03b |
+| 5 | A3 | ACT-03c |
+| 6 | D | ACT-04 |
+| 7 | E (tool mutations) | ACT-05 |
+| 8 | E (maintenance / gap-fill) | ACT-06 |
 
 Full sprint + Kanban catalog: [13](13-activation-sprint-roadmap.md).
 

@@ -11,7 +11,7 @@ ADR does **not** create, merge, or override vanilla `Aggregate` / `Aggregated` /
 | `ADRHighwayAggregationData` | Vanilla `Aggregate` entity | `highwayDataId` (Hash128) linking to highway registry | **Remove** (ACT-01) |
 | `ADRHighwayAggregationDataDirtyHwId` | Same | Dirty flag to replicate marker / clear cache | **Remove** (ACT-01) |
 | `ADRHighwayAggregationCacheData` | Same | Mileage: `startDistanceOverrideKm`, `reverseCounting` | **Remove** (ACT-01) |
-| `ADRRandomizationData` | New `Aggregate` (among other entity types) | Seed for nameset-based road names | Keep on vanilla; **also** on ADR aggregates after fork (ACT-03) |
+| `ADRRandomizationData` | New `Aggregate` (among other entity types) | Seed for nameset-based road names | Keep on vanilla; **also** on ADR aggregates after fork (ACT-03c) |
 | `ADREntityStationRef` / manual building refs | Aggregate / building | Station naming locked to a road aggregate | Prefer ADR when linked (ACT-04) |
 | `ADREdgeData.fixedAggregation` | Intended for edges | **Declared + serialized; never read/written elsewhere** | Do not revive; use `ADRNameAggregated` |
 | Road Grouping T0–T3 | Tool / overlay / cards | Vanilla Aggregate membership + stub logs | **Done**; wire to ADR in ACT-05 |
@@ -31,7 +31,7 @@ ADR does **not** create, merge, or override vanilla `Aggregate` / `Aggregated` /
 
 ### Naming
 
-- [`AdrNamesetSystem`](../../../BelzontAdr/Systems/AdrNamesetSystem.cs) — seeds `ADRRandomizationData` on new `Aggregate` entities. **Activation:** also seed ADR aggregates (ACT-03).
+- [`AdrNamesetSystem`](../../../BelzontAdr/Systems/AdrNamesetSystem.cs) — seeds `ADRRandomizationData` on new `Aggregate` entities. **Activation:** also seed ADR aggregates (ACT-03c).
 - [`AdrNameSystemOverrides`](../../../BelzontAdr/Overrides/AdrNameSystemOverrides.cs) — Harmony on `NameSystem`:
   - `GetAggregateName`: custom name → vanilla; else highway name if `ADRHighwayAggregationData` set; else nameset + road-prefix from `FindReferenceRoad` on `AggregateElement` buffer.
   - Building / stop addresses use `BuildingUtils.GetAddress` then format with that road name.
@@ -63,7 +63,7 @@ public Entity fixedAggregation;
 
 - No Harmony on `AggregateSystem`, `AggregateMeshSystem`, or `GenerateAggregatesSystem`.
 - No UI to merge/split vanilla aggregates or set `fixedAggregation`.
-- No separate ADR aggregate entity type yet — highway and street identity are always the vanilla aggregate entity (**until ACT-03**).
+- No separate ADR aggregate entity type yet — highway and street identity are always the vanilla aggregate entity (**until ACT-03a…ACT-03c**).
 
 ## Implications for activation ([12](12-activation-change-map.md))
 
@@ -71,7 +71,7 @@ public Entity fixedAggregation;
 |------------------|------------------------|
 | Highway data on vanilla Aggregate | **Remove** Aggregate host (ACT-01); reattach via tool later |
 | Markers with route/mileage | **Visual-only** (ACT-02); WE placeholders |
-| Namesets / seeds on Aggregate | Fork copies seed to ADR; vanilla `Redraw` (ACT-03) |
+| Namesets / seeds on Aggregate | Fork copies seed to ADR; vanilla `Redraw` (ACT-03c); types in ACT-03a; CRUD in ACT-03b |
 | `GetAggregateName` / GetAddress assume vanilla Aggregate | Prefer ADR when linked (ACT-04); split naming after fork |
 | Road Grouping on vanilla Aggregate | Fork + real mutations (ACT-05); maintenance (ACT-06) |
 | `fixedAggregation` dead | Do not wire; use `ADRNameAggregated` |

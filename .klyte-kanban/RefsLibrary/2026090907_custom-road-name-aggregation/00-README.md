@@ -47,9 +47,9 @@ This pack is **documentation only**. It does not ship product code. Kanban tasks
 8. [08-association-tool-first-ux.md](08-association-tool-first-ux.md) — tool-first UX; **full activation** (not thin contract)
 9. [09-road-grouping-tool-spec.md](09-road-grouping-tool-spec.md) — **Road Grouping** tool contract
 10. [10-road-grouping-overlay-render-system.md](10-road-grouping-overlay-render-system.md) — opaque route-ribbon layer
-11. [11-road-grouping-tool-roadmap.md](11-road-grouping-tool-roadmap.md) — T0–T3 shipped; T4/T5 → activation ACT-03…ACT-06
-12. [12-activation-change-map.md](12-activation-change-map.md) — **file-level activation change map** (sections A–E)
-13. [13-activation-sprint-roadmap.md](13-activation-sprint-roadmap.md) — **one activation sprint + Kanban task catalog** (document only)
+11. [11-road-grouping-tool-roadmap.md](11-road-grouping-tool-roadmap.md) — T0–T3 shipped; T4/T5 → activation ACT-03a…ACT-06
+12. [12-activation-change-map.md](12-activation-change-map.md) — **file-level activation change map** (sections A1–A3, B–E)
+13. [13-activation-sprint-roadmap.md](13-activation-sprint-roadmap.md) — **one activation sprint + Kanban task catalog** (ACT-03 split into 03a/03b/03c)
 
 ## Success criteria (this research pack)
 
