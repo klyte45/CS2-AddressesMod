@@ -29,13 +29,13 @@ Workstream 3b (split from former ACT-03). Membership service operates on ACT-03a
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] API/system can create an ADR name-aggregate entity with ADRNameAggregate + empty/populated ADRNameAggregateElement
-- [ ] Can destroy ADR aggregate and clear related ADRNameAggregated on edges
-- [ ] Can add/remove/reorder members in ADRNameAggregateElement
-- [ ] Can set per-member flags: preventPropagation, numberOverrideActive, numberOverride
-- [ ] ADRNameAggregated on edges stays consistent with buffer membership and mirrored flags
-- [ ] Empty aggregates are torn down (no orphan empty ADR entities)
-- [ ] Vanilla Aggregated / AggregateElement are never mutated by this service
+- [x] API/system can create an ADR name-aggregate entity with ADRNameAggregate + empty/populated ADRNameAggregateElement
+- [x] Can destroy ADR aggregate and clear related ADRNameAggregated on edges
+- [x] Can add/remove/reorder members in ADRNameAggregateElement
+- [x] Can set per-member flags: preventPropagation, numberOverrideActive, numberOverride
+- [x] ADRNameAggregated on edges stays consistent with buffer membership and mirrored flags
+- [x] Empty aggregates are torn down (no orphan empty ADR entities)
+- [x] Vanilla Aggregated / AggregateElement are never mutated by this service
 
 ---
 
