@@ -60,16 +60,16 @@ Each task links to [12](12-activation-change-map.md).
 
 ### Tasks (all in the single sprint)
 
-| ID (suggested) | Title | Order | Depends | Description |
-|----------------|-------|-------|---------|-------------|
-| ACT-01 | Strip Aggregate highway host | 1 | — | Remove `ADRHighwayAggregationData` (`highwayDataId`), `ADRHighwayAggregationDataDirtyHwId`, `ADRHighwayAggregationCacheData` (`startDistanceOverrideKm`, `reverseCounting`) and all Aggregate-touching jobs in `AdrHighwayRoutesSystem` / `2B`. Keep highway **registry**. Update consumers (NameSystem highway branch, GetAddress cache, regions, Road Grouping numbering). Beta: drop leftover components on load. See [12](12-activation-change-map.md) §B. |
-| ACT-02 | Markers visual-only + WE placeholders | 2 | ACT-01 | Strip from `ADRHighwayMarkerData`: `routeDataIndex`, `routeDirection`, `displayInformation`, `numericCustomParam1/2`, `overrideMileage`, `newMileage`, `reverseMileageCounting`. **Keep** `pylonCount`, `pylonSpacing`, `pylonMaterial`, `pylonFormat`, `pylonHeight`. Strip tool options / SIP / TS bindings. WE: keep formula tags; `[Feature Name]` placeholders + XML comments. Gut bridge/tooltip route/mileage. See [12](12-activation-change-map.md) §C. |
-| ACT-03a | ADR name-aggregate components + serialize | 3 | ACT-01 | Add `ADRNameAggregate` (tag), `ADRNameAggregateElement` buffer (`m_Edge`, `preventPropagation`, `numberOverrideActive`, `numberOverride`), `ADRNameAggregated` (edge→ADR link + mirrored flags). `ISerializable` + register like other ADR components. No gameplay yet. See [12](12-activation-change-map.md) §A1. |
-| ACT-03b | Membership service CRUD | 4 | ACT-03a | Membership service: create/destroy ADR aggregate; add/remove/reorder members; set `preventPropagation` / `numberOverrideActive` / `numberOverride`; tear down empty. Does **not** include fork yet. See [12](12-activation-change-map.md) §A2. |
-| ACT-03c | ForkFromVanilla + ADR seeding | 5 | ACT-03b | `ForkFromVanilla`: copy vanilla `ADRRandomizationData` seed S → ADR; `Redraw()` vanilla → S2; full `AggregateElement` copy into ADR buffer then apply first edit; set `ADRNameAggregated` on members. `AdrNamesetSystem` also seeds new ADR aggregates. See [12](12-activation-change-map.md) §A3. |
-| ACT-04 | Prefer ADR in name/address/SIP | 6 | ACT-03c | Retarget `AdrNameSystemOverrides`, `BuildingUtilsOverrides`, `AdrRoadAddressNumbering`, `AdrSelectionInfoPanelSystem` (+ seed UI). Split naming: vanilla seed S2 for non-ADR edges; ADR for linked members. See [12](12-activation-change-map.md) §D. |
-| ACT-05 | Road Grouping ADR mutations | 7 | ACT-03c, ACT-04 | Tool: fork on first membership apply; read/write ADR buffer; retire log stubs. Controller cards + overlay belonging/remainder from ADR. Verify VUIO entity Index/Version. See [12](12-activation-change-map.md) §E. |
-| ACT-06 | Membership maintenance dogfood | 8 | ACT-05 | Remap + gap-fill per [07](07-membership-maintenance-edge-cases.md); dogfood via Road Grouping tool. |
+| ID (suggested) | Board ID | Title | Order | Depends | Description |
+|----------------|----------|-------|-------|---------|-------------|
+| ACT-01 | **0061** | Strip Aggregate highway host | 1 | — | Remove `ADRHighwayAggregationData` (`highwayDataId`), `ADRHighwayAggregationDataDirtyHwId`, `ADRHighwayAggregationCacheData` (`startDistanceOverrideKm`, `reverseCounting`) and all Aggregate-touching jobs in `AdrHighwayRoutesSystem` / `2B`. Keep highway **registry**. Update consumers (NameSystem highway branch, GetAddress cache, regions, Road Grouping numbering). Beta: drop leftover components on load. See [12](12-activation-change-map.md) §B. |
+| ACT-02 | **0062** | Markers visual-only + WE placeholders | 2 | ACT-01 / 0061 | Strip from `ADRHighwayMarkerData`: `routeDataIndex`, `routeDirection`, `displayInformation`, `numericCustomParam1/2`, `overrideMileage`, `newMileage`, `reverseMileageCounting`. **Keep** `pylonCount`, `pylonSpacing`, `pylonMaterial`, `pylonFormat`, `pylonHeight`. Strip tool options / SIP / TS bindings. WE: keep formula tags; `[Feature Name]` placeholders + XML comments. Gut bridge/tooltip route/mileage. See [12](12-activation-change-map.md) §C. |
+| ACT-03a | **0063** | ADR name-aggregate components + serialize | 3 | ACT-01 / 0061 | Add `ADRNameAggregate` (tag), `ADRNameAggregateElement` buffer (`m_Edge`, `preventPropagation`, `numberOverrideActive`, `numberOverride`), `ADRNameAggregated` (edge→ADR link + mirrored flags). `ISerializable` + register like other ADR components. No gameplay yet. See [12](12-activation-change-map.md) §A1. |
+| ACT-03b | **0064** | Membership service CRUD | 4 | ACT-03a / 0063 | Membership service: create/destroy ADR aggregate; add/remove/reorder members; set `preventPropagation` / `numberOverrideActive` / `numberOverride`; tear down empty. Does **not** include fork yet. See [12](12-activation-change-map.md) §A2. |
+| ACT-03c | **0065** | ForkFromVanilla + ADR seeding | 5 | ACT-03b / 0064 | `ForkFromVanilla`: copy vanilla `ADRRandomizationData` seed S → ADR; `Redraw()` vanilla → S2; full `AggregateElement` copy into ADR buffer then apply first edit; set `ADRNameAggregated` on members. `AdrNamesetSystem` also seeds new ADR aggregates. See [12](12-activation-change-map.md) §A3. |
+| ACT-04 | **0066** | Prefer ADR in name/address/SIP | 6 | ACT-03c / 0065 | Retarget `AdrNameSystemOverrides`, `BuildingUtilsOverrides`, `AdrRoadAddressNumbering`, `AdrSelectionInfoPanelSystem` (+ seed UI). Split naming: vanilla seed S2 for non-ADR edges; ADR for linked members. See [12](12-activation-change-map.md) §D. |
+| ACT-05 | **0067** | Road Grouping ADR mutations | 7 | ACT-03c / 0065, ACT-04 / 0066 | Tool: fork on first membership apply; read/write ADR buffer; retire log stubs. Controller cards + overlay belonging/remainder from ADR. Verify VUIO entity Index/Version. See [12](12-activation-change-map.md) §E. |
+| ACT-06 | **0068** | Membership maintenance dogfood | 8 | ACT-05 / 0067 | Remap + gap-fill per [07](07-membership-maintenance-edge-cases.md); dogfood via Road Grouping tool. |
 
 ### Optional later backlog tasks (same or new epics)
 
@@ -84,11 +84,11 @@ Each task links to [12](12-activation-change-map.md).
 
 | Board sprint | Tasks |
 |--------------|-------|
-| **ADR aggregation activation** | ACT-01, ACT-02, ACT-03a, ACT-03b, ACT-03c, ACT-04, ACT-05, ACT-06 |
+| **Sprint 012 — ADR aggregation activation** | 0061…0068 (ACT-01, ACT-02, ACT-03a, ACT-03b, ACT-03c, ACT-04, ACT-05, ACT-06) |
 
 ### Superseded backlog
 
-Former Road Grouping **T4** / **T5** thin-contract tasks (`0058`, `0059`) are superseded by this catalog — cancel when activation tasks are registered.
+Former Road Grouping **T4** / **T5** thin-contract tasks **0058** / **0059** were **cancelled (C)** when activation tasks were registered.
 
 ---
 

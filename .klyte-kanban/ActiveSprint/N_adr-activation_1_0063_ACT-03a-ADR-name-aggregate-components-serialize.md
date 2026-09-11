@@ -71,6 +71,10 @@ Workstream 3a (split from former ACT-03). Introduce ADR-owned name-aggregate ECS
 
 - ACT-03b
 - ACT-03c
+- [0064] ACT-03b-Membership-service-CRUD
+- [0065] ACT-03c-ForkFromVanilla-ADR-seeding
+
+---
 
 ## Other Notes
 
