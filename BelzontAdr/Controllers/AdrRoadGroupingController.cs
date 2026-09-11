@@ -61,7 +61,7 @@ namespace BelzontAdr
 
             // Preserve state across UI reloads (BindingsReleased → re-init).
             var selected = SelectedAggregation?.Value ?? Entity.Null;
-            var showCards = ShowNumberCards?.Value ?? false;
+            var showCards = ShowNumberCards?.Value ?? true;
             var cards = SegmentCards?.Value ?? EmptyCards;
 
             SelectedAggregation = new(selected, $"{PREFIX}{nameof(SelectedAggregation)}", m_eventCaller, m_callBinder);

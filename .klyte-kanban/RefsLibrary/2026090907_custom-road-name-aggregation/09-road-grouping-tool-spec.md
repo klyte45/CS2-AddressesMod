@@ -135,7 +135,7 @@ v0 does **not** mutate membership — logs only.
 ## Number range UI cards
 
 - **C#** computes per-segment house-number range using ADR numbering rules (same logic family as [`BuildingUtilsOverrides.GetAddress_Override`](../../../BelzontAdr/Overrides/BuildingUtilsOverrides.cs): aggregate walk, length, highway overrides, unit multiplier → odd numbers at segment ends).
-- **React** world-anchored cards (screen-project midpoints). Not `OverlayRenderSystem.DrawText` (name-entity based).
+- **React** world-anchored cards: offset **above/below** the projected midpoint (not centered on it), connector line from the facing card edge midpoint to the segment center, circle on the center, and non-overlapping screen packing (stable `sortKey` order).
 
 ### Visibility
 
