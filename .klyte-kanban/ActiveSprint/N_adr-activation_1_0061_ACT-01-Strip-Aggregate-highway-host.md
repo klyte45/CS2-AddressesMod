@@ -15,7 +15,7 @@ RefsLibrary/2026090907_custom-road-name-aggregation/13-activation-sprint-roadmap
 
 ## Background
 
-Workstream 1 of ADR aggregation activation. Highway route/mileage must leave vanilla Aggregate so ADR name-aggregates can own membership without Aggregate-hosted highway state. Beta save breakage on leftover Aggregate highway components is acceptable.
+Workstream 1 of ADR aggregation activation. Highway route/mileage must leave vanilla Aggregate so ADR name-aggregates can own membership without Aggregate-hosted highway state. Remove the Aggregate highway component fields from the structs (prefer deleting ADRHighwayAggregationData / DirtyHwId / CacheData types). Previously saved Aggregate highway component bytes are ignored on load — no migrate/convert of old highwayDataId or cache values.
 
 ---
 
@@ -35,6 +35,8 @@ Workstream 1 of ADR aggregation activation. Highway route/mileage must leave van
 - [ ] Consumers no longer read Aggregate highway Data/Cache: AdrNameSystemOverrides highway branch, BuildingUtilsOverrides, AdrRoadAddressNumbering, AdrRegionsSystem highwayId, Road Grouping overlay/controller numbering
 - [ ] Load path ignores/drops leftover Aggregate highway components
 - [ ] HighwayRegisterManagement.tsx + registry APIs still compile and run (orphaned from Aggregate until later reattach epic)
+- [ ] Unused Aggregate highway fields are removed from the structs (ADRHighwayAggregationData.highwayDataId; CacheData.startDistanceOverrideKm and reverseCounting; DirtyHwId tag gone) — not left as dead serialized members
+- [ ] Previously saved Aggregate highway component data is ignored on load (no migration of old highwayDataId / cache values into new state)
 
 ---
 
@@ -50,6 +52,8 @@ Workstream 1 of ADR aggregation activation. Highway route/mileage must leave van
 8. AdrRegionsSystem: stop reading removed highwayId (default/empty)
 9. Road Grouping overlay/controller: walk ADR/vanilla without highway overrides
 10. Beta: on load ignore/drop leftover Aggregate highway components
+11. Remove unused fields from the Aggregate highway structs — delete the component types or strip every field (highwayDataId; startDistanceOverrideKm; reverseCounting; DirtyHwId). Do not keep empty obsolete field slots for those values.
+12. On load: ignore previously saved Aggregate highway data — drop/skip leftover components; do not read or convert old serialized highwayDataId / cache into live state. Beta OK.
 
 ---
 
