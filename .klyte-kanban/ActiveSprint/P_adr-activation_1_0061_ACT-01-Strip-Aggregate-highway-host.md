@@ -29,14 +29,14 @@ Workstream 1 of ADR aggregation activation. Highway route/mileage must leave van
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrHighwayRoutesSystem Aggregate-touching jobs removed (NewAggregateFiller, ReplicateAggregateSetting, CalculateHighwayCacheData, AggregationCacheEraser, InfoPanel Aggregate writes); highwaysDataRegistry CRUD + serialize kept
-- [ ] AdrHighwayRoutes2BSystem removed or gutted; AddressesCs2Mod registration updated if emptied
-- [ ] Consumers no longer read Aggregate highway Data/Cache: AdrNameSystemOverrides highway branch, BuildingUtilsOverrides, AdrRoadAddressNumbering, AdrRegionsSystem highwayId, Road Grouping overlay/controller numbering
-- [ ] HighwayRegisterManagement.tsx + registry APIs still compile and run (orphaned from Aggregate until later reattach epic)
-- [ ] Unused Aggregate highway fields are removed from the structs (ADRHighwayAggregationData.highwayDataId; CacheData.startDistanceOverrideKm and reverseCounting; DirtyHwId tag gone) — not left as dead serialized members
-- [ ] Previously saved Aggregate highway component data is ignored on load (no migration of old highwayDataId / cache values into new state)
-- [ ] Frontend/VUIO: remove fields, DTO properties, and bindings that only exist for Aggregate-hosted highway Data/Cache (e.g. Aggregate-linked highwayId / cache-driven UI) when those backend fields are gone — do not leave dead TS types or binders
-- [ ] Keep HighwayRegisterManagement.tsx + registry list APIs; do not strip marker route/mileage UI here (that is ACT-02)
+- [x] AdrHighwayRoutesSystem Aggregate-touching jobs removed (NewAggregateFiller, ReplicateAggregateSetting, CalculateHighwayCacheData, AggregationCacheEraser, InfoPanel Aggregate writes); highwaysDataRegistry CRUD + serialize kept
+- [x] AdrHighwayRoutes2BSystem removed or gutted; AddressesCs2Mod registration updated if emptied
+- [x] Consumers no longer read Aggregate highway Data/Cache: AdrNameSystemOverrides highway branch, BuildingUtilsOverrides, AdrRoadAddressNumbering, AdrRegionsSystem highwayId, Road Grouping overlay/controller numbering
+- [x] HighwayRegisterManagement.tsx + registry APIs still compile and run (orphaned from Aggregate until later reattach epic)
+- [x] Unused Aggregate highway fields are removed from the structs (ADRHighwayAggregationData.highwayDataId; CacheData.startDistanceOverrideKm and reverseCounting; DirtyHwId tag gone) — not left as dead serialized members
+- [x] Previously saved Aggregate highway component data is ignored on load (no migration of old highwayDataId / cache values into new state)
+- [x] Frontend/VUIO: remove fields, DTO properties, and bindings that only exist for Aggregate-hosted highway Data/Cache (e.g. Aggregate-linked highwayId / cache-driven UI) when those backend fields are gone — do not leave dead TS types or binders
+- [x] Keep HighwayRegisterManagement.tsx + registry list APIs; do not strip marker route/mileage UI here (that is ACT-02)
 
 ---
 
