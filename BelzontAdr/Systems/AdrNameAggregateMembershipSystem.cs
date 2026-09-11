@@ -1,8 +1,16 @@
 using Colossal.Entities;
+using Game.Common;
+using Game.Net;
 using Unity.Entities;
 
 namespace BelzontAdr
 {
+    public enum AdrNameAggregateForkEdit : byte
+    {
+        AddMember = 0,
+        RemoveMember = 1
+    }
+
     public partial class AdrNameAggregateMembershipSystem : SystemBase
     {
         public static AdrNameAggregateMembershipSystem Instance { get; private set; }
@@ -49,6 +57,102 @@ namespace BelzontAdr
                 AddMember(aggregate, edges[i]);
             }
             return aggregate;
+        }
+
+        public bool TryForkFromVanilla(
+            Entity vanillaAggregate,
+            AdrNameAggregateForkEdit edit,
+            Entity edge,
+            out Entity adrAggregate,
+            int insertIndex = -1)
+        {
+            adrAggregate = Entity.Null;
+
+            if (vanillaAggregate == Entity.Null
+                || !EntityManager.Exists(vanillaAggregate)
+                || !EntityManager.HasComponent<Aggregate>(vanillaAggregate)
+                || IsAdrNameAggregate(vanillaAggregate)
+                || edge == Entity.Null
+                || !EntityManager.Exists(edge)
+                || !EntityManager.TryGetBuffer(vanillaAggregate, true, out DynamicBuffer<AggregateElement> vanillaElements)
+                || vanillaElements.Length == 0)
+            {
+                return false;
+            }
+
+            bool edgeInVanilla = false;
+            for (int i = 0; i < vanillaElements.Length; i++)
+            {
+                if (vanillaElements[i].m_Edge == edge)
+                {
+                    edgeInVanilla = true;
+                    break;
+                }
+            }
+
+            switch (edit)
+            {
+                case AdrNameAggregateForkEdit.AddMember:
+                    if (edgeInVanilla)
+                    {
+                        return false;
+                    }
+                    break;
+                case AdrNameAggregateForkEdit.RemoveMember:
+                    if (!edgeInVanilla || vanillaElements.Length <= 1)
+                    {
+                        return false;
+                    }
+                    break;
+                default:
+                    return false;
+            }
+
+            if (!EntityManager.TryGetComponent(vanillaAggregate, out ADRRandomizationData vanillaSeed))
+            {
+                vanillaSeed = new ADRRandomizationData();
+                vanillaSeed.Redraw();
+                EntityManager.AddComponentData(vanillaAggregate, vanillaSeed);
+            }
+
+            adrAggregate = CreateAggregate();
+            var adrSeed = new ADRRandomizationData();
+            adrSeed.CopySeedFrom(vanillaSeed);
+            EntityManager.AddComponentData(adrAggregate, adrSeed);
+
+            vanillaSeed.Redraw();
+            EntityManager.SetComponentData(vanillaAggregate, vanillaSeed);
+            EnsureNameDirty(vanillaAggregate);
+            EnsureNameDirty(adrAggregate);
+
+            for (int i = 0; i < vanillaElements.Length; i++)
+            {
+                var memberEdge = vanillaElements[i].m_Edge;
+                if (memberEdge == Entity.Null || !EntityManager.Exists(memberEdge))
+                {
+                    continue;
+                }
+                AddMember(adrAggregate, memberEdge);
+            }
+
+            bool applied = edit switch
+            {
+                AdrNameAggregateForkEdit.AddMember => AddMember(adrAggregate, edge, insertIndex),
+                AdrNameAggregateForkEdit.RemoveMember => RemoveMember(adrAggregate, edge),
+                _ => false
+            };
+
+            if (!applied || !IsAdrNameAggregate(adrAggregate))
+            {
+                if (IsAdrNameAggregate(adrAggregate))
+                {
+                    DestroyAggregate(adrAggregate);
+                }
+                adrAggregate = Entity.Null;
+                return false;
+            }
+
+            return true;
         }
 
         public void DestroyAggregate(Entity aggregate)
@@ -317,6 +421,18 @@ namespace BelzontAdr
                 return;
             }
             EntityManager.RemoveComponent<ADRNameAggregated>(edge);
+        }
+
+        private void EnsureNameDirty(Entity entity)
+        {
+            if (!EntityManager.HasComponent<BatchesUpdated>(entity))
+            {
+                EntityManager.AddComponent<BatchesUpdated>(entity);
+            }
+            if (!EntityManager.HasComponent<Updated>(entity))
+            {
+                EntityManager.AddComponent<Updated>(entity);
+            }
         }
 
         private static int IndexOfEdge(DynamicBuffer<ADRNameAggregateElement> buffer, Entity edge)

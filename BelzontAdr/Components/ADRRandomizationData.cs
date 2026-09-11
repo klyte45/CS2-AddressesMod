@@ -19,6 +19,11 @@ namespace BelzontAdr
             m_seedIdentifier = AdrNamesetSystem.Instance.GetNextSeed();
         }
 
+        public void CopySeedFrom(in ADRRandomizationData other)
+        {
+            m_seedIdentifier = other.m_seedIdentifier;
+        }
+
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);

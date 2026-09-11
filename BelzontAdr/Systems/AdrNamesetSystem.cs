@@ -142,6 +142,7 @@ namespace BelzontAdr
                         Any = new ComponentType[]
                         {
                             ComponentType.ReadOnly<Aggregate>(),
+                            ComponentType.ReadOnly<ADRNameAggregate>(),
                             ComponentType.ReadOnly<Household>(),
                             ComponentType.ReadOnly<HouseholdPet>(),
                             ComponentType.ReadOnly<Citizen>(),
