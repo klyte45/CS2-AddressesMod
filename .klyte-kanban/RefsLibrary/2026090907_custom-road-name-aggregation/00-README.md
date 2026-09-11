@@ -4,7 +4,7 @@
 
 Reference pack for **player-customizable road name aggregation**, implemented as an **ADR-owned parallel system** that does **not** override vanilla `AggregateSystem` / `Aggregated` / `Aggregate` lifecycle.
 
-This pack is **documentation only**. It does not ship product code. Kanban tasks for activation are **catalogued in [13](13-activation-sprint-roadmap.md)** for manual import — this pack does not create board items.
+This pack is **documentation only** for research/design. Activation Kanban tasks live in **Sprint 012** (`adr-activation`, board IDs **0061–0068**) — catalog detail in [13](13-activation-sprint-roadmap.md).
 
 ## Scope
 
@@ -32,7 +32,7 @@ This pack is **documentation only**. It does not ship product code. Kanban tasks
 | Fork / seed (activation) | First membership edit forks ADR: copy vanilla seed → ADR; `Redraw` vanilla; full `AggregateElement` copy then apply edit; split naming after fork. See [12](12-activation-change-map.md) |
 | Initial UX | **Net-only Road Grouping tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. Spec: [09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md); activation: [12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md) |
 | Tool naming | Product/code: **Road Grouping** (`AdrRoadGrouping*`). Doc [08](08-association-tool-first-ux.md) keeps historical “association” filename |
-| Pack depth | Analysis + design + tool specs + **activation change-map / single-sprint catalog** — board creation only if separately requested |
+| Pack depth | Analysis + design + tool specs + **activation change-map / Sprint 012 catalog** |
 | Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR; BelzontWE for tool scaffold |
 
 ## Reading order
