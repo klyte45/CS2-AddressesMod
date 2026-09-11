@@ -10,10 +10,10 @@ Have the basics of the Road Grouping tool working (T0–T3): activate tool, sele
 
 - **Sprint number**: 011
 - **Start date**: 2026-09-09 18:30 -0300
-- **End date**:
+- **End date**: 2026-09-10 22:18 -0300
 - **Original tasks**: 04
 - **Original task IDs**: [0054], [0055], [0056], [0057]
-- **Delivered tasks (from original)**:
+- **Delivered tasks (from original)**: 4
 - **Added tasks**: 0
-- **Delivered tasks (from added)**:
-- **Total delivered tasks**:
+- **Delivered tasks (from added)**: 0
+- **Total delivered tasks**: 4
