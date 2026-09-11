@@ -9,11 +9,14 @@ namespace BelzontAdr.Bridge
     {
         private static AdrHighwayRoutesSystem m_highwaySystem;
 
+        /// <summary>
+        /// Marker route/mileage identity removed (visual-only markers).To be reimplemented when Highway settings get supported on custom aggregations.
+        /// </summary>
         public static (Colossal.Hash128 routeDataIndex, int routeDirection, int numericCustomParam1, int numericCustomParam2) DesconstructRoadMarkerData(Entity e)
         {
             return !World.DefaultGameObjectInjectionWorld.EntityManager.TryGetComponent<ADRHighwayMarkerData>(e, out var component)
                         ? default
-                        : (component.routeDataIndex, (int)component.routeDirection, component.numericCustomParam1, component.numericCustomParam2);
+                        : (default, default, component.numericCustomParam1, component.numericCustomParam2);
         }
 
         public static (string prefix, string suffix, string fullName) GetHighwayRouteNamings(Colossal.Hash128 routeIndex)

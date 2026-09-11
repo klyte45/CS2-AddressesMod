@@ -1,7 +1,6 @@
 ﻿using Belzont.Utils;
 using Colossal.Serialization.Entities;
 using System.Collections.Generic;
-using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
@@ -9,18 +8,11 @@ namespace BelzontAdr
 {
     public struct ADRHighwayMarkerData : IComponentData, ISerializable
     {
-        const uint CURRENT_VERSION = 2;
+        const uint CURRENT_VERSION = 3;
 
-        public Colossal.Hash128 routeDataIndex;
-
-        public RouteDirection routeDirection;
         public DisplayInformation displayInformation;
         public int numericCustomParam1;
         public int numericCustomParam2;
-
-        public bool overrideMileage;
-        public float newMileage;
-        public bool reverseMileageCounting;
 
         public byte pylonCount;
         public float pylonSpacing;
@@ -40,21 +32,6 @@ namespace BelzontAdr
                     initialized = value;
                 }
             }
-        }
-
-        public enum RouteDirection
-        {
-            UNDEFINED,
-            NORTH,
-            NORTHEAST,
-            EAST,
-            SOUTHEAST,
-            SOUTH,
-            SOUTHWEST,
-            WEST,
-            NORTHWEST,
-            INTERNAL,
-            EXTERNAL
         }
 
         public enum DisplayInformation
@@ -84,14 +61,24 @@ namespace BelzontAdr
         public void Deserialize<TReader>(TReader reader) where TReader : IReader
         {
             var version = reader.CheckVersionK45(CURRENT_VERSION, typeof(ADRHighwayMarkerData));
-            reader.Read(out routeDataIndex);
-            reader.Read(out routeDirection);
-            reader.Read(out displayInformation);
-            reader.Read(out numericCustomParam1);
-            reader.Read(out numericCustomParam2);
-            reader.Read(out overrideMileage);
-            reader.Read(out newMileage);
-            reader.Read(out reverseMileageCounting);
+            if (version < 3)
+            {
+                // Discard pre-v3 route/mileage identity; keep visual display fields.
+                reader.Read(out Colossal.Hash128 _); // was routeDataIndex
+                reader.Read(out string _); // was RouteDirection (enum as string)
+                reader.Read(out displayInformation);
+                reader.Read(out numericCustomParam1);
+                reader.Read(out numericCustomParam2);
+                reader.Read(out bool _); // was overrideMileage
+                reader.Read(out float _); // was newMileage
+                reader.Read(out bool _); // was reverseMileageCounting
+            }
+            else
+            {
+                reader.Read(out displayInformation);
+                reader.Read(out numericCustomParam1);
+                reader.Read(out numericCustomParam2);
+            }
             if (version >= 2)
             {
                 reader.Read(out pylonCount);
@@ -114,14 +101,9 @@ namespace BelzontAdr
         public void Serialize<TWriter>(TWriter writer) where TWriter : IWriter
         {
             writer.Write(CURRENT_VERSION);
-            writer.Write(routeDataIndex);
-            writer.Write(routeDirection);
             writer.Write(displayInformation);
             writer.Write(numericCustomParam1);
             writer.Write(numericCustomParam2);
-            writer.Write(overrideMileage);
-            writer.Write(newMileage);
-            writer.Write(reverseMileageCounting);
             writer.Write(pylonCount);
             writer.Write(pylonSpacing);
             writer.Write(pylonMaterial);

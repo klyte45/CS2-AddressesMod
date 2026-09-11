@@ -3,7 +3,6 @@ import { toEntityTyped, VanillaComponentResolver, VanillaWidgets } from "@klyte4
 import useAsyncMemo from "@klyte45/vuio-commons/src/utils/useAsyncMemo";
 import { selectedInfo } from "cs2/bindings";
 import { useEffect, useState } from "react";
-import { LocalizationStrings, default as routesSystem } from "service/AdrHighwayRoutesSystem";
 import AdrVehicleSpawnerSystem, { VehicleSourceKind } from "service/AdrVehicleSpawnerSystem";
 import { translate } from "utility/translate";
 

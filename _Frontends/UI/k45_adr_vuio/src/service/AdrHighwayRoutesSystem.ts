@@ -1,36 +1,24 @@
 import { MultiUIValueBinding, MultiUIValueBindingTools } from "@klyte45/vuio-commons";
-import { LocElement } from "cs2/l10n";
 import { ObjectTyped } from "object-typed";
 
 const AdrHighwayRoutesSystem = {
     _prefix: "k45::adr.highwayRoutes",
-    Tool_RouteId: MultiUIValueBinding<string>,
-    Tool_RouteDirection: MultiUIValueBinding<number>,
     Tool_DisplayInformation: MultiUIValueBinding<number>,
     Tool_NumericCustomParam1: MultiUIValueBinding<number>,
     Tool_NumericCustomParam2: MultiUIValueBinding<number>,
-    Tool_NewMileage: MultiUIValueBinding<number>,
-    Tool_OverrideMileage: MultiUIValueBinding<boolean>,
-    Tool_ReverseMileageCounting: MultiUIValueBinding<boolean>,
     Tool_PylonCount: MultiUIValueBinding<number>,
     Tool_PylonSpacing: MultiUIValueBinding<number>,
     Tool_PylonMaterial: MultiUIValueBinding<number>,
     Tool_PylonHeight: MultiUIValueBinding<number>,
     Tool_PylonFormat: MultiUIValueBinding<number>,
-    InfoPanel_RouteId: MultiUIValueBinding<string>,
-    InfoPanel_RouteDirection: MultiUIValueBinding<number>,
     InfoPanel_DisplayInformation: MultiUIValueBinding<number>,
     InfoPanel_NumericCustomParam1: MultiUIValueBinding<number>,
     InfoPanel_NumericCustomParam2: MultiUIValueBinding<number>,
-    InfoPanel_NewMileage: MultiUIValueBinding<number>,
-    InfoPanel_OverrideMileage: MultiUIValueBinding<boolean>,
-    InfoPanel_ReverseMileageCounting: MultiUIValueBinding<boolean>,
     InfoPanel_PylonCount: MultiUIValueBinding<number>,
     InfoPanel_PylonSpacing: MultiUIValueBinding<number>,
     InfoPanel_PylonMaterial: MultiUIValueBinding<number>,
     InfoPanel_PylonHeight: MultiUIValueBinding<number>,
     InfoPanel_PylonFormat: MultiUIValueBinding<number>,
-
 }
 
 export default {
@@ -59,7 +47,6 @@ export default {
                     || (value.size + value.position) > 31
                     || ![AdrFieldType.NUMBER, AdrFieldType.SELECTION].includes(value.type)
                 ) {
-                    // console.log(x[0], "invalid basic", x[1])
                     return false;
                 }
                 if (value.type == AdrFieldType.NUMBER) {
@@ -67,7 +54,6 @@ export default {
                         (value.max && typeof value.max != "number")
                         || (value.min && typeof value.min != "number")
                     ) {
-                        // console.log(x[0], "invalid num")
                         return false;
                     }
                 }
@@ -75,12 +61,10 @@ export default {
                     if (typeof value.options != 'object'
                         && ObjectTyped.entries(value.options).some(x => isNaN(parseInt(x[0] as string)) || typeof x[1] != 'string')
                     ) {
-                        // console.log(x[0], "invalid sel")
                         return false;
                     }
                 }
                 if (value.condition != undefined && !validateCondition(value.condition, validKeys)) {
-                    // console.log(x[0], "invalid cond")
                     return false;
                 }
                 return true;
@@ -89,20 +73,6 @@ export default {
         }
         return null;
     }
-}
-
-export enum RouteDirection {
-    UNDEFINED,
-    NORTH,
-    NORTHEAST,
-    EAST,
-    SOUTHEAST,
-    SOUTH,
-    SOUTHWEST,
-    WEST,
-    NORTHWEST,
-    INTERNAL,
-    EXTERNAL
 }
 
 export enum PylonFormat {
@@ -125,19 +95,7 @@ export enum DisplayInformation {
     CUSTOM_7
 }
 
-export type RouteItem = {
-    name: string,
-    id: string
-}
-
 export const LocalizationStrings = {
-    routeIdentifier: "RoadMarkSettings.RouteIdentifier",
-    routeDirection: "RoadMarkSettings.RouteDirection",
-    overrideMileage: "RoadMarkSettings.OverrideMileage",
-    overrideMileageShort: "RoadMarkSettings.OverrideMileageShort",
-    overrideMileageToggleButton: "RoadMarkSettings.OverrideMileageToggleButton",
-    newMileage: "RoadMarkSettings.NewMileage",
-    reverseMileageCounting: "RoadMarkSettings.ReverseMileageCounting",
     displayInformation: "RoadMarkSettings.DisplayInformation",
     customParam1: "RoadMarkSettings.CustomParam1",
     customParams: "RoadMarkSettings.CustomParams",
@@ -178,7 +136,6 @@ function validateCondition(item: any, validProperties: string[]): boolean {
             case "gt":
             case "lt":
                 if (value.length != 2 || !validProperties.includes(value[0]) || typeof value[1] != 'number') {
-                    // console.log(item, "invalid cond")
                     return false;
                 }
                 return true;

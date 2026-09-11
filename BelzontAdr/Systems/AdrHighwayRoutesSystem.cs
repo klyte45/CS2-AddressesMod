@@ -27,7 +27,6 @@ using Colossal.Core;
 
 
 
-
 #if BURST
 using Unity.Burst;
 #endif
@@ -102,14 +101,9 @@ namespace BelzontAdr
         #endregion
 
         #region Tool controller part
-        public MultiUIValueBinding<Colossal.Hash128, string> Tool_RouteId { get; private set; }
-        public MultiUIValueBinding<RouteDirection, int> Tool_RouteDirection { get; private set; }
         public MultiUIValueBinding<DisplayInformation, int> Tool_DisplayInformation { get; private set; }
         public MultiUIValueBinding<int> Tool_NumericCustomParam1 { get; private set; }
         public MultiUIValueBinding<int> Tool_NumericCustomParam2 { get; private set; }
-        public MultiUIValueBinding<float> Tool_NewMileage { get; private set; }
-        public MultiUIValueBinding<bool> Tool_OverrideMileage { get; private set; }
-        public MultiUIValueBinding<bool> Tool_ReverseMileageCounting { get; private set; }
         public MultiUIValueBinding<byte> Tool_PylonCount { get; private set; }
         public MultiUIValueBinding<float> Tool_PylonSpacing { get; private set; }
         public MultiUIValueBinding<PylonMaterial, int> Tool_PylonMaterial { get; private set; }
@@ -129,14 +123,9 @@ namespace BelzontAdr
 
         private void DoInitValueBindings_Tool(Action<string, object[]> EventCaller, Action<string, Delegate> CallBinder)
         {
-            Tool_RouteId = new(m_dataForNewItem.routeDataIndex, $"{PREFIX}{nameof(Tool_RouteId)}", EventCaller, CallBinder, (x, _) => x.ToString(), (x, _) => Colossal.Hash128.Parse(x));
-            Tool_RouteDirection = new(m_dataForNewItem.routeDirection, $"{PREFIX}{nameof(Tool_RouteDirection)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (RouteDirection)x);
             Tool_DisplayInformation = new(m_dataForNewItem.displayInformation, $"{PREFIX}{nameof(Tool_DisplayInformation)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (DisplayInformation)x);
             Tool_NumericCustomParam1 = new(m_dataForNewItem.numericCustomParam1, $"{PREFIX}{nameof(Tool_NumericCustomParam1)}", EventCaller, CallBinder);
             Tool_NumericCustomParam2 = new(m_dataForNewItem.numericCustomParam2, $"{PREFIX}{nameof(Tool_NumericCustomParam2)}", EventCaller, CallBinder);
-            Tool_NewMileage = new(m_dataForNewItem.newMileage, $"{PREFIX}{nameof(Tool_NewMileage)}", EventCaller, CallBinder);
-            Tool_OverrideMileage = new(m_dataForNewItem.overrideMileage, $"{PREFIX}{nameof(Tool_OverrideMileage)}", EventCaller, CallBinder);
-            Tool_ReverseMileageCounting = new(m_dataForNewItem.reverseMileageCounting, $"{PREFIX}{nameof(Tool_ReverseMileageCounting)}", EventCaller, CallBinder);
             Tool_PylonCount = new(m_dataForNewItem.pylonCount, $"{PREFIX}{nameof(Tool_PylonCount)}", EventCaller, CallBinder);
             Tool_PylonSpacing = new(m_dataForNewItem.pylonSpacing, $"{PREFIX}{nameof(Tool_PylonSpacing)}", EventCaller, CallBinder);
             Tool_PylonMaterial = new(m_dataForNewItem.pylonMaterial, $"{PREFIX}{nameof(Tool_PylonMaterial)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (PylonMaterial)x);
@@ -146,14 +135,9 @@ namespace BelzontAdr
 
             CallBinder($"{PREFIX}isCurrentPrefabRoadMarker", IsCurrentPrefabRoadMarker);
 
-            Tool_RouteId.OnScreenValueChanged += (x) => { m_dataForNewItem.routeDataIndex = x; MarkTempMarksDirty(); };
-            Tool_RouteDirection.OnScreenValueChanged += (x) => { m_dataForNewItem.routeDirection = x; MarkTempMarksDirty(); };
             Tool_DisplayInformation.OnScreenValueChanged += (x) => { m_dataForNewItem.displayInformation = x; MarkTempMarksDirty(); };
             Tool_NumericCustomParam1.OnScreenValueChanged += (x) => { m_dataForNewItem.numericCustomParam1 = x; MarkTempMarksDirty(); };
             Tool_NumericCustomParam2.OnScreenValueChanged += (x) => { m_dataForNewItem.numericCustomParam2 = x; MarkTempMarksDirty(); };
-            Tool_NewMileage.OnScreenValueChanged += (x) => { m_dataForNewItem.newMileage = x; MarkTempMarksDirty(); };
-            Tool_OverrideMileage.OnScreenValueChanged += (x) => { m_dataForNewItem.overrideMileage = x; MarkTempMarksDirty(); };
-            Tool_ReverseMileageCounting.OnScreenValueChanged += (x) => { m_dataForNewItem.reverseMileageCounting = x; MarkTempMarksDirty(); };
             Tool_PylonCount.OnScreenValueChanged += (x) => { m_dataForNewItem.pylonCount = (byte)math.clamp(x, 1, 2); MarkTempMarksDirty(); };
             Tool_PylonSpacing.OnScreenValueChanged += (x) => { m_dataForNewItem.pylonSpacing = math.clamp(x, 0.05f, 3f); MarkTempMarksDirty(); };
             Tool_PylonMaterial.OnScreenValueChanged += (x) => { m_dataForNewItem.pylonMaterial = x; MarkTempMarksDirty(); };
@@ -174,14 +158,9 @@ namespace BelzontAdr
 
         private SelectedInfoUISystem m_selectedInfoUISystem;
 
-        public MultiUIValueBinding<Colossal.Hash128, string> InfoPanel_RouteId { get; private set; }
-        public MultiUIValueBinding<RouteDirection, int> InfoPanel_RouteDirection { get; private set; }
         public MultiUIValueBinding<DisplayInformation, int> InfoPanel_DisplayInformation { get; private set; }
         public MultiUIValueBinding<int> InfoPanel_NumericCustomParam1 { get; private set; }
         public MultiUIValueBinding<int> InfoPanel_NumericCustomParam2 { get; private set; }
-        public MultiUIValueBinding<float> InfoPanel_NewMileage { get; private set; }
-        public MultiUIValueBinding<bool> InfoPanel_OverrideMileage { get; private set; }
-        public MultiUIValueBinding<bool> InfoPanel_ReverseMileageCounting { get; private set; }
         public MultiUIValueBinding<int> InfoPanel_PylonCount { get; private set; }
         public MultiUIValueBinding<float> InfoPanel_PylonSpacing { get; private set; }
         public MultiUIValueBinding<PylonMaterial, int> InfoPanel_PylonMaterial { get; private set; }
@@ -191,15 +170,9 @@ namespace BelzontAdr
 
         private void DoInitValueBindings_InfoPanel(Action<string, object[]> EventCaller, Action<string, Delegate> CallBinder)
         {
-
-            InfoPanel_RouteId = new(default, $"{PREFIX}{nameof(InfoPanel_RouteId)}", EventCaller, CallBinder, (x, _) => x.ToString(), (x, _) => Colossal.Hash128.Parse(x));
-            InfoPanel_RouteDirection = new(default, $"{PREFIX}{nameof(InfoPanel_RouteDirection)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (RouteDirection)x);
             InfoPanel_DisplayInformation = new(default, $"{PREFIX}{nameof(InfoPanel_DisplayInformation)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (DisplayInformation)x);
             InfoPanel_NumericCustomParam1 = new(default, $"{PREFIX}{nameof(InfoPanel_NumericCustomParam1)}", EventCaller, CallBinder);
             InfoPanel_NumericCustomParam2 = new(default, $"{PREFIX}{nameof(InfoPanel_NumericCustomParam2)}", EventCaller, CallBinder);
-            InfoPanel_NewMileage = new(default, $"{PREFIX}{nameof(InfoPanel_NewMileage)}", EventCaller, CallBinder);
-            InfoPanel_OverrideMileage = new(default, $"{PREFIX}{nameof(InfoPanel_OverrideMileage)}", EventCaller, CallBinder);
-            InfoPanel_ReverseMileageCounting = new(default, $"{PREFIX}{nameof(InfoPanel_ReverseMileageCounting)}", EventCaller, CallBinder);
             InfoPanel_PylonCount = new(default, $"{PREFIX}{nameof(InfoPanel_PylonCount)}", EventCaller, CallBinder);
             InfoPanel_PylonSpacing = new(default, $"{PREFIX}{nameof(InfoPanel_PylonSpacing)}", EventCaller, CallBinder);
             InfoPanel_PylonMaterial = new(default, $"{PREFIX}{nameof(InfoPanel_PylonMaterial)}", EventCaller, CallBinder, (x, _) => (int)x, (x, _) => (PylonMaterial)x);
@@ -221,18 +194,9 @@ namespace BelzontAdr
 
             MainThreadDispatcher.RegisterUpdater(registerSelfOnUI);
 
-            InfoPanel_RouteId.OnScreenValueChanged += (x) => EnqueueModification<Colossal.Hash128, ADRHighwayMarkerData>(x, (x, currentItem, entity) =>
-            {
-                currentItem.routeDataIndex = x;
-                return currentItem;
-            });
-            InfoPanel_RouteDirection.OnScreenValueChanged += (x) => EnqueueModification<RouteDirection, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.routeDirection = x; return currentItem; });
             InfoPanel_DisplayInformation.OnScreenValueChanged += (x) => EnqueueModification<DisplayInformation, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.displayInformation = x; return currentItem; });
             InfoPanel_NumericCustomParam1.OnScreenValueChanged += (x) => EnqueueModification<int, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.numericCustomParam1 = x; return currentItem; });
             InfoPanel_NumericCustomParam2.OnScreenValueChanged += (x) => EnqueueModification<int, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.numericCustomParam2 = x; return currentItem; });
-            InfoPanel_NewMileage.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.newMileage = x; return currentItem; });
-            InfoPanel_OverrideMileage.OnScreenValueChanged += (x) => EnqueueModification<bool, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.overrideMileage = x; return currentItem; });
-            InfoPanel_ReverseMileageCounting.OnScreenValueChanged += (x) => EnqueueModification<bool, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.reverseMileageCounting = x; return currentItem; });
             InfoPanel_PylonCount.OnScreenValueChanged += (x) => EnqueueModification<byte, ADRHighwayMarkerData>((byte)x, (x, currentItem, _) => { currentItem.pylonCount = (byte)math.clamp(x, 1, 2); return currentItem; });
             InfoPanel_PylonSpacing.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonSpacing = math.clamp(x, 0.05f, 3f); return currentItem; });
             InfoPanel_PylonMaterial.OnScreenValueChanged += (x) => EnqueueModification<PylonMaterial, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonMaterial = x; return currentItem; });
@@ -247,14 +211,9 @@ namespace BelzontAdr
             {
                 m_executionQueue.Enqueue(() =>
                 {
-                    InfoPanel_RouteId.Value = component.routeDataIndex;
-                    InfoPanel_RouteDirection.Value = component.routeDirection;
                     InfoPanel_DisplayInformation.Value = component.displayInformation;
                     InfoPanel_NumericCustomParam1.Value = component.numericCustomParam1;
                     InfoPanel_NumericCustomParam2.Value = component.numericCustomParam2;
-                    InfoPanel_NewMileage.Value = component.newMileage;
-                    InfoPanel_OverrideMileage.Value = component.overrideMileage;
-                    InfoPanel_ReverseMileageCounting.Value = component.reverseMileageCounting;
                     InfoPanel_PylonCount.Value = component.pylonCount;
                     InfoPanel_PylonSpacing.Value = component.pylonSpacing;
                     InfoPanel_PylonMaterial.Value = component.pylonMaterial;
