@@ -174,6 +174,16 @@ namespace BelzontAdr
             refRoad = math.length(geom0.m_Bounds.min) < math.length(geomLast.m_Bounds.min) ? elements[0].m_Edge : elements[^1].m_Edge;
             return true;
         }
+
+        public bool FindReferenceRoad(Entity entity, out DynamicBuffer<ADRNameAggregateElement> elements, out Entity refRoad)
+        {
+            refRoad = default;
+            if (!EntityManager.TryGetBuffer(entity, true, out elements) || elements.Length == 0) return false;
+            if (!EntityManager.TryGetComponent<EdgeGeometry>(elements[0].m_Edge, out var geom0)) return false;
+            if (!EntityManager.TryGetComponent<EdgeGeometry>(elements[^1].m_Edge, out var geomLast)) return false;
+            refRoad = math.length(geom0.m_Bounds.min) < math.length(geomLast.m_Bounds.min) ? elements[0].m_Edge : elements[^1].m_Edge;
+            return true;
+        }
         public bool GetRoadNameList(Entity refRoad, out AdrNameFile roadsNamesList)
         {
             Entity refDistrict = EntityManager.TryGetComponent<BorderDistrict>(refRoad, out var refDistrictBorders) ? refDistrictBorders.m_Left == default ? refDistrictBorders.m_Right : refDistrictBorders.m_Left : default;

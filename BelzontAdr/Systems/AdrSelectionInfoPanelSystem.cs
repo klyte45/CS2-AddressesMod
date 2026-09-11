@@ -118,7 +118,9 @@ namespace BelzontAdr
                 {
                     if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have Aggregated and Road");
                     result.type = AdrEntityType.RoadAggregation;
-                    result.entityValue = agg.m_Aggregate;
+                    result.entityValue = AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, e, out var adrAggregate)
+                        ? adrAggregate
+                        : agg.m_Aggregate;
                 }
                 else
                 {
@@ -126,7 +128,7 @@ namespace BelzontAdr
                 }
                 resultList.Add(result);
             }
-            if (EntityManager.HasComponent<Aggregate>(e))
+            if (EntityManager.HasComponent<Aggregate>(e) || EntityManager.HasComponent<ADRNameAggregate>(e))
             {
                 var result = new AdrEntityData
                 {
@@ -134,9 +136,12 @@ namespace BelzontAdr
                 };
                 if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is Aggregate");
                 result.type = AdrEntityType.RoadAggregation;
-                if (mainSystem.FindReferenceRoad(e, out _, out var refRoad))
+                bool foundRef = EntityManager.HasComponent<ADRNameAggregate>(e)
+                    ? mainSystem.FindReferenceRoad(e, out DynamicBuffer<ADRNameAggregateElement> _, out var refRoadAdr)
+                    : mainSystem.FindReferenceRoad(e, out DynamicBuffer<AggregateElement> _, out refRoadAdr);
+                if (foundRef)
                 {
-                    result.hasCustomNameList = mainSystem.GetRoadNameList(refRoad, out var namesList);
+                    result.hasCustomNameList = mainSystem.GetRoadNameList(refRoadAdr, out var namesList);
                     if (result.hasCustomNameList)
                     {
                         result.customNameListName = namesList.Name;
@@ -245,7 +250,17 @@ namespace BelzontAdr
             nodesToMap.Enqueue(edge.m_Start);
             nodesToMap.Enqueue(edge.m_End);
             roadsMapped.Add(buildingData.m_RoadEdge);
-            if (EntityManager.TryGetComponent<Aggregated>(buildingData.m_RoadEdge, out var starterAgg)) result.Add(starterAgg.m_Aggregate);
+            if (EntityManager.TryGetComponent<Aggregated>(buildingData.m_RoadEdge, out var starterAgg))
+            {
+                if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, buildingData.m_RoadEdge, out var starterAdr))
+                {
+                    result.Add(starterAdr);
+                }
+                else
+                {
+                    result.Add(starterAgg.m_Aggregate);
+                }
+            }
             var maxHops = 30;
             while (maxHops-- > 0 && nodesToMap.TryDequeue(out Entity nextItem))
             {
@@ -264,8 +279,14 @@ namespace BelzontAdr
                     {
                         nodesToMap.Enqueue(edgeItem.m_End);
                     }
-                    if (!EntityManager.TryGetComponent<Aggregated>(item.m_Edge, out var agg)) continue;
-                    result.Add(agg.m_Aggregate);
+                    if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, item.m_Edge, out var adrAgg))
+                    {
+                        result.Add(adrAgg);
+                    }
+                    else if (EntityManager.TryGetComponent<Aggregated>(item.m_Edge, out var agg))
+                    {
+                        result.Add(agg.m_Aggregate);
+                    }
                 }
             }
             return result;

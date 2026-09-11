@@ -30,13 +30,13 @@ Workstream 4. After fork exists, naming and addressing must prefer ADR when an e
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrNameSystemOverrides: if ADRNameAggregated present, name the ADR entity; else vanilla Aggregate; FindReferenceRoad walks ADR buffer when linked
-- [ ] BuildingUtilsOverrides GetAddress walks ADRNameAggregateElement when linked; road entity returned is ADR aggregate; respects numberOverrideActive/numberOverride; no highway cache
-- [ ] AdrRoadAddressNumbering uses same ADR membership resolution for Road Grouping card ranges
-- [ ] AdrSelectionInfoPanelSystem targets ADR entity when edge has ADR link (RoadAggregation / seed UI)
-- [ ] SeedManagementOptions / AddressesInfoOptionsComponent work when backend returns ADR as naming entity
-- [ ] Station / road-options lists prefer ADR aggregates when present
-- [ ] Split naming after fork verified: leftover vanilla edges get S2 name; ADR members get ADR name
+- [x] AdrNameSystemOverrides: if ADRNameAggregated present, name the ADR entity; else vanilla Aggregate; FindReferenceRoad walks ADR buffer when linked
+- [x] BuildingUtilsOverrides GetAddress walks ADRNameAggregateElement when linked; road entity returned is ADR aggregate; respects numberOverrideActive/numberOverride; no highway cache
+- [x] AdrRoadAddressNumbering uses same ADR membership resolution for Road Grouping card ranges
+- [x] AdrSelectionInfoPanelSystem targets ADR entity when edge has ADR link (RoadAggregation / seed UI)
+- [x] SeedManagementOptions / AddressesInfoOptionsComponent work when backend returns ADR as naming entity
+- [x] Station / road-options lists prefer ADR aggregates when present
+- [x] Split naming after fork verified: leftover vanilla edges get S2 name; ADR members get ADR name
 
 ---
 

@@ -306,7 +306,7 @@ namespace BelzontAdr
                         return true;
                 }
             }
-            if (entityManager.HasComponent<Aggregate>(entity))
+            if (entityManager.HasComponent<Aggregate>(entity) || entityManager.HasComponent<ADRNameAggregate>(entity))
             {
                 var shallRunOrignal = GetAggregateName(out var pattern, out var genName, entity);
                 if (!shallRunOrignal)
@@ -457,7 +457,9 @@ namespace BelzontAdr
                         };
                         entityCommandBuffer.AddComponent(aggNextItem.m_Aggregate, aggregationStationRef);
                     }
-                    refAggregate = aggNextItem.m_Aggregate;
+                    refAggregate = AdrRoadAddressNumbering.TryGetAdrAggregate(entityManager, nextItem, out var adrAggregate)
+                        ? adrAggregate
+                        : aggNextItem.m_Aggregate;
                     break;
                 }
             }
@@ -471,7 +473,41 @@ namespace BelzontAdr
             name = format = null;
             if (m_nameSystem.TryGetCustomName(entity, out _)) return true;
 
-            if (!adrMainSystem.FindReferenceRoad(entity, out DynamicBuffer<AggregateElement> elements, out Entity refRoad)) return true;
+            Entity refRoad;
+            bool fullBridge = true;
+            bool anyElevated = false;
+
+            if (entityManager.HasComponent<ADRNameAggregate>(entity))
+            {
+                if (!adrMainSystem.FindReferenceRoad(entity, out DynamicBuffer<ADRNameAggregateElement> adrElements, out refRoad)) return true;
+                for (int i = 0; i < adrElements.Length; i++)
+                {
+                    if (entityManager.TryGetComponent<Game.Net.Elevation>(adrElements[i].m_Edge, out var elevData) && elevData.m_Elevation[0] >= 6)
+                    {
+                        anyElevated = true;
+                    }
+                    else
+                    {
+                        fullBridge = false;
+                    }
+                }
+            }
+            else
+            {
+                if (!adrMainSystem.FindReferenceRoad(entity, out DynamicBuffer<AggregateElement> elements, out refRoad)) return true;
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    if (entityManager.TryGetComponent<Game.Net.Elevation>(elements[i].m_Edge, out var elevData) && elevData.m_Elevation[0] >= 6)
+                    {
+                        anyElevated = true;
+                    }
+                    else
+                    {
+                        fullBridge = false;
+                    }
+                }
+            }
+
             if (!adrMainSystem.GetRoadNameList(refRoad, out var roadsNamesList)) return true;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;
             if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData))
@@ -480,19 +516,6 @@ namespace BelzontAdr
                 {
                     roadData.m_Flags = (Game.Prefabs.RoadFlags)((int)trackData.m_TrackType << 16);//rail track
                     roadData.m_SpeedLimit = trackData.m_SpeedLimit;
-                }
-            }
-            var fullBridge = true;
-            var anyElevated = false;
-            for (int i = 0; i < elements.Length; i++)
-            {
-                if (entityManager.TryGetComponent<Game.Net.Elevation>(elements[i].m_Edge, out var elevData) && elevData.m_Elevation[0] >= 6)
-                {
-                    anyElevated = true;
-                }
-                else
-                {
-                    fullBridge = false;
                 }
             }
 
