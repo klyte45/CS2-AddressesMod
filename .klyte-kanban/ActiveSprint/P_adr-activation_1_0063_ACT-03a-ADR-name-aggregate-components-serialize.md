@@ -1,7 +1,7 @@
+**Start time:** 2026-09-11 14:29 -0300
 # [0063] ACT-03a-ADR-name-aggregate-components-serialize
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/12-activation-change-map.md §A1
