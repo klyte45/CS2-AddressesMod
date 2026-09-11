@@ -29,11 +29,9 @@ Workstream 1 of ADR aggregation activation. Highway route/mileage must leave van
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ADRHighwayAggregationData, ADRHighwayAggregationDataDirtyHwId, and ADRHighwayAggregationCacheData are deleted or fully obsolete with no writers
 - [ ] AdrHighwayRoutesSystem Aggregate-touching jobs removed (NewAggregateFiller, ReplicateAggregateSetting, CalculateHighwayCacheData, AggregationCacheEraser, InfoPanel Aggregate writes); highwaysDataRegistry CRUD + serialize kept
 - [ ] AdrHighwayRoutes2BSystem removed or gutted; AddressesCs2Mod registration updated if emptied
 - [ ] Consumers no longer read Aggregate highway Data/Cache: AdrNameSystemOverrides highway branch, BuildingUtilsOverrides, AdrRoadAddressNumbering, AdrRegionsSystem highwayId, Road Grouping overlay/controller numbering
-- [ ] Load path ignores/drops leftover Aggregate highway components
 - [ ] HighwayRegisterManagement.tsx + registry APIs still compile and run (orphaned from Aggregate until later reattach epic)
 - [ ] Unused Aggregate highway fields are removed from the structs (ADRHighwayAggregationData.highwayDataId; CacheData.startDistanceOverrideKm and reverseCounting; DirtyHwId tag gone) — not left as dead serialized members
 - [ ] Previously saved Aggregate highway component data is ignored on load (no migration of old highwayDataId / cache values into new state)

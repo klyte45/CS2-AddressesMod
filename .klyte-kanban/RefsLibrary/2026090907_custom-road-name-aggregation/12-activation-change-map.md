@@ -13,7 +13,7 @@ Supersedes “thin contract” as the next backend step. Road Grouping T0–T3 i
 | Seed rule | Copy vanilla `ADRRandomizationData` seed → ADR; **`Redraw()`** vanilla Aggregate |
 | Fork buffer init | **Full** vanilla `AggregateElement` copy into ADR buffer, **then** apply first edit |
 | Naming after fork | **Split:** non-ADR edges → vanilla Aggregate name (new seed); ADR-linked edges → ADR name (copied seed) |
-| Highway on Aggregate | **Remove** now (not migrate in this wave) |
+| Highway on Aggregate | **Remove** now (not migrate in this wave): delete Aggregate highway struct fields/types; **ignore** previously saved Aggregate highway data on load |
 | Markers | **Visual-only** runtime/UI (strip route/mileage); **keep** pylon fields; **keep** highway **registry** settings for later tool epic |
 | WE layout | Keep formula XML tags; **`[Feature Name]`** placeholders + **XML comments** for old formulae |
 | Out of this wave | World labels / forked pick; SIP H1; highway reattach via tool |
@@ -63,7 +63,7 @@ Does **not** include `ForkFromVanilla` or nameset seeding (those are ACT-03c).
 
 | File | Current role | Required change | Task |
 |------|--------------|-----------------|--------|
-| [`ADRHighwayAggregationData.cs`](../../../BelzontAdr/Components/ADRHighwayAggregationData.cs) | `Data`, `DirtyHwId`, `CacheData` on vanilla Aggregate | **Delete** types (or obsolete + stop all writes) | ACT-01 |
+| [`ADRHighwayAggregationData.cs`](../../../BelzontAdr/Components/ADRHighwayAggregationData.cs) | `Data`, `DirtyHwId`, `CacheData` on vanilla Aggregate | **Remove** unused fields from the structs — prefer **delete** the three types (`ADRHighwayAggregationData.highwayDataId`; empty `DirtyHwId`; `CacheData.startDistanceOverrideKm` / `reverseCounting`). Do not leave those values as dead serialized members. | ACT-01 |
 | [`AdrHighwayRoutesSystem.cs`](../../../BelzontAdr/Systems/AdrHighwayRoutesSystem.cs) | Aggregate filler / replicate / cache jobs; marker↔Aggregate sync | Remove Aggregate-touching jobs (`NewAggregateFiller`, `ReplicateAggregateSetting`, `CalculateHighwayCacheData`, `AggregationCacheEraser`, InfoPanel Aggregate writes). **Keep** `highwaysDataRegistry` CRUD + serialize | ACT-01 |
 | [`AdrHighwayRoutes2BSystem.cs`](../../../BelzontAdr/Systems/AdrHighwayRoutes2BSystem.cs) | Dirties Aggregate highway cache on Aggregated C/U/D | Remove or gut | ACT-01 |
 | [`AdrNameSystemOverrides.cs`](../../../BelzontAdr/Overrides/AdrNameSystemOverrides.cs) | Highway name branch via Aggregate Data | Drop Aggregate→highway name branch until later tool epic | ACT-01 |
@@ -73,7 +73,7 @@ Does **not** include `ForkFromVanilla` or nameset seeding (those are ACT-03c).
 | Road Grouping overlay / controller | Uses highway Data/Cache for orientation/numbering | Use ADR/vanilla walk **without** highway overrides | ACT-01 |
 | [`AddressesCs2Mod.cs`](../../../BelzontAdr/AddressesCs2Mod.cs) | Registers 2B highway system | Drop registration if system emptied | ACT-01 |
 
-Save migration: on load, **ignore/drop** leftover Aggregate highway components (beta OK).
+Save migration: on load, **ignore** previously saved Aggregate highway component data (drop/skip leftover components). **Do not** migrate/convert old `highwayDataId` or cache values. Beta OK.
 
 **Keep:** settings [`HighwayRegisterManagement.tsx`](../../../_Frontends/UI/k45_adr_vuio/src/settings/tabs/region/subpages/HighwayRegisterManagement.tsx) + registry APIs (orphaned from Aggregate until reattached via tool later).
 
