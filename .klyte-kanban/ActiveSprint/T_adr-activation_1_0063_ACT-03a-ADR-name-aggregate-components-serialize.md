@@ -1,3 +1,4 @@
+**End time:** 2026-09-11 14:36 -0300
 **Start time:** 2026-09-11 14:29 -0300
 # [0063] ACT-03a-ADR-name-aggregate-components-serialize
 
