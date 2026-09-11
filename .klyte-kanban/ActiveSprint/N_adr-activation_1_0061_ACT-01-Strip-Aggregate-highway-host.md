@@ -15,7 +15,7 @@ RefsLibrary/2026090907_custom-road-name-aggregation/13-activation-sprint-roadmap
 
 ## Background
 
-Workstream 1 of ADR aggregation activation. Highway route/mileage must leave vanilla Aggregate so ADR name-aggregates can own membership without Aggregate-hosted highway state. Remove the Aggregate highway component fields from the structs (prefer deleting ADRHighwayAggregationData / DirtyHwId / CacheData types). Previously saved Aggregate highway component bytes are ignored on load — no migrate/convert of old highwayDataId or cache values.
+Workstream 1 of ADR aggregation activation. Highway route/mileage must leave vanilla Aggregate so ADR name-aggregates can own membership without Aggregate-hosted highway state. Remove the Aggregate highway component fields from the structs (prefer deleting ADRHighwayAggregationData / DirtyHwId / CacheData types). Previously saved Aggregate highway component bytes are ignored on load — no migrate/convert of old highwayDataId or cache values. Also remove frontend/VUIO fields and bindings that only exist for Aggregate-hosted highway Data/Cache when those backend fields go away (keep HighwayRegisterManagement registry UI). Marker route/mileage UI strip remains ACT-02.
 
 ---
 
@@ -35,6 +35,8 @@ Workstream 1 of ADR aggregation activation. Highway route/mileage must leave van
 - [ ] HighwayRegisterManagement.tsx + registry APIs still compile and run (orphaned from Aggregate until later reattach epic)
 - [ ] Unused Aggregate highway fields are removed from the structs (ADRHighwayAggregationData.highwayDataId; CacheData.startDistanceOverrideKm and reverseCounting; DirtyHwId tag gone) — not left as dead serialized members
 - [ ] Previously saved Aggregate highway component data is ignored on load (no migration of old highwayDataId / cache values into new state)
+- [ ] Frontend/VUIO: remove fields, DTO properties, and bindings that only exist for Aggregate-hosted highway Data/Cache (e.g. Aggregate-linked highwayId / cache-driven UI) when those backend fields are gone — do not leave dead TS types or binders
+- [ ] Keep HighwayRegisterManagement.tsx + registry list APIs; do not strip marker route/mileage UI here (that is ACT-02)
 
 ---
 
@@ -52,6 +54,8 @@ Workstream 1 of ADR aggregation activation. Highway route/mileage must leave van
 10. Beta: on load ignore/drop leftover Aggregate highway components
 11. Remove unused fields from the Aggregate highway structs — delete the component types or strip every field (highwayDataId; startDistanceOverrideKm; reverseCounting; DirtyHwId). Do not keep empty obsolete field slots for those values.
 12. On load: ignore previously saved Aggregate highway data — drop/skip leftover components; do not read or convert old serialized highwayDataId / cache into live state. Beta OK.
+13. Audit _Frontends/UI/k45_adr_vuio for Aggregate highway host consumers (RegionEditor highwayId from AdrRegionsSystem Aggregate Data, any binder/DTO exposing highwayDataId or AggregationCache fields). Remove or empty those frontend fields when applicable after backend strip.
+14. Do not treat AddressesToolOptions / RoadMarkSettings route-mileage strip as ACT-01 — those are ACT-02 marker visual-only.
 
 ---
 
