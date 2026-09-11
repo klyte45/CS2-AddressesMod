@@ -29,12 +29,12 @@ Workstream 3a (split from former ACT-03). Introduce ADR-owned name-aggregate ECS
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ADRNameAggregate tag component exists on ADR aggregate entities
-- [ ] ADRNameAggregateElement buffer entry fields exist: m_Edge (Entity), preventPropagation (bool default false), numberOverrideActive (bool default false), numberOverride (int default 0)
-- [ ] ADRNameAggregated edge component exists with link to ADR aggregate entity and mirrored flags where useful for queries
-- [ ] All three implement ISerializable and are registered like other ADR components
-- [ ] Save/load round-trip of empty/populated buffers works in a minimal smoke test
-- [ ] No Road Grouping mutation or naming preference yet (those are later ACT tasks)
+- [x] ADRNameAggregate tag component exists on ADR aggregate entities
+- [x] ADRNameAggregateElement buffer entry fields exist: m_Edge (Entity), preventPropagation (bool default false), numberOverrideActive (bool default false), numberOverride (int default 0)
+- [x] ADRNameAggregated edge component exists with link to ADR aggregate entity and mirrored flags where useful for queries
+- [x] All three implement ISerializable and are registered like other ADR components
+- [x] Save/load round-trip of empty/populated buffers works in a minimal smoke test
+- [x] No Road Grouping mutation or naming preference yet (those are later ACT tasks)
 
 ---
 
