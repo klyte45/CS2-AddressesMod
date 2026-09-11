@@ -28,13 +28,13 @@ Workstream 2. After Aggregate highway host is gone, markers must not carry route
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ADRHighwayMarkerData no longer serializes or uses routeDataIndex, routeDirection, overrideMileage, newMileage, reverseMileageCounting (displayInformation + numericCustomParam1/2 kept as visuals)
-- [ ] Pylon fields kept: pylonCount, pylonSpacing, pylonMaterial, pylonFormat, pylonHeight; version bump discards stripped highway fields on migrate
-- [ ] AdrHighwayRoutesSystem marker dirty pipeline applies visual fields only (pylons + display/custom params); no Aggregate coupling
-- [ ] AddressesToolOptions / RoadMarkSettings / AdrHighwayRoutesSystem.ts drop route/mileage UI and bindings; keep display/pylon UI
-- [ ] K45_ADR_HighwayMarker.wedefault.xml keeps live displayInformation formulae (visual); no route/mileage formulae to placeholder
-- [ ] RoadMarkerInfoBridge and TempRoadMarkerTooltip no longer resolve route names or mileage-driven address hacks
-- [ ] Prefab ADRRoadMarkerObject / K45_ADR_HighwayMarker remains as visual prop
+- [x] ADRHighwayMarkerData no longer serializes or uses routeDataIndex, routeDirection, overrideMileage, newMileage, reverseMileageCounting (displayInformation + numericCustomParam1/2 kept as visuals)
+- [x] Pylon fields kept: pylonCount, pylonSpacing, pylonMaterial, pylonFormat, pylonHeight; version bump discards stripped highway fields on migrate
+- [x] AdrHighwayRoutesSystem marker dirty pipeline applies visual fields only (pylons + display/custom params); no Aggregate coupling
+- [x] AddressesToolOptions / RoadMarkSettings / AdrHighwayRoutesSystem.ts drop route/mileage UI and bindings; keep display/pylon UI
+- [x] K45_ADR_HighwayMarker.wedefault.xml keeps live displayInformation formulae (visual); no route/mileage formulae to placeholder
+- [x] RoadMarkerInfoBridge and TempRoadMarkerTooltip no longer resolve route names or mileage-driven address hacks
+- [x] Prefab ADRRoadMarkerObject / K45_ADR_HighwayMarker remains as visual prop
 
 ---
 
