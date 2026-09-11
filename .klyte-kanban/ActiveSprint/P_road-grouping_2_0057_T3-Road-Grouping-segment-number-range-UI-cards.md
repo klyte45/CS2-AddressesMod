@@ -36,8 +36,8 @@ Phase T3. Per-segment house-number range cards in React, ranges from C# ADR numb
 - [x] 120% viewport (10% margin) cull on midpoint projection
 - [x] Stable sort by edge/buffer index; frontend cache between refreshes
 - [x] Viewport projection refresh every frame while cards shown
-- [ ] When >10 segments in 120% viewport, half-km/mi mileage markers (locale decimals) instead of per-segment ranges
-- [ ] Cards offset above/below midpoint with connector line + anchor circle; non-overlapping pack
+- [x] When >10 segments in 120% viewport, half-km/mi mileage markers (locale decimals) instead of per-segment ranges
+- [x] Cards offset above/below midpoint with connector line + anchor circle; non-overlapping pack
 
 ---
 
