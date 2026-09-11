@@ -1,7 +1,7 @@
+**Start time:** 2026-09-10 23:25 -0300
 # [0061] ACT-01-Strip-Aggregate-highway-host
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/12-activation-change-map.md §B
@@ -42,7 +42,7 @@ Workstream 1 of ADR aggregation activation. Highway route/mileage must leave van
 
 ## Implementation Notes
 
-1. Delete or stop writing ADRHighwayAggregationData.highwayDataId (Hash128)
+1. Delete ADRHighwayAggregationData.highwayDataId (Hash128)
 2. Delete empty dirty tag ADRHighwayAggregationDataDirtyHwId
 3. Delete ADRHighwayAggregationCacheData.startDistanceOverrideKm (float) and reverseCounting (bool)
 4. Gut AdrHighwayRoutesSystem Aggregate filler/replicate/cache/eraser paths; keep registry

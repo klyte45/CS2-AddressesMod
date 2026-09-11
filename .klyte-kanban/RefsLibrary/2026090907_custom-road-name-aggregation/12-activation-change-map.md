@@ -72,10 +72,11 @@ Does **not** include `ForkFromVanilla` or nameset seeding (those are ACT-03c).
 | [`AdrRegionsSystem.cs`](../../../BelzontAdr/Systems/AdrRegionsSystem.cs) | Exposes Aggregate `highwayId` | Stop reading removed component (default/empty until later) | ACT-01 |
 | Road Grouping overlay / controller | Uses highway Data/Cache for orientation/numbering | Use ADR/vanilla walk **without** highway overrides | ACT-01 |
 | [`AddressesCs2Mod.cs`](../../../BelzontAdr/AddressesCs2Mod.cs) | Registers 2B highway system | Drop registration if system emptied | ACT-01 |
+| Region map VUIO ([`RegionEditor.tsx`](../../../_Frontends/UI/k45_adr_vuio/src/settings/tabs/region/RegionEditor.tsx) `highwayId`, related DTOs/bindings) | Map paths classed by Aggregate `highwayDataId` via `AdrRegionsSystem` | **Remove or empty** frontend fields/bindings that only exist for Aggregate-hosted highway Data/Cache when backend stops providing them. Keep registry hover UI that keys off registry ids. | ACT-01 |
 
 Save migration: on load, **ignore** previously saved Aggregate highway component data (drop/skip leftover components). **Do not** migrate/convert old `highwayDataId` or cache values. Beta OK.
 
-**Keep:** settings [`HighwayRegisterManagement.tsx`](../../../_Frontends/UI/k45_adr_vuio/src/settings/tabs/region/subpages/HighwayRegisterManagement.tsx) + registry APIs (orphaned from Aggregate until reattached via tool later).
+**Keep:** settings [`HighwayRegisterManagement.tsx`](../../../_Frontends/UI/k45_adr_vuio/src/settings/tabs/region/subpages/HighwayRegisterManagement.tsx) + registry APIs (orphaned from Aggregate until reattached via tool later). Marker route/mileage tool/SIP UI strip is **ACT-02**, not ACT-01.
 
 ---
 
