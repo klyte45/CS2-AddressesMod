@@ -1,22 +1,23 @@
 # Custom road-name aggregation — research pack
 
-*Researched: 2026-09-09 · Game.dll build GUID `b5fd0b9582554f3c83207d8d5d7a19a0` (kcs2m backend cache)*
+*Researched: 2026-09-09 · Activation planning: 2026-09-10 · Game.dll build GUID `b5fd0b9582554f3c83207d8d5d7a19a0` (kcs2m backend cache)*
 
-Reference pack for a future feature: **player-customizable road name aggregation**, implemented as an **ADR-owned parallel system** that does **not** override vanilla `AggregateSystem` / `Aggregated` / `Aggregate` lifecycle.
+Reference pack for **player-customizable road name aggregation**, implemented as an **ADR-owned parallel system** that does **not** override vanilla `AggregateSystem` / `Aggregated` / `Aggregate` lifecycle.
 
-This pack is **documentation only**. It does not ship product code or create Kanban tasks/sprints.
+This pack is **documentation only**. It does not ship product code. Kanban tasks for activation are **catalogued in [13](13-activation-sprint-roadmap.md)** for manual import — this pack does not create board items.
 
 ## Scope
 
 | In scope | Out of scope |
 |----------|--------------|
-| Vanilla Aggregation audit (components, systems, consumers) | Implementing ADR components / systems / UI |
+| Vanilla Aggregation audit (components, systems, consumers) | Implementing ADR components / systems / UI (follows [13](13-activation-sprint-roadmap.md)) |
 | Verdict: display / naming / tooling vs traffic simulation | Harmony-patching or disabling `AggregateSystem` |
 | Current ADR touchpoints on vanilla aggregates | Editing `i18n.csv` / locale CSVs |
-| Parallel-system design notes (name + house numbers; highway migrate) | Kanban sprint/task creation |
+| Parallel-system design notes (name + house numbers) | Creating Kanban board items via MCP from this pack |
 | Gaps and follow-up implementation planning inputs | Frontend research via game UI dumps |
 | Labels-vs-Aggregation-sync discussion + Harmony viability for leftover UI | Implementing those Harmony patches |
-| Road Grouping tool / overlay specs + implementation roadmap ([09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md)) | Shipping product C# / VUIO for the tool (follows the roadmap later) |
+| Road Grouping tool / overlay specs + T0–T3 roadmap ([09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md)) | Shipping activation sprint code (see [12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md)) |
+| Activation change-map + single-sprint Kanban catalog ([12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md)) | |
 
 ## Confirmed decisions
 
@@ -24,28 +25,31 @@ This pack is **documentation only**. It does not ship product code or create Kan
 |----------|--------|
 | Strategy | **Parallel ADR aggregations** — leave vanilla Aggregation alone; new ADR components/entities for mod-managed associations |
 | Address scope | ADR name-aggregates control **both road name and house-number sequencing** for associated edges |
-| Highway data | **Migrate** `ADRHighwayAggregationData` (+ cache/dirty) from vanilla `Aggregate` to **ADR-owned** aggregate entities |
-| World labels (when ADR-associated) | **ADR-owned** thin labels + suppress conflicting vanilla labels — not Aggregation post-sync |
-| Label pick (click ADR labels) | **Fork** vanilla `RaycastLabelsJob` (~150 lines) as ADR Burst job; schedule via managed `RaycastSystem` hook — do not Harmony-patch the Burst job body |
-| Membership per edge | **`preventPropagation`** (default false) allows non-contiguous ADR; gap-fill only between propagating endpoints (live net apply only — **not** on load). **`numberOverrideActive`** (default false) + **`numberOverride`** (`int`, highway-marker style) |
-| Initial UX | **Net-only Road Grouping tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. Direction: [08](08-association-tool-first-ux.md); locked spec: [09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md) |
+| Highway data (activation) | **Remove** Aggregate-hosted `ADRHighway*` now; markers **visual-only**; registry kept; **reattach via tool later** (not migrate-in-place this wave). See [12](12-activation-change-map.md) |
+| World labels (when ADR-associated) | **ADR-owned** thin labels + suppress conflicting vanilla labels — not Aggregation post-sync (**later epic**) |
+| Label pick (click ADR labels) | **Fork** vanilla `RaycastLabelsJob` (~150 lines) as ADR Burst job; schedule via managed `RaycastSystem` hook — do not Harmony-patch the Burst job body (**later epic**) |
+| Membership per edge | **`preventPropagation`** (default false); **`numberOverrideActive`** + **`numberOverride`** (`int`). Gap-fill only between propagating endpoints; **no** gap-fill on load |
+| Fork / seed (activation) | First membership edit forks ADR: copy vanilla seed → ADR; `Redraw` vanilla; full `AggregateElement` copy then apply edit; split naming after fork. See [12](12-activation-change-map.md) |
+| Initial UX | **Net-only Road Grouping tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. Spec: [09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md); activation: [12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md) |
 | Tool naming | Product/code: **Road Grouping** (`AdrRoadGrouping*`). Doc [08](08-association-tool-first-ux.md) keeps historical “association” filename |
-| Pack depth | Analysis + design notes + **tool/overlay implementation specs** — **no** Kanban board work in this pack unless separately requested |
+| Pack depth | Analysis + design + tool specs + **activation change-map / single-sprint catalog** — board creation only if separately requested |
 | Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR; BelzontWE for tool scaffold |
 
 ## Reading order
 
 1. [01-vanilla-aggregation-overview.md](01-vanilla-aggregation-overview.md) — components + `AggregateSystem` rules + tool pipeline
 2. [02-consumer-audit.md](02-consumer-audit.md) — who reads aggregates; **display-vs-sim verdict**
-3. [03-adr-current-touchpoints.md](03-adr-current-touchpoints.md) — how ADR hangs data off vanilla aggregates today
-4. [04-parallel-system-design-notes.md](04-parallel-system-design-notes.md) — recommended ADR-owned design
-5. [05-research-gaps-and-next.md](05-research-gaps-and-next.md) — remaining gaps + follow-up pack inputs
+3. [03-adr-current-touchpoints.md](03-adr-current-touchpoints.md) — how ADR hangs data off vanilla aggregates today (+ activation strip notes)
+4. [04-parallel-system-design-notes.md](04-parallel-system-design-notes.md) — recommended ADR-owned design + fork/seed activation rules
+5. [05-research-gaps-and-next.md](05-research-gaps-and-next.md) — remaining gaps; points to activation docs
 6. [06-labels-vs-vanilla-sync-and-harmony.md](06-labels-vs-vanilla-sync-and-harmony.md) — ADR labels vs Aggregation sync; unattended branches; Harmony viability
 7. [07-membership-maintenance-edge-cases.md](07-membership-maintenance-edge-cases.md) — net remap + gap-fill continuity + edge-case matrix
-8. [08-association-tool-first-ux.md](08-association-tool-first-ux.md) — **start UX with net-only tool** + world draw + node controls; impact on epic order
-9. [09-road-grouping-tool-spec.md](09-road-grouping-tool-spec.md) — **Road Grouping** tool contract (WE scaffold, LMB gestures, stubs, number cards)
-10. [10-road-grouping-overlay-render-system.md](10-road-grouping-overlay-render-system.md) — opaque route-ribbon layer (#008800 base / #00BB00 highlights / #004400 preview / #FF8800 remove / #FFFF00 fixed)
-11. [11-road-grouping-tool-roadmap.md](11-road-grouping-tool-roadmap.md) — implementation phases T0–T5
+8. [08-association-tool-first-ux.md](08-association-tool-first-ux.md) — tool-first UX; **full activation** (not thin contract)
+9. [09-road-grouping-tool-spec.md](09-road-grouping-tool-spec.md) — **Road Grouping** tool contract
+10. [10-road-grouping-overlay-render-system.md](10-road-grouping-overlay-render-system.md) — opaque route-ribbon layer
+11. [11-road-grouping-tool-roadmap.md](11-road-grouping-tool-roadmap.md) — T0–T3 shipped; T4/T5 → activation ACT-03…ACT-06
+12. [12-activation-change-map.md](12-activation-change-map.md) — **file-level activation change map** (sections A–E)
+13. [13-activation-sprint-roadmap.md](13-activation-sprint-roadmap.md) — **one activation sprint + Kanban task catalog** (document only)
 
 ## Success criteria (this research pack)
 
@@ -61,6 +65,8 @@ This pack is **documentation only**. It does not ship product code or create Kan
 - [x] Road Grouping tool specification documented ([09](09-road-grouping-tool-spec.md))
 - [x] Road Grouping overlay render system documented ([10](10-road-grouping-overlay-render-system.md))
 - [x] Road Grouping implementation roadmap T0–T5 documented ([11](11-road-grouping-tool-roadmap.md))
+- [x] Activation change-map documented ([12](12-activation-change-map.md))
+- [x] Activation sprint roadmap + Kanban catalog documented ([13](13-activation-sprint-roadmap.md))
 
 ## Related packs
 

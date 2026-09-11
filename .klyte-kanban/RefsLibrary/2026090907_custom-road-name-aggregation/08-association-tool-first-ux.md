@@ -69,44 +69,33 @@ Implementation note: node picks still use net raycast; handles are **tool overla
 
 ## Impact on prior plan
 
-### Thin C# contract — what it actually is
+### Full architecture activation (replaces “thin contract”)
 
-Not “all backend.” A **minimal data + resolve API** so the tool and names have something real to talk to:
+Road Grouping T0–T3 is shipped. Next backend work is **full** ADR Aggregate/Element/Aggregated + fork/seed + real mutations — not a minimal thin contract. File map: [12](12-activation-change-map.md). One sprint + tasks: [13](13-activation-sprint-roadmap.md).
 
-| In thin contract | Out (later epics) |
-|------------------|-------------------|
-| `ADRNameAggregate` tag entity | Full gap-fill / remap matrix ([07](07-membership-maintenance-edge-cases.md)) |
-| `ADRNameAggregateElement` buffer (`m_Edge` + `preventPropagation` + `numberOverride*`) | Highway migrate |
-| `ADRNameAggregated` on edges | World **name** labels + forked pick |
-| Serialize those types | SIP / DefaultTool H1 |
-| Create / destroy aggregate; add/remove member; set flags (C# API the tool calls) | Rich tool modes / polish |
-| NameSystem + GetAddress prefer ADR when linked | |
+| In activation sprint (ACT-01…ACT-06) | Later epics |
+|--------------------------------------|-------------|
+| Strip Aggregate highway host; markers visual-only | Highway reattach via tool |
+| `ADRNameAggregate` / Element / Aggregated + serialize + ForkFromVanilla | World **name** labels + forked pick |
+| NameSystem + GetAddress prefer ADR | SIP / DefaultTool H1 |
+| Road Grouping real membership writes | |
+| Membership maintenance / gap-fill ([07](07-membership-maintenance-edge-cases.md)) | |
 
-Enough that: tool mutations persist, street name + house numbers follow ADR for associated edges.
+### World-drawing-first — completed
 
-## World-drawing-first (valid learning path)
+Tool scaffold + overlays + stubs + number cards landed against vanilla Aggregate. **Do not** invent a permanent preview-only membership format — switch data source to ADR (ACT-03…ACT-05).
 
-If the unfamiliar risk is **world overlay drawing**, it is reasonable to **start there before** the thin contract — with a **stub data source**:
-
-1. **Scaffold** association `ToolBaseSystem` / `IBelzontToolSystem` + toolbar entry + net-only raycast.  
-2. **Draw overlays from vanilla only** — e.g. hover/focus edge → highlight that edge’s vanilla `AggregateElement` chain; optional second color for “focused” vs “hover.”  
-3. **Node handle positions** at edge endpoints (draw only; clicks can no-op or log).  
-4. **Then** add thin contract and switch overlay input from vanilla Aggregate → `ADRNameAggregateElement` (+ keep vanilla context layer).
-
-That does **not** replace the thin contract; it **reorders** learning: drawing tech → wire real membership → mutations → maintenance.
-
-Do **not** invent a permanent parallel “preview-only membership” format — stub against vanilla Aggregates, then replace the data source.
-
-### Sequencing (updated)
+### Sequencing (updated 2026-09-10)
 
 ```text
-0a. (Optional learning) Tool scaffold + world overlays from vanilla AggregateElement
-0b. Thin C# contract (types + serialize + member APIs + NameSystem/GetAddress)
-1. Association tool — wire overlays to ADR membership; mutations + flags; node controls
-2. Membership maintenance (remap + gap-fill); dogfood via tool
-3. Highway migrate onto ADR aggregates
-4. World name labels + forked RaycastLabelsJob (not tool overlay)
-5. Cleanup fixedAggregation / ADREdgeData
+0a–0b / T0–T3. Road Grouping tool + overlays + stubs + cards (SHIPPED)
+ACT-01. Strip Aggregate highway host
+ACT-02. Markers visual-only + WE placeholders
+ACT-03. Full ADR components + ForkFromVanilla + serialize
+ACT-04. NameSystem / GetAddress / SIP seed prefer ADR
+ACT-05. Road Grouping mutations → ADR
+ACT-06. Membership maintenance (remap + gap-fill)
+Later: highway reattach via tool; world labels; fixedAggregation cleanup
 
 Not in this wave: SIP / DefaultTool H1
 ```
@@ -115,10 +104,10 @@ Not in this wave: SIP / DefaultTool H1
 
 | Earlier item | Impact |
 |--------------|--------|
-| Epic: Player association UX | **Promoted to first playable epic**; concrete form = **net-only tool + world draw + node controls** |
-| Epic: ADR name aggregation | Still first **code**, but **minimal** — enough for tool commands + name/number resolve |
-| Polish: SIP stats + H1 | **Out of scope this wave** (research kept in [06](06-labels-vs-vanilla-sync-and-harmony.md) for later) |
-| Epic / spike: ADR labels | Still after tool; do **not** confuse tool overlay with AggregateMesh-style name labels |
+| Epic: Player association UX | **Shipped** as Road Grouping T0–T3; mutations in ACT-05 |
+| Epic: Thin ADR name aggregation | **Superseded** by full activation ACT-03 + ACT-04 |
+| Polish: SIP stats + H1 | **Out of scope this wave** (research kept in [06](06-labels-vs-vanilla-sync-and-harmony.md)) |
+| Epic / spike: ADR labels | Still after activation; do **not** confuse tool overlay with AggregateMesh-style name labels |
 | SIP as editor or inspect | **Excluded** from current implementation |
 
 ### Relationship to H1 highlight plan ([06](06-labels-vs-vanilla-sync-and-harmony.md))
@@ -137,10 +126,10 @@ Not in this wave: SIP / DefaultTool H1
 
 | Risk | Mitigation |
 |------|------------|
-| World overlay systems are non-trivial | Start with edge coloring via existing highlight/batch patterns or simple line overlays; node handles in a second tool iteration |
+| World overlay systems are non-trivial | Mitigated — T0–T3 shipped route-ribbon overlays |
 | Tool + maintenance + labels all draw nets | Clear layer ownership: tool preview vs persistent labels (no DefaultTool H1 this wave) |
-| Node UX ambiguous | Spike one gesture (click adjacent edge from endpoint) before drag gizmos |
-| Thin backend must exist first | Optional: world-draw spike on vanilla Aggregates first; thin contract before real membership edits |
+| Node UX ambiguous | Endpoint LMB-drag + fixed pin shipped as stubs; real writes in ACT-05 |
+| Backend before mutations | Full ADR components in ACT-03 (not thin contract); see [12](12-activation-change-map.md) |
 
 ## Open questions (tool-specific) — settled
 
@@ -162,4 +151,6 @@ Superseded by **Road Grouping** specs [09](09-road-grouping-tool-spec.md), [10](
 - [07](07-membership-maintenance-edge-cases.md) — mutations the tool must obey  
 - [09](09-road-grouping-tool-spec.md) — **Road Grouping** tool contract  
 - [10](10-road-grouping-overlay-render-system.md) — overlay system  
-- [11](11-road-grouping-tool-roadmap.md) — implementation roadmap  
+- [11](11-road-grouping-tool-roadmap.md) — T0–T3 shipped; activation ACT-03…ACT-06
+- [12](12-activation-change-map.md) — activation file map
+- [13](13-activation-sprint-roadmap.md) — one sprint + Kanban catalog (docs only)  

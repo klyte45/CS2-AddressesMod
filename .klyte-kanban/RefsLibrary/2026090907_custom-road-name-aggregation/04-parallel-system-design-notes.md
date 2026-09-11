@@ -7,13 +7,25 @@
 - Let players define **custom road name associations** (which edges share one street name and one house-number sequence).
 - Avoid fighting vanilla `AggregateSystem` Validate/Combine/Create.
 - Keep **labels, SIP addresses, and building numbers** consistent when an edge is ADR-associated.
-- **Migrate** highway aggregation data off vanilla `Aggregate` onto ADR-owned aggregates.
+- **Activation wave:** strip Aggregate-hosted highway components; markers visual-only; introduce full ADR Aggregate/Element/Aggregated and fork-from-vanilla. Highway **reattach via Road Grouping tool later** (not migrate-in-place this wave). See [12](12-activation-change-map.md).
 
 ## Non-goals
 
 - Harmony-replace or disable `Game.Net.AggregateSystem`.
 - Mutate vanilla `Aggregated.m_Aggregate` / `AggregateElement` for custom membership.
 - Change traffic simulation / pathfinding.
+- World labels / SIP H1 in the activation wave ([13](13-activation-sprint-roadmap.md)).
+
+## Activation fork / seed rules (settled 2026-09-10)
+
+| Rule | Choice |
+|------|--------|
+| Fork trigger | First membership **edit** (not plain select) |
+| Seed | Copy vanilla `ADRRandomizationData` → ADR; **`Redraw()`** vanilla Aggregate |
+| Buffer init | Full vanilla `AggregateElement` copy, then apply edit |
+| Naming after fork | Split: vanilla name (new seed) for non-ADR edges; ADR name for linked members |
+
+Full file map: [12](12-activation-change-map.md). Sprints: [13](13-activation-sprint-roadmap.md).
 
 ## Recommended component sketch (names illustrative)
 
@@ -24,7 +36,7 @@ Use ADR-prefixed types so they never collide with vanilla:
 | `ADRNameAggregate` | Tag on ADR aggregate entity | Marks ADR-owned name-aggregate (parallel to vanilla `Aggregate`) |
 | `ADRNameAggregateElement` | Buffer on ADR aggregate | Ordered membership entries (edge + per-member flags) — source of truth for name + numbering walk |
 | `ADRNameAggregated` | Component on edge | Link to ADR aggregate when associated; absent ⇒ fall back to vanilla. Mirrors membership fields needed for edge queries |
-| Existing | On ADR aggregate | `ADRRandomizationData`, custom name storage (via vanilla NameSystem custom-name APIs if applicable), **`ADRHighwayAggregationData` / Dirty / Cache** after migration |
+| Existing | On ADR aggregate | `ADRRandomizationData`, custom name storage (via vanilla NameSystem custom-name APIs if applicable). **`ADRHighwayAggregationData` / Dirty / Cache** — **not** on Aggregate in activation wave; reattach to ADR via tool in a **later** epic |
 
 Do **not** revive `ADREdgeData.fixedAggregation` as the link field; prefer an explicit `ADRNameAggregated` (or rename clearly) so edge geometry metadata stays separate from association.
 
@@ -95,22 +107,15 @@ Vanilla will still merge/split its own aggregates; ADR must maintain its own mem
 
 Fill `ADRNameAggregateElement` with a practical ordered walk (geometry / association-time). **Do not treat perfect permanent house-number order as a research blocker:** vanilla AggregateElement order is rebuilt by Validate/Combine and is not a stable guarantee either; ADR already improves numbering via existing `GetAddress` / highway-cache overrides — keep that bar, do not invent a stricter product requirement.
 
-## Highway data migration (confirmed)
+## Highway data (activation vs later)
 
-Today: `ADRHighwayAggregationData` (+ Dirty + Cache) live on **vanilla** `Aggregate`.
+**Today:** `ADRHighwayAggregationData` (+ Dirty + Cache) live on **vanilla** `Aggregate`.
 
-Target: same components live on **`ADRNameAggregate`** entities.
+**Activation wave ([12](12-activation-change-map.md) ACT-01 / ACT-02):** **Remove** Aggregate-hosted highway components. Markers become **visual-only** (strip route/mileage; keep pylons; WE `[Feature]` placeholders). **Keep** highway **registry** settings UI. Do **not** migrate highway onto ADR in this activation sprint.
 
-### Suggested migration path (implementation later)
+**Later epic:** reattach route/mileage onto `ADRNameAggregate` via Road Grouping tool; restore WE formulae from placeholders. Beta breakage on old Aggregate highway saves is acceptable when stripping.
 
-1. On load / first run after feature: for each vanilla Aggregate with non-default `highwayDataId`, ensure an ADR name-aggregate exists covering the same `AggregateElement` edges (or create 1:1 ADR aggregate mirroring current membership).
-2. Move (or copy-then-remove) highway + cache components onto the ADR entity; set `ADRNameAggregated` on those edges.
-3. Update `AdrHighwayRoutesSystem` / `2B` / markers / SIP / region queries to key off ADR types.
-4. Optional simple save migrate when cheap; **beta allows breakage** on orphans / conflicting markers / cities that never get association — do not treat those edge matrices as blockers.
-
-After cutover, vanilla Aggregate for highways is only the game’s default label/SIP target; **ADR** owns route id and mileage cache.
-
-## Labels and label pick (planned path)
+## Labels and label pick (planned path — after activation)
 
 Do **not** fight vanilla Aggregation for label geometry. For ADR-associated edges:
 
