@@ -3,6 +3,7 @@ using Colossal.Mathematics;
 using Game.Net;
 using Game.Objects;
 using Game.SceneFlow;
+using System.Globalization;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -15,6 +16,91 @@ namespace BelzontAdr
     /// </summary>
     public static class AdrRoadAddressNumbering
     {
+        public const int DenseSegmentCardThreshold = 10;
+        public const float HalfKilometerMeters = 500f;
+        public const float HalfMileMeters = 804.672f; // 0.5 * 1609.344
+
+        public static bool TryResolveInverseAggregate(
+            EntityManager entityManager,
+            AdrMainSystem adrMainSystem,
+            AdrHighwayRoutesSystem highwayRoutesSystem,
+            Entity aggregate,
+            DynamicBuffer<AggregateElement> aggregationBuffer,
+            out bool isInverseAggregate)
+        {
+            isInverseAggregate = false;
+            if (aggregationBuffer.Length == 0
+                || !entityManager.TryGetComponent(aggregationBuffer[0].m_Edge, out Curve e0)
+                || !entityManager.TryGetComponent(aggregationBuffer[^1].m_Edge, out Curve e1))
+            {
+                return false;
+            }
+
+            var refE0 = CheckSegmentReversion(entityManager, aggregationBuffer, false, 0, aggregationBuffer[0])
+                ? e0.m_Bezier.d.xz
+                : e0.m_Bezier.a.xz;
+            var refE1 = CheckSegmentReversion(entityManager, aggregationBuffer, false, aggregationBuffer.Length - 1, aggregationBuffer[^1])
+                ? e1.m_Bezier.a.xz
+                : e1.m_Bezier.d.xz;
+
+            var zeroMarker = entityManager.TryGetComponent(aggregate, out ADRHighwayAggregationData hwDataInfo)
+                && hwDataInfo.highwayDataId != default
+                && highwayRoutesSystem.TryGetHighwayData(hwDataInfo.highwayDataId, out var hwData)
+                    ? hwData.refStartPoint
+                    : adrMainSystem.GetZeroMarkerPosition();
+            isInverseAggregate = math.distancesq(refE0, zeroMarker) > math.distancesq(refE1, zeroMarker);
+            return true;
+        }
+
+        public static bool IsFreedomUnitSystem() =>
+            GameManager.instance.settings.userInterface.unitSystem
+            == Game.Settings.InterfaceSettings.UnitSystem.Freedom;
+
+        /// <summary>
+        /// Locale for decimal separators — game UI culture when available, otherwise current UI culture.
+        /// </summary>
+        public static CultureInfo GetUiCulture()
+        {
+            try
+            {
+                var locale = GameManager.instance?.localizationManager?.activeLocaleId;
+                if (!string.IsNullOrEmpty(locale))
+                {
+                    return CultureInfo.GetCultureInfo(locale);
+                }
+            }
+            catch
+            {
+                // fall through
+            }
+
+            return CultureInfo.CurrentUICulture;
+        }
+
+        public static string FormatMileageLabel(bool freedom, float majorUnits, CultureInfo culture = null)
+        {
+            culture ??= GetUiCulture();
+            string prefix = freedom ? "mi" : "km";
+            float roundedHalf = math.round(majorUnits * 2f) / 2f;
+            if (math.abs(roundedHalf - math.round(roundedHalf)) < 0.01f)
+            {
+                return $"{prefix} {((int)math.round(roundedHalf)).ToString(culture)}";
+            }
+
+            return $"{prefix} {roundedHalf.ToString("0.0", culture)}";
+        }
+
+        public static string FormatHouseNumberRange(int low, int high, CultureInfo culture = null)
+        {
+            culture ??= GetUiCulture();
+            if (low == high)
+            {
+                return low.ToString(culture);
+            }
+
+            return $"{low.ToString(culture)}–{high.ToString(culture)}";
+        }
+
         public static bool TryGetOddNumberAtCurvePos(
             EntityManager entityManager,
             AdrMainSystem adrMainSystem,
@@ -31,25 +117,12 @@ namespace BelzontAdr
                 return false;
             }
 
-            if (!entityManager.TryGetComponent(aggregationBuffer[0].m_Edge, out Curve e0)
-                || !entityManager.TryGetComponent(aggregationBuffer[^1].m_Edge, out Curve e1))
+            if (!TryResolveInverseAggregate(
+                    entityManager, adrMainSystem, highwayRoutesSystem, aggregated.m_Aggregate, aggregationBuffer,
+                    out bool isInverseAggregate))
             {
                 return false;
             }
-
-            var refE0 = CheckSegmentReversion(entityManager, aggregationBuffer, false, 0, aggregationBuffer[0])
-                ? e0.m_Bezier.d.xz
-                : e0.m_Bezier.a.xz;
-            var refE1 = CheckSegmentReversion(entityManager, aggregationBuffer, false, aggregationBuffer.Length - 1, aggregationBuffer[^1])
-                ? e1.m_Bezier.a.xz
-                : e1.m_Bezier.d.xz;
-
-            var zeroMarker = entityManager.TryGetComponent(aggregated.m_Aggregate, out ADRHighwayAggregationData hwDataInfo)
-                && hwDataInfo.highwayDataId != default
-                && highwayRoutesSystem.TryGetHighwayData(hwDataInfo.highwayDataId, out var hwData)
-                    ? hwData.refStartPoint
-                    : adrMainSystem.GetZeroMarkerPosition();
-            bool isInverseAggregate = math.distancesq(refE0, zeroMarker) > math.distancesq(refE1, zeroMarker);
 
             float currentDistance = 0f;
             float lastOverrideNumber = 0f;
@@ -112,10 +185,7 @@ namespace BelzontAdr
                     bool isReversedSegment = CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
                     var t = new Bounds1(isReversedSegment ? curvePos : 0f, isReversedSegment ? 1f : curvePos);
                     float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
-                    var unitMultiplier = GameManager.instance.settings.userInterface.unitSystem
-                        == Game.Settings.InterfaceSettings.UnitSystem.Freedom
-                            ? 1.09361329f
-                            : 1f;
+                    var unitMultiplier = IsFreedomUnitSystem() ? 1.09361329f : 1f;
                     number = (Mathf.RoundToInt(
                                   ((overridedToKm * 500)
                                    + ((isInverseOverride ? -.5f : .5f)

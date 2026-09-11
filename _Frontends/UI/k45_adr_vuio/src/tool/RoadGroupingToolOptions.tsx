@@ -13,6 +13,7 @@ export type RoadGroupingSegmentCard = {
     sortKey: number;
     numberLow: number;
     numberHigh: number;
+    label?: string;
     midX: number;
     midY: number;
     midZ: number;

@@ -13,6 +13,13 @@ import styles from "./RoadGroupingNumberCards.module.scss";
 const formatRange = (low: number, high: number) =>
     low === high ? `${low}` : `${low}–${high}`;
 
+const cardLabel = (card: RoadGroupingSegmentCard) => {
+    if (typeof card.label === "string" && card.label.length > 0) {
+        return card.label;
+    }
+    return formatRange(card.numberLow, card.numberHigh);
+};
+
 const isCardVisible = (card: RoadGroupingSegmentCard) => {
     if (typeof card.visible === "boolean") {
         return card.visible;
@@ -35,6 +42,7 @@ const normalizeCards = (raw: unknown): RoadGroupingSegmentCard[] => {
             sortKey: Number(item.sortKey ?? item.SortKey ?? 0),
             numberLow: Number(item.numberLow ?? item.NumberLow ?? 0),
             numberHigh: Number(item.numberHigh ?? item.NumberHigh ?? 0),
+            label: String(item.label ?? item.Label ?? ""),
             midX: Number(item.midX ?? item.MidX ?? 0),
             midY: Number(item.midY ?? item.MidY ?? 0),
             midZ: Number(item.midZ ?? item.MidZ ?? 0),
@@ -95,7 +103,7 @@ const layoutCards = (
 
         const anchorX = card.viewportX * screenW;
         const anchorY = (1 - card.viewportY) * screenH;
-        const label = formatRange(card.numberLow, card.numberHigh);
+        const label = cardLabel(card);
         const w = estimateCardWidth(label);
         const h = CARD_H;
         const key = `${card.edge.Index}:${card.edge.Version}:${card.sortKey}`;

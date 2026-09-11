@@ -7,6 +7,7 @@ using Game.Rendering;
 using Game.SceneFlow;
 using Game.Tools;
 using System;
+using System.Collections.Generic;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -59,7 +60,6 @@ namespace BelzontAdr
             if (m_initialized) return;
             m_initialized = true;
 
-            // Preserve state across UI reloads (BindingsReleased → re-init).
             var selected = SelectedAggregation?.Value ?? Entity.Null;
             var showCards = ShowNumberCards?.Value ?? true;
             var cards = SegmentCards?.Value ?? EmptyCards;
@@ -89,9 +89,6 @@ namespace BelzontAdr
             }
         }
 
-        /// <summary>
-        /// Call when membership list for the focused aggregation changes (T5); rebuilds ranges immediately.
-        /// </summary>
         public void InvalidateSegmentCards()
         {
             m_CardsDirty = true;
@@ -105,7 +102,6 @@ namespace BelzontAdr
             m_AdrMainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
             m_HighwayRoutesSystem = World.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
             m_CameraUpdateSystem = World.GetOrCreateSystemManaged<CameraUpdateSystem>();
-            // Same as WEWorldPickerController: allow InitValueBindings to re-run after UI reload.
             GameManager.instance.userInterface.view.Listener.BindingsReleased += () => m_initialized = false;
         }
 
@@ -137,12 +133,11 @@ namespace BelzontAdr
                 return;
             }
 
-            // Ranges rebuild on aggregation/toggle dirty; viewport projection every frame.
-            PublishCards(aggregation, rebuildRanges: m_CardsDirty);
+            PublishCards(aggregation, rebuildContent: m_CardsDirty);
             m_CardsDirty = false;
         }
 
-        private void PublishCards(Entity aggregation, bool rebuildRanges)
+        private void PublishCards(Entity aggregation, bool rebuildContent)
         {
             if (!EntityManager.TryGetBuffer(aggregation, true, out DynamicBuffer<AggregateElement> elements)
                 || elements.Length == 0)
@@ -151,22 +146,63 @@ namespace BelzontAdr
                 return;
             }
 
-            AdrRoadGroupingSegmentCard[] previous = SegmentCards.Value;
-            bool canReuseRanges = !rebuildRanges
-                                  && previous != null
-                                  && previous.Length == elements.Length;
-
-            var cards = new AdrRoadGroupingSegmentCard[elements.Length];
             var camera = ResolveCamera();
+            int visibleSegments = CountVisibleSegments(elements, camera);
+
+            // Dense screen: half-km / half-mi markers instead of per-segment house ranges.
+            if (visibleSegments > AdrRoadAddressNumbering.DenseSegmentCardThreshold)
+            {
+                PushCards(BuildMileageCards(aggregation, elements, camera));
+                return;
+            }
+
+            PushCards(BuildSegmentRangeCards(elements, camera, rebuildContent));
+        }
+
+        private int CountVisibleSegments(DynamicBuffer<AggregateElement> elements, Camera camera)
+        {
+            int visible = 0;
+            for (int i = 0; i < elements.Length; i++)
+            {
+                Entity edge = elements[i].m_Edge;
+                if (!EntityManager.TryGetComponent(edge, out Curve curve))
+                {
+                    continue;
+                }
+
+                float3 mid = MathUtils.Position(curve.m_Bezier, 0.5f);
+                if (IsWorldVisible(mid, camera))
+                {
+                    visible++;
+                }
+            }
+
+            return visible;
+        }
+
+        private AdrRoadGroupingSegmentCard[] BuildSegmentRangeCards(
+            DynamicBuffer<AggregateElement> elements,
+            Camera camera,
+            bool rebuildContent)
+        {
+            AdrRoadGroupingSegmentCard[] previous = SegmentCards.Value;
+            bool canReuse = !rebuildContent
+                            && previous != null
+                            && previous.Length == elements.Length
+                            && previous.Length > 0
+                            && previous[0].label != null
+                            && !previous[0].label.StartsWith("km ", StringComparison.Ordinal)
+                            && !previous[0].label.StartsWith("mi ", StringComparison.Ordinal);
+
+            var culture = AdrRoadAddressNumbering.GetUiCulture();
+            var cards = new AdrRoadGroupingSegmentCard[elements.Length];
 
             for (int i = 0; i < elements.Length; i++)
             {
                 Entity edge = elements[i].m_Edge;
                 AdrRoadGroupingSegmentCard card;
 
-                if (canReuseRanges
-                    && previous[i].edge == edge
-                    && previous[i].sortKey == i)
+                if (canReuse && previous[i].edge == edge && previous[i].sortKey == i)
                 {
                     card = previous[i];
                 }
@@ -193,6 +229,12 @@ namespace BelzontAdr
                     {
                         card.numberLow = math.min(n0, n1);
                         card.numberHigh = math.max(n0, n1);
+                        card.label = AdrRoadAddressNumbering.FormatHouseNumberRange(
+                            card.numberLow, card.numberHigh, culture);
+                    }
+                    else
+                    {
+                        card.label = string.Empty;
                     }
                 }
 
@@ -200,12 +242,78 @@ namespace BelzontAdr
                 cards[i] = card;
             }
 
-            PushCards(cards);
+            return cards;
+        }
+
+        private AdrRoadGroupingSegmentCard[] BuildMileageCards(
+            Entity aggregation,
+            DynamicBuffer<AggregateElement> elements,
+            Camera camera)
+        {
+            if (!AdrRoadAddressNumbering.TryResolveInverseAggregate(
+                    EntityManager, m_AdrMainSystem, m_HighwayRoutesSystem, aggregation, elements,
+                    out bool isInverseAggregate))
+            {
+                return EmptyCards;
+            }
+
+            bool freedom = AdrRoadAddressNumbering.IsFreedomUnitSystem();
+            float stepMeters = freedom
+                ? AdrRoadAddressNumbering.HalfMileMeters
+                : AdrRoadAddressNumbering.HalfKilometerMeters;
+            float metersPerMajor = freedom ? (AdrRoadAddressNumbering.HalfMileMeters * 2f) : 1000f;
+            var culture = AdrRoadAddressNumbering.GetUiCulture();
+            var list = new List<AdrRoadGroupingSegmentCard>(32);
+
+            float currentDistance = 0f;
+            float nextMarker = 0f;
+            int sortKey = 0;
+
+            for (int i = isInverseAggregate ? elements.Length - 1 : 0;
+                 isInverseAggregate ? i >= 0 : i < elements.Length;
+                 i += isInverseAggregate ? -1 : 1)
+            {
+                AggregateElement element = elements[i];
+                Entity edge = element.m_Edge;
+                if (!EntityManager.TryGetComponent(edge, out Curve curve) || curve.m_Length < 0.01f)
+                {
+                    continue;
+                }
+
+                float newDistance = currentDistance + curve.m_Length;
+                bool reversed = AdrRoadAddressNumbering.CheckSegmentReversion(
+                    EntityManager, elements, isInverseAggregate, i, element);
+
+                while (nextMarker <= newDistance + 0.01f)
+                {
+                    float local = math.saturate((nextMarker - currentDistance) / curve.m_Length);
+                    float curvePos = reversed ? 1f - local : local;
+                    float3 pos = MathUtils.Position(curve.m_Bezier, curvePos);
+                    float majorUnits = nextMarker / metersPerMajor;
+
+                    var card = new AdrRoadGroupingSegmentCard
+                    {
+                        edge = edge,
+                        sortKey = sortKey++,
+                        midX = pos.x,
+                        midY = pos.y,
+                        midZ = pos.z,
+                        label = AdrRoadAddressNumbering.FormatMileageLabel(freedom, majorUnits, culture),
+                    };
+                    ProjectCard(ref card, camera);
+                    list.Add(card);
+
+                    nextMarker += stepMeters;
+                }
+
+                currentDistance = newDistance;
+            }
+
+            return list.Count == 0 ? EmptyCards : list.ToArray();
         }
 
         private void PushCards(AdrRoadGroupingSegmentCard[] cards)
         {
-            // Always notify UI (array reference equality would skip identical empty pushes).
             SegmentCards.Value = cards ?? EmptyCards;
             SegmentCards.UpdateUIs();
         }
@@ -218,6 +326,19 @@ namespace BelzontAdr
             }
 
             return Camera.main;
+        }
+
+        private static bool IsWorldVisible(float3 world, Camera camera)
+        {
+            if (camera == null)
+            {
+                return false;
+            }
+
+            Vector3 viewport = camera.WorldToViewportPoint((Vector3)world);
+            return viewport.z > 0f
+                   && viewport.x > -0.1f && viewport.x < 1.1f
+                   && viewport.y > -0.1f && viewport.y < 1.1f;
         }
 
         private static void ProjectCard(ref AdrRoadGroupingSegmentCard card, Camera camera)
@@ -234,7 +355,6 @@ namespace BelzontAdr
             Vector3 viewport = camera.WorldToViewportPoint(world);
             card.viewportX = viewport.x;
             card.viewportY = viewport.y;
-            // 120% viewport (10% margin); behind camera is never visible.
             card.visible = viewport.z > 0f
                            && viewport.x > -0.1f && viewport.x < 1.1f
                            && viewport.y > -0.1f && viewport.y < 1.1f;

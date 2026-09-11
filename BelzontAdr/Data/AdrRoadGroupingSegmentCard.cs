@@ -3,8 +3,8 @@ using Unity.Entities;
 namespace BelzontAdr
 {
     /// <summary>
-    /// Per-segment house-number range card payload for Road Grouping VUIO.
-    /// Stable sort key is AggregateElement buffer index.
+    /// Number-range / mileage card payload for Road Grouping VUIO.
+    /// <see cref="label"/> is the display text (house range or locale-formatted "km 0,5" / "mi 0.5").
     /// </summary>
     public struct AdrRoadGroupingSegmentCard
     {
@@ -12,6 +12,7 @@ namespace BelzontAdr
         public int sortKey;
         public int numberLow;
         public int numberHigh;
+        public string label;
         public float midX;
         public float midY;
         public float midZ;

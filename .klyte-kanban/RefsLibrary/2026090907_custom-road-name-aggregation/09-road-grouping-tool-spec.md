@@ -136,6 +136,7 @@ v0 does **not** mutate membership — logs only.
 
 - **C#** computes per-segment house-number range using ADR numbering rules (same logic family as [`BuildingUtilsOverrides.GetAddress_Override`](../../../BelzontAdr/Overrides/BuildingUtilsOverrides.cs): aggregate walk, length, highway overrides, unit multiplier → odd numbers at segment ends).
 - **React** world-anchored cards: offset **above/below** the projected midpoint (not centered on it), connector line from the facing card edge midpoint to the segment center, circle on the center, and non-overlapping screen packing (stable `sortKey` order).
+- If **more than 10 segments** fall in the **120% viewport**, switch to **half-km / half-mi** markers along the aggregate (`km 0` / `km 0,5` or `mi …`, decimals via **user locale**); otherwise keep per-segment house-number ranges.
 
 ### Visibility
 
