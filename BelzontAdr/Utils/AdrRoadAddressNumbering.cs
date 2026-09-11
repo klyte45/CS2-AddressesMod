@@ -1,7 +1,6 @@
 using Colossal.Entities;
 using Colossal.Mathematics;
 using Game.Net;
-using Game.Objects;
 using Game.SceneFlow;
 using System.Globalization;
 using Unity.Entities;
@@ -11,7 +10,7 @@ using UnityEngine;
 namespace BelzontAdr
 {
     /// <summary>
-    /// Shared ADR house-number math (same family as <see cref="BuildingUtilsOverrides.GetAddress_Override"/>),
+    /// Shared ADR house-number math (same family as <see cref="BuildingUtilsOverrides"/> GetAddress override),
     /// without building-side even/odd adjustment — odd numbers at curve positions.
     /// </summary>
     public static class AdrRoadAddressNumbering
@@ -23,8 +22,6 @@ namespace BelzontAdr
         public static bool TryResolveInverseAggregate(
             EntityManager entityManager,
             AdrMainSystem adrMainSystem,
-            AdrHighwayRoutesSystem highwayRoutesSystem,
-            Entity aggregate,
             DynamicBuffer<AggregateElement> aggregationBuffer,
             out bool isInverseAggregate)
         {
@@ -43,11 +40,7 @@ namespace BelzontAdr
                 ? e1.m_Bezier.a.xz
                 : e1.m_Bezier.d.xz;
 
-            var zeroMarker = entityManager.TryGetComponent(aggregate, out ADRHighwayAggregationData hwDataInfo)
-                && hwDataInfo.highwayDataId != default
-                && highwayRoutesSystem.TryGetHighwayData(hwDataInfo.highwayDataId, out var hwData)
-                    ? hwData.refStartPoint
-                    : adrMainSystem.GetZeroMarkerPosition();
+            var zeroMarker = adrMainSystem.GetZeroMarkerPosition();
             isInverseAggregate = math.distancesq(refE0, zeroMarker) > math.distancesq(refE1, zeroMarker);
             return true;
         }
@@ -104,7 +97,6 @@ namespace BelzontAdr
         public static bool TryGetOddNumberAtCurvePos(
             EntityManager entityManager,
             AdrMainSystem adrMainSystem,
-            AdrHighwayRoutesSystem highwayRoutesSystem,
             Entity edge,
             float curvePos,
             out int number)
@@ -118,17 +110,13 @@ namespace BelzontAdr
             }
 
             if (!TryResolveInverseAggregate(
-                    entityManager, adrMainSystem, highwayRoutesSystem, aggregated.m_Aggregate, aggregationBuffer,
+                    entityManager, adrMainSystem, aggregationBuffer,
                     out bool isInverseAggregate))
             {
                 return false;
             }
 
             float currentDistance = 0f;
-            float lastOverrideNumber = 0f;
-            entityManager.TryGetComponent<ADRHighwayAggregationCacheData>(aggregated.m_Aggregate, out var cacheData);
-            float overridedToKm = cacheData.startDistanceOverrideKm;
-            bool isInverseOverride = cacheData.reverseCounting;
 
             for (int i = isInverseAggregate ? aggregationBuffer.Length - 1 : 0;
                  isInverseAggregate ? i >= 0 : i < aggregationBuffer.Length;
@@ -142,44 +130,6 @@ namespace BelzontAdr
                     newDistance += curve.m_Length;
                 }
 
-                if (entityManager.TryGetBuffer<SubObject>(aggregateElement.m_Edge, true, out var items) && items.Length > 0)
-                {
-                    bool? isReversedSegment = null;
-                    float overridePosition = -1;
-                    float targetNewNumber = 0f;
-                    float maxTarget = 1;
-                    if (aggregateElement.m_Edge == edge)
-                    {
-                        isReversedSegment ??= CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
-                        maxTarget = isReversedSegment.Value ? 1 - curvePos : curvePos;
-                    }
-
-                    for (int j = 0; j < items.Length; j++)
-                    {
-                        if (entityManager.TryGetComponent<Attached>(items[j].m_SubObject, out var attachmentData)
-                            && entityManager.TryGetComponent<ADRHighwayMarkerData>(items[j].m_SubObject, out var markerData)
-                            && markerData.overrideMileage)
-                        {
-                            isReversedSegment ??= CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
-                            var thisPosition = isReversedSegment.Value ? 1 - attachmentData.m_CurvePosition : attachmentData.m_CurvePosition;
-                            if (thisPosition > overridePosition && thisPosition <= maxTarget)
-                            {
-                                overridePosition = thisPosition;
-                                targetNewNumber = markerData.newMileage;
-                                isInverseOverride = markerData.reverseMileageCounting;
-                            }
-                        }
-                    }
-
-                    if (overridePosition >= 0)
-                    {
-                        var t = new Bounds1(0f, overridePosition);
-                        float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
-                        lastOverrideNumber = math.lerp(currentDistance, newDistance, s);
-                        overridedToKm = targetNewNumber;
-                    }
-                }
-
                 if (aggregateElement.m_Edge == edge)
                 {
                     bool isReversedSegment = CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
@@ -187,9 +137,7 @@ namespace BelzontAdr
                     float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
                     var unitMultiplier = IsFreedomUnitSystem() ? 1.09361329f : 1f;
                     number = (Mathf.RoundToInt(
-                                  ((overridedToKm * 500)
-                                   + ((isInverseOverride ? -.5f : .5f)
-                                      * (math.lerp(currentDistance, newDistance, s) - lastOverrideNumber)))
+                                  (.5f * math.lerp(currentDistance, newDistance, s))
                                   * unitMultiplier) * 2) + 1;
                     return true;
                 }

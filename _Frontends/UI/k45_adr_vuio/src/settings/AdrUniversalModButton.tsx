@@ -18,15 +18,7 @@ export const AdrUniversalModButton = () => {
         <FocusDisabled>
             <button type="button" className={styles.modButton} onClick={openSettings} title={translate("umm.openSettings")}>
                 <img className={styles.icon} src="coui://adr.k45/UI/images/ADR.svg" alt="" />
-            </button>
-            <button
-                type="button"
-                className={styles.modButton}
-                onClick={enableRoadGrouping}
-                title={translate("umm.enableRoadGrouping")}
-            >
-                <img className={styles.icon} src="coui://uil/Standard/Road.svg" alt="" />
-            </button>
+            </button>          
         </FocusDisabled>
     );
 };

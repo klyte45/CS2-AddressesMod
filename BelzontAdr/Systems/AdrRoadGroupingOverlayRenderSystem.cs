@@ -49,7 +49,6 @@ namespace BelzontAdr
         private PrefabSystem m_PrefabSystem;
         private OverlayRenderSystem m_OverlayRenderSystem;
         private AdrMainSystem m_AdrMainSystem;
-        private AdrHighwayRoutesSystem m_HighwayRoutesSystem;
         private AdrRoadGroupingTool m_Tool;
         private AdrRoadGroupingController m_Controller;
         private EntityQuery m_RouteConfigQuery;
@@ -96,7 +95,6 @@ namespace BelzontAdr
             m_PrefabSystem = World.GetOrCreateSystemManaged<PrefabSystem>();
             m_OverlayRenderSystem = World.GetOrCreateSystemManaged<OverlayRenderSystem>();
             m_AdrMainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
-            m_HighwayRoutesSystem = World.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
             m_Tool = World.GetOrCreateSystemManaged<AdrRoadGroupingTool>();
             m_Controller = World.GetOrCreateSystemManaged<AdrRoadGroupingController>();
             m_RouteConfigQuery = GetEntityQuery(ComponentType.ReadOnly<RouteConfigurationData>());
@@ -365,9 +363,9 @@ namespace BelzontAdr
                     IncrementDegree(ref nodeDegrees, edge.m_End);
                 }
 
-                // Same direction source as BuildingUtilsOverrides.GetAddress_Override:
-                // isInverseAggregate (ends vs zero/highway marker) XOR reverseCounting cache.
-                ResolveNumberingDirection(aggregate, elements, out bool isInverseAggregate, out bool reverseCounting);
+                // Same direction source as BuildingUtilsOverrides GetAddress override:
+                // isInverseAggregate (chain ends vs city zero marker).
+                ResolveNumberingDirection(elements, out bool isInverseAggregate);
 
                 float distance = 0f;
                 int prevSegmentIndex = -1;
@@ -381,7 +379,7 @@ namespace BelzontAdr
                         continue;
                     }
 
-                    bool inverted = IsNumberingSegmentInverted(elements, i, edgeEntity, isInverseAggregate, reverseCounting);
+                    bool inverted = IsNumberingSegmentInverted(elements, i, edgeEntity, isInverseAggregate);
                     Bezier4x3 bezier = curve.m_Bezier;
                     if (inverted)
                     {
@@ -912,24 +910,17 @@ namespace BelzontAdr
         }
 
         /// <summary>
-        /// Same direction flips as <c>BuildingUtilsOverrides.GetAddress_Override</c> /
-        /// <c>CheckSegmentReversion(..., isInverseAggregate)</c> plus highway
-        /// <c>ADRHighwayAggregationCacheData.reverseCounting</c>.
+        /// Same direction flips as GetAddress override /
+        /// <c>CheckSegmentReversion(..., isInverseAggregate)</c>.
         /// </summary>
         private bool IsNumberingSegmentInverted(
             DynamicBuffer<AggregateElement> elements,
             int index,
             Entity edge,
-            bool isInverseAggregate,
-            bool reverseCounting)
+            bool isInverseAggregate)
         {
             bool inverted = IsSegmentInverted(elements, index, edge);
             if (isInverseAggregate)
-            {
-                inverted = !inverted;
-            }
-
-            if (reverseCounting)
             {
                 inverted = !inverted;
             }
@@ -939,25 +930,16 @@ namespace BelzontAdr
 
         /// <summary>
         /// ADR house-number growth direction (same as GetAddress override):
-        /// compare oriented chain ends to highway <c>refStartPoint</c> or city zero marker;
-        /// optional <c>reverseCounting</c> from highway cache.
+        /// compare oriented chain ends to the city zero marker.
         /// </summary>
         private void ResolveNumberingDirection(
-            Entity aggregate,
             DynamicBuffer<AggregateElement> elements,
-            out bool isInverseAggregate,
-            out bool reverseCounting)
+            out bool isInverseAggregate)
         {
             isInverseAggregate = false;
-            reverseCounting = false;
             if (elements.Length == 0)
             {
                 return;
-            }
-
-            if (EntityManager.TryGetComponent(aggregate, out ADRHighwayAggregationCacheData cache))
-            {
-                reverseCounting = cache.reverseCounting;
             }
 
             if (!EntityManager.TryGetComponent(elements[0].m_Edge, out Curve e0)
@@ -973,13 +955,6 @@ namespace BelzontAdr
             float2 refE1 = inv1 ? e1.m_Bezier.a.xz : e1.m_Bezier.d.xz;
 
             float2 zeroMarker = m_AdrMainSystem.GetZeroMarkerPosition();
-            if (EntityManager.TryGetComponent(aggregate, out ADRHighwayAggregationData hwDataInfo)
-                && hwDataInfo.highwayDataId != default
-                && m_HighwayRoutesSystem.TryGetHighwayData(hwDataInfo.highwayDataId, out var hwData))
-            {
-                zeroMarker = hwData.refStartPoint;
-            }
-
             isInverseAggregate = math.distancesq(refE0, zeroMarker) > math.distancesq(refE1, zeroMarker);
         }
 

@@ -26,7 +26,6 @@ namespace BelzontAdr
         private ToolSystem m_ToolSystem;
         private AdrRoadGroupingTool m_Tool;
         private AdrMainSystem m_AdrMainSystem;
-        private AdrHighwayRoutesSystem m_HighwayRoutesSystem;
         private CameraUpdateSystem m_CameraUpdateSystem;
 
         private Entity m_LastAggregation = Entity.Null;
@@ -100,7 +99,6 @@ namespace BelzontAdr
             m_ToolSystem = World.GetOrCreateSystemManaged<ToolSystem>();
             m_Tool = World.GetOrCreateSystemManaged<AdrRoadGroupingTool>();
             m_AdrMainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
-            m_HighwayRoutesSystem = World.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
             m_CameraUpdateSystem = World.GetOrCreateSystemManaged<CameraUpdateSystem>();
             GameManager.instance.userInterface.view.Listener.BindingsReleased += () => m_initialized = false;
         }
@@ -223,9 +221,9 @@ namespace BelzontAdr
                     }
 
                     if (AdrRoadAddressNumbering.TryGetOddNumberAtCurvePos(
-                            EntityManager, m_AdrMainSystem, m_HighwayRoutesSystem, edge, 0f, out int n0)
+                            EntityManager, m_AdrMainSystem, edge, 0f, out int n0)
                         && AdrRoadAddressNumbering.TryGetOddNumberAtCurvePos(
-                            EntityManager, m_AdrMainSystem, m_HighwayRoutesSystem, edge, 1f, out int n1))
+                            EntityManager, m_AdrMainSystem, edge, 1f, out int n1))
                     {
                         card.numberLow = math.min(n0, n1);
                         card.numberHigh = math.max(n0, n1);
@@ -251,7 +249,7 @@ namespace BelzontAdr
             Camera camera)
         {
             if (!AdrRoadAddressNumbering.TryResolveInverseAggregate(
-                    EntityManager, m_AdrMainSystem, m_HighwayRoutesSystem, aggregation, elements,
+                    EntityManager, m_AdrMainSystem, elements,
                     out bool isInverseAggregate))
             {
                 return EmptyCards;

@@ -17,7 +17,6 @@ namespace BelzontAdr
         public void DoPatches(World world)
         {
             adrMainSystem = world.GetOrCreateSystemManaged<AdrMainSystem>();
-            hwRoutesSysten = world.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
 
             var GetAddress = typeof(BuildingUtils).GetMethod("GetAddress", RedirectorUtils.allFlags, null, new[]
             {
@@ -47,15 +46,8 @@ namespace BelzontAdr
                 var refE0 = CheckSegmentReversion(entityManager, aggregationBuffer, false, 0, aggregationBuffer[0]) ? e0.m_Bezier.d.xz : e0.m_Bezier.a.xz;
                 var refE1 = CheckSegmentReversion(entityManager, aggregationBuffer, false, aggregationBuffer.Length - 1, aggregationBuffer[^1]) ? e1.m_Bezier.a.xz : e1.m_Bezier.d.xz;
 
-                var zeroMarker = entityManager.TryGetComponent(aggregated.m_Aggregate, out ADRHighwayAggregationData hwDataInfo)
-                    && hwDataInfo.highwayDataId != default
-                    && hwRoutesSysten.TryGetHighwayData(hwDataInfo.highwayDataId, out var hwData) ? hwData.refStartPoint : adrMainSystem.GetZeroMarkerPosition();
+                var zeroMarker = adrMainSystem.GetZeroMarkerPosition();
                 bool isInverseAggregate = refE0.SqrDistance(zeroMarker) > refE1.SqrDistance(zeroMarker);
-
-                float lastOverrideNumber = 0f;
-                entityManager.TryGetComponent<ADRHighwayAggregationCacheData>(aggregated.m_Aggregate, out var cacheData);
-                float overridedToKm = cacheData.startDistanceOverrideKm;
-                bool isInverseOverride = cacheData.reverseCounting;
 
                 for (int i = isInverseAggregate ? aggregationBuffer.Length - 1 : 0;
                      isInverseAggregate ? i >= 0 : i < aggregationBuffer.Length;
@@ -69,43 +61,6 @@ namespace BelzontAdr
                         newDistance += curve.m_Length;
                     }
 
-
-                    if (entityManager.TryGetBuffer<Game.Objects.SubObject>(aggregateElement.m_Edge, true, out var items) && items.Length > 0)
-                    {
-                        bool? isReversedSegment = null;
-                        float overridePosition = -1;
-                        float targetNewNumber = 0f;
-                        float maxTarget = 1;
-                        if (aggregateElement.m_Edge == edge)
-                        {
-                            isReversedSegment ??= CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
-                            maxTarget = isReversedSegment.Value ? 1 - curvePos : curvePos;
-                        }
-                        for (int j = 0; j < items.Length; j++)
-                        {
-                            if (entityManager.TryGetComponent<Attached>(items[j].m_SubObject, out var attachmentData)
-                                && entityManager.TryGetComponent<ADRHighwayMarkerData>(items[j].m_SubObject, out var markerData)
-                                && markerData.overrideMileage)
-                            {
-                                isReversedSegment ??= CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
-                                var thisPosition = isReversedSegment.Value ? 1 - attachmentData.m_CurvePosition : attachmentData.m_CurvePosition;
-                                if (thisPosition > overridePosition && thisPosition <= maxTarget)
-                                {
-                                    overridePosition = thisPosition;
-                                    targetNewNumber = markerData.newMileage;
-                                    isInverseOverride = markerData.reverseMileageCounting;
-                                }
-                            }
-                        }
-                        if (overridePosition >= 0)
-                        {
-                            var t = new Bounds1(0f, overridePosition);
-                            float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
-                            lastOverrideNumber = math.lerp(currentDistance, newDistance, s);
-                            overridedToKm = targetNewNumber;
-                        }
-                    }
-
                     if (aggregateElement.m_Edge == edge)
                     {
                         bool isReversedSegment = CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
@@ -114,7 +69,7 @@ namespace BelzontAdr
                         float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
                         road = aggregated.m_Aggregate;
                         var unitMultiplier = GameManager.instance.settings.userInterface.unitSystem == Game.Settings.InterfaceSettings.UnitSystem.Freedom ? 1.09361329f : 1f; //yd or m
-                        number = (Mathf.RoundToInt(((overridedToKm * 500) + ((isInverseOverride ? -.5f : .5f) * (math.lerp(currentDistance, newDistance, s) - lastOverrideNumber))) * unitMultiplier) * 2) + 1;
+                        number = (Mathf.RoundToInt((.5f * math.lerp(currentDistance, newDistance, s)) * unitMultiplier) * 2) + 1;
 
                         //Check road side
                         if (entityManager.TryGetComponent(entity, out Game.Objects.Transform transform))
@@ -161,6 +116,5 @@ namespace BelzontAdr
         }
 
         private static AdrMainSystem adrMainSystem;
-        private static AdrHighwayRoutesSystem hwRoutesSysten;
     }
 }

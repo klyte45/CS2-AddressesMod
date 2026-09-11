@@ -3,12 +3,9 @@ using Belzont.Serialization;
 using Belzont.Utils;
 using BridgeWE;
 using Colossal.Entities;
-using Colossal.Mathematics;
 using Colossal.OdinSerializer.Utilities;
 using Colossal.Serialization.Entities;
 using Game.Common;
-using Game.Net;
-using Game.Objects;
 using Game.SceneFlow;
 using Game.Tools;
 using Game.UI;
@@ -19,7 +16,6 @@ using System.Linq;
 using Unity.Burst.Intrinsics;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Jobs;
 using Unity.Mathematics;
 using static Belzont.Utils.NameSystemExtensions;
 using static BelzontAdr.ADRHighwayMarkerData;
@@ -228,28 +224,20 @@ namespace BelzontAdr
             InfoPanel_RouteId.OnScreenValueChanged += (x) => EnqueueModification<Colossal.Hash128, ADRHighwayMarkerData>(x, (x, currentItem, entity) =>
             {
                 currentItem.routeDataIndex = x;
-                if (EntityManager.TryGetComponent<Attached>(entity, out var attached)
-                && EntityManager.TryGetComponent<Aggregated>(attached.m_Parent, out var aggregated)
-                && EntityManager.TryGetComponent<ADRHighwayAggregationData>(aggregated.m_Aggregate, out var highwayAggregationData))
-                {
-                    highwayAggregationData.highwayDataId = x;
-                    EntityManager.SetComponentData(aggregated.m_Aggregate, highwayAggregationData);
-                    m_modificationEndBarrier.CreateCommandBuffer().AddComponent<ADRHighwayAggregationDataDirtyHwId>(aggregated.m_Aggregate);
-                }
                 return currentItem;
             });
-            InfoPanel_RouteDirection.OnScreenValueChanged += (x) => EnqueueModification<RouteDirection, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.routeDirection = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_DisplayInformation.OnScreenValueChanged += (x) => EnqueueModification<DisplayInformation, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.displayInformation = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_NumericCustomParam1.OnScreenValueChanged += (x) => EnqueueModification<int, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.numericCustomParam1 = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_NumericCustomParam2.OnScreenValueChanged += (x) => EnqueueModification<int, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.numericCustomParam2 = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_NewMileage.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.newMileage = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_OverrideMileage.OnScreenValueChanged += (x) => EnqueueModification<bool, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.overrideMileage = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_ReverseMileageCounting.OnScreenValueChanged += (x) => EnqueueModification<bool, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.reverseMileageCounting = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_PylonCount.OnScreenValueChanged += (x) => EnqueueModification<byte, ADRHighwayMarkerData>((byte)x, (x, currentItem, _) => { currentItem.pylonCount = (byte)math.clamp(x, 1, 2); m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_PylonSpacing.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonSpacing = math.clamp(x, 0.05f, 3f); m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_PylonMaterial.OnScreenValueChanged += (x) => EnqueueModification<PylonMaterial, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonMaterial = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_PylonHeight.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonHeight = math.clamp(x, .25f, 10); m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
-            InfoPanel_PylonFormat.OnScreenValueChanged += (x) => EnqueueModification<PylonFormat, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonFormat = x; m_cacheToBeErased.Add(currentItem.routeDataIndex); return currentItem; });
+            InfoPanel_RouteDirection.OnScreenValueChanged += (x) => EnqueueModification<RouteDirection, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.routeDirection = x; return currentItem; });
+            InfoPanel_DisplayInformation.OnScreenValueChanged += (x) => EnqueueModification<DisplayInformation, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.displayInformation = x; return currentItem; });
+            InfoPanel_NumericCustomParam1.OnScreenValueChanged += (x) => EnqueueModification<int, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.numericCustomParam1 = x; return currentItem; });
+            InfoPanel_NumericCustomParam2.OnScreenValueChanged += (x) => EnqueueModification<int, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.numericCustomParam2 = x; return currentItem; });
+            InfoPanel_NewMileage.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.newMileage = x; return currentItem; });
+            InfoPanel_OverrideMileage.OnScreenValueChanged += (x) => EnqueueModification<bool, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.overrideMileage = x; return currentItem; });
+            InfoPanel_ReverseMileageCounting.OnScreenValueChanged += (x) => EnqueueModification<bool, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.reverseMileageCounting = x; return currentItem; });
+            InfoPanel_PylonCount.OnScreenValueChanged += (x) => EnqueueModification<byte, ADRHighwayMarkerData>((byte)x, (x, currentItem, _) => { currentItem.pylonCount = (byte)math.clamp(x, 1, 2); return currentItem; });
+            InfoPanel_PylonSpacing.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonSpacing = math.clamp(x, 0.05f, 3f); return currentItem; });
+            InfoPanel_PylonMaterial.OnScreenValueChanged += (x) => EnqueueModification<PylonMaterial, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonMaterial = x; return currentItem; });
+            InfoPanel_PylonHeight.OnScreenValueChanged += (x) => EnqueueModification<float, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonHeight = math.clamp(x, .25f, 10); return currentItem; });
+            InfoPanel_PylonFormat.OnScreenValueChanged += (x) => EnqueueModification<PylonFormat, ADRHighwayMarkerData>(x, (x, currentItem, _) => { currentItem.pylonFormat = x; return currentItem; });
 
         }
 
@@ -300,24 +288,16 @@ namespace BelzontAdr
         private EntityQuery m_DirtyMarkerData;
         private EntityQuery m_DirtyMarkerDataTemp;
         private EntityQuery m_markTempDirtyTargets;
-        private EntityQuery m_unprocessedAggregations;
-        private EntityQuery m_dirtyHwDataAggregations;
-        private EntityQuery m_uncachedAggregations;
-        private EntityQuery m_cachedAggregations;
-        private EntityQuery m_aggregatedDeleted;
         private ModificationEndBarrier m_modificationEndBarrier;
         private ToolSystem m_toolSystem;
         private Adr_WEIntegrationSystem m_adrWeIntegrationSystem;
-        private AdrMainSystem m_mainSystem;
         private AdrEditorUISystem m_adrEditorUI;
-        private readonly NativeParallelHashSet<Colossal.Hash128> m_cacheToBeErased = new(20, Allocator.Persistent);
         protected override void OnCreate()
         {
             base.OnCreate();
             m_modificationEndBarrier = World.GetOrCreateSystemManaged<ModificationEndBarrier>();
             m_adrWeIntegrationSystem = World.GetOrCreateSystemManaged<Adr_WEIntegrationSystem>();
             m_toolSystem = World.GetExistingSystemManaged<ToolSystem>();
-            m_mainSystem = World.GetExistingSystemManaged<AdrMainSystem>();
             m_DirtyMarkerData = GetEntityQuery(new EntityQueryDesc[]
             {
                 new()
@@ -363,84 +343,6 @@ namespace BelzontAdr
                     }
                 }
             });
-            m_unprocessedAggregations = GetEntityQuery(new EntityQueryDesc[]
-            {
-                new()
-                {
-                    All = new ComponentType[]
-                    {
-                        ComponentType.ReadOnly<Aggregate>(),
-                    },
-                    None = new ComponentType[] {
-                        ComponentType.ReadOnly<Temp>(),
-                        ComponentType.ReadOnly<ADRHighwayAggregationData>(),
-                        ComponentType.ReadOnly<Deleted>()
-                    }
-                }
-            });
-            m_dirtyHwDataAggregations = GetEntityQuery(new EntityQueryDesc[]
-            {
-                new()
-                {
-                    All = new ComponentType[]
-                    {
-                        ComponentType.ReadOnly<Aggregate>(),
-                        ComponentType.ReadOnly<ADRHighwayAggregationData>(),
-                        ComponentType.ReadOnly<ADRHighwayAggregationDataDirtyHwId>(),
-                    },
-                    None = new ComponentType[] {
-                        ComponentType.ReadOnly<Temp>(),
-                        ComponentType.ReadOnly<Deleted>()
-                    }
-                }
-            });
-            m_uncachedAggregations = GetEntityQuery(new EntityQueryDesc[]
-            {
-                new()
-                {
-                    All = new ComponentType[]
-                    {
-                        ComponentType.ReadOnly<Aggregate>(),
-                        ComponentType.ReadOnly<ADRHighwayAggregationData>(),
-                    },
-                    None = new ComponentType[] {
-                        ComponentType.ReadOnly<ADRHighwayAggregationCacheData>(),
-                        ComponentType.ReadOnly<Temp>(),
-                        ComponentType.ReadOnly<Deleted>()
-                    }
-                }
-            });
-            m_cachedAggregations = GetEntityQuery(new EntityQueryDesc[]
-            {
-                new()
-                {
-                    All = new ComponentType[]
-                    {
-                        ComponentType.ReadOnly<Aggregate>(),
-                        ComponentType.ReadOnly<ADRHighwayAggregationData>(),
-                        ComponentType.ReadOnly<ADRHighwayAggregationCacheData>(),
-                    },
-                    None = new ComponentType[] {
-                        ComponentType.ReadOnly<Updated>(),
-                        ComponentType.ReadOnly<Temp>(),
-                        ComponentType.ReadOnly<Deleted>()
-                    }
-                }
-            });
-            m_aggregatedDeleted = GetEntityQuery(new EntityQueryDesc[]
-            {
-                new()
-                {
-                    All = new ComponentType[]
-                    {
-                        ComponentType.ReadOnly<Aggregated>(),
-                        ComponentType.ReadOnly<Deleted>()
-                    },
-                    None = new ComponentType[] {
-                        ComponentType.ReadOnly<Temp>(),
-                    }
-                }
-            });
         }
 
         protected override void OnDestroy()
@@ -468,10 +370,6 @@ namespace BelzontAdr
                     m_EntityType = GetEntityTypeHandle(),
                     m_markerData = GetComponentTypeHandle<ADRHighwayMarkerData>(),
                     m_tempLookup = GetComponentLookup<Temp>(),
-                    m_adrHwAggregationDataLookup = GetComponentLookup<ADRHighwayAggregationData>(),
-                    m_aggregatedLookup = GetComponentLookup<Aggregated>(),
-                    m_attachedLookup = GetComponentLookup<Attached>(),
-                    m_adrHwAggregationDataDirtyHwIdLookup = GetComponentLookup<ADRHighwayAggregationDataDirtyHwId>(),
                 };
                 updater.ScheduleParallel(m_DirtyMarkerData, Dependency).Complete();
             }
@@ -484,201 +382,7 @@ namespace BelzontAdr
                     EntityManager.RemoveComponent<ADRHighwayMarkerDataDirty>(entities[i]);
                 }
             }
-            else if (!m_unprocessedAggregations.IsEmpty)
-            {
-                var updater = new NewAggregateFiller
-                {
-                    m_CommandBuffer = m_modificationEndBarrier.CreateCommandBuffer().AsParallelWriter(),
-                    m_EntityType = GetEntityTypeHandle(),
-                    m_aggregateElementsData = GetBufferLookup<AggregateElement>(),
-                    m_markerDataLookup = GetComponentLookup<ADRHighwayMarkerData>(),
-                    m_subObjectsLookup = GetBufferLookup<SubObject>(),
-                };
-                updater.ScheduleParallel(m_unprocessedAggregations, Dependency).Complete();
-                m_mainSystem.OnChangedRoadNameGenerationRules();
-            }
-            else if (!m_dirtyHwDataAggregations.IsEmpty)
-            {
-                var updater = new ReplicateAggregateSetting
-                {
-                    m_CommandBuffer = m_modificationEndBarrier.CreateCommandBuffer().AsParallelWriter(),
-                    m_EntityType = GetEntityTypeHandle(),
-                    m_aggregateElementsData = GetBufferLookup<AggregateElement>(),
-                    m_markerDataLookup = GetComponentLookup<ADRHighwayMarkerData>(),
-                    m_subObjectsLookup = GetBufferLookup<SubObject>(),
-                    m_HighwayAggregationData = GetComponentTypeHandle<ADRHighwayAggregationData>()
-                };
-                updater.ScheduleParallel(m_dirtyHwDataAggregations, Dependency).Complete();
-                m_mainSystem.OnChangedRoadNameGenerationRules();
-            }
-            else if (m_cacheToBeErased.Count() > 0 && !m_cachedAggregations.IsEmpty)
-            {
-                var updater = new AggregationCacheEraser
-                {
-                    m_CommandBuffer = m_modificationEndBarrier.CreateCommandBuffer().AsParallelWriter(),
-                    m_EntityType = GetEntityTypeHandle(),
-                    m_HashesToErase = m_cacheToBeErased,
-                    m_hwTypeHandle = GetComponentTypeHandle<ADRHighwayAggregationData>()
-                };
-                updater.ScheduleParallel(m_cachedAggregations, Dependency).Complete();
-                m_cacheToBeErased.Clear();
-                m_mainSystem.OnChangedRoadNameGenerationRules();
-            }
-            else if (!m_uncachedAggregations.IsEmpty)
-            {
-                var highwayRefPointMap = new NativeHashMap<Colossal.Hash128, float2>(highwaysDataRegistry.Count, Allocator.Temp);
-                foreach (var value in highwaysDataRegistry.Values)
-                {
-                    highwayRefPointMap[value.Id] = value.refStartPoint;
-                }
-                var updater = new CalculateHighwayCacheData
-                {
-                    m_CommandBuffer = m_modificationEndBarrier.CreateCommandBuffer().AsParallelWriter(),
-                    m_EntityType = GetEntityTypeHandle(),
-                    m_aggregateElementsData = GetBufferLookup<AggregateElement>(),
-                    m_markerDataLookup = GetComponentLookup<ADRHighwayMarkerData>(),
-                    m_subObjectsLookup = GetBufferLookup<SubObject>(),
-                    m_attachedLookup = GetComponentLookup<Attached>(),
-                    m_curveLookup = GetComponentLookup<Curve>(),
-                    m_edgeLookup = GetComponentLookup<Edge>(),
-                    m_hwAggregationData = GetComponentTypeHandle<ADRHighwayAggregationData>(),
-                    m_globalZeroMarker = m_mainSystem.GetZeroMarkerPosition(),
-                    m_refPointHighway = highwayRefPointMap
-                };
-                updater.ScheduleParallel(m_uncachedAggregations, Dependency).Complete();
-                highwayRefPointMap.Dispose();
-                m_mainSystem.OnChangedRoadNameGenerationRules();
-            }
         }
-#if BURST
-        [BurstCompile]
-#endif
-        private struct NewAggregateFiller : IJobChunk
-        {
-            public EntityCommandBuffer.ParallelWriter m_CommandBuffer;
-            public EntityTypeHandle m_EntityType;
-            public BufferLookup<AggregateElement> m_aggregateElementsData;
-            public BufferLookup<SubObject> m_subObjectsLookup;
-            public ComponentLookup<ADRHighwayMarkerData> m_markerDataLookup;
-
-            public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
-            {
-                var entities = chunk.GetNativeArray(m_EntityType);
-                for (int i = 0; i < entities.Length; i++)
-                {
-                    var entity = entities[i];
-                    Colossal.Hash128 idFound = default;
-                    if (m_aggregateElementsData.TryGetBuffer(entity, out var edges))
-                    {
-                        for (int j = 0; j < edges.Length; j++)
-                        {
-                            if (m_subObjectsLookup.TryGetBuffer(edges[j].m_Edge, out var subObjects))
-                            {
-                                for (int k = 0; k < subObjects.Length; k++)
-                                {
-                                    if (m_markerDataLookup.TryGetComponent(subObjects[k].m_SubObject, out var markerData))
-                                    {
-                                        if (idFound == default)
-                                        {
-                                            if (markerData.routeDataIndex != default)
-                                            {
-                                                idFound = markerData.routeDataIndex;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            markerData.routeDataIndex = idFound;
-                                            m_CommandBuffer.SetComponent(unfilteredChunkIndex, subObjects[k].m_SubObject, markerData);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    m_CommandBuffer.AddComponent(unfilteredChunkIndex, entity, new ADRHighwayAggregationData
-                    {
-                        highwayDataId = idFound
-                    });
-                }
-            }
-        }
-
-#if BURST
-        [BurstCompile]
-#endif
-        private struct AggregationCacheEraser : IJobChunk
-        {
-            public EntityCommandBuffer.ParallelWriter m_CommandBuffer;
-            public EntityTypeHandle m_EntityType;
-            public ComponentTypeHandle<ADRHighwayAggregationData> m_hwTypeHandle;
-            public NativeParallelHashSet<Colossal.Hash128> m_HashesToErase;
-
-            public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
-            {
-                var entities = chunk.GetNativeArray(m_EntityType);
-                var hwDataArray = chunk.GetNativeArray(ref m_hwTypeHandle);
-                for (int i = 0; i < entities.Length; i++)
-                {
-                    var entity = entities[i];
-                    var hwData = hwDataArray[i];
-                    if (hwData.highwayDataId != default && m_HashesToErase.Contains(hwData.highwayDataId))
-                    {
-                        m_CommandBuffer.RemoveComponent<ADRHighwayAggregationCacheData>(unfilteredChunkIndex, entity);
-                    }
-                }
-            }
-        }
-#if BURST
-        [BurstCompile]
-#endif
-        private struct ReplicateAggregateSetting : IJobChunk
-        {
-            public EntityCommandBuffer.ParallelWriter m_CommandBuffer;
-            public ComponentTypeHandle<ADRHighwayAggregationData> m_HighwayAggregationData;
-            public EntityTypeHandle m_EntityType;
-            public BufferLookup<AggregateElement> m_aggregateElementsData;
-            public BufferLookup<SubObject> m_subObjectsLookup;
-            public ComponentLookup<ADRHighwayMarkerData> m_markerDataLookup;
-
-            public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
-            {
-                var entities = chunk.GetNativeArray(m_EntityType);
-                var highwaysDatas = chunk.GetNativeArray(ref m_HighwayAggregationData);
-                for (int i = 0; i < entities.Length; i++)
-                {
-                    var entity = entities[i];
-                    var highwayData = highwaysDatas[i];
-                    var idToReplicate = highwayData.highwayDataId;
-                    var anyChanged = false;
-                    if (m_aggregateElementsData.TryGetBuffer(entity, out var edges))
-                    {
-                        for (int j = 0; j < edges.Length; j++)
-                        {
-                            if (m_subObjectsLookup.TryGetBuffer(edges[j].m_Edge, out var subObjects))
-                            {
-                                for (int k = 0; k < subObjects.Length; k++)
-                                {
-                                    if (m_markerDataLookup.TryGetComponent(subObjects[k].m_SubObject, out var markerData))
-                                    {
-                                        markerData.routeDataIndex = idToReplicate;
-                                        m_CommandBuffer.SetComponent(unfilteredChunkIndex, subObjects[k].m_SubObject, markerData);
-                                        anyChanged = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (!anyChanged)
-                    {
-                        highwayData.highwayDataId = default;
-                        m_CommandBuffer.SetComponent(unfilteredChunkIndex, entity, highwayData);
-                    }
-                    m_CommandBuffer.RemoveComponent<ADRHighwayAggregationDataDirtyHwId>(unfilteredChunkIndex, entity);
-                    m_CommandBuffer.RemoveComponent<ADRHighwayAggregationCacheData>(unfilteredChunkIndex, entity);
-                }
-            }
-        }
-
 #if BURST
         [BurstCompile]
 #endif
@@ -689,12 +393,6 @@ namespace BelzontAdr
             public ComponentLookup<Temp> m_tempLookup;
             public ADRHighwayMarkerData m_currentToolData;
             public EntityTypeHandle m_EntityType;
-            public NativeParallelHashSet<Colossal.Hash128>.ParallelWriter m_markedToRecalculate;
-
-            public ComponentLookup<Aggregated> m_aggregatedLookup;
-            public ComponentLookup<Attached> m_attachedLookup;
-            public ComponentLookup<ADRHighwayAggregationData> m_adrHwAggregationDataLookup;
-            public ComponentLookup<ADRHighwayAggregationDataDirtyHwId> m_adrHwAggregationDataDirtyHwIdLookup;
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
@@ -706,163 +404,10 @@ namespace BelzontAdr
                     var currentMarkData = markDatas[i];
                     if (!currentMarkData.Initialized || m_tempLookup.HasComponent(entity))
                     {
-                        if (!m_tempLookup.HasComponent(entity)
-                            && m_attachedLookup.TryGetComponent(entity, out var attached)
-                            && m_aggregatedLookup.TryGetComponent(attached.m_Parent, out var aggregationLink)
-                            && m_adrHwAggregationDataLookup.TryGetComponent(aggregationLink.m_Aggregate, out var adrHwAggregationData)
-                            && adrHwAggregationData.highwayDataId != m_currentToolData.routeDataIndex
-                            && !m_adrHwAggregationDataDirtyHwIdLookup.HasComponent(aggregationLink.m_Aggregate)
-                            )
-                        {
-                            if (m_currentToolData.routeDataIndex == default)
-                            {
-                                var dataCopy = m_currentToolData;
-                                dataCopy.routeDataIndex = adrHwAggregationData.highwayDataId;
-                                m_CommandBuffer.SetComponent(unfilteredChunkIndex, entity, dataCopy);
-                                m_markedToRecalculate.Add(dataCopy.routeDataIndex);
-                            }
-                            else
-                            {
-                                m_CommandBuffer.SetComponent(unfilteredChunkIndex, entity, m_currentToolData);
-                                adrHwAggregationData.highwayDataId = m_currentToolData.routeDataIndex;
-                                m_CommandBuffer.SetComponent(unfilteredChunkIndex, aggregationLink.m_Aggregate, adrHwAggregationData);
-                                m_CommandBuffer.AddComponent<ADRHighwayAggregationDataDirtyHwId>(unfilteredChunkIndex, aggregationLink.m_Aggregate);
-                            }
-                        }
-                        else
-                        {
-                            m_CommandBuffer.SetComponent(unfilteredChunkIndex, entity, m_currentToolData);
-                            m_markedToRecalculate.Add(m_currentToolData.routeDataIndex);
-                        }
+                        m_CommandBuffer.SetComponent(unfilteredChunkIndex, entity, m_currentToolData);
                     }
                     m_CommandBuffer.RemoveComponent<ADRHighwayMarkerDataDirty>(unfilteredChunkIndex, entity);
                 }
-            }
-        }
-
-
-#if BURST
-        [BurstCompile]
-#endif
-        private struct CalculateHighwayCacheData : IJobChunk
-        {
-            public EntityCommandBuffer.ParallelWriter m_CommandBuffer;
-            public ComponentTypeHandle<ADRHighwayAggregationData> m_hwAggregationData;
-            public EntityTypeHandle m_EntityType;
-            public BufferLookup<AggregateElement> m_aggregateElementsData;
-            public BufferLookup<SubObject> m_subObjectsLookup;
-            public ComponentLookup<ADRHighwayMarkerData> m_markerDataLookup;
-            public NativeHashMap<Colossal.Hash128, float2> m_refPointHighway;
-            public ComponentLookup<Curve> m_curveLookup;
-            public ComponentLookup<Edge> m_edgeLookup;
-            public float2 m_globalZeroMarker;
-            public ComponentLookup<Attached> m_attachedLookup;
-
-            public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
-            {
-                var entities = chunk.GetNativeArray(m_EntityType);
-                var aggregationDatas = chunk.GetNativeArray(ref m_hwAggregationData);
-                for (int h = 0; h < entities.Length; h++)
-                {
-                    var entity = entities[h];
-                    var currentAggregationData = aggregationDatas[h];
-
-                    if (!m_aggregateElementsData.TryGetBuffer(entity, out var aggregationBuffer)
-                        || !m_curveLookup.TryGetComponent(aggregationBuffer[0].m_Edge, out Curve e0)
-                        || !m_curveLookup.TryGetComponent(aggregationBuffer[^1].m_Edge, out Curve e1))
-                    {
-                        m_CommandBuffer.SetComponent(unfilteredChunkIndex, entity, new ADRHighwayAggregationCacheData());
-                        continue;
-                    }
-
-
-                    var refE0 = CheckSegmentReversion(aggregationBuffer, false, 0, aggregationBuffer[0]) ? e0.m_Bezier.d.xz : e0.m_Bezier.a.xz;
-                    var refE1 = CheckSegmentReversion(aggregationBuffer, false, aggregationBuffer.Length - 1, aggregationBuffer[^1]) ? e1.m_Bezier.a.xz : e1.m_Bezier.d.xz;
-
-                    var zeroMarker = currentAggregationData.highwayDataId != default
-                        && m_refPointHighway.TryGetValue(currentAggregationData.highwayDataId, out var refPoint) ? refPoint : m_globalZeroMarker;
-                    bool isInverseAggregate = refE0.SqrDistance(zeroMarker) > refE1.SqrDistance(zeroMarker);
-
-                    var currentDistance = 0f;
-                    var isInverseOverride = false;
-                    bool found = false;
-
-                    for (int i = isInverseAggregate ? aggregationBuffer.Length - 1 : 0; isInverseAggregate ? i >= 0 : i < aggregationBuffer.Length; i += isInverseAggregate ? -1 : 1)
-                    {
-                        AggregateElement aggregateElement = aggregationBuffer[i];
-                        float newDistance = currentDistance;
-                        if (m_curveLookup.TryGetComponent(aggregateElement.m_Edge, out Curve curve))
-                        {
-                            newDistance += curve.m_Length;
-                        }
-
-                        if (m_subObjectsLookup.TryGetBuffer(aggregateElement.m_Edge, out var items) && items.Length > 0)
-                        {
-                            bool? isReversedSegment = null;
-                            float overridePosition = -1;
-                            float targetNewNumber = 0f;
-                            float maxTarget = 1;
-                            for (int j = 0; j < items.Length; j++)
-                            {
-                                if (m_attachedLookup.TryGetComponent(items[j].m_SubObject, out var attachmentData)
-                                    && m_markerDataLookup.TryGetComponent(items[j].m_SubObject, out var markerData)
-                                    && markerData.overrideMileage)
-                                {
-                                    isReversedSegment ??= CheckSegmentReversion(aggregationBuffer, isInverseAggregate, i, aggregateElement);
-                                    var thisPosition = isReversedSegment.Value ? 1 - attachmentData.m_CurvePosition : attachmentData.m_CurvePosition;
-                                    if (thisPosition > overridePosition && thisPosition <= maxTarget)
-                                    {
-                                        overridePosition = thisPosition;
-                                        targetNewNumber = markerData.newMileage;
-                                        maxTarget = thisPosition;
-                                        isInverseOverride = markerData.reverseMileageCounting;
-                                    }
-                                }
-                            }
-                            if (overridePosition >= 0)
-                            {
-                                var t = new Bounds1(0f, overridePosition);
-                                float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
-
-                                m_CommandBuffer.AddComponent(unfilteredChunkIndex, entity, new ADRHighwayAggregationCacheData
-                                {
-                                    startDistanceOverrideKm = targetNewNumber - (math.lerp(currentDistance, newDistance, s) * (isInverseOverride ? -.001f : .001f)),
-                                    reverseCounting = isInverseOverride
-                                });
-                                found = true;
-                                break;
-                            }
-                        }
-                        currentDistance = newDistance;
-                    }
-                    if (!found)
-                    {
-                        m_CommandBuffer.AddComponent(unfilteredChunkIndex, entity, new ADRHighwayAggregationCacheData { startDistanceOverrideKm = 0, reverseCounting = false });
-                    }
-                }
-            }
-
-            private bool CheckSegmentReversion(DynamicBuffer<AggregateElement> dynamicBuffer, bool isInverseAggregate, int i, AggregateElement aggregateElement)
-            {
-                bool isReversedSegment = false;
-                if (i > 0)
-                {
-                    if (m_edgeLookup.TryGetComponent(aggregateElement.m_Edge, out Edge edge2)
-                        && m_edgeLookup.TryGetComponent(dynamicBuffer[i - 1].m_Edge, out Edge edge3)
-                        && (edge2.m_End == edge3.m_Start || edge2.m_End == edge3.m_End))
-                    {
-                        isReversedSegment = true;
-                    }
-                }
-                else if (i < dynamicBuffer.Length - 1
-                    && m_edgeLookup.TryGetComponent(aggregateElement.m_Edge, out Edge edge4)
-                    && m_edgeLookup.TryGetComponent(dynamicBuffer[i + 1].m_Edge, out Edge edge5)
-                    && (edge4.m_Start == edge5.m_Start || edge4.m_Start == edge5.m_End))
-                {
-                    isReversedSegment = true;
-                }
-                if (isInverseAggregate) isReversedSegment = !isReversedSegment;
-                return isReversedSegment;
             }
         }
         #endregion
