@@ -29,13 +29,13 @@ Workstream 3c (split from former ACT-03). First membership edit forks from vanil
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ForkFromVanilla copies vanilla ADRRandomizationData seed S onto the new ADR aggregate
-- [ ] ForkFromVanilla calls vanilla Aggregate Redraw() so leftover vanilla members get new seed S2
-- [ ] ForkFromVanilla initializes ADRNameAggregateElement as a full copy of vanilla AggregateElement then applies the first add/remove edit
-- [ ] ADRNameAggregated is set on ADR member edges after fork
-- [ ] AdrNamesetSystem seeds ADRRandomizationData on new ADR aggregates (not only vanilla Aggregate)
-- [ ] Plain select does not fork; only first membership change triggers fork (tool wiring may land in ACT-05 but API supports it)
-- [ ] Vanilla Aggregate membership list is not mutated by fork (seed redraw only)
+- [x] ForkFromVanilla copies vanilla ADRRandomizationData seed S onto the new ADR aggregate
+- [x] ForkFromVanilla calls vanilla Aggregate Redraw() so leftover vanilla members get new seed S2
+- [x] ForkFromVanilla initializes ADRNameAggregateElement as a full copy of vanilla AggregateElement then applies the first add/remove edit
+- [x] ADRNameAggregated is set on ADR member edges after fork
+- [x] AdrNamesetSystem seeds ADRRandomizationData on new ADR aggregates (not only vanilla Aggregate)
+- [x] Plain select does not fork; only first membership change triggers fork (tool wiring may land in ACT-05 but API supports it)
+- [x] Vanilla Aggregate membership list is not mutated by fork (seed redraw only)
 
 ---
 
