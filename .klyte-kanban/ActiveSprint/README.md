@@ -14,6 +14,6 @@ ADR-linked edges name and number via ADR; Road Grouping writes membership; Aggre
 - **Original tasks**: 00
 - **Original task IDs**: (none)
 - **Delivered tasks (from original)**:
-- **Added tasks**: 0
+- **Added tasks**: 1
 - **Delivered tasks (from added)**:
 - **Total delivered tasks**:
