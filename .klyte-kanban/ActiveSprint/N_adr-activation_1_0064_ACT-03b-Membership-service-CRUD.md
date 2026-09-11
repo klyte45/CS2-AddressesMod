@@ -74,6 +74,10 @@ Workstream 3b (split from former ACT-03). Membership service operates on ACT-03a
 
 - ACT-03a
 - ACT-03c
+- [0063] ACT-03a-ADR-name-aggregate-components-serialize
+- [0065] ACT-03c-ForkFromVanilla-ADR-seeding
+
+---
 
 ## Other Notes
 
