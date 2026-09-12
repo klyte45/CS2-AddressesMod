@@ -175,6 +175,23 @@ namespace BelzontAdr
             bool overUi = InputManager.instance.mouseOverUI;
             HoveredDragHandle = Entity.Null;
 
+            // Tool focus is ADR-only — coerce leftover vanilla Aggregate selections.
+            if (selected != Entity.Null && !m_Membership.IsAdrNameAggregate(selected))
+            {
+                if (EntityManager.HasComponent<Aggregate>(selected)
+                    && m_Membership.TryForkFromVanillaSeed(selected, out Entity coercedAdr))
+                {
+                    selected = coercedAdr;
+                    m_Controller.SelectedAggregation.Value = coercedAdr;
+                    m_Controller.InvalidateSegmentCards();
+                }
+                else
+                {
+                    selected = Entity.Null;
+                    m_Controller.ClearSelection();
+                }
+            }
+
             if (selected == Entity.Null)
             {
                 ClearFixedMembership();
@@ -225,13 +242,10 @@ namespace BelzontAdr
             {
                 if (m_ApplyAction.WasPressedThisFrame()
                     && eligibleEdge != Entity.Null
-                    && EntityManager.TryGetComponent(eligibleEdge, out Aggregated aggregated))
+                    && m_Membership.TryEnsureAdrForEdge(eligibleEdge, out Entity adrFocus))
                 {
-                    // Prefer existing ADR association when present; else focus vanilla Aggregate.
-                    m_Controller.SelectedAggregation.Value =
-                        AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, eligibleEdge, out var adrAggregate)
-                            ? adrAggregate
-                            : aggregated.m_Aggregate;
+                    m_Controller.SelectedAggregation.Value = adrFocus;
+                    m_Controller.InvalidateSegmentCards();
                 }
 
                 return inputDeps;
@@ -420,40 +434,37 @@ namespace BelzontAdr
 
         private void ApplyMembershipToggle(Entity edge, Entity selected)
         {
-            bool currentlyMember = IsMemberEdge(edge, selected);
-            if (m_Membership.IsAdrNameAggregate(selected))
+            Entity working = selected;
+            if (!m_Membership.IsAdrNameAggregate(working))
             {
-                bool ok = currentlyMember
-                    ? m_Membership.RemoveMember(selected, edge)
-                    : m_Membership.AddMember(selected, edge);
-                if (!ok)
+                // Select normally materializes ADR; keep a seed fallback if focus is still vanilla.
+                if (!m_Membership.TryForkFromVanillaSeed(working, out Entity adrAggregate))
                 {
                     return;
                 }
 
-                if (!m_Membership.IsAdrNameAggregate(selected))
-                {
-                    ClearFixedMembership();
-                    m_Controller.ClearSelection();
-                }
-                else
-                {
-                    m_Controller.InvalidateSegmentCards();
-                }
-                return;
+                working = adrAggregate;
+                m_Controller.SelectedAggregation.Value = adrAggregate;
             }
 
-            // First membership edit on vanilla Aggregate → fork.
-            var edit = currentlyMember
-                ? AdrNameAggregateForkEdit.RemoveMember
-                : AdrNameAggregateForkEdit.AddMember;
-            if (!m_Membership.TryForkFromVanilla(selected, edit, edge, out Entity adrAggregate))
+            bool currentlyMember = IsMemberEdge(edge, working);
+            bool ok = currentlyMember
+                ? m_Membership.RemoveMember(working, edge)
+                : m_Membership.AddMember(working, edge);
+            if (!ok)
             {
                 return;
             }
 
-            m_Controller.SelectedAggregation.Value = adrAggregate;
-            m_Controller.InvalidateSegmentCards();
+            if (!m_Membership.IsAdrNameAggregate(working))
+            {
+                ClearFixedMembership();
+                m_Controller.ClearSelection();
+            }
+            else
+            {
+                m_Controller.InvalidateSegmentCards();
+            }
         }
 
         private void ApplyPathMembership(Entity selected, List<Entity> addEdges, List<Entity> removeEdges)
@@ -465,27 +476,10 @@ namespace BelzontAdr
             }
 
             Entity working = selected;
-            int removeStart = 0;
-            int addStart = 0;
 
             if (!m_Membership.IsAdrNameAggregate(working))
             {
-                Entity forkEdge;
-                AdrNameAggregateForkEdit forkEdit;
-                if (removeEdges != null && removeEdges.Count > 0)
-                {
-                    forkEdge = removeEdges[0];
-                    forkEdit = AdrNameAggregateForkEdit.RemoveMember;
-                    removeStart = 1;
-                }
-                else
-                {
-                    forkEdge = addEdges[0];
-                    forkEdit = AdrNameAggregateForkEdit.AddMember;
-                    addStart = 1;
-                }
-
-                if (!m_Membership.TryForkFromVanilla(working, forkEdit, forkEdge, out Entity adrAggregate))
+                if (!m_Membership.TryForkFromVanillaSeed(working, out Entity adrAggregate))
                 {
                     return;
                 }
@@ -496,7 +490,7 @@ namespace BelzontAdr
 
             if (removeEdges != null)
             {
-                for (int i = removeStart; i < removeEdges.Count; i++)
+                for (int i = 0; i < removeEdges.Count; i++)
                 {
                     m_Membership.RemoveMember(working, removeEdges[i]);
                     if (!m_Membership.IsAdrNameAggregate(working))
@@ -510,7 +504,7 @@ namespace BelzontAdr
 
             if (addEdges != null && m_Membership.IsAdrNameAggregate(working))
             {
-                for (int i = addStart; i < addEdges.Count; i++)
+                for (int i = 0; i < addEdges.Count; i++)
                 {
                     m_Membership.AddMember(working, addEdges[i]);
                 }

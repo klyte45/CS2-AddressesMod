@@ -126,36 +126,9 @@ namespace BelzontAdr
                     return false;
             }
 
-            if (!EntityManager.TryGetComponent(vanillaAggregate, out ADRRandomizationData vanillaSeed))
+            if (!TryForkFromVanillaSeed(vanillaAggregate, out adrAggregate))
             {
-                vanillaSeed = new ADRRandomizationData();
-                vanillaSeed.Redraw();
-                EntityManager.AddComponentData(vanillaAggregate, vanillaSeed);
-            }
-
-            adrAggregate = CreateAggregate();
-            var adrSeed = new ADRRandomizationData();
-            adrSeed.CopySeedFrom(vanillaSeed);
-            EntityManager.AddComponentData(adrAggregate, adrSeed);
-
-            vanillaSeed.Redraw();
-            EntityManager.SetComponentData(vanillaAggregate, vanillaSeed);
-            EnsureNameDirty(vanillaAggregate);
-            EnsureNameDirty(adrAggregate);
-
-            // Seed remainder only — never steal existing ADR members during fork copy.
-            for (int i = 0; i < vanillaElements.Length; i++)
-            {
-                var memberEdge = vanillaElements[i].m_Edge;
-                if (memberEdge == Entity.Null || !EntityManager.Exists(memberEdge))
-                {
-                    continue;
-                }
-                if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, memberEdge, out _))
-                {
-                    continue;
-                }
-                AddMemberCore(adrAggregate, memberEdge, insertIndex: -1, allowSteal: false, out _);
+                return false;
             }
 
             Entity stolenFrom = Entity.Null;
@@ -177,19 +150,6 @@ namespace BelzontAdr
                 return false;
             }
 
-            // NameSystem.SetCustomName needs EndFrameBarrier ECB — not allowed during ToolUpdate.
-            Entity vanillaForName = vanillaAggregate;
-            Entity adrForName = adrAggregate;
-            m_runOnUpdate.Enqueue(() =>
-            {
-                if (!EntityManager.Exists(vanillaForName) || !EntityManager.Exists(adrForName))
-                {
-                    return;
-                }
-                TransferCustomNameToAdr(vanillaForName, adrForName);
-            });
-
-            // RemoveMember already may have torn down; AddMember path needs straight-chain order.
             if (edit == AdrNameAggregateForkEdit.AddMember
                 || (edit == AdrNameAggregateForkEdit.RemoveMember && IsAdrNameAggregate(adrAggregate)))
             {
@@ -204,6 +164,136 @@ namespace BelzontAdr
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Materialize an ADR name-aggregate from the vanilla Aggregate's remainder
+        /// (edges not already linked to an ADR). No membership edit.
+        /// Used on Road Grouping segment select and as the base for edit forks.
+        /// </summary>
+        public bool TryForkFromVanillaSeed(Entity vanillaAggregate, out Entity adrAggregate)
+        {
+            adrAggregate = Entity.Null;
+
+            if (vanillaAggregate == Entity.Null
+                || !EntityManager.Exists(vanillaAggregate)
+                || !EntityManager.HasComponent<Aggregate>(vanillaAggregate)
+                || IsAdrNameAggregate(vanillaAggregate)
+                || !EntityManager.TryGetBuffer(vanillaAggregate, true, out DynamicBuffer<AggregateElement> vanillaElements)
+                || vanillaElements.Length == 0)
+            {
+                return false;
+            }
+
+            // Snapshot before structural changes — CreateEntity / EnsureNameDirty invalidate buffer handles.
+            var edgesToSeed = new List<Entity>(vanillaElements.Length);
+            for (int i = 0; i < vanillaElements.Length; i++)
+            {
+                Entity memberEdge = vanillaElements[i].m_Edge;
+                if (memberEdge == Entity.Null || !EntityManager.Exists(memberEdge))
+                {
+                    continue;
+                }
+                if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, memberEdge, out _))
+                {
+                    continue;
+                }
+                edgesToSeed.Add(memberEdge);
+            }
+
+            if (edgesToSeed.Count == 0)
+            {
+                return false;
+            }
+
+            if (!EntityManager.TryGetComponent(vanillaAggregate, out ADRRandomizationData vanillaSeed))
+            {
+                vanillaSeed = new ADRRandomizationData();
+                vanillaSeed.Redraw();
+                EntityManager.AddComponentData(vanillaAggregate, vanillaSeed);
+            }
+
+            adrAggregate = CreateAggregate();
+            var adrSeed = new ADRRandomizationData();
+            adrSeed.CopySeedFrom(vanillaSeed);
+            EntityManager.AddComponentData(adrAggregate, adrSeed);
+
+            vanillaSeed.Redraw();
+            EntityManager.SetComponentData(vanillaAggregate, vanillaSeed);
+            EnsureNameDirty(vanillaAggregate);
+            EnsureNameDirty(adrAggregate);
+
+            for (int i = 0; i < edgesToSeed.Count; i++)
+            {
+                AddMemberCore(adrAggregate, edgesToSeed[i], insertIndex: -1, allowSteal: false, out _);
+            }
+
+            if (!EntityManager.TryGetBuffer(adrAggregate, true, out DynamicBuffer<ADRNameAggregateElement> seeded)
+                || seeded.Length == 0)
+            {
+                DestroyAggregate(adrAggregate);
+                adrAggregate = Entity.Null;
+                return false;
+            }
+
+            // NameSystem.SetCustomName needs EndFrameBarrier ECB — not allowed during ToolUpdate.
+            Entity vanillaForName = vanillaAggregate;
+            Entity adrForName = adrAggregate;
+            m_runOnUpdate.Enqueue(() =>
+            {
+                if (!EntityManager.Exists(vanillaForName) || !EntityManager.Exists(adrForName))
+                {
+                    return;
+                }
+                TransferCustomNameToAdr(vanillaForName, adrForName);
+            });
+
+            if (seeded.Length > 1)
+            {
+                ResortMembers(adrAggregate);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Resolve the ADR name-aggregate for a road edge: existing link, or materialize from the
+        /// edge's vanilla Aggregate remainder (ensuring <paramref name="edge"/> is a member).
+        /// Never returns a vanilla Aggregate entity.
+        /// </summary>
+        public bool TryEnsureAdrForEdge(Entity edge, out Entity adrAggregate)
+        {
+            adrAggregate = Entity.Null;
+            if (edge == Entity.Null || !EntityManager.Exists(edge))
+            {
+                return false;
+            }
+
+            if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, edge, out adrAggregate))
+            {
+                return true;
+            }
+
+            if (!EntityManager.TryGetComponent(edge, out Aggregated aggregated)
+                || aggregated.m_Aggregate == Entity.Null
+                || !EntityManager.Exists(aggregated.m_Aggregate)
+                || !EntityManager.HasComponent<Aggregate>(aggregated.m_Aggregate))
+            {
+                return false;
+            }
+
+            Entity vanilla = aggregated.m_Aggregate;
+            if (!TryForkFromVanillaSeed(vanilla, out adrAggregate))
+            {
+                return false;
+            }
+
+            if (!TryGetMemberIndex(adrAggregate, edge, out _))
+            {
+                AddMember(adrAggregate, edge);
+            }
+
+            return IsAdrNameAggregate(adrAggregate);
         }
 
         public void DestroyAggregate(Entity aggregate)

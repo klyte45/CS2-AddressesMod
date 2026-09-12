@@ -225,7 +225,23 @@ namespace BelzontAdr
 
             if (selected == Entity.Null)
             {
-                // Pick preview: hovered Aggregate in hover-preview green, no end handles.
+                // Pick preview: ADR membership if hovered edge is ADR-linked; else vanilla remainder.
+                Entity hovered = m_Tool.HoveredEdge;
+                if (hovered == Entity.Null)
+                {
+                    return;
+                }
+
+                m_PreviewDrawColor = HoverPreviewColor;
+                if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, hovered, out Entity hoverAdr)
+                    && EntityManager.TryGetBuffer(hoverAdr, true, out DynamicBuffer<ADRNameAggregateElement> hoverAdrElements)
+                    && hoverAdrElements.Length > 0)
+                {
+                    BuildRouteSegments(hoverAdr, hoverAdrElements, m_PreviewSegments, ref m_PreviewBounds, drawEndNodes: false);
+                    m_HasPreview = m_PreviewSegments.Length > 0;
+                    return;
+                }
+
                 if (!TryResolveHoveredAggregate(out Entity hoverAggregate)
                     || !EntityManager.TryGetBuffer(hoverAggregate, true, out DynamicBuffer<AggregateElement> hoverElements)
                     || hoverElements.Length == 0)
@@ -233,7 +249,6 @@ namespace BelzontAdr
                     return;
                 }
 
-                m_PreviewDrawColor = HoverPreviewColor;
                 BuildRouteSegments(hoverAggregate, hoverElements, m_PreviewSegments, ref m_PreviewBounds, drawEndNodes: false, excludeAdrLinked: true);
                 m_HasPreview = m_PreviewSegments.Length > 0;
                 return;
@@ -245,7 +260,6 @@ namespace BelzontAdr
             {
                 BuildRouteSegments(selected, adrElements, m_BelongingSegments, ref m_BelongingBounds, drawEndNodes: true);
                 m_HasBelonging = m_BelongingSegments.Length > 0;
-                BuildVanillaRemainderOverlay(adrElements);
                 BuildFixedMembershipOverlay();
                 BuildHighlightPreview(selected, isAdrSelection: true);
                 return;
@@ -308,62 +322,6 @@ namespace BelzontAdr
                 size,
                 size,
                 OverlayRenderSystem.CustomMeshType.Plane);
-        }
-
-        /// <summary>
-        /// Dim vanilla Aggregate edges that are not in the ADR membership set.
-        /// Uses each member edge's <see cref="Aggregated.m_Aggregate"/> context (read-only).
-        /// </summary>
-        private void BuildVanillaRemainderOverlay(DynamicBuffer<ADRNameAggregateElement> adrElements)
-        {
-            var membership = new NativeHashSet<Entity>(adrElements.Length, Allocator.Temp);
-            var seenVanillaAggregates = new NativeHashSet<Entity>(4, Allocator.Temp);
-            try
-            {
-                for (int i = 0; i < adrElements.Length; i++)
-                {
-                    Entity edge = adrElements[i].m_Edge;
-                    if (edge != Entity.Null)
-                    {
-                        membership.Add(edge);
-                    }
-                }
-
-                for (int i = 0; i < adrElements.Length; i++)
-                {
-                    Entity memberEdge = adrElements[i].m_Edge;
-                    if (memberEdge == Entity.Null
-                        || !EntityManager.TryGetComponent(memberEdge, out Aggregated aggregated)
-                        || aggregated.m_Aggregate == Entity.Null
-                        || !seenVanillaAggregates.Add(aggregated.m_Aggregate)
-                        || !EntityManager.TryGetBuffer(aggregated.m_Aggregate, true, out DynamicBuffer<AggregateElement> vanillaElements))
-                    {
-                        continue;
-                    }
-
-                    for (int j = 0; j < vanillaElements.Length; j++)
-                    {
-                        Entity vanillaEdge = vanillaElements[j].m_Edge;
-                        if (vanillaEdge == Entity.Null || membership.Contains(vanillaEdge))
-                        {
-                            continue;
-                        }
-
-                        AddEdgeSegment(vanillaEdge, m_RemainderSegments, ref m_RemainderBounds);
-                    }
-                }
-
-                if (m_RemainderSegments.Length > 0)
-                {
-                    SaturateOpacities(m_RemainderSegments);
-                    m_HasRemainder = true;
-                }
-            }
-            finally
-            {
-                membership.Dispose();
-                seenVanillaAggregates.Dispose();
-            }
         }
 
         /// <summary>
