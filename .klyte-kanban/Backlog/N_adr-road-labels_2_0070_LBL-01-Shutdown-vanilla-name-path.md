@@ -52,6 +52,11 @@ First task of epic adr-road-labels (Sprint 013 catalog). Always-on when ADR load
 4. Keep Prefab/material init for arrows if required; do not tear down NetLabel archetype components yet (ADR bake will reuse Label* contract)
 5. Verify hideOverlay and camera filters are unchanged for arrows
 6. Document any game-update re-diff notes for these two managed methods (GUID d124bec1… baseline in 14/16)
+7. Target Game.Rendering.AggregateMeshSystem.OnUpdate name branch only: early-out UpdateLabelVertices / UpdateLabelPositions / FillNameMeshData
+8. Target AggregateRenderSystem.Render name GetNameMesh/DrawMesh loop; leave requireNetArrows arrow branch
+9. Harmony under BelzontAdr/Overrides or AdrRoadNameLabelHarmony
+10. Keep Prefab/material init for arrows; do not tear down NetLabel Label* components (ADR reuse)
+11. GUID d124bec1… baseline in 14/16 for re-diff
 
 ---
 
@@ -72,8 +77,8 @@ First task of epic adr-road-labels (Sprint 013 catalog). Always-on when ADR load
 
 ### Is dependent for
 
-
-
+- [0071] LBL-02-ADR-TMP-bake-LabelExtents-materials
+- [0075] LBL-06-Integration-dogfood-game-update-checklist
 ### Is related to
 
 - [0067] ACT-05-Road-Grouping-ADR-mutations
@@ -86,6 +91,8 @@ First task of epic adr-road-labels (Sprint 013 catalog). Always-on when ADR load
 - LBL-04-ADR-name-mesh-batch-DrawMesh
 - LBL-05-Forked-pick-SIP-Aggregate-section-parity
 - LBL-06-Integration-dogfood-game-update-checklist
+
+---
 
 ## Other Notes
 
