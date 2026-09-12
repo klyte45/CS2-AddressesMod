@@ -30,11 +30,11 @@ Gap follow-up to ACT-03c. ForkFromVanilla already copies ADRRandomizationData se
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ForkFromVanilla: if vanilla Aggregate has a custom name, ADR aggregate receives the same custom name via NameSystem.SetCustomName (CustomName flag on ADR entity)
-- [ ] ForkFromVanilla clears custom name from vanilla Aggregate (NameSystem clear + CustomName component removed) so leftover edges use generated S2
-- [ ] If vanilla has no custom name, fork behavior unchanged (seed-only naming path)
-- [ ] Custom-name transfer does not mutate vanilla AggregateElement membership
-- [ ] Verified: ADR-linked edges resolve the transferred custom name after fork; leftover vanilla edges do not keep the old custom name
+- [x] ForkFromVanilla: if vanilla Aggregate has a custom name, ADR aggregate receives the same custom name via NameSystem.SetCustomName (CustomName flag on ADR entity)
+- [x] ForkFromVanilla clears custom name from vanilla Aggregate (NameSystem clear + CustomName component removed) so leftover edges use generated S2
+- [x] If vanilla has no custom name, fork behavior unchanged (seed-only naming path)
+- [x] Custom-name transfer does not mutate vanilla AggregateElement membership
+- [x] Verified: ADR-linked edges resolve the transferred custom name after fork; leftover vanilla edges do not keep the old custom name
 
 ---
 
