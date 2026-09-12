@@ -30,25 +30,25 @@ Workstream 5. Wire shipped Road Grouping T0-T3 to real ADR membership. Discover 
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrRoadGroupingTool discovers selection via vanilla Aggregated but membership source is ADR after fork
-- [ ] First Ctrl+LMB apply or endpoint-drag release that would change membership calls ForkFromVanilla; SelectedAggregation becomes ADR entity
-- [ ] Subsequent toggle/drag writes ADR membership via ACT-03b APIs; log stubs retired
-- [ ] Fixed pin remains session behavior (or later flag) without mutating vanilla Aggregate membership
-- [ ] AdrRoadGroupingController segment cards built from ADRNameAggregateElement; invalidate on real membership change
-- [ ] Overlay: belonging = ADR members; remainder = vanilla Aggregate edges not in ADR; empty-selection pick-preview unchanged
-- [ ] VUIO entity Index/Version still valid after fork (opaque entity identity)
-- [ ] Vanilla Aggregate membership list is never mutated by the tool
+- [ ] AdrRoadGroupingTool discovers via vanilla Aggregated; selection always resolves to ADR (existing link or TryEnsureAdrForEdge / TryForkFromVanillaSeed on click) — never keeps vanilla Aggregate selected
+- [ ] Membership edits (Ctrl+toggle / endpoint-drag) write ADR via membership APIs; vanilla AggregateElement is never mutated
+- [ ] Fork seed snapshots AggregateElement edges before structural changes so full vanilla remainder is copied (not a single-edge ADR)
+- [ ] Custom-name transfer on fork is deferred to MainLoop (NameSystem EndFrameBarrier)
+- [ ] Fixed pin remains session-only
+- [ ] AdrRoadGroupingController segment cards from ADRNameAggregateElement; invalidate on membership change
+- [ ] Overlay: belonging = ADR members when selected; pick-preview prefers ADR membership when hovering ADR-linked edges; no dark vanilla-remainder wash while editing ADR
+- [ ] Steal: adding an ADR-owned edge moves it to the focused ADR and resorts both aggregates
+- [ ] VUIO entity Index/Version valid after fork
 
 ---
 
 ## Implementation Notes
 
-1. AdrRoadGroupingTool: replace stub logs with membership service calls
-2. On first edit: ForkFromVanilla → SelectedAggregation = ADR
-3. Controller cards from ADR elements; refresh on membership events
-4. Overlay belonging/remainder from ADR vs vanilla Aggregate set difference
-5. Verify VUIO Index/Version after entity swap on fork
-6. Cancel/supersede backlog 0058 and 0059 if still open
+1. Select materializes ADR via TryEnsureAdrForEdge / TryForkFromVanillaSeed
+2. Snapshot vanilla edges before CreateEntity/EnsureNameDirty when seeding
+3. Deferred SetCustomName queue on AdrNameAggregateMembershipSystem MainLoop
+4. Overlay pick-preview ADR-aware; removed BuildVanillaRemainderOverlay from edit path
+5. AddMember steals from other ADR aggregates and resorts source+target
 
 ---
 
