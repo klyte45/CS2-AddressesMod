@@ -39,6 +39,9 @@ Sixth and closing task of epic adr-road-labels phase-1 (Sprint 013 catalog). End
 - [ ] Known gaps listed (optional LBL-07/08/09) — not silent
 - [ ] No player-facing vanilla-label fallback toggle
 - [ ] Compile + extended playtest session notes attached or linked
+- [ ] Dogfood: locale change, nameset/custom rename, Temp place/upgrade, tunnels, ADR fork/edit via Road Grouping refresh labels
+- [ ] Full SIP panel on S2 vs vanilla Aggregate: stats, title rename key, icon, focus position
+- [ ] P0 parity holes fixed in owning LBL or LBL-07…09 opened for spill — not silent
 
 ---
 
@@ -49,6 +52,11 @@ Sixth and closing task of epic adr-road-labels phase-1 (Sprint 013 catalog). End
 3. Capture before/after notes for S1 vs S2 visual and pick
 4. If LBL-05 spilled SIP to LBL-08, verify core path still and mark spill in checklist
 5. Update 18 Board IDs / status when sprint closes
+6. Integration QA + docs — fix only dogfood blockers; new features → new tasks
+7. Checklist: AggregateMeshSystem name half, AggregateRenderSystem name loop, RaycastLabelsJob, RaycastSystem Labels schedule, NetLabelPrefab GUID d124bec1…, Label* layout, SIP Aggregate gates
+8. Capture S1 vs S2 visual + pick + SIP notes
+9. If LBL-05 spilled H1/SIP to LBL-08, verify core path and mark spill in checklist
+10. Update 18 Board IDs / status when sprint closes
 
 ---
 
