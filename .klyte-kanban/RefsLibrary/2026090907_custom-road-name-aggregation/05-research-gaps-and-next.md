@@ -63,7 +63,7 @@ Consumer audit focused on **Game.dll**. If other Managed DLLs reference Aggregat
 
 Order: strip Aggregate highway (ACT-01) → markers visual-only (ACT-02) → ADR components (ACT-03a) → membership CRUD (ACT-03b) → ForkFromVanilla + seed (ACT-03c) → name/address (ACT-04) → Road Grouping mutations (ACT-05) → membership maintenance (ACT-06).
 
-**Later (after ACT-06):** highway reattach via tool; ADR labels + forked pick; `fixedAggregation` cleanup.
+**Later (after ACT-06):** highway reattach via tool; **citywide ADR name labels** + forked pick ([14](14-vanilla-road-label-pipeline.md)–[16](16-label-takeover-effort-and-risk.md); supersedes thin-edge sketch in [06](06-labels-vs-vanilla-sync-and-harmony.md)); `fixedAggregation` cleanup. Extension feasibility (sprites / multi-recipe / WE copy): [17](17-label-extensions-text-images-look.md).
 
 **Explicitly deferred:** SIP `RoadSection` / `TitleSection` / ImageSystem / DefaultTool H1 — keep [06](06-labels-vs-vanilla-sync-and-harmony.md) as future reference only.
 
