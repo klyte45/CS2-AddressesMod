@@ -1,7 +1,7 @@
+**Start time:** 2026-09-12 18:38 -0300
 # [0071] LBL-02-ADR-TMP-bake-LabelExtents-materials
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/18-label-takeover-sprint-roadmap.md LBL-02
