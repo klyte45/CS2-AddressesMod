@@ -6,8 +6,10 @@
 
 RefsLibrary/2026090907_custom-road-name-aggregation/18-label-takeover-sprint-roadmap.md LBL-05
 RefsLibrary/2026090907_custom-road-name-aggregation/15-adr-citywide-name-label-takeover.md
-RefsLibrary/2026090907_custom-road-name-aggregation/06-sip-and-tooling-gaps.md
+RefsLibrary/2026090907_custom-road-name-aggregation/06-labels-vs-vanilla-sync-and-harmony.md
 RefsLibrary/2026090907_custom-road-name-aggregation/14-vanilla-road-label-pipeline.md
+
+---
 
 ## User Story
 

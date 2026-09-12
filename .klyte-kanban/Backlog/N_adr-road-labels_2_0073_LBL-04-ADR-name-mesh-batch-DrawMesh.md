@@ -98,4 +98,18 @@ Fourth task of epic adr-road-labels. Build name meshes from LBL-02 vertices + LB
 
 ## Other Notes
 
-Epic adr-road-labels. Size M. Depends on LBL-03 [0072 expected]. Next: LBL-05 pick in parallel-ish; LBL-06 integration.
+Epic adr-road-labels. Size M. Depends on LBL-02 [0071] and LBL-03 [0072]. Feeds LBL-06.
+
+---
+
+## Depends on
+
+["[0071] LBL-02-ADR-TMP-bake-LabelExtents-materials","[0072] LBL-03-ADR-placement-job-vanilla-ADR-membership"]
+
+---
+
+## Groups with
+
+["[0070] LBL-01-Shutdown-vanilla-name-path","[0071] LBL-02-ADR-TMP-bake-LabelExtents-materials","[0072] LBL-03-ADR-placement-job-vanilla-ADR-membership","[0074] LBL-05-Forked-pick-SIP-Aggregate-section-parity","[0075] LBL-06-Integration-dogfood-game-update-checklist"]
+
+---
