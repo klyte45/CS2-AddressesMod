@@ -39,6 +39,9 @@ Second task of epic adr-road-labels. After LBL-01 shuts down vanilla name TMP/me
 - [ ] No live shared Texture2D with WE — copy/re-register only if any sprite path is touched (phase-1 text-only preferred)
 - [ ] Unit/smoke: sample aggregate name string bakes non-empty vertices and sane extents
 - [ ] Compile + load: no TMP/FontAsset null refs in bake path logs
+- [ ] Parity layout: sizeDelta 250×100, fontSize 200, center alignment matching vanilla UpdateLabelVertices
+- [ ] Clone materials + CopyFontAtlasParameters as vanilla
+- [ ] Wire dirty via Updated; extend AdrMainSystem.ResetRoadsCache pattern to ADR owners as needed; cache string changes
 
 ---
 
@@ -50,6 +53,11 @@ Second task of epic adr-road-labels. After LBL-01 shuts down vanilla name TMP/me
 4. Cache FontAsset/Material from NetLabelPrefab; avoid per-frame TMP allocations
 5. Invalidate on rename, locale change, and aggregate owner change events already used by ADR naming
 6. Defer TMP sprites / multi-recipe / look knobs — see 17 feasibility only
+7. Port vanilla UpdateLabelVertices: NameSystem.GetRenderedLabelName (or ADR-resolved entity) → TMP GetTextInfo → LabelVertex
+8. Write LabelExtents; LabelMaterial from NetLabelPrefab FontAsset/Material
+9. Parity: sizeDelta 250×100, fontSize 200, center
+10. Dirty via Updated / ResetRoadsCache extension for ADR owners
+11. Phase-1 text-only — no TMP sprites / multi-recipe / WE product path
 
 ---
 
@@ -71,8 +79,9 @@ Second task of epic adr-road-labels. After LBL-01 shuts down vanilla name TMP/me
 
 ### Is dependent for
 
-
-
+- [0072] LBL-03-ADR-placement-job-vanilla-ADR-membership
+- [0073] LBL-04-ADR-name-mesh-batch-DrawMesh
+- [0075] LBL-06-Integration-dogfood-game-update-checklist
 ### Is related to
 
 - [0067] ACT-05-Road-Grouping-ADR-mutations
@@ -84,6 +93,8 @@ Second task of epic adr-road-labels. After LBL-01 shuts down vanilla name TMP/me
 - LBL-04-ADR-name-mesh-batch-DrawMesh
 - LBL-05-Forked-pick-SIP-Aggregate-section-parity
 - LBL-06-Integration-dogfood-game-update-checklist
+
+---
 
 ## Other Notes
 
