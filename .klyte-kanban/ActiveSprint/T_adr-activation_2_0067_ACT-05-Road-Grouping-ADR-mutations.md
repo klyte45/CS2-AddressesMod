@@ -1,3 +1,4 @@
+**End time:** 2026-09-12 00:34 -0300
 **Start time:** 2026-09-11 22:05 -0300
 # [0067] ACT-05-Road-Grouping-ADR-mutations
 
@@ -30,15 +31,15 @@ Workstream 5. Wire shipped Road Grouping T0-T3 to real ADR membership. Discover 
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrRoadGroupingTool discovers via vanilla Aggregated; selection always resolves to ADR (existing link or TryEnsureAdrForEdge / TryForkFromVanillaSeed on click) — never keeps vanilla Aggregate selected
-- [ ] Membership edits (Ctrl+toggle / endpoint-drag) write ADR via membership APIs; vanilla AggregateElement is never mutated
-- [ ] Fork seed snapshots AggregateElement edges before structural changes so full vanilla remainder is copied (not a single-edge ADR)
-- [ ] Custom-name transfer on fork is deferred to MainLoop (NameSystem EndFrameBarrier)
-- [ ] Fixed pin remains session-only
-- [ ] AdrRoadGroupingController segment cards from ADRNameAggregateElement; invalidate on membership change
-- [ ] Overlay: belonging = ADR members when selected; pick-preview prefers ADR membership when hovering ADR-linked edges; no dark vanilla-remainder wash while editing ADR
-- [ ] Steal: adding an ADR-owned edge moves it to the focused ADR and resorts both aggregates
-- [ ] VUIO entity Index/Version valid after fork
+- [x] AdrRoadGroupingTool discovers via vanilla Aggregated; selection always resolves to ADR (existing link or TryEnsureAdrForEdge / TryForkFromVanillaSeed on click) — never keeps vanilla Aggregate selected
+- [x] Membership edits (Ctrl+toggle / endpoint-drag) write ADR via membership APIs; vanilla AggregateElement is never mutated
+- [x] Fork seed snapshots AggregateElement edges before structural changes so full vanilla remainder is copied (not a single-edge ADR)
+- [x] Custom-name transfer on fork is deferred to MainLoop (NameSystem EndFrameBarrier)
+- [x] Fixed pin remains session-only
+- [x] AdrRoadGroupingController segment cards from ADRNameAggregateElement; invalidate on membership change
+- [x] Overlay: belonging = ADR members when selected; pick-preview prefers ADR membership when hovering ADR-linked edges; no dark vanilla-remainder wash while editing ADR
+- [x] Steal: adding an ADR-owned edge moves it to the focused ADR and resorts both aggregates
+- [x] VUIO entity Index/Version valid after fork
 
 ---
 
