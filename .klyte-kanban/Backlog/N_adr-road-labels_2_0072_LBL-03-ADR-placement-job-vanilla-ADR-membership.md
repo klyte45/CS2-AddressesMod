@@ -40,6 +40,9 @@ Third task of epic adr-road-labels — largest placement piece. Dual membership:
 - [ ] Smoke: mixed city (some grouped, some not) shows placements for both owners without double-stacking
 - [ ] No AggregateSystem Burst patches
 - [ ] Compile + load smoke on a dogfood save with Road Grouping associations
+- [ ] Placement uses ~100f spacing, redundancy, m_MaxScale parity with vanilla AddLabels / UpdateLabelPositionsJob
+- [ ] LabelPosition buffers written on the pick owner entity (S1 Aggregate or S2 ADR name-aggregate)
+- [ ] Burst preferred for placement job
 
 ---
 
@@ -51,6 +54,12 @@ Third task of epic adr-road-labels — largest placement piece. Dual membership:
 4. Spacing / curve sampling: match vanilla name label density for phase-1; document any intentional deltas
 5. Invalidate on net geometry change, rename, association change
 6. Keep arrow positions entirely in vanilla AggregateMeshSystem
+7. Port/adapt UpdateLabelPositionsJob / AddLabels (100f spacing, redundancy, m_MaxScale)
+8. Dual source: unassociated → AggregateElement on Aggregate (S1); associated → ADRNameAggregateElement on ADR aggregate (S2)
+9. Write LabelPosition on pick owner entity
+10. Shared owner-resolution helper for LBL-05 pick
+11. Schedule after net/association systems; invalidate on geometry/association/rename
+12. Keep arrow positions in vanilla AggregateMeshSystem
 
 ---
 
@@ -73,8 +82,9 @@ Third task of epic adr-road-labels — largest placement piece. Dual membership:
 
 ### Is dependent for
 
-
-
+- [0073] LBL-04-ADR-name-mesh-batch-DrawMesh
+- [0074] LBL-05-Forked-pick-SIP-Aggregate-section-parity
+- [0075] LBL-06-Integration-dogfood-game-update-checklist
 ### Is related to
 
 - [0066] ACT-04-Prefer-ADR-in-name-address-SIP
@@ -86,6 +96,8 @@ Third task of epic adr-road-labels — largest placement piece. Dual membership:
 - LBL-04-ADR-name-mesh-batch-DrawMesh
 - LBL-05-Forked-pick-SIP-Aggregate-section-parity
 - LBL-06-Integration-dogfood-game-update-checklist
+
+---
 
 ## Other Notes
 
