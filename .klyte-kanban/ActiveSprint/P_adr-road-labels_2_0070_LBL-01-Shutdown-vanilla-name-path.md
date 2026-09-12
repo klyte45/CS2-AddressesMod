@@ -32,14 +32,14 @@ First task of epic adr-road-labels (Sprint 013 catalog). Always-on when ADR load
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Managed Harmony Prefix/early-out skips AggregateMeshSystem name half: UpdateLabelVertices, UpdateLabelPositions, FillNameMeshData
-- [ ] Arrow half of AggregateMeshSystem still runs (UpdateArrowMaterials / UpdateArrowPositions / FillArrowMeshData as needed)
-- [ ] Managed Harmony Prefix prevents AggregateRenderSystem.Render name GetNameMesh/DrawMesh loop
-- [ ] requireNetArrows arrow branch in AggregateRenderSystem still draws arrows
+- [x] Managed Harmony Prefix/early-out skips AggregateMeshSystem name half: UpdateLabelVertices, UpdateLabelPositions, FillNameMeshData
+- [x] Arrow half of AggregateMeshSystem still runs (UpdateArrowMaterials / UpdateArrowPositions / FillArrowMeshData as needed)
+- [x] Managed Harmony Prefix prevents AggregateRenderSystem.Render name GetNameMesh/DrawMesh loop
+- [x] requireNetArrows arrow branch in AggregateRenderSystem still draws arrows
 - [ ] With ADR loaded, world road NAME overlays are gone on a smoke city
 - [ ] One-way arrows still appear when a tool requires net arrows
-- [ ] Always-on with ADR load — no player-facing vanilla-label fallback toggle
-- [ ] No patches to AggregateSystem Burst jobs
+- [x] Always-on with ADR load — no player-facing vanilla-label fallback toggle
+- [x] No patches to AggregateSystem Burst jobs
 - [ ] Compile + smoke: load game with ADR, confirm no name labels and arrows still work in a net tool that needs them
 
 ---
@@ -57,6 +57,7 @@ First task of epic adr-road-labels (Sprint 013 catalog). Always-on when ADR load
 9. Harmony under BelzontAdr/Overrides or AdrRoadNameLabelHarmony
 10. Keep Prefab/material init for arrows; do not tear down NetLabel Label* components (ADR reuse)
 11. GUID d124bec1… baseline in 14/16 for re-diff
+12. Implemented BelzontAdr/Overrides/AdrRoadNameLabelOverrides.cs — Prefix UpdateLabelVertices / UpdateLabelPositions / FillNameMeshData (pass-through JobHandle); Prefix AggregateRenderSystem.Render to run only when requireNetArrows (arrow branch then early return), else skip name DrawMesh loop. Auto-discovered via IRedirectable. Re-diff surfaces: AggregateMeshSystem.OnUpdate name half + AggregateRenderSystem.Render @ GUID d124bec16c0748da9ebf48366d9c1d68.
 
 ---
 
