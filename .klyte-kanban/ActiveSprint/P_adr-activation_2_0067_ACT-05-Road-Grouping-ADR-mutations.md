@@ -1,7 +1,7 @@
+**Start time:** 2026-09-11 22:05 -0300
 # [0067] ACT-05-Road-Grouping-ADR-mutations
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/12-activation-change-map.md §E
