@@ -10,10 +10,10 @@ ADR-linked edges name and number via ADR; Road Grouping writes membership; Aggre
 
 - **Sprint number**: 012
 - **Start date**: 2026-09-10 23:16 -0300
-- **End date**:
+- **End date**: 2026-09-12 01:36 -0300
 - **Original tasks**: 00
 - **Original task IDs**: (none)
-- **Delivered tasks (from original)**:
+- **Delivered tasks (from original)**: 0
 - **Added tasks**: 9
-- **Delivered tasks (from added)**:
-- **Total delivered tasks**:
+- **Delivered tasks (from added)**: 9
+- **Total delivered tasks**: 9
