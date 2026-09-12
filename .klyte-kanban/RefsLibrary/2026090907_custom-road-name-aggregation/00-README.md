@@ -1,16 +1,16 @@
 # Custom road-name aggregation — research pack
 
-*Researched: 2026-09-09 · Activation planning: 2026-09-10 · Label takeover research: 2026-09-11 · Game.dll build GUID `d124bec16c0748da9ebf48366d9c1d68` (kcs2m backend cache; older docs may still cite `b5fd0b9582554f3c83207d8d5d7a19a0`)*
+*Researched: 2026-09-09 · Activation planning: 2026-09-10 · Label takeover research: 2026-09-11 · Label sprint catalog: 2026-09-12 · Game.dll build GUID `d124bec16c0748da9ebf48366d9c1d68` (kcs2m backend cache; older docs may still cite `b5fd0b9582554f3c83207d8d5d7a19a0`)*
 
 Reference pack for **player-customizable road name aggregation**, implemented as an **ADR-owned parallel system** that does **not** override vanilla `AggregateSystem` / `Aggregated` / `Aggregate` lifecycle.
 
-This pack is **documentation only** for research/design. Activation Kanban tasks live in **Sprint 012** (`adr-activation`, board IDs **0061–0068**) — catalog detail in [13](13-activation-sprint-roadmap.md). Citywide **road name-label takeover** research: [14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md).
+This pack is **documentation only** for research/design. Activation Kanban tasks live in **Sprint 012** (`adr-activation`, board IDs **0061–0068**) — catalog detail in [13](13-activation-sprint-roadmap.md). Citywide **road name-label takeover** research: [14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md); implementation catalog: [18](18-label-takeover-sprint-roadmap.md).
 
 ## Scope
 
 | In scope | Out of scope |
 |----------|--------------|
-| Vanilla Aggregation audit (components, systems, consumers) | Implementing ADR components / systems / UI (follows [13](13-activation-sprint-roadmap.md)) |
+| Vanilla Aggregation audit (components, systems, consumers) | Implementing ADR components / systems / UI (follows [13](13-activation-sprint-roadmap.md) / [18](18-label-takeover-sprint-roadmap.md)) |
 | Verdict: display / naming / tooling vs traffic simulation | Harmony-patching or disabling `AggregateSystem` |
 | Current ADR touchpoints on vanilla aggregates | Editing `i18n.csv` / locale CSVs |
 | Parallel-system design notes (name + house numbers) | Creating Kanban board items via MCP from this pack |
@@ -18,7 +18,8 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Labels-vs-Aggregation-sync discussion + Harmony viability for leftover UI | Implementing those Harmony patches |
 | Road Grouping tool / overlay specs + T0–T3 roadmap ([09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md)) | Shipping activation sprint code (see [12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md)) |
 | Activation change-map + single-sprint Kanban catalog ([12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md)) | Taking over district/area labels or one-way arrows |
-| Citywide road **name** label takeover research ([14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md)) | Implementing label takeover / BelzontWE live shared `Texture2D` |
+| Citywide road **name** label takeover research ([14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md)) | BelzontWE live shared `Texture2D` |
+| Label takeover sprint / task catalog ([18](18-label-takeover-sprint-roadmap.md)) | Creating board items until explicitly requested |
 
 ## Confirmed decisions
 
@@ -29,12 +30,14 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Highway data (activation) | **Remove** Aggregate-hosted `ADRHighway*` now; markers **visual-only**; registry kept; **reattach via tool later** (not migrate-in-place this wave). See [12](12-activation-change-map.md) |
 | World labels (label epic) | **Citywide ADR ownership** of road **name** labels; shut down vanilla name mesh/draw; leave arrows + `AggregateSystem` alone. Always-on when ADR loads. Phase-1 **parity-only**. See [15](15-adr-citywide-name-label-takeover.md). *(Supersedes “thin labels on ADR edges only” in [06](06-labels-vs-vanilla-sync-and-harmony.md) for epic scope.)* |
 | Label pick | **Fork** vanilla `RaycastLabelsJob` (~150 lines); schedule via managed `RaycastSystem` hook. **S1** (vanilla Aggregate) for unassociated roads; **S2** (ADR name-aggregate) when associated. See [15](15-adr-citywide-name-label-takeover.md) / [06](06-labels-vs-vanilla-sync-and-harmony.md) |
+| SIP with label pick | SIP sections that activate on vanilla `Aggregate` must also work for ADR name-aggregate (S2) — catalog **LBL-05** in [18](18-label-takeover-sprint-roadmap.md) |
+| Label implementation catalog | Draft tasks **LBL-01…LBL-06** (optional spill LBL-07…09); epic `adr-road-labels`; suggested **Sprint 013**. See [18](18-label-takeover-sprint-roadmap.md) |
 | Membership per edge | **`preventPropagation`** (default false); **`numberOverrideActive`** + **`numberOverride`** (`int`). Gap-fill only between propagating endpoints; **no** gap-fill on load |
 | Fork / seed (activation) | First membership edit forks ADR: copy vanilla seed → ADR; `Redraw` vanilla; full `AggregateElement` copy then apply edit; split naming after fork. See [12](12-activation-change-map.md) |
 | Initial UX | **Net-only Road Grouping tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. Spec: [09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md); activation: [12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md) |
 | Tool naming | Product/code: **Road Grouping** (`AdrRoadGrouping*`). Doc [08](08-association-tool-first-ux.md) keeps historical “association” filename |
 | Label extensions (shields / multi-recipe / look knobs) | **Feasibility** documented in [17](17-label-extensions-text-images-look.md); **product strategy deferred** to later research. WE sync = **copy/re-register only** (no live shared `Texture2D`) |
-| Pack depth | Analysis + design + tool specs + activation catalog + **label takeover research (14–17)** |
+| Pack depth | Analysis + design + tool specs + activation catalog + label research (14–17) + **label sprint catalog (18)** |
 | Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR; BelzontWE for tool scaffold / WE atlas APIs |
 
 ## Reading order
@@ -56,6 +59,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 15. [15-adr-citywide-name-label-takeover.md](15-adr-citywide-name-label-takeover.md) — citywide ADR name-label architecture + shutdown levers
 16. [16-label-takeover-effort-and-risk.md](16-label-takeover-effort-and-risk.md) — effort vs tool/activation; Harmony / churn risk
 17. [17-label-extensions-text-images-look.md](17-label-extensions-text-images-look.md) — extension **feasibility** (text, TMP sprites, multi-recipe, WE copy/re-register, look knobs)
+18. [18-label-takeover-sprint-roadmap.md](18-label-takeover-sprint-roadmap.md) — **label takeover draft tasks + Sprint 013/014 planning**
 
 ## Success criteria (this research pack)
 
@@ -77,8 +81,8 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 - [x] Citywide ADR name-label takeover architecture documented ([15](15-adr-citywide-name-label-takeover.md))
 - [x] Label takeover effort / risk documented ([16](16-label-takeover-effort-and-risk.md))
 - [x] Label extension feasibility (text / images / multi-content / look / WE) documented ([17](17-label-extensions-text-images-look.md))
+- [x] Label takeover sprint / task catalog documented ([18](18-label-takeover-sprint-roadmap.md))
 
 ## Related packs
 
 - [2026040409_address-format-customization](../2026040409_address-format-customization/01_game-address-format-research.md) — addresses already resolve through the **aggregate** entity via `BuildingUtils.GetAddress`
-

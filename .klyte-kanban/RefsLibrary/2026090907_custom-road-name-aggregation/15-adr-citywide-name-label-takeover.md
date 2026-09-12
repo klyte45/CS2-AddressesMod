@@ -19,6 +19,7 @@ This **supersedes** the “thin ADR labels only on associated edges + suppress v
 | Phase-1 look | **Parity-only** — match vanilla; knobs / TMP sprites deferred ([17](17-label-extensions-text-images-look.md) feasibility only) |
 | Pick owner (unassociated) | **S1** — vanilla `Aggregate` entity |
 | Pick owner (ADR-associated) | **S2** — ADR name-aggregate entity ([06](06-labels-vs-vanilla-sync-and-harmony.md)) |
+| SIP (label epic) | Sections that activate for vanilla `Aggregate` must also work for **S2** ADR name-aggregate (catalog **LBL-05** — [18](18-label-takeover-sprint-roadmap.md); design archive [06](06-labels-vs-vanilla-sync-and-harmony.md)) |
 
 ## Shutdown levers (vanilla names)
 
@@ -93,7 +94,8 @@ With citywide draw ownership, vanilla name meshes are empty/disabled, so dual-la
 | Name mesh/render | Disabled (always-on) |
 | `NameSystem` / GetAddress | Already / activation-wave ADR preference for associated edges — independent of draw ownership |
 | Road Grouping overlays | Tool feedback only — **not** a substitute for city labels ([10](10-road-grouping-overlay-render-system.md)) |
-| SIP RoadSection / DefaultTool H1 | Still deferred ([06](06-labels-vs-vanilla-sync-and-harmony.md)) |
+| SIP Aggregate-gated sections | **In label epic (LBL-05)** — parity with vanilla Aggregate SIP when S2 selected ([18](18-label-takeover-sprint-roadmap.md) / [06](06-labels-vs-vanilla-sync-and-harmony.md)) |
+| DefaultTool H1 highlight | Prefer with LBL-05; spill **LBL-08** if needed |
 
 ## Relation to activation sprint
 

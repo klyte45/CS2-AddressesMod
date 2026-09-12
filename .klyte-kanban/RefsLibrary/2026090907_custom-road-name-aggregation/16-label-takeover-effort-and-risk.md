@@ -17,6 +17,7 @@ Size the **parity-only, citywide name-label takeover** epic relative to existing
 | ADR placement along membership | **L** | Port/adapt `UpdateLabelPositionsJob` / `AddLabels` (`100f` spacing, redundancy / `m_MaxScale`); dual source lists (vanilla vs ADR elements) |
 | ADR batched mesh + `Graphics.DrawMesh` | **M** | Mirror `FillNameMeshData` + name draw loop |
 | Forked pick + `RaycastSystem` hook | **M** | ~150-line leaf job; S1/S2 owner policy |
+| SIP Aggregate section parity (with pick) | **M–L** | `RoadSection` / `TitleSection` / icon / focus — see LBL-05 in [18](18-label-takeover-sprint-roadmap.md); design [06](06-labels-vs-vanilla-sync-and-harmony.md) |
 | Citywide membership policy + dirty | **M** | Always-on wiring; `Updated` refresh; Temp / underground parity |
 | Integration / game-update re-diff | **M** | Checklist against GUID; temp nets; load |
 
@@ -41,14 +42,16 @@ Existing research ([14](14-vanilla-road-label-pipeline.md)–[15](15-adr-citywid
 
 ## Suggested task split (4–6 tasks)
 
-1. Shutdown vanilla name path + ADR render hook  
-2. TMP bake + material/atlas parity  
-3. Placement job (vanilla AggregateElement + ADR element sources)  
-4. Mesh batching + draw  
-5. Forked pick + S1/S2 owner policy  
-6. Integration testing / update-diff checklist  
+Full Kanban catalog + sprint planning: **[18-label-takeover-sprint-roadmap.md](18-label-takeover-sprint-roadmap.md)** (LBL-01…LBL-06; optional spill LBL-07…09).
 
-Calendar feel: **~1 sprint** for someone familiar with the codebase; may spill if placement + Temp-net edge cases fight back.
+1. Shutdown vanilla name path + ADR render hook → **LBL-01**  
+2. TMP bake + material/atlas parity → **LBL-02**  
+3. Placement job (vanilla AggregateElement + ADR element sources) → **LBL-03**  
+4. Mesh batching + draw → **LBL-04**  
+5. Forked pick + S1/S2 owner policy + **SIP Aggregate section parity** → **LBL-05**  
+6. Integration testing / update-diff checklist → **LBL-06**  
+
+Calendar feel: **~1 sprint** (suggested **Sprint 013**) for someone familiar with the codebase; may spill to **Sprint 014** if placement + Temp-net edge cases fight back.
 
 ## Harmony / intervention surface
 

@@ -76,9 +76,9 @@ Each task links to [12](12-activation-change-map.md).
 | Title | Notes |
 |-------|--------|
 | Highway reattach via Road Grouping tool | Re-host route/mileage on ADR aggregates; restore WE formulae from placeholders |
-| ADR world name labels + forked RaycastLabelsJob | [06](06-labels-vs-vanilla-sync-and-harmony.md) |
+| ADR world name labels + forked RaycastLabelsJob | Catalog: [18](18-label-takeover-sprint-roadmap.md) (LBL-01…06; Sprint 013). Arch: [15](15-adr-citywide-name-label-takeover.md). Archive pick notes: [06](06-labels-vs-vanilla-sync-and-harmony.md) |
 | Cleanup `ADREdgeData.fixedAggregation` | Delete or leave inert — [03](03-adr-current-touchpoints.md) |
-| SIP RoadSection / DefaultTool H1 | Explicitly deferred |
+| SIP RoadSection / DefaultTool H1 | **In label epic:** SIP Aggregate-gated sections → [18](18-label-takeover-sprint-roadmap.md) **LBL-05**; DefaultTool H1 prefer LBL-05 / spill **LBL-08**. Design archive: [06](06-labels-vs-vanilla-sync-and-harmony.md) |
 
 ### Suggested board sprint
 
