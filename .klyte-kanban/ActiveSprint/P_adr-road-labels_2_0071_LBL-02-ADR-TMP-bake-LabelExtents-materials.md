@@ -32,16 +32,16 @@ Second task of epic adr-road-labels. After LBL-01 shuts down vanilla name TMP/me
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ADR system (or service) produces Buffer/DynamicBuffer LabelVertex for road-name label entities (or owner-keyed buffers ADR owns)
-- [ ] LabelExtents written consistently with baked glyph bounds
-- [ ] LabelMaterial / material references resolve to NetLabelPrefab (or documented ADR copy) TMP Material + FontAsset
-- [ ] Bake invalidates/rebuilds when GetRenderedLabelName / ADR display name changes for an owner aggregate
-- [ ] No live shared Texture2D with WE — copy/re-register only if any sprite path is touched (phase-1 text-only preferred)
+- [x] ADR system (or service) produces Buffer/DynamicBuffer LabelVertex for road-name label entities (or owner-keyed buffers ADR owns)
+- [x] LabelExtents written consistently with baked glyph bounds
+- [x] LabelMaterial / material references resolve to NetLabelPrefab (or documented ADR copy) TMP Material + FontAsset
+- [x] Bake invalidates/rebuilds when GetRenderedLabelName / ADR display name changes for an owner aggregate
+- [x] No live shared Texture2D with WE — copy/re-register only if any sprite path is touched (phase-1 text-only preferred)
 - [ ] Unit/smoke: sample aggregate name string bakes non-empty vertices and sane extents
 - [ ] Compile + load: no TMP/FontAsset null refs in bake path logs
-- [ ] Parity layout: sizeDelta 250×100, fontSize 200, center alignment matching vanilla UpdateLabelVertices
-- [ ] Clone materials + CopyFontAtlasParameters as vanilla
-- [ ] Wire dirty via Updated; extend AdrMainSystem.ResetRoadsCache pattern to ADR owners as needed; cache string changes
+- [x] Parity layout: sizeDelta 250×100, fontSize 200, center alignment matching vanilla UpdateLabelVertices
+- [x] Clone materials + CopyFontAtlasParameters as vanilla
+- [x] Wire dirty via Updated; extend AdrMainSystem.ResetRoadsCache pattern to ADR owners as needed; cache string changes
 
 ---
 
@@ -58,6 +58,7 @@ Second task of epic adr-road-labels. After LBL-01 shuts down vanilla name TMP/me
 9. Parity: sizeDelta 250×100, fontSize 200, center
 10. Dirty via Updated / ResetRoadsCache extension for ADR owners
 11. Phase-1 text-only — no TMP sprites / multi-recipe / WE product path
+12. Implemented AdrRoadNameLabelMeshSystem: NetLabel material init (full scan + Created), TMP bake parity (250x100 / fontSize 200 / center), LabelVertex + LabelExtents, material clone + CopyFontAtlasParameters, string cache, locale dirty via onActiveDictionaryChanged + Updated. Ensures ADRNameAggregate gets Label* + PrefabRef (membership hooks + catch-up query). Registered PreCulling after AggregateMeshSystem + PreDeserialize. No WE Texture2D sharing.
 
 ---
 
