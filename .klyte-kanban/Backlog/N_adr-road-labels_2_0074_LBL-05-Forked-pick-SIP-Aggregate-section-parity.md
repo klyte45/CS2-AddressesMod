@@ -17,7 +17,7 @@ RefsLibrary/2026090907_custom-road-name-aggregation/14-vanilla-road-label-pipeli
 
 ## Background
 
-Fifth task of epic adr-road-labels. Fork RaycastLabelsJob / label pick so clicks resolve S1 Aggregate or S2 ADR name-aggregate owners. Expand scope (locked): SIP sections that currently gate on vanilla Aggregate must also open/work for ADR S2 owners — RoadSection, TitleSection, aggregate icon, DefaultTool H1 preferred in this task; spill leftover SIP surface to optional LBL-08 if needed. Prefer DefaultTool H1 in LBL-05.
+Fifth task of epic adr-road-labels. Fork RaycastLabelsJob / label pick so clicks resolve S1 Aggregate or S2 ADR name-aggregate owners. Expanded locked scope: every SIP section that activates for vanilla Aggregate must also activate/work for ADR name-aggregate (S2). At minimum RoadSection, TitleSection.GetVirtualKeyboardLocaleKey ("RoadName"), Aggregate-path ImageSystem/icon, SelectedInfoUISystem.GetAggregatePosition for S2 LabelPosition. Prefer shipping DefaultTool H1 highlight list job here when cheap (same membership helper as RoadSection); else open LBL-08. Correct SIP gate doc is 06-labels-vs-vanilla-sync-and-harmony.md.
 
 ---
 
@@ -40,6 +40,10 @@ Fifth task of epic adr-road-labels. Fork RaycastLabelsJob / label pick so clicks
 - [ ] No broken pick on arrows-only or non-label net hits
 - [ ] Smoke: pick S1 and S2 labels in dogfood city; SIP shows correct name/sections
 - [ ] Compile + playtest
+- [ ] Burst clone of Game.Net.RaycastJobs.RaycastLabelsJob (~150 lines); resolve m_Owner S1 vs S2; schedule from managed Harmony on RaycastSystem when TypeMask.Labels — do not patch Burst job body
+- [ ] RoadSection walks ADRNameAggregateElement with same per-edge math as doc 06; S1 remainder filtering when vanilla Aggregate still selected
+- [ ] Title locale key RoadName for ADR entity; Aggregate-path icon works for S2
+- [ ] SelectedInfoUISystem.GetAggregatePosition works for S2 LabelPosition
 
 ---
 
@@ -51,6 +55,13 @@ Fifth task of epic adr-road-labels. Fork RaycastLabelsJob / label pick so clicks
 4. Do not break building/address SIP from ACT-04
 5. If SIP surface is too large mid-task, finish pick+core sections and document LBL-08 leftovers in otherNotes/relatedTasks
 6. Arrows remain non-name pick targets as vanilla
+7. Burst clone RaycastLabelsJob; managed Harmony on RaycastSystem for TypeMask.Labels schedule — never patch Burst job body
+8. Shared S1/S2 owner helper with LBL-03
+9. SIP audit via Game.dll search at implement time: Aggregate / AggregateElement gates; Managed Harmony for ADR equivalence
+10. RoadSection: ADRNameAggregateElement walk; S1 remainder when Aggregate selected
+11. TitleSection RoadName key; ImageSystem Aggregate icon path; GetAggregatePosition for S2
+12. Prefer DefaultTool H1 in this task; spill to LBL-08 with gap list
+13. Do not break ACT-04 building/address SIP
 
 ---
 
@@ -72,13 +83,12 @@ Fifth task of epic adr-road-labels. Fork RaycastLabelsJob / label pick so clicks
 
 ### Is dependent for
 
-
-
+- [0075] LBL-06-Integration-dogfood-game-update-checklist
 ### Is related to
 
 - [0067] ACT-05-Road-Grouping-ADR-mutations
 - [0073] LBL-04-ADR-name-mesh-batch-DrawMesh
-
+- RefsLibrary/2026090907_custom-road-name-aggregation/06-labels-vs-vanilla-sync-and-harmony.md
 ### Groups with
 
 - LBL-01-Shutdown-vanilla-name-path
@@ -86,6 +96,10 @@ Fifth task of epic adr-road-labels. Fork RaycastLabelsJob / label pick so clicks
 - LBL-03-ADR-placement-job-vanilla-ADR-membership
 - LBL-04-ADR-name-mesh-batch-DrawMesh
 - LBL-06-Integration-dogfood-game-update-checklist
+
+---
+
+---
 
 ## Other Notes
 
