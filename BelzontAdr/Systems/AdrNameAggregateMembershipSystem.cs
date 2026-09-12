@@ -1,6 +1,7 @@
 using Colossal.Entities;
 using Game.Common;
 using Game.Net;
+using Game.UI;
 using Unity.Entities;
 
 namespace BelzontAdr
@@ -15,10 +16,13 @@ namespace BelzontAdr
     {
         public static AdrNameAggregateMembershipSystem Instance { get; private set; }
 
+        private NameSystem m_nameSystem;
+
         protected override void OnCreate()
         {
             base.OnCreate();
             Instance = this;
+            m_nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
         }
 
         protected override void OnDestroy()
@@ -119,6 +123,8 @@ namespace BelzontAdr
             var adrSeed = new ADRRandomizationData();
             adrSeed.CopySeedFrom(vanillaSeed);
             EntityManager.AddComponentData(adrAggregate, adrSeed);
+
+            TransferCustomNameToAdr(vanillaAggregate, adrAggregate);
 
             vanillaSeed.Redraw();
             EntityManager.SetComponentData(vanillaAggregate, vanillaSeed);
@@ -421,6 +427,20 @@ namespace BelzontAdr
                 return;
             }
             EntityManager.RemoveComponent<ADRNameAggregated>(edge);
+        }
+
+        private void TransferCustomNameToAdr(Entity vanillaAggregate, Entity adrAggregate)
+        {
+            if (!m_nameSystem.TryGetCustomName(vanillaAggregate, out string customName)
+                || string.IsNullOrWhiteSpace(customName))
+            {
+                return;
+            }
+
+            // ADR uses the same vanilla CustomName component via NameSystem.
+            m_nameSystem.SetCustomName(adrAggregate, customName);
+            // Clear original so leftover vanilla edges use generated S2 (CustomName removed).
+            m_nameSystem.SetCustomName(vanillaAggregate, string.Empty);
         }
 
         private void EnsureNameDirty(Entity entity)

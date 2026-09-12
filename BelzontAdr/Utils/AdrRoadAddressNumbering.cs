@@ -303,7 +303,7 @@ namespace BelzontAdr
             ref int number)
         {
             if (sideEntity == Entity.Null
-                || !entityManager.TryGetComponent(sideEntity, out Transform transform))
+                || !entityManager.TryGetComponent(sideEntity, out Game.Objects.Transform transform))
             {
                 return;
             }
