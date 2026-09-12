@@ -1,4 +1,4 @@
-﻿#if !RELEASE 
+#if !RELEASE 
 //#define LOCAL
 #endif
 using Belzont.Interfaces;
@@ -31,6 +31,7 @@ namespace BelzontAdr
             updateSystem.UpdateAt<AdrNamesetSystem>(SystemUpdatePhase.Modification2B);
             // Name transfers use NameSystem.SetCustomName → EndFrameBarrier (allowed in MainLoop only).
             updateSystem.UpdateAt<AdrNameAggregateMembershipSystem>(SystemUpdatePhase.MainLoop);
+            updateSystem.UpdateAt<AdrNameAggregateMaintenanceSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<AdrVehicleSystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RoadVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RailVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
