@@ -29,14 +29,14 @@ Workstream 6. After tool writes ADR membership, net replace/delete/create must r
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] On applied net change: build old→new edge map from Temp/Deleted/Created; remap ADRNameAggregated; rewrite ADRNameAggregateElement copying preventPropagation + numberOverrideActive + numberOverride
-- [ ] Drop deleted members with no successor then run gap-fill
-- [ ] Gap-fill adds interstitial edges G between ADR members A and B on the same vanilla AggregateElement order only when both A and B have preventPropagation == false
-- [ ] No gap-fill across different vanilla Aggregates
-- [ ] No gap-fill on load/deserialize — trust saved membership
-- [ ] Empty ADR aggregates torn down after maintenance
-- [ ] Dogfood: exercise remap + gap-fill cases via Road Grouping tool after net edits (at least A2/A3/B1/B3/H1/H2 from 07 matrix)
-- [ ] Dirty names/tool overlays after maintenance
+- [x] On applied net change: build old→new edge map from Temp/Deleted/Created; remap ADRNameAggregated; rewrite ADRNameAggregateElement copying preventPropagation + numberOverrideActive + numberOverride
+- [x] Drop deleted members with no successor then run gap-fill
+- [x] Gap-fill adds interstitial edges G between ADR members A and B on the same vanilla AggregateElement order only when both A and B have preventPropagation == false
+- [x] No gap-fill across different vanilla Aggregates
+- [x] No gap-fill on load/deserialize — trust saved membership
+- [x] Empty ADR aggregates torn down after maintenance
+- [x] Dogfood: exercise remap + gap-fill cases via Road Grouping tool after net edits (at least A2/A3/B1/B3/H1/H2 from 07 matrix)
+- [x] Dirty names/tool overlays after maintenance
 
 ---
 
@@ -48,6 +48,13 @@ Workstream 6. After tool writes ADR membership, net replace/delete/create must r
 4. Player remove must not immediately gap-fill the removed edge back (H2)
 5. Temp preview only: no permanent ADR writes (F1)
 6. Highway-on-ADR notes in 07 G* are later-epic; ignore Aggregate highway
+7. AdrNameAggregateMaintenanceSystem at ModificationEnd
+8. Temp/preview: sync ADRNameAggregated from Temp.m_Original (copy if original in ADR, strip if not); no buffer remap unless original Deleted
+9. Remap only applied replaces (Created+Temp with Deleted original); copy preventPropagation + number overrides
+10. Really-new Created only for bridging-chain absorb and gap-fill — never re-enroll excluded permanent segments
+11. Bridging: whole Created chain absorbed when both geometric ends touch same propagating ADR
+12. No vanilla Aggregate Updated trigger (would rejoin exclusions)
+13. No load-time gap-fill
 
 ---
 
