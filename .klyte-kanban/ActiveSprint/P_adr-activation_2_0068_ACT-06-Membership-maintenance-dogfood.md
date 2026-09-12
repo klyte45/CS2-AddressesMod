@@ -1,7 +1,7 @@
+**Start time:** 2026-09-12 00:34 -0300
 # [0068] ACT-06-Membership-maintenance-dogfood
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/07-membership-maintenance-edge-cases.md
