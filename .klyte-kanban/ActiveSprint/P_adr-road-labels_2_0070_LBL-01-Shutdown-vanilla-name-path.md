@@ -36,11 +36,11 @@ First task of epic adr-road-labels (Sprint 013 catalog). Always-on when ADR load
 - [x] Arrow half of AggregateMeshSystem still runs (UpdateArrowMaterials / UpdateArrowPositions / FillArrowMeshData as needed)
 - [x] Managed Harmony Prefix prevents AggregateRenderSystem.Render name GetNameMesh/DrawMesh loop
 - [x] requireNetArrows arrow branch in AggregateRenderSystem still draws arrows
-- [ ] With ADR loaded, world road NAME overlays are gone on a smoke city
-- [ ] One-way arrows still appear when a tool requires net arrows
+- [x] With ADR loaded, world road NAME overlays are gone on a smoke city
+- [x] One-way arrows still appear when a tool requires net arrows
 - [x] Always-on with ADR load — no player-facing vanilla-label fallback toggle
 - [x] No patches to AggregateSystem Burst jobs
-- [ ] Compile + smoke: load game with ADR, confirm no name labels and arrows still work in a net tool that needs them
+- [x] Compile + smoke: load game with ADR, confirm no name labels and arrows still work in a net tool that needs them
 
 ---
 
