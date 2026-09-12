@@ -50,6 +50,11 @@ Fourth task of epic adr-road-labels. Build name meshes from LBL-02 vertices + LB
 4. Invalidate mesh when bake or placement invalidates
 5. Do not resurrect vanilla name Render loop — ADR owns names after LBL-01
 6. Look knobs (distance, width) deferred — 17 feasibility only
+7. Port FillNameMeshData warp/batch from AggregateMeshSystem; ADR render mirrors name half of AggregateRenderSystem (hideOverlay, Game/SceneView cameras, surface + underground submeshes)
+8. Do not draw arrows — leave AggregateRenderSystem arrow branch alone
+9. Match NetLabel layer/material; batch by material where vanilla batched
+10. Invalidate mesh when bake or placement invalidates
+11. Look knobs deferred — see 17
 
 ---
 
@@ -68,11 +73,10 @@ Fourth task of epic adr-road-labels. Build name meshes from LBL-02 vertices + LB
 
 - [0071] LBL-02-ADR-TMP-bake-LabelExtents-materials
 - LBL-03-ADR-placement-job-vanilla-ADR-membership
-
+- [0072] LBL-03-ADR-placement-job-vanilla-ADR-membership
 ### Is dependent for
 
-
-
+- [0075] LBL-06-Integration-dogfood-game-update-checklist
 ### Is related to
 
 - [0070] LBL-01-Shutdown-vanilla-name-path
@@ -84,6 +88,10 @@ Fourth task of epic adr-road-labels. Build name meshes from LBL-02 vertices + LB
 - LBL-03-ADR-placement-job-vanilla-ADR-membership
 - LBL-05-Forked-pick-SIP-Aggregate-section-parity
 - LBL-06-Integration-dogfood-game-update-checklist
+
+---
+
+---
 
 ## Other Notes
 
