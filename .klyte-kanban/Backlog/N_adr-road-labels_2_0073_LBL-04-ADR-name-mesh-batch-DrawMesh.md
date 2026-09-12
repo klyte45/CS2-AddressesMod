@@ -88,8 +88,11 @@ Fourth task of epic adr-road-labels. Build name meshes from LBL-02 vertices + LB
 - LBL-03-ADR-placement-job-vanilla-ADR-membership
 - LBL-05-Forked-pick-SIP-Aggregate-section-parity
 - LBL-06-Integration-dogfood-game-update-checklist
-
----
+- [0070] LBL-01-Shutdown-vanilla-name-path
+- [0071] LBL-02-ADR-TMP-bake-LabelExtents-materials
+- [0072] LBL-03-ADR-placement-job-vanilla-ADR-membership
+- [0074] LBL-05-Forked-pick-SIP-Aggregate-section-parity
+- [0075] LBL-06-Integration-dogfood-game-update-checklist
 
 ---
 
