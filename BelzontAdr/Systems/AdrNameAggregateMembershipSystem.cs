@@ -2,6 +2,8 @@ using Colossal.Entities;
 using Game.Common;
 using Game.Net;
 using Game.UI;
+using System;
+using System.Collections.Generic;
 using Unity.Entities;
 
 namespace BelzontAdr
@@ -17,6 +19,7 @@ namespace BelzontAdr
         public static AdrNameAggregateMembershipSystem Instance { get; private set; }
 
         private NameSystem m_nameSystem;
+        private readonly Queue<Action> m_runOnUpdate = new();
 
         protected override void OnCreate()
         {
@@ -34,7 +37,13 @@ namespace BelzontAdr
             base.OnDestroy();
         }
 
-        protected override void OnUpdate() { }
+        protected override void OnUpdate()
+        {
+            while (m_runOnUpdate.Count > 0)
+            {
+                m_runOnUpdate.Dequeue().Invoke();
+            }
+        }
 
         public bool IsAdrNameAggregate(Entity aggregate)
             => aggregate != Entity.Null
@@ -58,8 +67,9 @@ namespace BelzontAdr
             }
             for (int i = 0; i < edges.Length; i++)
             {
-                AddMember(aggregate, edges[i]);
+                AddMemberCore(aggregate, edges[i], insertIndex: -1, allowSteal: true, out _);
             }
+            ResortMembers(aggregate);
             return aggregate;
         }
 
@@ -85,6 +95,7 @@ namespace BelzontAdr
             }
 
             bool edgeInVanilla = false;
+            bool edgeInAdr = AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, edge, out _);
             for (int i = 0; i < vanillaElements.Length; i++)
             {
                 if (vanillaElements[i].m_Edge == edge)
@@ -97,13 +108,16 @@ namespace BelzontAdr
             switch (edit)
             {
                 case AdrNameAggregateForkEdit.AddMember:
-                    if (edgeInVanilla)
+                    // Remainder edges are already seeded; only allow add when stealing from another ADR
+                    // or attaching an edge from outside this vanilla Aggregate.
+                    if (edgeInVanilla && !edgeInAdr)
                     {
                         return false;
                     }
                     break;
                 case AdrNameAggregateForkEdit.RemoveMember:
-                    if (!edgeInVanilla || vanillaElements.Length <= 1)
+                    // Can only remove a remainder (non-ADR) edge that is on this vanilla Aggregate.
+                    if (!edgeInVanilla || edgeInAdr || vanillaElements.Length <= 1)
                     {
                         return false;
                     }
@@ -124,13 +138,12 @@ namespace BelzontAdr
             adrSeed.CopySeedFrom(vanillaSeed);
             EntityManager.AddComponentData(adrAggregate, adrSeed);
 
-            TransferCustomNameToAdr(vanillaAggregate, adrAggregate);
-
             vanillaSeed.Redraw();
             EntityManager.SetComponentData(vanillaAggregate, vanillaSeed);
             EnsureNameDirty(vanillaAggregate);
             EnsureNameDirty(adrAggregate);
 
+            // Seed remainder only — never steal existing ADR members during fork copy.
             for (int i = 0; i < vanillaElements.Length; i++)
             {
                 var memberEdge = vanillaElements[i].m_Edge;
@@ -138,12 +151,18 @@ namespace BelzontAdr
                 {
                     continue;
                 }
-                AddMember(adrAggregate, memberEdge);
+                if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, memberEdge, out _))
+                {
+                    continue;
+                }
+                AddMemberCore(adrAggregate, memberEdge, insertIndex: -1, allowSteal: false, out _);
             }
 
+            Entity stolenFrom = Entity.Null;
             bool applied = edit switch
             {
-                AdrNameAggregateForkEdit.AddMember => AddMember(adrAggregate, edge, insertIndex),
+                AdrNameAggregateForkEdit.AddMember => AddMemberCore(
+                    adrAggregate, edge, insertIndex, allowSteal: true, out stolenFrom),
                 AdrNameAggregateForkEdit.RemoveMember => RemoveMember(adrAggregate, edge),
                 _ => false
             };
@@ -156,6 +175,32 @@ namespace BelzontAdr
                 }
                 adrAggregate = Entity.Null;
                 return false;
+            }
+
+            // NameSystem.SetCustomName needs EndFrameBarrier ECB — not allowed during ToolUpdate.
+            Entity vanillaForName = vanillaAggregate;
+            Entity adrForName = adrAggregate;
+            m_runOnUpdate.Enqueue(() =>
+            {
+                if (!EntityManager.Exists(vanillaForName) || !EntityManager.Exists(adrForName))
+                {
+                    return;
+                }
+                TransferCustomNameToAdr(vanillaForName, adrForName);
+            });
+
+            // RemoveMember already may have torn down; AddMember path needs straight-chain order.
+            if (edit == AdrNameAggregateForkEdit.AddMember
+                || (edit == AdrNameAggregateForkEdit.RemoveMember && IsAdrNameAggregate(adrAggregate)))
+            {
+                ResortMembers(adrAggregate);
+                EnsureNameDirty(adrAggregate);
+            }
+
+            if (stolenFrom != Entity.Null && IsAdrNameAggregate(stolenFrom))
+            {
+                ResortMembers(stolenFrom);
+                EnsureNameDirty(stolenFrom);
             }
 
             return true;
@@ -182,6 +227,32 @@ namespace BelzontAdr
 
         public bool AddMember(Entity aggregate, Entity edge, int insertIndex = -1)
         {
+            if (!AddMemberCore(aggregate, edge, insertIndex, allowSteal: true, out Entity stolenFrom))
+            {
+                return false;
+            }
+
+            ResortMembers(aggregate);
+            EnsureNameDirty(aggregate);
+
+            if (stolenFrom != Entity.Null && IsAdrNameAggregate(stolenFrom))
+            {
+                ResortMembers(stolenFrom);
+                EnsureNameDirty(stolenFrom);
+            }
+
+            return true;
+        }
+
+        private bool AddMemberCore(
+            Entity aggregate,
+            Entity edge,
+            int insertIndex,
+            bool allowSteal,
+            out Entity stolenFrom)
+        {
+            stolenFrom = Entity.Null;
+
             if (!IsAdrNameAggregate(aggregate) || edge == Entity.Null || !EntityManager.Exists(edge))
             {
                 return false;
@@ -193,11 +264,27 @@ namespace BelzontAdr
                 {
                     return true;
                 }
+
                 if (IsAdrNameAggregate(existing.m_Aggregate))
                 {
-                    RemoveMember(existing.m_Aggregate, edge);
+                    if (!allowSteal)
+                    {
+                        return false;
+                    }
+
+                    stolenFrom = existing.m_Aggregate;
+                    if (!RemoveMember(existing.m_Aggregate, edge, resort: false))
+                    {
+                        // Link pointed at an ADR but buffer lacked the edge — force-clear and continue.
+                        if (EntityManager.HasComponent<ADRNameAggregated>(edge))
+                        {
+                            EntityManager.RemoveComponent<ADRNameAggregated>(edge);
+                        }
+                    }
+
                     if (!IsAdrNameAggregate(aggregate))
                     {
+                        stolenFrom = Entity.Null;
                         return false;
                     }
                 }
@@ -208,6 +295,13 @@ namespace BelzontAdr
             }
 
             var buffer = EntityManager.GetBuffer<ADRNameAggregateElement>(aggregate);
+            int existingIndex = IndexOfEdge(buffer, edge);
+            if (existingIndex >= 0)
+            {
+                ApplyEdgeLink(edge, aggregate, buffer[existingIndex]);
+                return true;
+            }
+
             var element = new ADRNameAggregateElement(edge);
             if (insertIndex < 0 || insertIndex >= buffer.Length)
             {
@@ -222,6 +316,9 @@ namespace BelzontAdr
         }
 
         public bool RemoveMember(Entity aggregate, Entity edge)
+            => RemoveMember(aggregate, edge, resort: true);
+
+        private bool RemoveMember(Entity aggregate, Entity edge, bool resort)
         {
             if (!IsAdrNameAggregate(aggregate) || edge == Entity.Null)
             {
@@ -237,7 +334,18 @@ namespace BelzontAdr
 
             buffer.RemoveAt(index);
             ClearEdgeLink(edge, aggregate);
-            TeardownIfEmpty(aggregate);
+            if (buffer.Length == 0)
+            {
+                DestroyAggregate(aggregate);
+                return true;
+            }
+
+            if (resort)
+            {
+                ResortMembers(aggregate);
+                EnsureNameDirty(aggregate);
+            }
+
             return true;
         }
 
@@ -257,7 +365,14 @@ namespace BelzontAdr
             var edge = buffer[index].m_Edge;
             buffer.RemoveAt(index);
             ClearEdgeLink(edge, aggregate);
-            TeardownIfEmpty(aggregate);
+            if (buffer.Length == 0)
+            {
+                DestroyAggregate(aggregate);
+                return true;
+            }
+
+            ResortMembers(aggregate);
+            EnsureNameDirty(aggregate);
             return true;
         }
 
@@ -380,19 +495,6 @@ namespace BelzontAdr
             return index >= 0;
         }
 
-        private void TeardownIfEmpty(Entity aggregate)
-        {
-            if (!IsAdrNameAggregate(aggregate))
-            {
-                return;
-            }
-            var buffer = EntityManager.GetBuffer<ADRNameAggregateElement>(aggregate, true);
-            if (buffer.Length == 0)
-            {
-                DestroyAggregate(aggregate);
-            }
-        }
-
         private void ApplyEdgeLink(Entity edge, Entity aggregate, ADRNameAggregateElement element)
         {
             var link = new ADRNameAggregated
@@ -441,6 +543,386 @@ namespace BelzontAdr
             m_nameSystem.SetCustomName(adrAggregate, customName);
             // Clear original so leftover vanilla edges use generated S2 (CustomName removed).
             m_nameSystem.SetCustomName(vanillaAggregate, string.Empty);
+        }
+
+        /// <summary>
+        /// Rebuild buffer order: connected islands as straight as possible; islands sorted by
+        /// min member Entity.Index; each island oriented so the min-Index member lies in the first half.
+        /// At multi-edge nodes (crossings), the next edge is the unused candidate with nearest prior buffer order.
+        /// </summary>
+        public void ResortMembers(Entity aggregate)
+        {
+            if (!IsAdrNameAggregate(aggregate))
+            {
+                return;
+            }
+
+            var buffer = EntityManager.GetBuffer<ADRNameAggregateElement>(aggregate);
+            if (buffer.Length <= 1)
+            {
+                return;
+            }
+
+            var byEdge = new Dictionary<Entity, ADRNameAggregateElement>(buffer.Length);
+            var originalOrder = new Dictionary<Entity, int>(buffer.Length);
+            var edges = new List<Entity>(buffer.Length);
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                var element = buffer[i];
+                if (element.m_Edge == Entity.Null || !EntityManager.Exists(element.m_Edge))
+                {
+                    continue;
+                }
+                if (byEdge.ContainsKey(element.m_Edge))
+                {
+                    continue;
+                }
+                byEdge[element.m_Edge] = element;
+                originalOrder[element.m_Edge] = i;
+                edges.Add(element.m_Edge);
+            }
+
+            if (edges.Count <= 1)
+            {
+                return;
+            }
+
+            var nodeToEdges = new Dictionary<Entity, List<Entity>>();
+            for (int i = 0; i < edges.Count; i++)
+            {
+                if (!EntityManager.TryGetComponent(edges[i], out Edge netEdge))
+                {
+                    continue;
+                }
+                AddIncident(nodeToEdges, netEdge.m_Start, edges[i]);
+                AddIncident(nodeToEdges, netEdge.m_End, edges[i]);
+            }
+
+            var neighbors = new Dictionary<Entity, List<Entity>>(edges.Count);
+            for (int i = 0; i < edges.Count; i++)
+            {
+                neighbors[edges[i]] = new List<Entity>(2);
+            }
+
+            foreach (var pair in nodeToEdges)
+            {
+                var atNode = pair.Value;
+                for (int i = 0; i < atNode.Count; i++)
+                {
+                    for (int j = i + 1; j < atNode.Count; j++)
+                    {
+                        AddUnique(neighbors[atNode[i]], atNode[j]);
+                        AddUnique(neighbors[atNode[j]], atNode[i]);
+                    }
+                }
+            }
+
+            var remaining = new HashSet<Entity>(edges);
+            var islands = new List<List<Entity>>();
+            while (remaining.Count > 0)
+            {
+                Entity seed = Entity.Null;
+                foreach (var e in remaining)
+                {
+                    seed = e;
+                    break;
+                }
+
+                var component = new List<Entity>();
+                var queue = new Queue<Entity>();
+                queue.Enqueue(seed);
+                remaining.Remove(seed);
+                while (queue.Count > 0)
+                {
+                    var cur = queue.Dequeue();
+                    component.Add(cur);
+                    if (!neighbors.TryGetValue(cur, out var nexts))
+                    {
+                        continue;
+                    }
+                    for (int i = 0; i < nexts.Count; i++)
+                    {
+                        if (remaining.Remove(nexts[i]))
+                        {
+                            queue.Enqueue(nexts[i]);
+                        }
+                    }
+                }
+
+                islands.Add(OrderIslandStraight(component, neighbors, nodeToEdges, originalOrder));
+            }
+
+            islands.Sort((a, b) => MinEdgeIndex(a).CompareTo(MinEdgeIndex(b)));
+
+            buffer.Clear();
+            for (int i = 0; i < islands.Count; i++)
+            {
+                var island = islands[i];
+                for (int j = 0; j < island.Count; j++)
+                {
+                    var edge = island[j];
+                    var element = byEdge[edge];
+                    buffer.Add(element);
+                    ApplyEdgeLink(edge, aggregate, element);
+                }
+            }
+        }
+
+        private List<Entity> OrderIslandStraight(
+            List<Entity> component,
+            Dictionary<Entity, List<Entity>> neighbors,
+            Dictionary<Entity, List<Entity>> nodeToEdges,
+            Dictionary<Entity, int> originalOrder)
+        {
+            if (component.Count <= 1)
+            {
+                return component;
+            }
+
+            var islandSet = new HashSet<Entity>(component);
+            var ordered = new List<Entity>(component.Count);
+            var used = new HashSet<Entity>();
+
+            while (used.Count < component.Count)
+            {
+                Entity startEdge = PickIslandStartEdge(component, used, nodeToEdges, islandSet, originalOrder);
+                if (startEdge == Entity.Null)
+                {
+                    break;
+                }
+
+                Entity cursorNode = PickWalkStartNode(startEdge, nodeToEdges, islandSet, used);
+                Entity current = startEdge;
+                while (current != Entity.Null)
+                {
+                    ordered.Add(current);
+                    used.Add(current);
+
+                    if (!EntityManager.TryGetComponent(current, out Edge netEdge))
+                    {
+                        break;
+                    }
+
+                    Entity nextNode = netEdge.m_Start == cursorNode ? netEdge.m_End : netEdge.m_Start;
+                    Entity nextEdge = PickNextEdgeAtNode(current, nextNode, nodeToEdges, islandSet, used, originalOrder);
+                    if (nextEdge == Entity.Null)
+                    {
+                        break;
+                    }
+
+                    cursorNode = nextNode;
+                    current = nextEdge;
+                }
+            }
+
+            OrientIslandByMinIndexHalf(ordered);
+            return ordered;
+        }
+
+        private Entity PickIslandStartEdge(
+            List<Entity> component,
+            HashSet<Entity> used,
+            Dictionary<Entity, List<Entity>> nodeToEdges,
+            HashSet<Entity> islandSet,
+            Dictionary<Entity, int> originalOrder)
+        {
+            Entity bestEndpoint = Entity.Null;
+            int bestEndpointOrder = int.MaxValue;
+            Entity bestAny = Entity.Null;
+            int bestAnyOrder = int.MaxValue;
+
+            for (int i = 0; i < component.Count; i++)
+            {
+                var edge = component[i];
+                if (used.Contains(edge))
+                {
+                    continue;
+                }
+
+                int order = GetOriginalOrder(originalOrder, edge);
+                if (order < bestAnyOrder)
+                {
+                    bestAnyOrder = order;
+                    bestAny = edge;
+                }
+
+                if (!EntityManager.TryGetComponent(edge, out Edge netEdge))
+                {
+                    continue;
+                }
+
+                if (IsIslandEndpointNode(netEdge.m_Start, nodeToEdges, islandSet, used)
+                    || IsIslandEndpointNode(netEdge.m_End, nodeToEdges, islandSet, used))
+                {
+                    if (order < bestEndpointOrder)
+                    {
+                        bestEndpointOrder = order;
+                        bestEndpoint = edge;
+                    }
+                }
+            }
+
+            return bestEndpoint != Entity.Null ? bestEndpoint : bestAny;
+        }
+
+        private bool IsIslandEndpointNode(
+            Entity node,
+            Dictionary<Entity, List<Entity>> nodeToEdges,
+            HashSet<Entity> islandSet,
+            HashSet<Entity> used)
+        {
+            if (node == Entity.Null || !nodeToEdges.TryGetValue(node, out var atNode))
+            {
+                return false;
+            }
+
+            int live = 0;
+            for (int i = 0; i < atNode.Count; i++)
+            {
+                var edge = atNode[i];
+                if (islandSet.Contains(edge) && !used.Contains(edge))
+                {
+                    live++;
+                }
+            }
+
+            return live == 1;
+        }
+
+        private Entity PickWalkStartNode(
+            Entity startEdge,
+            Dictionary<Entity, List<Entity>> nodeToEdges,
+            HashSet<Entity> islandSet,
+            HashSet<Entity> used)
+        {
+            if (!EntityManager.TryGetComponent(startEdge, out Edge netEdge))
+            {
+                return Entity.Null;
+            }
+
+            if (IsIslandEndpointNode(netEdge.m_Start, nodeToEdges, islandSet, used))
+            {
+                return netEdge.m_Start;
+            }
+
+            if (IsIslandEndpointNode(netEdge.m_End, nodeToEdges, islandSet, used))
+            {
+                return netEdge.m_End;
+            }
+
+            // Loop / mid-chain seed: start walking from Start node.
+            return netEdge.m_Start;
+        }
+
+        private Entity PickNextEdgeAtNode(
+            Entity currentEdge,
+            Entity node,
+            Dictionary<Entity, List<Entity>> nodeToEdges,
+            HashSet<Entity> islandSet,
+            HashSet<Entity> used,
+            Dictionary<Entity, int> originalOrder)
+        {
+            if (node == Entity.Null || !nodeToEdges.TryGetValue(node, out var atNode))
+            {
+                return Entity.Null;
+            }
+
+            int currentOrder = GetOriginalOrder(originalOrder, currentEdge);
+            Entity best = Entity.Null;
+            int bestDistance = int.MaxValue;
+            int bestOrder = int.MaxValue;
+            for (int i = 0; i < atNode.Count; i++)
+            {
+                var cand = atNode[i];
+                if (!islandSet.Contains(cand) || used.Contains(cand) || cand == currentEdge)
+                {
+                    continue;
+                }
+
+                int candOrder = GetOriginalOrder(originalOrder, cand);
+                int distance = candOrder >= currentOrder ? candOrder - currentOrder : currentOrder - candOrder;
+                // Crossing / multi-edge node: prefer nearest original buffer order to the current edge.
+                if (distance < bestDistance
+                    || (distance == bestDistance && candOrder < bestOrder))
+                {
+                    bestDistance = distance;
+                    bestOrder = candOrder;
+                    best = cand;
+                }
+            }
+
+            return best;
+        }
+
+        private static int GetOriginalOrder(Dictionary<Entity, int> originalOrder, Entity edge)
+        {
+            return originalOrder != null && originalOrder.TryGetValue(edge, out int order)
+                ? order
+                : edge.Index;
+        }
+
+        private static void OrientIslandByMinIndexHalf(List<Entity> ordered)
+        {
+            if (ordered == null || ordered.Count <= 1)
+            {
+                return;
+            }
+
+            int minIndex = ordered[0].Index;
+            int minPos = 0;
+            for (int i = 1; i < ordered.Count; i++)
+            {
+                if (ordered[i].Index < minIndex)
+                {
+                    minIndex = ordered[i].Index;
+                    minPos = i;
+                }
+            }
+
+            // Keep orientation when min Index is in the first half; reverse otherwise.
+            if (minPos >= ordered.Count / 2)
+            {
+                ordered.Reverse();
+            }
+        }
+
+        private static int MinEdgeIndex(List<Entity> edges)
+        {
+            int min = int.MaxValue;
+            for (int i = 0; i < edges.Count; i++)
+            {
+                if (edges[i].Index < min)
+                {
+                    min = edges[i].Index;
+                }
+            }
+            return min;
+        }
+
+        private static void AddIncident(Dictionary<Entity, List<Entity>> nodeToEdges, Entity node, Entity edge)
+        {
+            if (node == Entity.Null)
+            {
+                return;
+            }
+            if (!nodeToEdges.TryGetValue(node, out var list))
+            {
+                list = new List<Entity>(2);
+                nodeToEdges[node] = list;
+            }
+            AddUnique(list, edge);
+        }
+
+        private static void AddUnique(List<Entity> list, Entity edge)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == edge)
+                {
+                    return;
+                }
+            }
+            list.Add(edge);
         }
 
         private void EnsureNameDirty(Entity entity)

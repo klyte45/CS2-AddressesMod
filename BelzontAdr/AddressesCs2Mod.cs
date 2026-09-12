@@ -29,7 +29,8 @@ namespace BelzontAdr
             updateSystem.UpdateAfter<AdrEditorUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAfter<AdrSettingsUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<AdrNamesetSystem>(SystemUpdatePhase.Modification2B);
-            updateSystem.UpdateAt<AdrNameAggregateMembershipSystem>(SystemUpdatePhase.Modification2B);
+            // Name transfers use NameSystem.SetCustomName → EndFrameBarrier (allowed in MainLoop only).
+            updateSystem.UpdateAt<AdrNameAggregateMembershipSystem>(SystemUpdatePhase.MainLoop);
             updateSystem.UpdateAt<AdrVehicleSystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RoadVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RailVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);

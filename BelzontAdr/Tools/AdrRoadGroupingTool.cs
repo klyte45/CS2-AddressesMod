@@ -49,6 +49,7 @@ namespace BelzontAdr
         private ProxyAction m_ToggleAction;
         private AdrRoadGroupingController m_Controller;
         private AdrRoadGroupingOverlayRenderSystem m_Overlay;
+        private AdrNameAggregateMembershipSystem m_Membership;
 
         private bool m_Dragging;
         private Entity m_DragStartNode;
@@ -76,6 +77,7 @@ namespace BelzontAdr
             m_ToggleAction = AdrModData.Instance.GetAction(AdrModData.kActionToggleMembership);
             m_Controller = World.GetOrCreateSystemManaged<AdrRoadGroupingController>();
             m_Overlay = World.GetOrCreateSystemManaged<AdrRoadGroupingOverlayRenderSystem>();
+            m_Membership = World.GetOrCreateSystemManaged<AdrNameAggregateMembershipSystem>();
         }
 
         public override PrefabBase GetPrefab() => null;
@@ -225,7 +227,11 @@ namespace BelzontAdr
                     && eligibleEdge != Entity.Null
                     && EntityManager.TryGetComponent(eligibleEdge, out Aggregated aggregated))
                 {
-                    m_Controller.SelectedAggregation.Value = aggregated.m_Aggregate;
+                    // Prefer existing ADR association when present; else focus vanilla Aggregate.
+                    m_Controller.SelectedAggregation.Value =
+                        AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, eligibleEdge, out var adrAggregate)
+                            ? adrAggregate
+                            : aggregated.m_Aggregate;
                 }
 
                 return inputDeps;
@@ -239,7 +245,7 @@ namespace BelzontAdr
                 if (eligibleEdge != Entity.Null
                     && EntityManager.HasComponent<Edge>(entity))
                 {
-                    LogToggleStub(eligibleEdge, selected);
+                    ApplyMembershipToggle(eligibleEdge, selected);
                 }
 
                 return inputDeps;
@@ -301,6 +307,7 @@ namespace BelzontAdr
                 return;
             }
 
+            RefreshMembershipSet(selectedAggregate);
             if (!TryBuildPreferredPath(m_DragStartNode, m_DragHoverNode, selectedAggregate, m_PathEdges))
             {
                 return;
@@ -351,7 +358,7 @@ namespace BelzontAdr
             }
 
             ClassifyPathMembership(m_PathEdges, m_PreviewAddEdges, m_PreviewRemoveEdges);
-            EmitPathMembershipLogs(selectedAggregate, m_PreviewAddEdges, m_PreviewRemoveEdges);
+            ApplyPathMembership(selectedAggregate, m_PreviewAddEdges, m_PreviewRemoveEdges);
             m_MembershipEdges.Clear();
             m_PreviewAddEdges.Clear();
             m_PreviewRemoveEdges.Clear();
@@ -380,6 +387,21 @@ namespace BelzontAdr
         private void RefreshMembershipSet(Entity aggregate)
         {
             m_MembershipEdges.Clear();
+            if (aggregate == Entity.Null)
+            {
+                return;
+            }
+
+            if (m_Membership.IsAdrNameAggregate(aggregate)
+                && EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<ADRNameAggregateElement> adrElements))
+            {
+                for (int i = 0; i < adrElements.Length; i++)
+                {
+                    m_MembershipEdges.Add(adrElements[i].m_Edge);
+                }
+                return;
+            }
+
             if (!EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<AggregateElement> elements))
             {
                 return;
@@ -387,20 +409,122 @@ namespace BelzontAdr
 
             for (int i = 0; i < elements.Length; i++)
             {
+                // Vanilla focus excludes edges already claimed by an ADR name-aggregate.
+                if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, elements[i].m_Edge, out _))
+                {
+                    continue;
+                }
                 m_MembershipEdges.Add(elements[i].m_Edge);
             }
         }
 
-        private void LogToggleStub(Entity edge, Entity aggregate)
+        private void ApplyMembershipToggle(Entity edge, Entity selected)
         {
-            bool currentlyMember = IsMemberEdge(edge, aggregate);
-            LogUtils.DoInfoLog(
-                "RoadGrouping membership toggle stub: edge={0}:{1} aggregate={2}:{3} would={4}",
-                edge.Index,
-                edge.Version,
-                aggregate.Index,
-                aggregate.Version,
-                currentlyMember ? "remove" : "add");
+            bool currentlyMember = IsMemberEdge(edge, selected);
+            if (m_Membership.IsAdrNameAggregate(selected))
+            {
+                bool ok = currentlyMember
+                    ? m_Membership.RemoveMember(selected, edge)
+                    : m_Membership.AddMember(selected, edge);
+                if (!ok)
+                {
+                    return;
+                }
+
+                if (!m_Membership.IsAdrNameAggregate(selected))
+                {
+                    ClearFixedMembership();
+                    m_Controller.ClearSelection();
+                }
+                else
+                {
+                    m_Controller.InvalidateSegmentCards();
+                }
+                return;
+            }
+
+            // First membership edit on vanilla Aggregate → fork.
+            var edit = currentlyMember
+                ? AdrNameAggregateForkEdit.RemoveMember
+                : AdrNameAggregateForkEdit.AddMember;
+            if (!m_Membership.TryForkFromVanilla(selected, edit, edge, out Entity adrAggregate))
+            {
+                return;
+            }
+
+            m_Controller.SelectedAggregation.Value = adrAggregate;
+            m_Controller.InvalidateSegmentCards();
+        }
+
+        private void ApplyPathMembership(Entity selected, List<Entity> addEdges, List<Entity> removeEdges)
+        {
+            if ((addEdges == null || addEdges.Count == 0)
+                && (removeEdges == null || removeEdges.Count == 0))
+            {
+                return;
+            }
+
+            Entity working = selected;
+            int removeStart = 0;
+            int addStart = 0;
+
+            if (!m_Membership.IsAdrNameAggregate(working))
+            {
+                Entity forkEdge;
+                AdrNameAggregateForkEdit forkEdit;
+                if (removeEdges != null && removeEdges.Count > 0)
+                {
+                    forkEdge = removeEdges[0];
+                    forkEdit = AdrNameAggregateForkEdit.RemoveMember;
+                    removeStart = 1;
+                }
+                else
+                {
+                    forkEdge = addEdges[0];
+                    forkEdit = AdrNameAggregateForkEdit.AddMember;
+                    addStart = 1;
+                }
+
+                if (!m_Membership.TryForkFromVanilla(working, forkEdit, forkEdge, out Entity adrAggregate))
+                {
+                    return;
+                }
+
+                working = adrAggregate;
+                m_Controller.SelectedAggregation.Value = adrAggregate;
+            }
+
+            if (removeEdges != null)
+            {
+                for (int i = removeStart; i < removeEdges.Count; i++)
+                {
+                    m_Membership.RemoveMember(working, removeEdges[i]);
+                    if (!m_Membership.IsAdrNameAggregate(working))
+                    {
+                        ClearFixedMembership();
+                        m_Controller.ClearSelection();
+                        return;
+                    }
+                }
+            }
+
+            if (addEdges != null && m_Membership.IsAdrNameAggregate(working))
+            {
+                for (int i = addStart; i < addEdges.Count; i++)
+                {
+                    m_Membership.AddMember(working, addEdges[i]);
+                }
+            }
+
+            if (!m_Membership.IsAdrNameAggregate(working))
+            {
+                ClearFixedMembership();
+                m_Controller.ClearSelection();
+                return;
+            }
+
+            m_Membership.ResortMembers(working);
+            m_Controller.InvalidateSegmentCards();
         }
 
         private void ToggleFixedMembership(Entity edge, Entity aggregate)
@@ -408,22 +532,10 @@ namespace BelzontAdr
             if (FixedMembershipEdge == edge)
             {
                 ClearFixedMembership();
-                LogUtils.DoInfoLog(
-                    "RoadGrouping fix membership: edge={0}:{1} aggregate={2}:{3} state=unfixed",
-                    edge.Index,
-                    edge.Version,
-                    aggregate.Index,
-                    aggregate.Version);
                 return;
             }
 
             FixedMembershipEdge = edge;
-            LogUtils.DoInfoLog(
-                "RoadGrouping fix membership: edge={0}:{1} aggregate={2}:{3} state=fixed",
-                edge.Index,
-                edge.Version,
-                aggregate.Index,
-                aggregate.Version);
         }
 
         public void ClearFixedMembership()
@@ -434,9 +546,42 @@ namespace BelzontAdr
 
         private bool IsMemberEdge(Entity edge, Entity aggregate)
         {
-            if (edge == Entity.Null
-                || aggregate == Entity.Null
-                || !EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<AggregateElement> elements))
+            if (edge == Entity.Null || aggregate == Entity.Null)
+            {
+                return false;
+            }
+
+            if (m_Membership.IsAdrNameAggregate(aggregate))
+            {
+                if (EntityManager.TryGetComponent(edge, out ADRNameAggregated link)
+                    && link.m_Aggregate == aggregate)
+                {
+                    return true;
+                }
+
+                if (!EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<ADRNameAggregateElement> adrElements))
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < adrElements.Length; i++)
+                {
+                    if (adrElements[i].m_Edge == edge)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            if (!EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<AggregateElement> elements))
+            {
+                return false;
+            }
+
+            // ADR-linked edges are not part of the vanilla Aggregate focus set.
+            if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, edge, out _))
             {
                 return false;
             }
@@ -488,36 +633,8 @@ namespace BelzontAdr
             }
         }
 
-        private void EmitPathMembershipLogs(
-            Entity aggregate,
-            List<Entity> addEdges,
-            List<Entity> removeEdges)
-        {
-            for (int i = 0; i < removeEdges.Count; i++)
-            {
-                Entity edge = removeEdges[i];
-                LogUtils.DoInfoLog(
-                    "RoadGrouping endpoint drag would-remove: edge={0}:{1} aggregate={2}:{3}",
-                    edge.Index,
-                    edge.Version,
-                    aggregate.Index,
-                    aggregate.Version);
-            }
-
-            for (int i = 0; i < addEdges.Count; i++)
-            {
-                Entity edge = addEdges[i];
-                LogUtils.DoInfoLog(
-                    "RoadGrouping endpoint drag would-add: edge={0}:{1} aggregate={2}:{3}",
-                    edge.Index,
-                    edge.Version,
-                    aggregate.Index,
-                    aggregate.Version);
-            }
-        }
-
         /// <summary>
-        /// 0-1 BFS: cost 0 when next edge shares previous step Aggregate; cost 1 on hop.
+        /// 0-1 BFS: cost 0 when next edge is already in focused membership (or shares prefer Aggregate); cost 1 on hop.
         /// </summary>
         private bool TryBuildPreferredPath(
             Entity startNode,
@@ -579,7 +696,8 @@ namespace BelzontAdr
                         edgeAgg = aggregated.m_Aggregate;
                     }
 
-                    int stepCost = edgeAgg != Entity.Null && edgeAgg == prefer ? 0 : 1;
+                    bool inFocusedMembership = m_MembershipEdges.Contains(edgeEntity);
+                    int stepCost = inFocusedMembership || (edgeAgg != Entity.Null && edgeAgg == prefer) ? 0 : 1;
                     int nextCost = nodeCost + stepCost;
                     if (m_PathCost.TryGetValue(next, out int existing) && existing <= nextCost)
                     {
@@ -589,7 +707,9 @@ namespace BelzontAdr
                     m_PathCost[next] = nextCost;
                     m_CameFromEdge[next] = edgeEntity;
                     m_CameFromNode[next] = node;
-                    m_PreferAggregateAtNode[next] = edgeAgg != Entity.Null ? edgeAgg : prefer;
+                    m_PreferAggregateAtNode[next] = inFocusedMembership
+                        ? selectedAggregate
+                        : (edgeAgg != Entity.Null ? edgeAgg : prefer);
 
                     if (stepCost == 0)
                     {

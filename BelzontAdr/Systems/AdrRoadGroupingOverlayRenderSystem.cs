@@ -41,6 +41,7 @@ namespace BelzontAdr
         private static readonly Color BelongingColor = new(0f, 0x88 / 255f, 0f, 1f);
         private static readonly Color HighlightColor = new(0f, 0xBB / 255f, 0f, 1f);
         private static readonly Color HoverPreviewColor = new(0f, 0x44 / 255f, 0f, 1f);
+        private static readonly Color RemainderColor = new(0x2A / 255f, 0x3A / 255f, 0x2E / 255f, 1f); // dark gray-green
         private static readonly Color RemovePreviewColor = new(1f, 0x88 / 255f, 0f, 1f); // #FF8800 would-remove
         private static readonly Color FixedMembershipColor = new(1f, 1f, 0f, 1f); // #FFFF00 fixed pin
         private static readonly Color EndHandleHoverColor = new(0f, 1f, 0f, 1f);
@@ -55,29 +56,35 @@ namespace BelzontAdr
 
         private Mesh m_Mesh;
         private Material m_BelongingMaterial;
+        private Material m_RemainderMaterial;
         private Material m_PreviewMaterial;
         private Material m_RemoveMaterial;
         private Material m_FixedMaterial;
         private int m_OriginalRenderQueue;
         private Vector4 m_RouteSize;
         private ComputeBuffer m_BelongingBuffer;
+        private ComputeBuffer m_RemainderBuffer;
         private ComputeBuffer m_PreviewBuffer;
         private ComputeBuffer m_RemoveBuffer;
         private ComputeBuffer m_FixedBuffer;
         private ComputeBuffer m_BelongingArgsBuffer;
+        private ComputeBuffer m_RemainderArgsBuffer;
         private ComputeBuffer m_PreviewArgsBuffer;
         private ComputeBuffer m_RemoveArgsBuffer;
         private ComputeBuffer m_FixedArgsBuffer;
         private readonly List<uint> m_ArgsArray = new(5);
         private NativeList<SegmentData> m_BelongingSegments;
+        private NativeList<SegmentData> m_RemainderSegments;
         private NativeList<SegmentData> m_PreviewSegments;
         private NativeList<SegmentData> m_RemoveSegments;
         private NativeList<SegmentData> m_FixedSegments;
         private Bounds3 m_BelongingBounds;
+        private Bounds3 m_RemainderBounds;
         private Bounds3 m_PreviewBounds;
         private Bounds3 m_RemoveBounds;
         private Bounds3 m_FixedBounds;
         private bool m_HasBelonging;
+        private bool m_HasRemainder;
         private bool m_HasPreview;
         private bool m_HasRemove;
         private bool m_HasFixed;
@@ -99,10 +106,12 @@ namespace BelzontAdr
             m_Controller = World.GetOrCreateSystemManaged<AdrRoadGroupingController>();
             m_RouteConfigQuery = GetEntityQuery(ComponentType.ReadOnly<RouteConfigurationData>());
             m_BelongingSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
+            m_RemainderSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
             m_PreviewSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
             m_RemoveSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
             m_FixedSegments = new NativeList<SegmentData>(4, Allocator.Persistent);
             m_BelongingBounds = new Bounds3(float.MaxValue, float.MinValue);
+            m_RemainderBounds = new Bounds3(float.MaxValue, float.MinValue);
             m_PreviewBounds = new Bounds3(float.MaxValue, float.MinValue);
             m_RemoveBounds = new Bounds3(float.MaxValue, float.MinValue);
             m_FixedBounds = new Bounds3(float.MaxValue, float.MinValue);
@@ -115,6 +124,11 @@ namespace BelzontAdr
             if (m_BelongingSegments.IsCreated)
             {
                 m_BelongingSegments.Dispose();
+            }
+
+            if (m_RemainderSegments.IsCreated)
+            {
+                m_RemainderSegments.Dispose();
             }
 
             if (m_PreviewSegments.IsCreated)
@@ -142,6 +156,11 @@ namespace BelzontAdr
                 UnityEngine.Object.Destroy(m_BelongingMaterial);
             }
 
+            if (m_RemainderMaterial != null)
+            {
+                UnityEngine.Object.Destroy(m_RemainderMaterial);
+            }
+
             if (m_PreviewMaterial != null)
             {
                 UnityEngine.Object.Destroy(m_PreviewMaterial);
@@ -158,10 +177,12 @@ namespace BelzontAdr
             }
 
             m_BelongingBuffer?.Release();
+            m_RemainderBuffer?.Release();
             m_PreviewBuffer?.Release();
             m_RemoveBuffer?.Release();
             m_FixedBuffer?.Release();
             m_BelongingArgsBuffer?.Release();
+            m_RemainderArgsBuffer?.Release();
             m_PreviewArgsBuffer?.Release();
             m_RemoveArgsBuffer?.Release();
             m_FixedArgsBuffer?.Release();
@@ -171,14 +192,17 @@ namespace BelzontAdr
         protected override void OnUpdate()
         {
             m_HasBelonging = false;
+            m_HasRemainder = false;
             m_HasPreview = false;
             m_HasRemove = false;
             m_HasFixed = false;
             m_BelongingSegments.Clear();
+            m_RemainderSegments.Clear();
             m_PreviewSegments.Clear();
             m_RemoveSegments.Clear();
             m_FixedSegments.Clear();
             m_BelongingBounds = new Bounds3(float.MaxValue, float.MinValue);
+            m_RemainderBounds = new Bounds3(float.MaxValue, float.MinValue);
             m_PreviewBounds = new Bounds3(float.MaxValue, float.MinValue);
             m_RemoveBounds = new Bounds3(float.MaxValue, float.MinValue);
             m_FixedBounds = new Bounds3(float.MaxValue, float.MinValue);
@@ -210,8 +234,20 @@ namespace BelzontAdr
                 }
 
                 m_PreviewDrawColor = HoverPreviewColor;
-                BuildRouteSegments(hoverAggregate, hoverElements, m_PreviewSegments, ref m_PreviewBounds, drawEndNodes: false);
+                BuildRouteSegments(hoverAggregate, hoverElements, m_PreviewSegments, ref m_PreviewBounds, drawEndNodes: false, excludeAdrLinked: true);
                 m_HasPreview = m_PreviewSegments.Length > 0;
+                return;
+            }
+
+            if (EntityManager.HasComponent<ADRNameAggregate>(selected)
+                && EntityManager.TryGetBuffer(selected, true, out DynamicBuffer<ADRNameAggregateElement> adrElements)
+                && adrElements.Length > 0)
+            {
+                BuildRouteSegments(selected, adrElements, m_BelongingSegments, ref m_BelongingBounds, drawEndNodes: true);
+                m_HasBelonging = m_BelongingSegments.Length > 0;
+                BuildVanillaRemainderOverlay(adrElements);
+                BuildFixedMembershipOverlay();
+                BuildHighlightPreview(selected, isAdrSelection: true);
                 return;
             }
 
@@ -221,13 +257,13 @@ namespace BelzontAdr
                 return;
             }
 
-            // Belonging membership + end handles.
-            BuildRouteSegments(selected, elements, m_BelongingSegments, ref m_BelongingBounds, drawEndNodes: true);
+            // Belonging = vanilla Aggregate minus edges already in an ADR name-aggregate.
+            BuildRouteSegments(selected, elements, m_BelongingSegments, ref m_BelongingBounds, drawEndNodes: true, excludeAdrLinked: true);
             m_HasBelonging = m_BelongingSegments.Length > 0;
 
             BuildFixedMembershipOverlay();
             // Preview: drag add (highlight) + remove (orange), or hovered non-member.
-            BuildHighlightPreview(selected);
+            BuildHighlightPreview(selected, isAdrSelection: false);
         }
 
         private void BuildFixedMembershipOverlay()
@@ -275,9 +311,65 @@ namespace BelzontAdr
         }
 
         /// <summary>
+        /// Dim vanilla Aggregate edges that are not in the ADR membership set.
+        /// Uses each member edge's <see cref="Aggregated.m_Aggregate"/> context (read-only).
+        /// </summary>
+        private void BuildVanillaRemainderOverlay(DynamicBuffer<ADRNameAggregateElement> adrElements)
+        {
+            var membership = new NativeHashSet<Entity>(adrElements.Length, Allocator.Temp);
+            var seenVanillaAggregates = new NativeHashSet<Entity>(4, Allocator.Temp);
+            try
+            {
+                for (int i = 0; i < adrElements.Length; i++)
+                {
+                    Entity edge = adrElements[i].m_Edge;
+                    if (edge != Entity.Null)
+                    {
+                        membership.Add(edge);
+                    }
+                }
+
+                for (int i = 0; i < adrElements.Length; i++)
+                {
+                    Entity memberEdge = adrElements[i].m_Edge;
+                    if (memberEdge == Entity.Null
+                        || !EntityManager.TryGetComponent(memberEdge, out Aggregated aggregated)
+                        || aggregated.m_Aggregate == Entity.Null
+                        || !seenVanillaAggregates.Add(aggregated.m_Aggregate)
+                        || !EntityManager.TryGetBuffer(aggregated.m_Aggregate, true, out DynamicBuffer<AggregateElement> vanillaElements))
+                    {
+                        continue;
+                    }
+
+                    for (int j = 0; j < vanillaElements.Length; j++)
+                    {
+                        Entity vanillaEdge = vanillaElements[j].m_Edge;
+                        if (vanillaEdge == Entity.Null || membership.Contains(vanillaEdge))
+                        {
+                            continue;
+                        }
+
+                        AddEdgeSegment(vanillaEdge, m_RemainderSegments, ref m_RemainderBounds);
+                    }
+                }
+
+                if (m_RemainderSegments.Length > 0)
+                {
+                    SaturateOpacities(m_RemainderSegments);
+                    m_HasRemainder = true;
+                }
+            }
+            finally
+            {
+                membership.Dispose();
+                seenVanillaAggregates.Dispose();
+            }
+        }
+
+        /// <summary>
         /// Preview layer: endpoint-drag would-add / would-remove, else hovered non-member.
         /// </summary>
-        private void BuildHighlightPreview(Entity selected)
+        private void BuildHighlightPreview(Entity selected, bool isAdrSelection)
         {
             if (m_Tool.IsEndpointDragging)
             {
@@ -328,10 +420,23 @@ namespace BelzontAdr
             }
 
             Entity hoveredEdge = m_Tool.HoveredEdge;
-            if (hoveredEdge == Entity.Null
-                || !EntityManager.TryGetComponent(hoveredEdge, out Aggregated aggregated)
-                || aggregated.m_Aggregate == selected
-                || aggregated.m_Aggregate == Entity.Null)
+            if (hoveredEdge == Entity.Null)
+            {
+                return;
+            }
+
+            if (isAdrSelection)
+            {
+                // Non-member: no ADRNameAggregated pointing at the selected ADR aggregate.
+                if (EntityManager.TryGetComponent(hoveredEdge, out ADRNameAggregated adrLink)
+                    && adrLink.m_Aggregate == selected)
+                {
+                    return;
+                }
+            }
+            else if (!EntityManager.TryGetComponent(hoveredEdge, out Aggregated aggregated)
+                     || aggregated.m_Aggregate == selected
+                     || aggregated.m_Aggregate == Entity.Null)
             {
                 return;
             }
@@ -347,14 +452,68 @@ namespace BelzontAdr
             DynamicBuffer<AggregateElement> elements,
             NativeList<SegmentData> dest,
             ref Bounds3 bounds,
-            bool drawEndNodes)
+            bool drawEndNodes,
+            bool excludeAdrLinked = false)
         {
-            var nodeDegrees = new NativeHashMap<Entity, int>(elements.Length * 2, Allocator.Temp);
+            var edges = new NativeList<Entity>(elements.Length, Allocator.Temp);
             try
             {
                 for (int i = 0; i < elements.Length; i++)
                 {
-                    if (!EntityManager.TryGetComponent(elements[i].m_Edge, out Edge edge))
+                    Entity edge = elements[i].m_Edge;
+                    if (excludeAdrLinked
+                        && AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, edge, out _))
+                    {
+                        continue;
+                    }
+                    edges.Add(edge);
+                }
+
+                BuildRouteSegments(aggregate, edges, dest, ref bounds, drawEndNodes);
+            }
+            finally
+            {
+                edges.Dispose();
+            }
+        }
+
+        private void BuildRouteSegments(
+            Entity aggregate,
+            DynamicBuffer<ADRNameAggregateElement> elements,
+            NativeList<SegmentData> dest,
+            ref Bounds3 bounds,
+            bool drawEndNodes)
+        {
+            var edges = new NativeList<Entity>(elements.Length, Allocator.Temp);
+            try
+            {
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    edges.Add(elements[i].m_Edge);
+                }
+
+                BuildRouteSegments(aggregate, edges, dest, ref bounds, drawEndNodes);
+            }
+            finally
+            {
+                edges.Dispose();
+            }
+        }
+
+        private void BuildRouteSegments(
+            Entity aggregate,
+            NativeList<Entity> edges,
+            NativeList<SegmentData> dest,
+            ref Bounds3 bounds,
+            bool drawEndNodes)
+        {
+            _ = aggregate;
+            var nodeDegrees = new NativeHashMap<Entity, int>(math.max(8, edges.Length * 2), Allocator.Temp);
+            try
+            {
+                for (int i = 0; i < edges.Length; i++)
+                {
+                    if (!EntityManager.TryGetComponent(edges[i], out Edge edge))
                     {
                         continue;
                     }
@@ -365,21 +524,21 @@ namespace BelzontAdr
 
                 // Same direction source as BuildingUtilsOverrides GetAddress override:
                 // isInverseAggregate (chain ends vs city zero marker).
-                ResolveNumberingDirection(elements, out bool isInverseAggregate);
+                ResolveNumberingDirection(edges, out bool isInverseAggregate);
 
                 float distance = 0f;
                 int prevSegmentIndex = -1;
 
-                for (int i = 0; i < elements.Length; i++)
+                for (int i = 0; i < edges.Length; i++)
                 {
-                    var edgeEntity = elements[i].m_Edge;
+                    var edgeEntity = edges[i];
                     if (!EntityManager.TryGetComponent(edgeEntity, out Curve curve)
                         || !EntityManager.TryGetComponent(edgeEntity, out Edge edge))
                     {
                         continue;
                     }
 
-                    bool inverted = IsNumberingSegmentInverted(elements, i, edgeEntity, isInverseAggregate);
+                    bool inverted = IsNumberingSegmentInverted(edges, i, edgeEntity, isInverseAggregate);
                     Bezier4x3 bezier = curve.m_Bezier;
                     if (inverted)
                     {
@@ -418,7 +577,7 @@ namespace BelzontAdr
 
                 if (drawEndNodes)
                 {
-                    DrawNodeMarkers(elements, nodeDegrees, drawEndNodes: true);
+                    DrawNodeMarkers(edges, nodeDegrees, drawEndNodes: true);
                 }
 
                 SaturateOpacities(dest);
@@ -473,23 +632,72 @@ namespace BelzontAdr
         /// <summary>
         /// Nodes that show full-size drag circles for the selected Aggregate
         /// (chain termini + any leftover degree-1 nodes).
+        /// Supports vanilla <see cref="AggregateElement"/> and ADR <see cref="ADRNameAggregateElement"/>.
         /// </summary>
         public void CollectDragHandleNodes(Entity aggregate, HashSet<Entity> dest)
         {
-            if (dest == null
-                || aggregate == Entity.Null
-                || !EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<AggregateElement> elements)
+            if (dest == null || aggregate == Entity.Null)
+            {
+                return;
+            }
+
+            if (EntityManager.HasComponent<ADRNameAggregate>(aggregate)
+                && EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<ADRNameAggregateElement> adrElements)
+                && adrElements.Length > 0)
+            {
+                var edges = new NativeList<Entity>(adrElements.Length, Allocator.Temp);
+                try
+                {
+                    for (int i = 0; i < adrElements.Length; i++)
+                    {
+                        edges.Add(adrElements[i].m_Edge);
+                    }
+
+                    CollectDragHandleNodes(edges, dest);
+                }
+                finally
+                {
+                    edges.Dispose();
+                }
+
+                return;
+            }
+
+            if (!EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<AggregateElement> elements)
                 || elements.Length == 0)
             {
                 return;
             }
 
-            var nodeDegrees = new NativeHashMap<Entity, int>(elements.Length * 2, Allocator.Temp);
+            var vanillaEdges = new NativeList<Entity>(elements.Length, Allocator.Temp);
             try
             {
                 for (int i = 0; i < elements.Length; i++)
                 {
-                    if (!EntityManager.TryGetComponent(elements[i].m_Edge, out Edge edge))
+                    Entity edge = elements[i].m_Edge;
+                    if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, edge, out _))
+                    {
+                        continue;
+                    }
+                    vanillaEdges.Add(edge);
+                }
+
+                CollectDragHandleNodes(vanillaEdges, dest);
+            }
+            finally
+            {
+                vanillaEdges.Dispose();
+            }
+        }
+
+        private void CollectDragHandleNodes(NativeList<Entity> edges, HashSet<Entity> dest)
+        {
+            var nodeDegrees = new NativeHashMap<Entity, int>(math.max(8, edges.Length * 2), Allocator.Temp);
+            try
+            {
+                for (int i = 0; i < edges.Length; i++)
+                {
+                    if (!EntityManager.TryGetComponent(edges[i], out Edge edge))
                     {
                         continue;
                     }
@@ -498,8 +706,8 @@ namespace BelzontAdr
                     IncrementDegree(ref nodeDegrees, edge.m_End);
                 }
 
-                Entity start = GetChainStartNode(elements);
-                Entity end = GetChainEndNode(elements);
+                Entity start = GetChainStartNode(edges);
+                Entity end = GetChainEndNode(edges);
                 if (start != Entity.Null)
                 {
                     dest.Add(start);
@@ -531,7 +739,7 @@ namespace BelzontAdr
         /// Hovered end-handle uses a brighter, larger circle.
         /// </summary>
         private void DrawNodeMarkers(
-            DynamicBuffer<AggregateElement> elements,
+            NativeList<Entity> edges,
             NativeHashMap<Entity, int> nodeDegrees,
             bool drawEndNodes)
         {
@@ -551,10 +759,10 @@ namespace BelzontAdr
             var endHandles = new NativeHashSet<Entity>(4, Allocator.Temp);
             try
             {
-                if (drawEndNodes && elements.Length > 0)
+                if (drawEndNodes && edges.Length > 0)
                 {
-                    endHandles.Add(GetChainStartNode(elements));
-                    endHandles.Add(GetChainEndNode(elements));
+                    endHandles.Add(GetChainStartNode(edges));
+                    endHandles.Add(GetChainEndNode(edges));
                     foreach (Entity endEntity in endHandles)
                     {
                         if (endEntity != Entity.Null && EntityManager.TryGetComponent(endEntity, out Node endNode))
@@ -606,28 +814,28 @@ namespace BelzontAdr
         }
 
         /// <summary>Buffer-forward chain start node (topology <c>IsInverted</c> on first element).</summary>
-        private Entity GetChainStartNode(DynamicBuffer<AggregateElement> elements)
+        private Entity GetChainStartNode(NativeList<Entity> edges)
         {
-            Entity edgeEntity = elements[0].m_Edge;
+            Entity edgeEntity = edges[0];
             if (!EntityManager.TryGetComponent(edgeEntity, out Edge edge))
             {
                 return Entity.Null;
             }
 
-            return IsSegmentInverted(elements, 0, edgeEntity) ? edge.m_End : edge.m_Start;
+            return IsSegmentInverted(edges, 0, edgeEntity) ? edge.m_End : edge.m_Start;
         }
 
         /// <summary>Buffer-forward chain end node (topology <c>IsInverted</c> on last element).</summary>
-        private Entity GetChainEndNode(DynamicBuffer<AggregateElement> elements)
+        private Entity GetChainEndNode(NativeList<Entity> edges)
         {
-            int last = elements.Length - 1;
-            Entity edgeEntity = elements[last].m_Edge;
+            int last = edges.Length - 1;
+            Entity edgeEntity = edges[last];
             if (!EntityManager.TryGetComponent(edgeEntity, out Edge edge))
             {
                 return Entity.Null;
             }
 
-            return IsSegmentInverted(elements, last, edgeEntity) ? edge.m_Start : edge.m_End;
+            return IsSegmentInverted(edges, last, edgeEntity) ? edge.m_Start : edge.m_End;
         }
 
         /// <summary>Exact copy of <c>RouteBufferSystem.AddSegment</c> curve matrix packing (non-shared path).</summary>
@@ -663,7 +871,7 @@ namespace BelzontAdr
 
         private void Render(ScriptableRenderContext context, List<Camera> cameras)
         {
-            if ((!m_HasBelonging && !m_HasPreview && !m_HasRemove && !m_HasFixed) || m_BelongingMaterial == null)
+            if ((!m_HasBelonging && !m_HasRemainder && !m_HasPreview && !m_HasRemove && !m_HasFixed) || m_BelongingMaterial == null)
             {
                 return;
             }
@@ -680,6 +888,18 @@ namespace BelzontAdr
                     m_BelongingBounds,
                     m_BelongingMaterial,
                     BelongingColor);
+            }
+
+            if (m_HasRemainder && m_RemainderMaterial != null)
+            {
+                DrawLayer(
+                    cameras,
+                    m_RemainderSegments,
+                    ref m_RemainderBuffer,
+                    ref m_RemainderArgsBuffer,
+                    m_RemainderBounds,
+                    m_RemainderMaterial,
+                    RemainderColor);
             }
 
             if (m_HasFixed && m_FixedMaterial != null)
@@ -830,6 +1050,8 @@ namespace BelzontAdr
 
             m_BelongingMaterial = new Material(routePrefab.m_Material);
             m_BelongingMaterial.name = "ADR RoadGrouping Routes belonging (" + routePrefab.name + ")";
+            m_RemainderMaterial = new Material(routePrefab.m_Material);
+            m_RemainderMaterial.name = "ADR RoadGrouping Routes remainder (" + routePrefab.name + ")";
             m_PreviewMaterial = new Material(routePrefab.m_Material);
             m_PreviewMaterial.name = "ADR RoadGrouping Routes preview (" + routePrefab.name + ")";
             m_RemoveMaterial = new Material(routePrefab.m_Material);
@@ -914,12 +1136,12 @@ namespace BelzontAdr
         /// <c>CheckSegmentReversion(..., isInverseAggregate)</c>.
         /// </summary>
         private bool IsNumberingSegmentInverted(
-            DynamicBuffer<AggregateElement> elements,
+            NativeList<Entity> edges,
             int index,
             Entity edge,
             bool isInverseAggregate)
         {
-            bool inverted = IsSegmentInverted(elements, index, edge);
+            bool inverted = IsSegmentInverted(edges, index, edge);
             if (isInverseAggregate)
             {
                 inverted = !inverted;
@@ -933,24 +1155,24 @@ namespace BelzontAdr
         /// compare oriented chain ends to the city zero marker.
         /// </summary>
         private void ResolveNumberingDirection(
-            DynamicBuffer<AggregateElement> elements,
+            NativeList<Entity> edges,
             out bool isInverseAggregate)
         {
             isInverseAggregate = false;
-            if (elements.Length == 0)
+            if (edges.Length == 0)
             {
                 return;
             }
 
-            if (!EntityManager.TryGetComponent(elements[0].m_Edge, out Curve e0)
-                || !EntityManager.TryGetComponent(elements[elements.Length - 1].m_Edge, out Curve e1))
+            if (!EntityManager.TryGetComponent(edges[0], out Curve e0)
+                || !EntityManager.TryGetComponent(edges[edges.Length - 1], out Curve e1))
             {
                 return;
             }
 
             // Topology-only orientation (isInverseAggregate=false), matching GetAddress override.
-            bool inv0 = IsSegmentInverted(elements, 0, elements[0].m_Edge);
-            bool inv1 = IsSegmentInverted(elements, elements.Length - 1, elements[elements.Length - 1].m_Edge);
+            bool inv0 = IsSegmentInverted(edges, 0, edges[0]);
+            bool inv1 = IsSegmentInverted(edges, edges.Length - 1, edges[edges.Length - 1]);
             float2 refE0 = inv0 ? e0.m_Bezier.d.xz : e0.m_Bezier.a.xz;
             float2 refE1 = inv1 ? e1.m_Bezier.a.xz : e1.m_Bezier.d.xz;
 
@@ -962,11 +1184,11 @@ namespace BelzontAdr
         /// Same topology rule as <c>AggregateMeshSystem.IsInverted</c> /
         /// ADR <c>CheckSegmentReversion</c> with <c>isInverseAggregate == false</c>.
         /// </summary>
-        private bool IsSegmentInverted(DynamicBuffer<AggregateElement> elements, int index, Entity edge)
+        private bool IsSegmentInverted(NativeList<Entity> edges, int index, Entity edge)
         {
             if (index > 0)
             {
-                if (!EntityManager.TryGetComponent(elements[index - 1].m_Edge, out Edge prev)
+                if (!EntityManager.TryGetComponent(edges[index - 1], out Edge prev)
                     || !EntityManager.TryGetComponent(edge, out Edge cur))
                 {
                     return false;
@@ -980,10 +1202,10 @@ namespace BelzontAdr
                 return cur.m_End == prev.m_End;
             }
 
-            if (index < elements.Length - 1)
+            if (index < edges.Length - 1)
             {
                 if (!EntityManager.TryGetComponent(edge, out Edge cur)
-                    || !EntityManager.TryGetComponent(elements[index + 1].m_Edge, out Edge next))
+                    || !EntityManager.TryGetComponent(edges[index + 1], out Edge next))
                 {
                     return false;
                 }
