@@ -358,6 +358,13 @@ export type SelectedInfoOptions = {
     districtRef: Entity;
     hasCustomNameList?: boolean;
     customNameListName?: string;
+    /** True when entityValue is an ADR name-aggregate (not vanilla Aggregate). */
+    isAdrAggregate?: boolean;
+    highwayDataId?: string;
+    routeDirection?: number;
+    mileageOverrideActive?: boolean;
+    mileageOverrideKm?: number;
+    reverseCounting?: boolean;
 };
 
 export enum AdrEntityType {
@@ -399,6 +406,15 @@ export class SelectInfoPanelService {
     static async setEntityNamingRef(x: Entity, ref: Entity, origin: Entity): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setEntityRoadReference", x, ref, origin); }
     static async redrawSeed(x: Entity): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.redrawSeed", x); }
     static async changeSeedByDelta(x: Entity, ref: number): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.changeSeedByDelta", x, ref); }
+    /** ADR aggregate custom name for Road Grouping tool options (HW-03b). SIP uses the panel title input — not Addresses options. */
+    static async getAggregateCustomName(x: Entity): Promise<string> { return await engine.call("k45::adr.selectionPanel.getAggregateCustomName", x); }
+    static async setAggregateCustomName(x: Entity, name?: string): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setAggregateCustomName", x, name); }
+    /** Highway fields on ADRNameAggregateHighwayData. No-op / false for vanilla Aggregate. */
+    static async setHighwayDataId(x: Entity, highwayDataId?: string): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setHighwayDataId", x, highwayDataId); }
+    static async setRouteDirection(x: Entity, routeDirection: number): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setRouteDirection", x, routeDirection); }
+    static async setMileageOverrideActive(x: Entity, active: boolean): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setMileageOverrideActive", x, active); }
+    static async setMileageOverrideKm(x: Entity, mileageKm: number): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setMileageOverrideKm", x, mileageKm); }
+    static async setReverseCounting(x: Entity, reverse: boolean): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setReverseCounting", x, reverse); }
 }
 
 const VEHICLE_PREFIX = "k45::adr.vehicles.";

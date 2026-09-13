@@ -21,12 +21,25 @@ namespace BelzontAdr
         #region Binding
         private Action<string, object[]> m_eventCaller;
 
+        /// <summary>
+        /// Binder surface for Addresses SIP and Road Grouping tool (HW-03b): pass the ADR
+        /// aggregate entity (e.g. tool <c>SelectedAggregation</c> / SIP <c>entityValue</c>).
+        /// Highway setters no-op on vanilla Aggregate. Aggregate custom-name binders are for the
+        /// tool only — SIP uses the selection panel title input.
+        /// </summary>
         public void SetupCallBinder(Action<string, Delegate> eventCaller)
         {
             eventCaller("selectionPanel.getEntityOptions", GetEntityOptions);
             eventCaller("selectionPanel.setEntityRoadReference", SetEntityRoadReference);
             eventCaller("selectionPanel.redrawSeed", ResetEntityAdrSeed);
             eventCaller("selectionPanel.changeSeedByDelta", ChangeEntityAdrSeedByDelta);
+            eventCaller("selectionPanel.getAggregateCustomName", GetAggregateCustomName);
+            eventCaller("selectionPanel.setAggregateCustomName", SetAggregateCustomName);
+            eventCaller("selectionPanel.setHighwayDataId", SetHighwayDataId);
+            eventCaller("selectionPanel.setRouteDirection", SetRouteDirection);
+            eventCaller("selectionPanel.setMileageOverrideActive", SetMileageOverrideActive);
+            eventCaller("selectionPanel.setMileageOverrideKm", SetMileageOverrideKm);
+            eventCaller("selectionPanel.setReverseCounting", SetReverseCounting);
         }
 
         public void SetupCaller(Action<string, object[]> eventCaller)
@@ -41,6 +54,8 @@ namespace BelzontAdr
 
         private NameSystem nameSystem;
         private AdrMainSystem mainSystem;
+        private AdrNameAggregateMembershipSystem membershipSystem;
+        private AdrHighwayRoutesSystem highwayRoutesSystem;
         private EntityQueryMask entityExistsQuery;
 
         protected override string group => "K45.Addresses";
@@ -50,6 +65,8 @@ namespace BelzontAdr
             base.OnCreate();
             nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
             mainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
+            membershipSystem = World.GetOrCreateSystemManaged<AdrNameAggregateMembershipSystem>();
+            highwayRoutesSystem = World.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
             m_InfoUISystem.AddMiddleSection(this);
             entityExistsQuery = EntityManager.UniversalQuery.GetEntityQueryMask();
             visible = true;
@@ -113,7 +130,7 @@ namespace BelzontAdr
                 var result = new AdrEntityData
                 {
                     targetEntityToName = e,
-                }; ;
+                };
                 if (EntityManager.HasComponent<Road>(e))
                 {
                     if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have Aggregated and Road");
@@ -121,6 +138,7 @@ namespace BelzontAdr
                     result.entityValue = AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, e, out var adrAggregate)
                         ? adrAggregate
                         : agg.m_Aggregate;
+                    FillRoadAggregationHighwayFields(result);
                 }
                 else
                 {
@@ -148,6 +166,7 @@ namespace BelzontAdr
                     }
                 }
                 result.entityValue = e;
+                FillRoadAggregationHighwayFields(result);
                 resultList.Add(result);
             }
             if (EntityManager.HasComponent<District>(e))
@@ -241,6 +260,184 @@ namespace BelzontAdr
             }
         }
 
+        private void FillRoadAggregationHighwayFields(AdrEntityData result)
+        {
+            Entity host = result.entityValue;
+            result.isAdrAggregate = host != Entity.Null
+                && EntityManager.Exists(host)
+                && EntityManager.HasComponent<ADRNameAggregate>(host);
+            if (!result.isAdrAggregate)
+            {
+                return;
+            }
+
+            membershipSystem.EnsureHighwayData(host);
+            if (!EntityManager.TryGetComponent(host, out ADRNameAggregateHighwayData highway))
+            {
+                highway = ADRNameAggregateHighwayData.CreateDefault();
+            }
+
+            result.highwayDataId = highway.highwayDataId.ToString();
+            result.routeDirection = (int)highway.routeDirection;
+            result.mileageOverrideActive = highway.mileageOverrideActive;
+            result.mileageOverrideKm = highway.mileageOverrideKm;
+            result.reverseCounting = highway.reverseCounting;
+        }
+
+        /// <summary>
+        /// Resolve ADR aggregate host for highway binders (and tool custom-name). Accepts the ADR
+        /// entity directly (SIP <c>entityValue</c> / tool <c>SelectedAggregation</c>) or an edge with
+        /// <see cref="ADRNameAggregated"/>. Vanilla Aggregate → false.
+        /// <para>
+        /// SIP custom name stays on the selection panel title input — do not surface it in Addresses
+        /// options. <see cref="GetAggregateCustomName"/> / <see cref="SetAggregateCustomName"/> are for
+        /// Road Grouping tool options (HW-03b).
+        /// </para>
+        /// </summary>
+        private bool TryResolveAdrHighwayHost(Entity entity, out Entity adrAggregate)
+        {
+            adrAggregate = Entity.Null;
+            if (entity == Entity.Null || !EntityManager.Exists(entity))
+            {
+                return false;
+            }
+
+            if (EntityManager.HasComponent<ADRNameAggregate>(entity))
+            {
+                adrAggregate = entity;
+                membershipSystem.EnsureHighwayData(adrAggregate);
+                return true;
+            }
+
+            if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, entity, out adrAggregate))
+            {
+                membershipSystem.EnsureHighwayData(adrAggregate);
+                return true;
+            }
+
+            return false;
+        }
+
+        private string GetAggregateCustomName(Entity entity)
+            => TryResolveAdrHighwayHost(entity, out Entity adr)
+               && nameSystem.TryGetCustomName(adr, out string customName)
+                ? customName
+                : string.Empty;
+
+        private bool SetAggregateCustomName(Entity entity, string name)
+        {
+            if (!TryResolveAdrHighwayHost(entity, out Entity adr))
+            {
+                return false;
+            }
+
+            nameSystem.SetCustomName(adr, name ?? string.Empty);
+            DirtyAdrAggregateConsumers(adr);
+            return true;
+        }
+
+        private bool SetHighwayDataId(Entity entity, string highwayDataId)
+        {
+            if (!TryResolveAdrHighwayHost(entity, out Entity adr)
+                || !EntityManager.TryGetComponent(adr, out ADRNameAggregateHighwayData highway))
+            {
+                return false;
+            }
+
+            Colossal.Hash128 id;
+            if (string.IsNullOrWhiteSpace(highwayDataId))
+            {
+                id = default;
+            }
+            else if (!Colossal.Hash128.TryParse(highwayDataId, out id))
+            {
+                return false;
+            }
+            else if (id != default && !highwayRoutesSystem.TryGetHighwayData(id, out _))
+            {
+                return false;
+            }
+
+            highway.highwayDataId = id;
+            EntityManager.SetComponentData(adr, highway);
+            DirtyAdrAggregateConsumers(adr);
+            return true;
+        }
+
+        private bool SetRouteDirection(Entity entity, int routeDirection)
+        {
+            if (!TryResolveAdrHighwayHost(entity, out Entity adr)
+                || !EntityManager.TryGetComponent(adr, out ADRNameAggregateHighwayData highway))
+            {
+                return false;
+            }
+
+            if (!Enum.IsDefined(typeof(ADRNameAggregateHighwayData.RouteDirection), routeDirection))
+            {
+                return false;
+            }
+
+            highway.routeDirection = (ADRNameAggregateHighwayData.RouteDirection)routeDirection;
+            EntityManager.SetComponentData(adr, highway);
+            DirtyAdrAggregateConsumers(adr);
+            return true;
+        }
+
+        private bool SetMileageOverrideActive(Entity entity, bool active)
+        {
+            if (!TryResolveAdrHighwayHost(entity, out Entity adr)
+                || !EntityManager.TryGetComponent(adr, out ADRNameAggregateHighwayData highway))
+            {
+                return false;
+            }
+
+            highway.mileageOverrideActive = active;
+            EntityManager.SetComponentData(adr, highway);
+            DirtyAdrAggregateConsumers(adr);
+            return true;
+        }
+
+        private bool SetMileageOverrideKm(Entity entity, float mileageKm)
+        {
+            if (!TryResolveAdrHighwayHost(entity, out Entity adr)
+                || !EntityManager.TryGetComponent(adr, out ADRNameAggregateHighwayData highway))
+            {
+                return false;
+            }
+
+            highway.mileageOverrideKm = mileageKm;
+            EntityManager.SetComponentData(adr, highway);
+            DirtyAdrAggregateConsumers(adr);
+            return true;
+        }
+
+        private bool SetReverseCounting(Entity entity, bool reverse)
+        {
+            if (!TryResolveAdrHighwayHost(entity, out Entity adr)
+                || !EntityManager.TryGetComponent(adr, out ADRNameAggregateHighwayData highway))
+            {
+                return false;
+            }
+
+            highway.reverseCounting = reverse;
+            EntityManager.SetComponentData(adr, highway);
+            DirtyAdrAggregateConsumers(adr);
+            return true;
+        }
+
+        private void DirtyAdrAggregateConsumers(Entity adrAggregate)
+        {
+            if (!EntityManager.HasComponent<Updated>(adrAggregate))
+            {
+                EntityManager.AddComponent<Updated>(adrAggregate);
+            }
+            if (!EntityManager.HasComponent<BatchesUpdated>(adrAggregate))
+            {
+                EntityManager.AddComponent<BatchesUpdated>(adrAggregate);
+            }
+            mainSystem.MarkRoadsDirty();
+        }
+
         private HashSet<Entity> GetRoadOptionsForBuildingEntity(Building buildingData)
         {
             Queue<Entity> nodesToMap = new Queue<Entity>();
@@ -318,6 +515,13 @@ namespace BelzontAdr
             public Entity districtRef;
             public bool hasCustomNameList;
             public string customNameListName;
+            /// <summary>True when <see cref="entityValue"/> is an ADR name-aggregate (not vanilla Aggregate).</summary>
+            public bool isAdrAggregate;
+            public string highwayDataId;
+            public int routeDirection;
+            public bool mileageOverrideActive;
+            public float mileageOverrideKm;
+            public bool reverseCounting;
         }
 
         private enum AdrEntityType
