@@ -42,6 +42,7 @@ Ninth and closing task of epic adr-hw-reattach. Integration QA against 21 accept
 - [ ] i18n pending entries only (no agent i18n.csv edits)
 - [ ] All HW-01…HW-08 completed in the same sprint
 - [ ] Playtest notes attached or linked; known gaps listed not silent
+- [ ] No save-migration work for old Aggregate/marker highway identity (beta — out of scope; manual re-assign OK)
 
 ---
 
@@ -51,6 +52,7 @@ Ninth and closing task of epic adr-hw-reattach. Integration QA against 21 accept
 2. Script: vanilla Aggregate SIP → ADR fork via tool → set custom name/seed/highway → check labels/addresses/cards → place marker WE → Region map hover
 3. Update 21 Board IDs section when closing
 4. Do not expand into highway shields (RefsLibrary 17)
+5. Do not open follow-up tasks for Aggregate/marker highway save migration — beta; out of scope for this feature.
 
 ---
 
