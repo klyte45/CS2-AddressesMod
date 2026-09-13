@@ -1,3 +1,4 @@
+**End time:** 2026-09-13 01:41 -0300
 **Start time:** 2026-09-13 00:27 -0300
 # [0078] HW-03-VUIO-Addresses-SIP-highway-section
 
@@ -37,7 +38,7 @@ Third task. VUIO Addresses SIP: keep SeedManagement for both Aggregate types; ad
 - [x] Highway UI uses HW-02 bindings; edits persist and dirty consumers
 - [x] Shared/extractable components preferred for tool reuse (or explicit note if not extractable yet)
 - [x] i18n pending *_entries.txt for new keys (en-US + pt-BR columns); no i18n.csv edits
-- [ ] npm frontend build succeeds; playtest SIP on vanilla Aggregate vs ADR
+- [x] npm frontend build succeeds; playtest SIP on vanilla Aggregate vs ADR
 
 ---
 
@@ -54,6 +55,9 @@ Third task. VUIO Addresses SIP: keep SeedManagement for both Aggregate types; ad
 9. Mileage override storage corrected to mileageOverrideMeters (int meters) on ADRNameAggregateHighwayData; binder setMileageOverrideMeters. UI converts via game UnitSystem (Metric=km, Freedom=mi) with matching label keys MileageOverrideKm/Mi.
 10. Custom name on Aggregate/ADR no longer early-returns getEntityOptions — SIP title owns the name; seed + HighwayAggregateSettings still shown for road aggregation selections.
 11. Highway settings are a separate SIP AdrEntityType.HighwayAggregate InfoSection (like RoadMark), appended before custom-name early return. RoadAggregation section is seed-only. Road aggregations no longer emit CustomName Addresses block (title owns name).
+12. SIP blocks use InfoSectionFoldout when subrows exist; CustomName (empty body) stays InfoSection. Foldout expanded state cached per AdrEntityType (default collapsed).
+13. getEntityOptions PreferNamingBlocksFirst so Naming Reference leads; CustomName emitted again for any CustomName entity including road aggregations.
+14. SeedManagement seed buttons: tinted IconButton + iconButton theme class for white glyphs under foldout content.
 
 ---
 
