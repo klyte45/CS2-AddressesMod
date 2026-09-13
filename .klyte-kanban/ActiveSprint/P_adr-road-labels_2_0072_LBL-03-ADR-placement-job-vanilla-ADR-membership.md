@@ -37,9 +37,9 @@ Third task of epic adr-road-labels — largest placement piece. Dual membership:
 - [x] S2: associated segments use ADR name-aggregate owner when Road Grouping / ADR association exists
 - [x] Owner switch S1↔S2 updates or rebuilds placement without leftover duplicate labels on same stretch
 - [x] Consumes LBL-02 LabelExtents so positions account for string width
-- [ ] Smoke: mixed city (some grouped, some not) shows placements for both owners without double-stacking
+- [x] Smoke: mixed city (some grouped, some not) shows placements for both owners without double-stacking
 - [x] No AggregateSystem Burst patches
-- [ ] Compile + load smoke on a dogfood save with Road Grouping associations
+- [x] Compile + load smoke on a dogfood save with Road Grouping associations
 - [x] Placement uses ~100f spacing, redundancy, m_MaxScale parity with vanilla AddLabels / UpdateLabelPositionsJob
 - [x] LabelPosition buffers written on the pick owner entity (S1 Aggregate or S2 ADR name-aggregate)
 - [x] Burst preferred for placement job
