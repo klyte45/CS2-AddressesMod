@@ -1,10 +1,10 @@
 # Custom road-name aggregation — research pack
 
-*Researched: 2026-09-09 · Activation planning: 2026-09-10 · Label takeover research: 2026-09-11 · Label sprint catalog: 2026-09-12 · Highway reattach design: 2026-09-12 · Game.dll build GUID `d124bec16c0748da9ebf48366d9c1d68` (kcs2m backend cache; older docs may still cite `b5fd0b9582554f3c83207d8d5d7a19a0`)*
+*Researched: 2026-09-09 · Activation planning: 2026-09-10 · Label takeover research: 2026-09-11 · Label sprint catalog: 2026-09-12 · Highway reattach design: 2026-09-12 · Net-kind typing: 2026-09-13 · Game.dll build GUID `d124bec16c0748da9ebf48366d9c1d68` (kcs2m backend cache; older docs may still cite `b5fd0b9582554f3c83207d8d5d7a19a0`)*
 
 Reference pack for **player-customizable road name aggregation**, implemented as an **ADR-owned parallel system** that does **not** override vanilla `AggregateSystem` / `Aggregated` / `Aggregate` lifecycle.
 
-This pack is **documentation only** for research/design. Activation Kanban tasks live in **Sprint 012** (`adr-activation`, board IDs **0061–0068**) — catalog detail in [13](13-activation-sprint-roadmap.md). Citywide **road name-label takeover** research: [14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md); implementation catalog: [18](18-label-takeover-sprint-roadmap.md). **Highway reattach** on ADR aggregates: [20](20-highway-reattach-on-adr-aggregates.md)–[21](21-highway-reattach-roadmap.md).
+This pack is **documentation only** for research/design. Activation Kanban tasks live in **Sprint 012** (`adr-activation`, board IDs **0061–0068**) — catalog detail in [13](13-activation-sprint-roadmap.md). Citywide **road name-label takeover** research: [14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md); implementation catalog: [18](18-label-takeover-sprint-roadmap.md). **Highway reattach** on ADR aggregates: [20](20-highway-reattach-on-adr-aggregates.md)–[21](21-highway-reattach-roadmap.md). **Net-kind mix gate / NetNameData:** [22](22-game-net-edge-kinds-and-aggregation.md)–[24](24-adr-net-kind-roadmap.md).
 
 ## Scope
 
@@ -21,6 +21,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Citywide road **name** label takeover research ([14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md)) | BelzontWE live shared `Texture2D` |
 | Label takeover sprint / task catalog ([18](18-label-takeover-sprint-roadmap.md)) | Creating board items until explicitly requested |
 | Highway reattach design + roadmap ([20](20-highway-reattach-on-adr-aggregates.md)–[21](21-highway-reattach-roadmap.md)) | Shipping HW-* product code until explicitly requested |
+| Net-kind typing + mix gate + per-kind NetNameData ([22](22-game-net-edge-kinds-and-aggregation.md)–[24](24-adr-net-kind-roadmap.md)) | Creating NET-* board tasks until explicitly requested; mutating vanilla AggregateNet assets |
 
 ## Confirmed decisions
 
@@ -39,8 +40,10 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Initial UX | **Net-only Road Grouping tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. Spec: [09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md); activation: [12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md) |
 | Tool naming | Product/code: **Road Grouping** (`AdrRoadGrouping*`). Doc [08](08-association-tool-first-ux.md) keeps historical “association” filename |
 | Label extensions (shields / multi-recipe / look knobs) | **Feasibility** documented in [17](17-label-extensions-text-images-look.md); **product strategy deferred** to later research. WE sync = **copy/re-register only** (no live shared `Texture2D`) |
-| Pack depth | Analysis + design + tool specs + activation catalog + label research (14–17) + label sprint catalog (18) + **highway reattach (20–21)** |
+| Pack depth | Analysis + design + tool specs + activation catalog + label research (14–17) + label sprint catalog (18) + highway reattach (20–21) + **net-kind (22–24)** |
 | Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR; BelzontWE for tool scaffold / WE atlas APIs |
+| Net kind classifier | **Prefab `*Data` first** (`RoadData` / `TrackData` / …); `Game.Net.Road` **unreliable** (streets/avenues may lack it). See [22](22-game-net-edge-kinds-and-aggregation.md) |
+| ADR kind mix | Exact `AdrNetKind` match; street↔highway **allowed**; cross-kind **forbidden**. Per-kind ADR `NetNameData` prefabs; road seeds only for `RoadData`. See [23](23-adr-net-kind-gate-labels-seeds.md) / [24](24-adr-net-kind-roadmap.md) |
 
 ## Reading order
 
@@ -65,6 +68,9 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 19. [19-game-update-re-diff-checklist.md](19-game-update-re-diff-checklist.md) — Managed update re-diff for name-label takeover (LBL-06)
 20. [20-highway-reattach-on-adr-aggregates.md](20-highway-reattach-on-adr-aggregates.md) — **highway rehost design** (component, SIP, WE, no-cache)
 21. [21-highway-reattach-roadmap.md](21-highway-reattach-roadmap.md) — **highway reattach task catalog** (HW-01…HW-08)
+22. [22-game-net-edge-kinds-and-aggregation.md](22-game-net-edge-kinds-and-aggregation.md) — Game.Net kinds, AggregateType, Road vs RoadData, NetNameData gap
+23. [23-adr-net-kind-gate-labels-seeds.md](23-adr-net-kind-gate-labels-seeds.md) — ADR kind gate, per-kind labels, road-only seeds
+24. [24-adr-net-kind-roadmap.md](24-adr-net-kind-roadmap.md) — NET-01…NET-05 catalog (0085 = NET-04 backlog)
 
 ## Success criteria (this research pack)
 
@@ -89,6 +95,9 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 - [x] Label takeover sprint / task catalog documented ([18](18-label-takeover-sprint-roadmap.md))
 - [x] Highway reattach on ADR aggregates designed ([20](20-highway-reattach-on-adr-aggregates.md))
 - [x] Highway reattach sprint / task catalog documented ([21](21-highway-reattach-roadmap.md))
+- [x] Game.Net edge kinds + AggregateType + NetNameData gap documented ([22](22-game-net-edge-kinds-and-aggregation.md))
+- [x] ADR net-kind gate / labels / seeds designed ([23](23-adr-net-kind-gate-labels-seeds.md))
+- [x] Net-kind implementation catalog documented ([24](24-adr-net-kind-roadmap.md))
 
 ## Related packs
 
