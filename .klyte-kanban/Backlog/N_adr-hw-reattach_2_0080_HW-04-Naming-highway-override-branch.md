@@ -66,8 +66,7 @@ Fifth task. Restore AdrNameSystemOverrides highway name branch keyed by ADRNameA
 
 ### Is dependent for
 
-
-
+- [0084] HW-08-Smoke-acceptance-checklist
 ### Is related to
 
 - [0066] ACT-04-Prefer-ADR-in-name-address-SIP
@@ -76,6 +75,8 @@ Fifth task. Restore AdrNameSystemOverrides highway name branch keyed by ADRNameA
 ### Groups with
 
 - HW-05-Mileage-addressing-authored-fields
+
+---
 
 ## Other Notes
 
