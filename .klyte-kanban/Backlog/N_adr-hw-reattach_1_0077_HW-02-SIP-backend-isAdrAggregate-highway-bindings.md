@@ -68,8 +68,9 @@ Second task. Extend AdrSelectionInfoPanelSystem / AdrEntityData with isAdrAggreg
 
 ### Is dependent for
 
-
-
+- [0078] HW-03-VUIO-Addresses-SIP-highway-section
+- [0079] HW-03b-Road-Grouping-tool-options-parity
+- [0084] HW-08-Smoke-acceptance-checklist
 ### Is related to
 
 - [0066] ACT-04-Prefer-ADR-in-name-address-SIP
@@ -79,6 +80,8 @@ Second task. Extend AdrSelectionInfoPanelSystem / AdrEntityData with isAdrAggreg
 - HW-01-ADRNameAggregateHighwayData-component-lifecycle
 - HW-03-VUIO-Addresses-SIP-highway-section
 - HW-03b-Road-Grouping-tool-options-parity
+
+---
 
 ## Other Notes
 
