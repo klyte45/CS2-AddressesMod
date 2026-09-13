@@ -1,12 +1,12 @@
 # Highway reattach — implementation roadmap & Kanban catalog
 
-*Added: 2026-09-12 · Updated: 2026-09-12 (tool options parity + custom name; HW-07 required; single sprint) · Design: [20](20-highway-reattach-on-adr-aggregates.md) · Activation strip: [12](12-activation-change-map.md) ACT-01/ACT-02 · Membership: [07](07-membership-maintenance-edge-cases.md)*
+*Added: 2026-09-12 · Updated: 2026-09-12 (tool options parity + custom name; HW-07 required; single sprint; board IDs **0076–0084**) · Design: [20](20-highway-reattach-on-adr-aggregates.md) · Activation strip: [12](12-activation-change-map.md) ACT-01/ACT-02 · Membership: [07](07-membership-maintenance-edge-cases.md)*
 
 ## Goal
 
-Define the **implementation roadmap** for re-hosting highway route / mileage / direction on **ADR name-aggregates**, edited from the **Addresses SIP** and **Road Grouping tool options** (shared ADR field set + custom name), with WE formulae restored from ADR-hosted data. Board items are created via MCP when explicitly requested (not from this doc alone).
+Define the **implementation roadmap** for re-hosting highway route / mileage / direction on **ADR name-aggregates**, edited from the **Addresses SIP** and **Road Grouping tool options** (shared ADR field set + custom name), with WE formulae restored from ADR-hosted data.
 
-This catalog replaces the vague “Highway reattach via Road Grouping tool” backlog line in [13](13-activation-sprint-roadmap.md).
+Board items are in backlog epic **`adr-hw-reattach`**, status **N** (ready to pull into a sprint after review). IDs **0076–0084**.
 
 ## Prerequisites
 
@@ -34,24 +34,25 @@ Do **not** start HW-* before ADR components exist; highway data has nowhere to l
 
 | Field | Value |
 |-------|--------|
-| Suggested epic label | **ADR highway reattach** |
-| Suggested epic slug | `adr-highway-reattach` |
-| Sprint plan | **One sprint** containing **all** HW-01…HW-08 (incl. HW-03b). Not part of activation Sprint 012; schedule after prerequisites |
+| Epic label | **ADR highway reattach** |
+| Epic slug | `adr-hw-reattach` (≤15 chars for board) |
+| Sprint plan | **One sprint** containing **all** HW-01…HW-08 (incl. HW-03b). Not started yet — backlog **N** pending review |
 | Effort band | Sized to fit a single sprint end-to-end |
+| Board IDs | **0076–0084** |
 
 ## Task catalog
 
-| Order | ID | Title | Size | Depends | Outcome |
-|-------|-----|-------|------|---------|---------|
-| 1 | HW-01 | Component + serialize on `ADRNameAggregate`; create/destroy with membership | M | ACT-03a+ | `ADRNameAggregateHighwayData` present with defaults; torn down with empty ADR aggregates |
-| 2 | HW-02 | SIP backend: `isAdrAggregate` + get/set highway (+ shared setters for tool) | M | HW-01 | DTO distinguishes ADR vs vanilla; fields read/write on ADR entity; dirty naming rules |
-| 3 | HW-03 | VUIO Addresses SIP highway section (ADR-only) + i18n `*_entries.txt` | M | HW-02 | Seed UI for both; highway picker / direction / mileage / reverse only for ADR; shared components preferred |
-| 4 | HW-03b | Road Grouping tool options: custom name + seed + highway parity | M | HW-02, HW-03 | Replace `Aggregation #Index` with custom name input; mount seed + highway against `SelectedAggregation` |
-| 5 | HW-04 | Naming override branch (`AdrNameSystemOverrides`) | M | HW-01 | Non-default `highwayDataId` → registry highway name; custom name when set |
-| 6 | HW-05 | Mileage/addressing + Road Grouping cards use authored fields | M | HW-01 | Override + reverse honored; no marker/cache scan |
-| 7 | HW-06 | WE formula restore + bridge resolve via ADR aggregate | L | HW-01 | Markers show route/mileage/direction from owning ADR aggregate + registry |
-| 8 | HW-07 | Regions map / registry hover by ADR `highwayDataId` | S | HW-01 | Region map classes/hovers by ADR highway id |
-| 9 | HW-08 | Smoke / acceptance checklist | S | HW-03, HW-03b…HW-07 | Dogfood matrix below green |
+| Order | ID | Board | Title | Size | Depends | Outcome |
+|-------|-----|-------|-------|------|---------|---------|
+| 1 | HW-01 | **0076** | Component + serialize on `ADRNameAggregate`; create/destroy with membership | M | ACT-03a+ | `ADRNameAggregateHighwayData` present with defaults; torn down with empty ADR aggregates |
+| 2 | HW-02 | **0077** | SIP backend: `isAdrAggregate` + get/set highway (+ shared setters for tool) | M | HW-01 / 0076 | DTO distinguishes ADR vs vanilla; fields read/write on ADR entity; dirty naming rules |
+| 3 | HW-03 | **0078** | VUIO Addresses SIP highway section (ADR-only) + i18n `*_entries.txt` | M | HW-02 / 0077 | Seed UI for both; highway picker / direction / mileage / reverse only for ADR; shared components preferred |
+| 4 | HW-03b | **0079** | Road Grouping tool options: custom name + seed + highway parity | M | HW-02 / 0077, HW-03 / 0078 | Replace `Aggregation #Index` with custom name input; mount seed + highway against `SelectedAggregation` |
+| 5 | HW-04 | **0080** | Naming override branch (`AdrNameSystemOverrides`) | M | HW-01 / 0076 | Non-default `highwayDataId` → registry highway name; custom name when set |
+| 6 | HW-05 | **0081** | Mileage/addressing + Road Grouping cards use authored fields | M | HW-01 / 0076 | Override + reverse honored; no marker/cache scan |
+| 7 | HW-06 | **0082** | WE formula restore + bridge resolve via ADR aggregate | L | HW-01 / 0076 | Markers show route/mileage/direction from owning ADR aggregate + registry |
+| 8 | HW-07 | **0083** | Regions map / registry hover by ADR `highwayDataId` | S | HW-01 / 0076 | Region map classes/hovers by ADR highway id |
+| 9 | HW-08 | **0084** | Smoke / acceptance checklist | S | HW-03…HW-07 / 0078–0083 | Dogfood matrix below green |
 
 ```text
 ACT-03a…ACT-04+ (prereq)
