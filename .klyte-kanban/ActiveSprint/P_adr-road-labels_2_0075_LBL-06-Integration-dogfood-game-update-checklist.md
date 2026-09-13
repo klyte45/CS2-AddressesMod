@@ -1,7 +1,7 @@
+**Start time:** 2026-09-12 22:59 -0300
 # [0075] LBL-06-Integration-dogfood-game-update-checklist
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/18-label-takeover-sprint-roadmap.md LBL-06
