@@ -215,6 +215,8 @@ Never:
 
 **Why S1 excludes ADR edges:** An ADR association can legally mix segments from **various** vanilla Aggregations. Counting or **highlighting** those edges again while a vanilla Aggregate is selected would mis-attribute length/flow/wear and show the wrong glow (and double-count vs the ADR SIP/highlight). ADR-owned edges belong only to the ADR aggregate’s stats **and** highlight.
 
+**Dogfood (pre-H1):** Hover/select of a **vanilla** Aggregate (including via its name label while LBL-01…04 leave pick on vanilla AggregateElement) still glows **ADR-associated** segments that remain on that Aggregate’s `AggregateElement` buffer. That is the expected gap until LBL-05 ships H1 (or spills to LBL-08): rewrite `CreationDefinition` to the S1 remainder before `GenerateAggregatesSystem`.
+
 With the planned fork, default to **S2** for ADR-associated roads. Unassociated roads keep vanilla selection unchanged. S1 filtering still matters whenever vanilla Aggregate remains selectable (edge click, tools, leftover aggregates).
 
 ## Relation to prior pack docs

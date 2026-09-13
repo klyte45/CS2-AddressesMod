@@ -64,6 +64,8 @@ Fifth task of epic adr-road-labels. Fork RaycastLabelsJob / label pick so clicks
 11. TitleSection RoadName key; ImageSystem Aggregate icon path; GetAggregatePosition for S2
 12. Prefer DefaultTool H1 in this task; spill to LBL-08 with gap list
 13. Do not break ACT-04 building/address SIP
+14. Dogfood pre-H1: hovering/selecting a vanilla Aggregate (incl. via its name label) still Highlights edges that also have ADRNameAggregated — wrong glow until H1 S1 remainder filter (doc 06). Must fix in LBL-05 H1 or spill to LBL-08 with this gap listed.
+15. When changing vanilla Aggregate selection behavior: highlight membership MUST use same S1 remainder / S2 full ADR sets as RoadSection (doc 06).
 
 ---
 
