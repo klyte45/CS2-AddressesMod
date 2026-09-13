@@ -67,8 +67,7 @@ Seventh task. Restore WE formulae from ACT-02 Feature placeholders / XML comment
 
 ### Is dependent for
 
-
-
+- [0084] HW-08-Smoke-acceptance-checklist
 ### Is related to
 
 - [0062] ACT-02-Markers-visual-only-WE-placeholders
@@ -77,6 +76,8 @@ Seventh task. Restore WE formulae from ACT-02 Feature placeholders / XML comment
 
 - HW-04-Naming-highway-override-branch
 - HW-05-Mileage-addressing-authored-fields
+
+---
 
 ## Other Notes
 
