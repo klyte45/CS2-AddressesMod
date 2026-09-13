@@ -6,7 +6,7 @@
 
 Ordered implementation slices for prefab-first **net kind**, **cross-kind membership gate**, **per-kind NetNameData**, and **road-only seeds/namesets**.
 
-Board items are **catalog only** here. Do **not** create NET-* tasks via MCP until explicitly requested. Existing sprint spill **0085** moves to **backlog** and is reshaped as the **NET-04** seed slice (depends on NET-01…03 conceptually).
+Board items are **catalog only** here. Do **not** create NET-* tasks via MCP until explicitly requested (except **0086** NET-04 already on backlog as the deferred seed slice). Sprint spill **0085** is terminal **Z**; continuation is **0086**.
 
 ## Prerequisites
 
@@ -34,16 +34,17 @@ Board items are **catalog only** here. Do **not** create NET-* tasks via MCP unt
 | 1 | NET-01 | *(create when asked)* | Classifier + stored kind on `ADRNameAggregate` | M | ACT-03a+ | `TryGetNetKind` from prefab `*Data`; serialize kind; set on create/fork |
 | 2 | NET-02 | *(create when asked)* | Membership + Road Grouping mix gate | M | NET-01 | `AddMemberCore` / tool reject cross-kind; UX feedback |
 | 3 | NET-03 | *(create when asked)* | Per-kind ADR NetNameData prefabs + label ensure | M | NET-01, LBL-02+ | Non-road S2 labels resolve materials; no vanilla AggregateNet mutation |
-| 4 | NET-04 | **0085** (backlog) | Road-only seeds / namesets / SIP DTO | M | NET-01 (prefer NET-02) | `GetAggregateName` road path only for `RoadData` kind; no TrackData fake; seed UI only for Road; **not** `HasComponent<Road>` |
+| 4 | NET-04 | **0086** (backlog L; overflown from **0085** Z) | Road-only seeds / namesets / SIP DTO | M | NET-01 (prefer NET-02) | `GetAggregateName` road path only for `RoadData` kind; no TrackData fake; seed UI only for Road; **not** `HasComponent<Road>` |
 | 5 | NET-05 | *(create when asked)* | Playtest matrix + smoke notes | S | NET-02…04 | Street without edge `Road` still Road kind; street↔highway mix OK; pathway/track reject; labels on non-road if in scope |
 
-### NET-04 / board **0085**
+### NET-04 / board **0086** (was **0085**)
 
-Former in-sprint **HW-03c** was too narrow (seed-only) and incorrectly leaned on edge `Road`. After docs:
+Former in-sprint **HW-03c [0085]** was Z-overflowed mid-sprint (seed-only scope too narrow; edge-`Road` gating wrong). Continuation:
 
-- **Location:** backlog (out of Sprint 014 until NET-01…03 ready to pull with it)
+- **Board:** **0086** — backlog status **L** (`Backlog/L_adr-hw-reattach_2_0086_NET-04-Road-only-seeds-namesets-prefab-RoadData.md`)
 - **Role:** implements road-only seed/nameset/SIP gating (= NET-04)
-- **DoD must require** prefab `RoadData` / `AdrNetKind.Road`, mix-gate awareness, and coordination with NetNameData work (NET-03) even if NET-03 is a separate board item
+- **DoD:** prefab `RoadData` / `AdrNetKind.Road`, no `HasComponent<Road>` sole gate; coordinate with NET-01…03
+- **0085:** remains terminal **Z** in ActiveSprint — do not pull; use **0086**
 
 ## Suggested pull order
 
@@ -60,7 +61,8 @@ May land NET-04 after NET-01 alone if seed bugs block playtest, but membership m
 | Board | Note |
 |-------|------|
 | **0079** HW-03b | Stays in sprint; seed UI remains; kind gate deferred |
-| **0085** | **Backlog**; not Sprint 014 DoD for HW-08 |
+| **0085** | Terminal **Z** in ActiveSprint (overflowed); superseded by **0086** |
+| **0086** NET-04 | **Backlog L**; not Sprint 014 DoD for HW-08 |
 | **0080–0084** | Highway work; when touching naming, respect Road kind once NET-01/04 land |
 
 ## Success criteria (when NET catalog ships)

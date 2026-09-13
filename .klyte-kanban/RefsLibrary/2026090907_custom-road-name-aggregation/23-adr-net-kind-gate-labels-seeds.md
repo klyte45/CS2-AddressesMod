@@ -11,7 +11,7 @@ Lock product/design for:
 3. **Per-kind `NetNameData`** for S2 world labels when vanilla AggregateNet lacks `NetLabel`
 4. **Road nameset / seed UI only** for vehicle-road aggregates (`RoadData`)
 
-This doc is **design only**. Catalog: [24](24-adr-net-kind-roadmap.md). Board: backlog task **0085** reshaped as NET-04 slice; full NET-* board create only when explicitly requested.
+This doc is **design only**. Catalog: [24](24-adr-net-kind-roadmap.md). Board: backlog **[0086] NET-04** (continuation of Z-overflowed **0085**); full NET-* board create only when explicitly requested.
 
 ## Locked decisions
 
@@ -117,7 +117,7 @@ Replace any `HasComponent<Road>` gates with prefab-`RoadData` / stored `AdrNetKi
 | Epic / task | Relation |
 |-------------|----------|
 | HW-03b **0079** | Tool seed UI stays; kind gate filters when seed appears |
-| Backlog **0085** (was HW-03c) | Absorbed as **NET-04** (road-only seeds) after NET-01…03; deferred from Sprint 014 |
+| Backlog **0086** NET-04 (was HW-03c **0085** Z) | Road-only seeds after NET-01…03; deferred from Sprint 014 |
 | HW-04…HW-08 | Highway naming/addressing only meaningful for `AdrNetKind.Road` |
 | Labels LBL-* | Extend ensure path; non-road labels need NET-03 NetNameData |
 

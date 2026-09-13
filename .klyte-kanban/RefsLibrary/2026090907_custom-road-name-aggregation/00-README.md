@@ -70,7 +70,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 21. [21-highway-reattach-roadmap.md](21-highway-reattach-roadmap.md) — **highway reattach task catalog** (HW-01…HW-08)
 22. [22-game-net-edge-kinds-and-aggregation.md](22-game-net-edge-kinds-and-aggregation.md) — Game.Net kinds, AggregateType, Road vs RoadData, NetNameData gap
 23. [23-adr-net-kind-gate-labels-seeds.md](23-adr-net-kind-gate-labels-seeds.md) — ADR kind gate, per-kind labels, road-only seeds
-24. [24-adr-net-kind-roadmap.md](24-adr-net-kind-roadmap.md) — NET-01…NET-05 catalog (0085 = NET-04 backlog)
+24. [24-adr-net-kind-roadmap.md](24-adr-net-kind-roadmap.md) — NET-01…NET-05 catalog (NET-04 board **0086**; **0085** Z-overflowed)
 
 ## Success criteria (this research pack)
 
