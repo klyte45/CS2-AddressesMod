@@ -1,6 +1,7 @@
 using Colossal.Mathematics;
 using Game.Net;
 using Game.Prefabs;
+using Game.Tools;
 using Unity.Burst;
 using Unity.Burst.Intrinsics;
 using Unity.Collections;
@@ -32,12 +33,19 @@ namespace BelzontAdr
             [ReadOnly] public ComponentLookup<NetCompositionData> m_NetCompositionData;
             [ReadOnly] public BufferLookup<ConnectedEdge> m_ConnectedEdges;
             [ReadOnly] public ComponentLookup<ADRNameAggregated> m_AdrAggregated;
+            [ReadOnly] public ComponentTypeHandle<Temp> m_TempType;
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
                 NativeArray<LabelExtents> extents = chunk.GetNativeArray(ref m_LabelExtentsType);
                 BufferAccessor<AggregateElement> elements = chunk.GetBufferAccessor(ref m_AggregateElementType);
                 BufferAccessor<LabelPosition> positions = chunk.GetBufferAccessor(ref m_LabelPositionType);
+                NativeArray<Temp> temps = chunk.GetNativeArray(ref m_TempType);
+                // Selection Temp Aggregate (GenerateAggregates) must place along its full membership,
+                // including ADR-associated edges — otherwise S2 select hides original (Hidden) and Temp
+                // gets zero labels (vanilla parity: labels live on the Temp Aggregate).
+                bool includeAdrEdges = temps.Length != 0
+                    && (temps[0].m_Flags & (TempFlags.Create | TempFlags.Delete | TempFlags.Select | TempFlags.Modify | TempFlags.Replace)) != 0;
                 NativeList<Entity> edgeList = default;
                 NativeList<float> redundancyBuffer = default;
 
@@ -63,7 +71,7 @@ namespace BelzontAdr
                     for (int e = 0; e < aggregateElements.Length; e++)
                     {
                         Entity edge = aggregateElements[e].m_Edge;
-                        if (!m_AdrAggregated.HasComponent(edge))
+                        if (includeAdrEdges || !m_AdrAggregated.HasComponent(edge))
                         {
                             edgeList.Add(edge);
                         }

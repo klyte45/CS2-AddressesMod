@@ -1,4 +1,4 @@
-﻿#if !RELEASE 
+#if !RELEASE 
 //#define LOCAL
 #endif
 using Belzont.Interfaces;
@@ -10,6 +10,7 @@ using Game.Modding;
 using Game.Rendering;
 using Game.SceneFlow;
 using Game.Serialization;
+using Game.Tools;
 using Unity.Entities;
 
 namespace BelzontAdr
@@ -38,6 +39,8 @@ namespace BelzontAdr
             updateSystem.UpdateBefore<PreDeserialize<AdrRoadNameLabelMeshSystem>>(SystemUpdatePhase.Deserialize);
             // LBL-04: name DrawMesh path (parity with AggregateRenderSystem name loop; no arrows).
             updateSystem.UpdateAt<AdrRoadNameLabelRenderSystem>(SystemUpdatePhase.Rendering);
+            // LBL-05 H1: rewrite CreationDefinition AggregateElement (S1 remainder / S2 ADR) before highlight.
+            updateSystem.UpdateBefore<AdrAggregateHighlightRewriteSystem, GenerateAggregatesSystem>(SystemUpdatePhase.Modification1);
             updateSystem.UpdateAt<AdrVehicleSystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RoadVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RailVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);

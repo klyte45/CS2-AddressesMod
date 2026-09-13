@@ -181,9 +181,10 @@ namespace BelzontAdr
         internal bool GetForGuid(Colossal.Hash128 guid, out AdrNameFile file) => CityNamesets.TryGetValue(guid, out file);
         private void OnCityNamesetsChanged()
         {
-            eventCaller.Invoke("namesets.onCityNamesetsChanged", null);
-            mainSystem.MarkDistrictsDirty();
-            mainSystem.MarkRoadsDirty();
+            // Deserialize runs before UI SetupCaller — null-safe like NotifyLibraryReloaded / AdrMainSystem.
+            eventCaller?.Invoke("namesets.onCityNamesetsChanged", null);
+            mainSystem?.MarkDistrictsDirty();
+            mainSystem?.MarkRoadsDirty();
             isDirty = true;
         }
 

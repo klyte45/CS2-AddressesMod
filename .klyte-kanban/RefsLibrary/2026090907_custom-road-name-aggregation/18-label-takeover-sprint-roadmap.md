@@ -26,8 +26,10 @@ Do **not** start LBL-* before ADR components + name preference exist; otherwise 
 | ADR TMP bake + placement + mesh + draw (vanilla parity look) | Player-facing distance/width knobs |
 | Forked `RaycastLabelsJob` + `RaycastSystem` schedule; S1/S2 owners | TMP shield sprites / multi-recipe / WE register product path ([17](17-label-extensions-text-images-look.md) later research) |
 | **SIP Aggregate parity:** every SIP section that activates for vanilla `Aggregate` must also activate / work for **ADR name-aggregate** (S2) selection | BelzontWE live shared `Texture2D` (rejected) |
-| Dirty/`Updated` refresh; Temp + underground parity | Traffic-routes tool affordance (optional later; [06](06-labels-vs-vanilla-sync-and-harmony.md)) |
-| Integration / update-diff checklist | Achievements / infoview filter noise |
+| Dirty/`Updated` refresh; Temp + underground parity | Achievements / infoview filter noise |
+| Integration / update-diff checklist | |
+| **Traffic-routes** live path for S2 (ActionsSection + `TrafficRoutesSystem`) | |
+| ADR name material outline `#004400` | |
 
 ## Recommended sprint plan
 
@@ -49,7 +51,7 @@ Prefer **one primary sprint** for parity (matches [16](16-label-takeover-effort-
 | 2 | LBL-02 | **0071** | ADR TMP bake + extents + materials | M | LBL-01 | Strings → `LabelVertex` / `LabelExtents` on label owners |
 | 3 | LBL-03 | **0072** | ADR placement job (dual membership) | L | LBL-02, ACT-03a+ | `LabelPosition` along vanilla or ADR element chains |
 | 4 | LBL-04 | **0073** | ADR mesh batch + DrawMesh | M | LBL-02, LBL-03 | Citywide name meshes visible at parity |
-| 5 | LBL-05 | **0074** | Forked pick + SIP Aggregate parity | L | LBL-03, ACT-04 | Click → S1/S2; SIP sections that gate on vanilla Aggregate also work for ADR |
+| 5 | LBL-05 | **0074** | Forked pick + SIP Aggregate parity | L | LBL-03, ACT-04 | Click → S1/S2; SIP Aggregate gates + TrafficRoutes for ADR; outline `#004400` |
 | 6 | LBL-06 | **0075** | Integration dogfood + update checklist | M | LBL-04, LBL-05 | Load/Temp/underground/locale dirty; SIP on S2; GUID re-diff notes |
 
 ```text
@@ -77,7 +79,6 @@ Use only if Sprint 013 ships with known gaps. Draft tasks (create on board only 
 | Theme | Doc | When |
 |-------|-----|------|
 | TMP sprite shields / multi-recipe / look knobs / WE copy-register | [17](17-label-extensions-text-images-look.md) | After later **product** research |
-| Traffic-routes tool over ADR groups | [06](06-labels-vs-vanilla-sync-and-harmony.md) | Optional polish |
 | Highway reattach via tool | [13](13-activation-sprint-roadmap.md) | Independent of labels |
 
 ---
@@ -107,7 +108,7 @@ Board IDs assigned **2026-09-12** in backlog (`N`, epic `adr-road-labels`) — r
 | LBL-02 | **0071** | ADR TMP bake + LabelExtents + materials | 2 | LBL-01 [0070] | Port vanilla `UpdateLabelVertices` pattern: `NameSystem.GetRenderedLabelName` (or ADR-resolved entity) → TMP `GetTextInfo` with parity layout (`sizeDelta` 250×100, `fontSize` 200, center); fill `LabelVertex`; clone materials + `CopyFontAtlasParameters`; write `LabelExtents`. Wire dirty via `Updated` (extend `AdrMainSystem.ResetRoadsCache` pattern to ADR owners as needed). Cache string changes. See [14](14-vanilla-road-label-pipeline.md). |
 | LBL-03 | **0072** | ADR placement job (vanilla + ADR membership) | 3 | LBL-02 [0071], ACT-03a+ | Port/adapt `UpdateLabelPositionsJob` / `AddLabels` (`100f` spacing, redundancy, `m_MaxScale`). Dual source: unassociated → vanilla `AggregateElement` on Aggregate; associated → `ADRNameAggregateElement` on ADR aggregate. Write vanilla-compatible `LabelPosition` buffers on the **pick owner** entity (S1/S2). Burst preferred. See [15](15-adr-citywide-name-label-takeover.md). |
 | LBL-04 | **0073** | ADR name mesh batch + DrawMesh | 4 | LBL-02 [0071], LBL-03 [0072] | Port `FillNameMeshData` warp/batch; ADR render system mirrors name half of `AggregateRenderSystem` (`hideOverlay`, Game/SceneView cameras, surface + underground submeshes). Do not draw arrows. Citywide visible names at parity. |
-| LBL-05 | **0074** | Forked pick + SIP Aggregate section parity | 5 | LBL-03 [0072], ACT-04 [0066] | **Pick:** Burst clone of `Game.Net.RaycastJobs.RaycastLabelsJob` (~150 lines); resolve `m_Owner` S1 vs S2; schedule from managed Harmony on `RaycastSystem` when `TypeMask.Labels`. Do **not** patch Burst job body. **SIP:** audit every InGame SIP section / gate that requires vanilla `Aggregate` and/or `AggregateElement` (at minimum `RoadSection`, `TitleSection.GetVirtualKeyboardLocaleKey`, Aggregate-path `ImageSystem` / icon — full list via Game.dll search at implement time). Managed Harmony so **ADR name-aggregate (S2)** shows the same sections and data as a vanilla Aggregate selection: `RoadSection` walk **`ADRNameAggregateElement`** with same per-edge math as [06](06-labels-vs-vanilla-sync-and-harmony.md); S1 remainder filtering when a vanilla Aggregate is still selected. Title locale `"RoadName"` for ADR entity. Ensure `SelectedInfoUISystem.GetAggregatePosition` works for S2 `LabelPosition`. Prefer shipping **DefaultTool H1** highlight list job in this task when cheap (same membership helper as RoadSection); otherwise open **LBL-08**. See [06](06-labels-vs-vanilla-sync-and-harmony.md) / [15](15-adr-citywide-name-label-takeover.md). |
+| LBL-05 | **0074** | Forked pick + SIP Aggregate section parity | 5 | LBL-03 [0072], ACT-04 [0066] | **Pick:** Burst clone of `Game.Net.RaycastJobs.RaycastLabelsJob` (~150 lines); resolve `m_Owner` S1 vs S2; schedule from managed Harmony on `RaycastSystem` when `TypeMask.Labels`. Do **not** patch Burst job body. **SIP:** audit every InGame SIP section / gate that requires vanilla `Aggregate` and/or `AggregateElement` (at minimum `RoadSection`, `TitleSection.GetVirtualKeyboardLocaleKey`, Aggregate-path `ImageSystem` / icon — full list via Game.dll search at implement time). Managed Harmony so **ADR name-aggregate (S2)** shows the same sections and data as a vanilla Aggregate selection: `RoadSection` walk **`ADRNameAggregateElement`** with same per-edge math as [06](06-labels-vs-vanilla-sync-and-harmony.md); S1 remainder filtering when a vanilla Aggregate is still selected. Title locale `"RoadName"` for ADR entity. Ensure `SelectedInfoUISystem.GetAggregatePosition` works for S2 `LabelPosition`. **Traffic routes (required):** `ActionsSection.hasTrafficRoutes` for S2 + live `TrafficRoutesSystem` path (mirror `AggregateElement` from ADR + accept S2 like Aggregate for `FillTargetMapJob`). Prefer shipping **DefaultTool H1** highlight list job in this task when cheap (same membership helper as RoadSection); otherwise open **LBL-08**. **Look (cheap):** ADR name materials `_OutlineColor` `#004400` (ADR-style clones only). See [06](06-labels-vs-vanilla-sync-and-harmony.md) / [15](15-adr-citywide-name-label-takeover.md). |
 | LBL-06 | **0075** | Integration dogfood + game-update checklist | 6 | LBL-04 [0073], LBL-05 [0074] | Dogfood: load city, locale change, nameset/custom rename, Temp place/upgrade, tunnels, ADR fork/edit via Road Grouping, pick + **full SIP panel on S2** (stats, title rename key, icon) vs vanilla Aggregate. Document re-diff checklist against kcs2m GUID for mesh/render/raycast/SIP surfaces ([16](16-label-takeover-effort-and-risk.md)). Fix P0 parity holes or open LBL-07…09 for spill. |
 
 ### Optional spill tasks (Sprint 014)

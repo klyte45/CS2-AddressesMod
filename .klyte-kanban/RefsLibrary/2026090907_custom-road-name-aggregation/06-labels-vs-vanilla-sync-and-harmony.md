@@ -45,7 +45,7 @@ If ADR owns membership + name + numbers + labels + forked pick, these may still 
 | **Selection highlight** | `DefaultToolSystem` → `GenerateAggregatesSystem` (`Highlighted` on each `AggregateElement.m_Edge`) | Full vanilla Aggregate glow, including edges also in ADR | **Settled H1:** ADR list job rewrites CreationDefinition buffer before GenerateAggregates; same membership as SIP |
 | **SIP title locale key** | `TitleSection.GetVirtualKeyboardLocaleKey` | `"RoadName"` only if entity has vanilla `Aggregate` | Easy Harmony if S2 |
 | **SIP icon** | `ImageSystem` via `AggregateElement` | Miss on ADR-only entity | Low-priority Harmony |
-| **Traffic routes tool** | `TrafficRoutesSystem` / `ActionsSection` | Still vanilla grouping | Optional later |
+| **Traffic routes tool** | `TrafficRoutesSystem` / `ActionsSection` | Still vanilla grouping | **LBL-05 required:** SIP `hasTrafficRoutes` + live path — mirror `AggregateElement` from ADR + brief `Aggregate` tag so `FillTargetMapJob` walks edges |
 | **Achievements / net temps / infoview filter** | various | Negligible for naming feature | Leave |
 
 **Label click** is **not** left unattended on the planned path — see next section.
@@ -124,7 +124,7 @@ Visibility (`OnUpdate`): `HasComponent<Aggregate> && HasComponent<AggregateEleme
 
 3. **Do not** invent aggregate-level traffic storage — sim already writes `Road` / `NetCondition` on edges; dual identity is **list choice**, not data ownership.
 
-4. **Companion (thin):** `TitleSection.GetVirtualKeyboardLocaleKey` Prefix — treat ADR name-aggregate like `Aggregate` → `"RoadName"`. `ImageSystem` / traffic-routes remain optional later.
+4. **Companion (thin):** `TitleSection.GetVirtualKeyboardLocaleKey` Prefix — treat ADR name-aggregate like `Aggregate` → `"RoadName"`. `ImageSystem` as needed. **Traffic-routes** live path is in LBL-05 (not optional).
 
 **Design constraint (S1):** By design one ADR name-aggregate can hold edges from **several** vanilla Aggregates. Therefore S1 must **exclude** ADR-associated edges from vanilla Aggregate sums — never double-count them into both vanilla and ADR SIP, and never treat “selected vanilla Aggregate” as “sum the ADR super-set.”
 
@@ -196,7 +196,7 @@ Must for feature:
 Should for polish:
   *(deferred — not this wave)* SIP RoadSection / TitleSection / DefaultTool H1
 Nice later:
-  Traffic-routes affordance over ADR groups
+  Traffic-routes live path over ADR groups (LBL-05)
   Optional constrained vanilla post-sync ONLY for geometry-legal same-type chains
 
 Never:

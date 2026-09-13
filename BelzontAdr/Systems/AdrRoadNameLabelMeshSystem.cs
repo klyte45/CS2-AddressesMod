@@ -34,6 +34,8 @@ namespace BelzontAdr
         {
             public Material m_Material;
             public bool m_IsUnderground;
+            /// <summary>True = ADR S2 (or Temp of ADR) style — dark green outline; false = vanilla Aggregate black outline.</summary>
+            public bool m_IsAdrStyle;
             public bool m_HasMesh;
         }
 
@@ -70,6 +72,8 @@ namespace BelzontAdr
         private List<MeshData> m_LabelData;
         private Dictionary<Entity, string> m_CachedLabels;
         private int m_FaceColor;
+        private int m_OutlineColor;
+        private static readonly Color AdrOutlineColor = new(0f, 0x44 / 255f, 0f, 1f);
         private bool m_Loaded = true;
         private bool m_TunnelSelectOn;
 
@@ -133,6 +137,7 @@ namespace BelzontAdr
                 ComponentType.Exclude<Deleted>());
 
             m_FaceColor = Shader.PropertyToID("_FaceColor");
+            m_OutlineColor = Shader.PropertyToID("_OutlineColor");
             GameManager.instance.localizationManager.onActiveDictionaryChanged += OnDictionaryChanged;
         }
 
@@ -403,7 +408,8 @@ namespace BelzontAdr
                     m_CompositionData = GetComponentLookup<Composition>(true),
                     m_NetCompositionData = GetComponentLookup<NetCompositionData>(true),
                     m_ConnectedEdges = GetBufferLookup<ConnectedEdge>(true),
-                    m_AdrAggregated = GetComponentLookup<ADRNameAggregated>(true)
+                    m_AdrAggregated = GetComponentLookup<ADRNameAggregated>(true),
+                    m_TempType = GetComponentTypeHandle<Temp>(true)
                 }.ScheduleParallel(m_S1PlacementQuery, handle);
             }
 
@@ -685,6 +691,7 @@ namespace BelzontAdr
                     }
 
                     string renderedLabelName;
+                    bool adrStyle = false;
                     if (temps.Length != 0)
                     {
                         Temp temp = temps[j];
@@ -695,10 +702,12 @@ namespace BelzontAdr
                             continue;
                         }
                         renderedLabelName = m_NameSystem.GetRenderedLabelName(temp.m_Original);
+                        adrStyle = EntityManager.HasComponent<ADRNameAggregate>(temp.m_Original);
                     }
                     else
                     {
                         renderedLabelName = m_NameSystem.GetRenderedLabelName(entity);
+                        adrStyle = EntityManager.HasComponent<ADRNameAggregate>(entity);
                     }
 
                     if (m_CachedLabels != null)
@@ -743,16 +752,20 @@ namespace BelzontAdr
                         for (int m = 0; m < meshData.m_Materials.Count; m++)
                         {
                             MaterialData existing = meshData.m_Materials[m];
-                            if (existing.m_Material != null && existing.m_Material.mainTexture == mainTexture)
+                            if (existing.m_Material == null
+                                || existing.m_Material.mainTexture != mainTexture
+                                || existing.m_IsAdrStyle != adrStyle)
                             {
-                                if (existing.m_IsUnderground)
-                                {
-                                    material.y = m;
-                                }
-                                else
-                                {
-                                    material.x = m;
-                                }
+                                continue;
+                            }
+
+                            if (existing.m_IsUnderground)
+                            {
+                                material.y = m;
+                            }
+                            else
+                            {
+                                material.x = m;
                             }
                         }
 
@@ -760,13 +773,19 @@ namespace BelzontAdr
                         {
                             var surface = new MaterialData
                             {
-                                m_Material = new Material(meshData.m_OriginalMaterial)
+                                m_Material = new Material(meshData.m_OriginalMaterial),
+                                m_IsAdrStyle = adrStyle
                             };
                             surface.m_Material.SetColor(m_FaceColor, new Color(1f, 1f, 1f, undergroundOn ? 0.25f : 1f));
+                            if (adrStyle)
+                            {
+                                ApplyAdrOutline(surface.m_Material);
+                            }
                             m_OverlayRenderSystem.CopyFontAtlasParameters(meshInfo.material, surface.m_Material);
                             material.x = meshData.m_Materials.Count;
                             meshData.m_Materials.Add(surface);
-                            surface.m_Material.name = $"ADR Aggregate names {material.x} ({meshData.m_OriginalMaterial.name})";
+                            string styleTag = adrStyle ? "ADR" : "Vanilla";
+                            surface.m_Material.name = $"{styleTag} Aggregate names {material.x} ({meshData.m_OriginalMaterial.name})";
                         }
 
                         if (material.y == -1)
@@ -774,13 +793,19 @@ namespace BelzontAdr
                             var underground = new MaterialData
                             {
                                 m_Material = new Material(meshData.m_OriginalMaterial),
-                                m_IsUnderground = true
+                                m_IsUnderground = true,
+                                m_IsAdrStyle = adrStyle
                             };
                             underground.m_Material.SetColor(m_FaceColor, new Color(1f, 1f, 1f, 1f));
+                            if (adrStyle)
+                            {
+                                ApplyAdrOutline(underground.m_Material);
+                            }
                             m_OverlayRenderSystem.CopyFontAtlasParameters(meshInfo.material, underground.m_Material);
                             material.y = meshData.m_Materials.Count;
                             meshData.m_Materials.Add(underground);
-                            underground.m_Material.name = $"ADR Aggregate underground names {material.y} ({meshData.m_OriginalMaterial.name})";
+                            string styleTag = adrStyle ? "ADR" : "Vanilla";
+                            underground.m_Material.name = $"{styleTag} Aggregate underground names {material.y} ({meshData.m_OriginalMaterial.name})";
                         }
 
                         Vector3[] positions = meshInfo.vertices;
@@ -860,6 +885,14 @@ namespace BelzontAdr
 
                 meshData.m_HasMesh = false;
                 meshData.m_MeshDirty = false;
+            }
+        }
+
+        private void ApplyAdrOutline(Material material)
+        {
+            if (material != null && material.HasProperty(m_OutlineColor))
+            {
+                material.SetColor(m_OutlineColor, AdrOutlineColor);
             }
         }
 

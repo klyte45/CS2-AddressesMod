@@ -77,6 +77,12 @@ Vanilla has **no** simple “max render distance” or “max characters” sett
 
 Phase-1: **do not** ship these knobs — parity only.
 
+## ADR look deltas (phase-1 dogfood requests)
+
+| Request | Status | Where |
+|---------|--------|--------|
+| Name material outline `#004400` (very dark green) instead of black | **LBL-05** — separate ADR-style material clones (`m_IsAdrStyle`); only ADR / Temp-of-ADR get `_OutlineColor`; vanilla Aggregate keeps default black | `AdrRoadNameLabelMeshSystem` |
+
 ## WE / BelzontWE shield sync
 
 ### Settled: no live shared `Texture2D`
