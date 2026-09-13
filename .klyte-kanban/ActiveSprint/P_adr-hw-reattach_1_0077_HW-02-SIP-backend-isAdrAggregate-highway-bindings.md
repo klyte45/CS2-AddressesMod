@@ -1,7 +1,7 @@
+**Start time:** 2026-09-13 00:18 -0300
 # [0077] HW-02-SIP-backend-isAdrAggregate-highway-bindings
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/20-highway-reattach-on-adr-aggregates.md §D
