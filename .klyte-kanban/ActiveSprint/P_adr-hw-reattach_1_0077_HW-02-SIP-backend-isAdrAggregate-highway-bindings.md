@@ -37,7 +37,7 @@ Second task. Extend AdrSelectionInfoPanelSystem / AdrEntityData with isAdrAggreg
 - [x] Writes dirty naming/address consumers (same family as OnChangedRoadNameGenerationRules / seed redraw)
 - [x] No writes to vanilla Aggregate highway components
 - [x] Setters usable from tool with SelectedAggregation entity (documented binder surface)
-- [ ] Compile + binder smoke from editor/game
+- [x] Compile + binder smoke from editor/game
 
 ---
 
