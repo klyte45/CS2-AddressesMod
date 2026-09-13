@@ -122,6 +122,9 @@ namespace BelzontAdr
                     continue;
                 }
 
+                // Backfill highway component on ADR aggregates from saves predating HW-01.
+                m_membership.EnsureHighwayData(aggregate);
+
                 bool touched = RemapAndDropDeadMembers(aggregate, oldToNew, out bool changed);
                 if (!m_membership.IsAdrNameAggregate(aggregate))
                 {

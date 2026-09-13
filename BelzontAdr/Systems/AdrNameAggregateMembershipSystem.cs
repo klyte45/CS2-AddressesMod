@@ -56,7 +56,23 @@ namespace BelzontAdr
             var aggregate = EntityManager.CreateEntity();
             EntityManager.AddComponent<ADRNameAggregate>(aggregate);
             EntityManager.AddBuffer<ADRNameAggregateElement>(aggregate);
+            EnsureHighwayData(aggregate);
             return aggregate;
+        }
+
+        /// <summary>
+        /// Always-present authored highway fields on ADR aggregates (defaults = inactive).
+        /// Safe to call on existing entities loaded before HW-01.
+        /// </summary>
+        public void EnsureHighwayData(Entity aggregate)
+        {
+            if (!IsAdrNameAggregate(aggregate)
+                || EntityManager.HasComponent<ADRNameAggregateHighwayData>(aggregate))
+            {
+                return;
+            }
+
+            EntityManager.AddComponentData(aggregate, ADRNameAggregateHighwayData.CreateDefault());
         }
 
         /// <summary>
