@@ -1,7 +1,7 @@
+**Start time:** 2026-09-12 21:18 -0300
 # [0073] LBL-04-ADR-name-mesh-batch-DrawMesh
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/18-label-takeover-sprint-roadmap.md LBL-04
