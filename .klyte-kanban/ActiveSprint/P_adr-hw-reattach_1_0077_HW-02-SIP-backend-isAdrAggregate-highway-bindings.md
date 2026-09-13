@@ -30,13 +30,13 @@ Second task. Extend AdrSelectionInfoPanelSystem / AdrEntityData with isAdrAggreg
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] getEntityOptions / AdrEntityData exposes isAdrAggregate for RoadAggregation
-- [ ] Highway field values returned for ADR selections (and safe defaults / omitted for vanilla)
-- [ ] Bindings get/set highwayDataId, routeDirection, mileageOverrideActive, mileageOverrideKm, reverseCounting on resolved ADR entity
-- [ ] Custom-name get/set available for ADR aggregate entity (NameSystem custom-name path)
-- [ ] Writes dirty naming/address consumers (same family as OnChangedRoadNameGenerationRules / seed redraw)
-- [ ] No writes to vanilla Aggregate highway components
-- [ ] Setters usable from tool with SelectedAggregation entity (documented binder surface)
+- [x] getEntityOptions / AdrEntityData exposes isAdrAggregate for RoadAggregation
+- [x] Highway field values returned for ADR selections (and safe defaults / omitted for vanilla)
+- [x] Bindings get/set highwayDataId, routeDirection, mileageOverrideActive, mileageOverrideKm, reverseCounting on resolved ADR entity
+- [x] Custom-name get/set available for ADR aggregate entity (NameSystem custom-name path)
+- [x] Writes dirty naming/address consumers (same family as OnChangedRoadNameGenerationRules / seed redraw)
+- [x] No writes to vanilla Aggregate highway components
+- [x] Setters usable from tool with SelectedAggregation entity (documented binder surface)
 - [ ] Compile + binder smoke from editor/game
 
 ---
@@ -48,6 +48,9 @@ Second task. Extend AdrSelectionInfoPanelSystem / AdrEntityData with isAdrAggreg
 3. Resolve edge → ADR aggregate the same way ACT-04 does for seed UI
 4. Validate highwayDataId against registry or allow default clear
 5. Ensure vanilla Aggregate path ignores highway setters
+6. Binder surface: AdrSelectionInfoPanelSystem (selectionPanel.*) — SIP and Road Grouping tool both pass the ADR aggregate entity (entityValue / SelectedAggregation). Vanilla Aggregate setters return false.
+7. getEntityOptions / AdrEntityData: isAdrAggregate + highway fields + customName for ADR RoadAggregation. Highway registry list remains highwayRoutes.listHighwaysRegistered.
+8. Setters: setHighwayDataId (registry-validated or clear), setRouteDirection, setMileageOverrideActive/Km, setReverseCounting, get/setAggregateCustomName via NameSystem. Writes call DirtyAdrAggregateConsumers (Updated + BatchesUpdated + MarkRoadsDirty).
 
 ---
 
