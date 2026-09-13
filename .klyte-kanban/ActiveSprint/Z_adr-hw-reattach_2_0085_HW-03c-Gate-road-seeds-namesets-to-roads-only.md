@@ -15,13 +15,13 @@ Related playtest feedback on HW-03b: seeds shall not apply to non-roads
 
 ## User Story
 
-> Acting as **a player naming networks with ADR**, I want **road nameset seeds and road-prefix naming to apply only to road aggregates**, so that I **pedestrian, track, and other non-road networks keep vanilla (or their own) naming and are not renamed by road seeds**.
+> Acting as **a player naming networks with ADR**, I want **road nameset seeds and road-prefix naming only on vehicle-road aggregates classified by prefab RoadData**, so that I **streets without edge Game.Net.Road still work; tracks/pathways are not renamed by road seeds**.
 
 ---
 
 ## Background
 
-Surfaced during HW-03b Road Grouping tool work. GetAggregateName currently applies GetRoadNameList + road prefix patterns to any Aggregate/ADRNameAggregate with a reference edge, and fakes TrackData into RoadData when RoadData is missing. TryAppendAggregateSeedOption sets hasCustomNameList from the same road nameset path (always falls back to DefaultRoadNameOverrides), so SIP and the Road Grouping tool expose seed dice for non-road aggregations. ADRRandomizationData is still attached broadly to all aggregates — redrawing a seed on a non-road aggregate is misleading if naming ignores it. This is deeper than a tool UI hide: name-system overrides + SIP seed DTO + tool seed visibility must agree. Do not fold into HW-03b (tool parity) or HW-04 (highway registry name branch); shared file AdrNameSystemOverrides.cs but distinct concern. Decide track policy while implementing (historically TrackData was treated as road-like).
+Former Sprint 014 HW-03c (0085) overflowed/deferred: seed-only scope was too narrow. Full design is RefsLibrary 22–24 (net-kind mix gate + per-kind NetNameData + road-only seeds). This backlog item is the NET-04 slice: road nameset/seed/SIP gating via prefab RoadData / AdrNetKind.Road — never HasComponent Road. Depends conceptually on NET-01 classifier (and prefer NET-02 membership gate) from catalog 24; create those board tasks when explicitly requested.
 
 ---
 
@@ -44,6 +44,12 @@ Surfaced during HW-03b Road Grouping tool work. GetAggregateName currently appli
 - [ ] District/citizen/household seed paths unchanged
 - [ ] Compile + playtest: road aggregate seed still works; pedestrian/path (and track if excluded) keep vanilla name and no road seed UI
 - [ ] HW-08 smoke checklist aware of this gate
+- [ ] Classifier uses prefab RoadData / stored AdrNetKind.Road — never HasComponent Road as sole gate
+- [ ] GetAggregateName applies road namesets/prefixes only for AdrNetKind.Road; no TrackData to RoadData fake for road naming
+- [ ] TryAppendAggregateSeedOption / SIP / Road Grouping show road seed UX only for Road kind
+- [ ] Street and avenue edges without edge Game.Net.Road still get road seeds when prefab has RoadData
+- [ ] Street highway mix remains allowed for Road kind; cross-kind seed path remains closed
+- [ ] Docs 22–24 referenced; coordinate with NET-01…03 when those board items exist
 
 ---
 
@@ -56,6 +62,12 @@ Surfaced during HW-03b Road Grouping tool work. GetAggregateName currently appli
 5. Optional follow-up: stop attaching ADRRandomizationData to aggregates that never consume road seeds — only if low-risk; otherwise leave attach + unused seed harmless
 6. Coordinate with HW-04 so highway name branch also only applies to road ADR aggregates
 7. Size: M (name override + SIP DTO + tool/SIP consistency + playtest matrix)
+8. Implement after or with NET-01 (AdrNetKind + TryGetNetKind from prefab Data)
+9. Prefer NET-02 membership gate already landed so non-road aggregates are rarer
+10. GetAggregateName: early-out unless kind is Road; delete TrackData RoadData fake for nameset path
+11. TryAppendAggregateSeedOption: hasCustomNameList only when AdrNetKind.Road
+12. Replace ADR HasComponent Road seed/address gates with RoadData or stored kind
+13. Reference RefsLibrary 22–24; board catalog NET-04 in 24-adr-net-kind-roadmap.md
 
 ---
 
