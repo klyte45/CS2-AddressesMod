@@ -1,6 +1,7 @@
 using Colossal.Entities;
 using Game.Common;
 using Game.Net;
+using Game.Prefabs;
 using Game.UI;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,15 @@ namespace BelzontAdr
             return aggregate;
         }
 
+        /// <summary>
+        /// Attach Label* + PrefabRef so LBL-02 TMP bake can own this ADR aggregate as an S2 label owner.
+        /// </summary>
+        private void EnsureLabelOwnerComponents(Entity adrAggregate, Entity prefabSource)
+        {
+            var labelSystem = World.GetExistingSystemManaged<AdrRoadNameLabelMeshSystem>();
+            labelSystem?.EnsureRoadNameLabelComponents(adrAggregate, prefabSource);
+        }
+
         public Entity CreateAggregate(Entity[] edges)
         {
             var aggregate = CreateAggregate();
@@ -70,6 +80,14 @@ namespace BelzontAdr
                 AddMemberCore(aggregate, edges[i], insertIndex: -1, allowSteal: true, out _);
             }
             ResortMembers(aggregate);
+            Entity prefabSource = Entity.Null;
+            if (edges.Length > 0
+                && EntityManager.TryGetComponent(edges[0], out Aggregated aggregated)
+                && aggregated.m_Aggregate != Entity.Null)
+            {
+                prefabSource = aggregated.m_Aggregate;
+            }
+            EnsureLabelOwnerComponents(aggregate, prefabSource);
             return aggregate;
         }
 
@@ -214,6 +232,7 @@ namespace BelzontAdr
             }
 
             adrAggregate = CreateAggregate();
+            EnsureLabelOwnerComponents(adrAggregate, vanillaAggregate);
             var adrSeed = new ADRRandomizationData();
             adrSeed.CopySeedFrom(vanillaSeed);
             EntityManager.AddComponentData(adrAggregate, adrSeed);

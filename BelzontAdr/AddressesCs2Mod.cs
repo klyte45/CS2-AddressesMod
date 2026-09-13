@@ -1,4 +1,4 @@
-#if !RELEASE 
+﻿#if !RELEASE 
 //#define LOCAL
 #endif
 using Belzont.Interfaces;
@@ -9,6 +9,7 @@ using Game;
 using Game.Modding;
 using Game.Rendering;
 using Game.SceneFlow;
+using Game.Serialization;
 using Unity.Entities;
 
 namespace BelzontAdr
@@ -32,6 +33,9 @@ namespace BelzontAdr
             // Name transfers use NameSystem.SetCustomName → EndFrameBarrier (allowed in MainLoop only).
             updateSystem.UpdateAt<AdrNameAggregateMembershipSystem>(SystemUpdatePhase.MainLoop);
             updateSystem.UpdateAt<AdrNameAggregateMaintenanceSystem>(SystemUpdatePhase.ModificationEnd);
+            // LBL-02: TMP bake into LabelVertex/LabelExtents (after vanilla AggregateMeshSystem prefab init).
+            updateSystem.UpdateAfter<AdrRoadNameLabelMeshSystem, AggregateMeshSystem>(SystemUpdatePhase.PreCulling);
+            updateSystem.UpdateBefore<PreDeserialize<AdrRoadNameLabelMeshSystem>>(SystemUpdatePhase.Deserialize);
             updateSystem.UpdateAt<AdrVehicleSystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RoadVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RailVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
