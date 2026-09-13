@@ -46,6 +46,11 @@ Fifth task. Restore AdrNameSystemOverrides highway name branch keyed by ADRNameA
 2. Resolve via ADRNameAggregated / ADRNameAggregate — never Aggregate ADRHighwayAggregationData
 3. Use AdrHighwayRoutesSystem.TryGetHighwayData
 4. Coordinate with HW-03b custom name field
+5. Restored highway naming in AdrNameSystemOverrides keyed by ADRNameAggregate + ADRNameAggregateHighwayData.highwayDataId + AdrHighwayRoutesSystem.TryGetHighwayData (not Aggregate).
+6. GetAggregateName priority documented: (1) custom name → original NameSystem path, (2) non-default highwayDataId → registry hwData.name, (3) nameset + road-prefix.
+7. GetRenderedLabelName: ADR highway shows yellow prefix-suffix; custom name wins name line when set (pre-ACT-01 parity).
+8. TryGetAdrHighwayRegistryName helper; m_adrHighwayRoutesSystem wired in DoPatches. Dirty already via DirtyAdrAggregateConsumers → MarkRoadsDirty (HW-02).
+9. Awaiting user solution compile + playtest rename/highway assign before DoD check / T.
 
 ---
 
