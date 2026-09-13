@@ -1,7 +1,7 @@
+**Start time:** 2026-09-13 14:40 -0300
 # [0080] HW-04-Naming-highway-override-branch
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/20-highway-reattach-on-adr-aggregates.md §E
