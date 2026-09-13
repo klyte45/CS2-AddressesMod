@@ -33,9 +33,11 @@ namespace BelzontAdr
             // Name transfers use NameSystem.SetCustomName → EndFrameBarrier (allowed in MainLoop only).
             updateSystem.UpdateAt<AdrNameAggregateMembershipSystem>(SystemUpdatePhase.MainLoop);
             updateSystem.UpdateAt<AdrNameAggregateMaintenanceSystem>(SystemUpdatePhase.ModificationEnd);
-            // LBL-02: TMP bake into LabelVertex/LabelExtents (after vanilla AggregateMeshSystem prefab init).
+            // LBL-02/03/04: TMP bake + placement + FillNameMeshes (after vanilla AggregateMeshSystem prefab init).
             updateSystem.UpdateAfter<AdrRoadNameLabelMeshSystem, AggregateMeshSystem>(SystemUpdatePhase.PreCulling);
             updateSystem.UpdateBefore<PreDeserialize<AdrRoadNameLabelMeshSystem>>(SystemUpdatePhase.Deserialize);
+            // LBL-04: name DrawMesh path (parity with AggregateRenderSystem name loop; no arrows).
+            updateSystem.UpdateAt<AdrRoadNameLabelRenderSystem>(SystemUpdatePhase.Rendering);
             updateSystem.UpdateAt<AdrVehicleSystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RoadVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<RailVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);

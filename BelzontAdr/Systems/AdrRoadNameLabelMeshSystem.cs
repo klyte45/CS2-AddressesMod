@@ -18,29 +18,35 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.Scripting;
 
 namespace BelzontAdr
 {
     /// <summary>
-    /// LBL-02/03: ADR TMP bake into LabelVertex/LabelExtents + dual-membership LabelPosition placement.
+    /// LBL-02/03/04: ADR TMP bake, dual-membership LabelPosition placement, and FillNameMeshData batch.
     /// Re-diff baseline Game.dll GUID d124bec16c0748da9ebf48366d9c1d68 —
-    /// AggregateMeshSystem.UpdateLabelVertices / UpdateLabelPositionsJob / InitializePrefabs.
+    /// AggregateMeshSystem.UpdateLabelVertices / UpdateLabelPositionsJob / FillNameMeshData / InitializePrefabs.
     /// </summary>
     public partial class AdrRoadNameLabelMeshSystem : GameSystemBase, IPreDeserialize
     {
-        private struct MaterialData
+        internal struct MaterialData
         {
             public Material m_Material;
             public bool m_IsUnderground;
             public bool m_HasMesh;
         }
 
-        private class MeshData
+        internal class MeshData
         {
+            public JobHandle m_DataDependencies;
             public Material m_OriginalMaterial;
             public List<MaterialData> m_Materials;
+            public Mesh m_Mesh;
+            public Mesh.MeshDataArray m_MeshData;
             public bool m_MeshDirty;
+            public bool m_HasMeshData;
+            public bool m_HasMesh;
         }
 
         private struct MaterialUpdate
@@ -184,7 +190,201 @@ namespace BelzontAdr
                 UpdateLabelVertices(loaded);
             }
 
-            Dependency = ScheduleLabelPlacement(Dependency);
+            bool placementPending = !m_S1PlacementQuery.IsEmptyIgnoreFilter || !m_S2PlacementQuery.IsEmptyIgnoreFilter;
+            JobHandle handle = ScheduleLabelPlacement(Dependency);
+            if (placementPending)
+            {
+                MarkAllNameMeshesDirty();
+            }
+
+            Dependency = FillNameMeshes(handle);
+        }
+
+        internal int GetNameMaterialCount()
+        {
+            return m_LabelData?.Count ?? 0;
+        }
+
+        internal bool TryGetNameMesh(int index, out Mesh mesh, out int subMeshCount)
+        {
+            mesh = null;
+            subMeshCount = 0;
+            if (m_LabelData == null || index < 0 || index >= m_LabelData.Count)
+            {
+                return false;
+            }
+
+            MeshData meshData = m_LabelData[index];
+            if (meshData.m_Materials == null)
+            {
+                return false;
+            }
+
+            subMeshCount = meshData.m_Materials.Count;
+            if (meshData.m_HasMeshData)
+            {
+                meshData.m_HasMeshData = false;
+                meshData.m_DataDependencies.Complete();
+                meshData.m_DataDependencies = default;
+                if (meshData.m_Mesh == null)
+                {
+                    meshData.m_Mesh = new Mesh();
+                    if (meshData.m_OriginalMaterial != null)
+                    {
+                        meshData.m_Mesh.name = $"ADR Aggregates ({meshData.m_OriginalMaterial})";
+                    }
+                }
+
+                Mesh.ApplyAndDisposeWritableMeshData(
+                    meshData.m_MeshData,
+                    meshData.m_Mesh,
+                    MeshUpdateFlags.DontValidateIndices | MeshUpdateFlags.DontRecalculateBounds);
+
+                Bounds bounds = default;
+                meshData.m_HasMesh = false;
+                for (int i = 0; i < subMeshCount; i++)
+                {
+                    MaterialData value = meshData.m_Materials[i];
+                    SubMeshDescriptor subMesh = meshData.m_Mesh.GetSubMesh(i);
+                    value.m_HasMesh = subMesh.vertexCount > 0;
+                    if (value.m_HasMesh)
+                    {
+                        if (meshData.m_HasMesh)
+                        {
+                            bounds.Encapsulate(subMesh.bounds);
+                        }
+                        else
+                        {
+                            bounds = subMesh.bounds;
+                            meshData.m_HasMesh = true;
+                        }
+                    }
+
+                    meshData.m_Materials[i] = value;
+                }
+
+                meshData.m_Mesh.bounds = bounds;
+            }
+
+            mesh = meshData.m_Mesh;
+            return meshData.m_HasMesh;
+        }
+
+        internal bool TryGetNameMaterial(int index, int subMeshIndex, out Material material)
+        {
+            material = null;
+            if (m_LabelData == null || index < 0 || index >= m_LabelData.Count)
+            {
+                return false;
+            }
+
+            MeshData meshData = m_LabelData[index];
+            if (meshData.m_Materials == null || subMeshIndex < 0 || subMeshIndex >= meshData.m_Materials.Count)
+            {
+                return false;
+            }
+
+            MaterialData materialData = meshData.m_Materials[subMeshIndex];
+            material = materialData.m_Material;
+            return materialData.m_HasMesh;
+        }
+
+        private void MarkAllNameMeshesDirty()
+        {
+            if (m_LabelData == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < m_LabelData.Count; i++)
+            {
+                m_LabelData[i].m_MeshDirty = true;
+            }
+        }
+
+        /// <summary>
+        /// Port of AggregateMeshSystem.FillNameMeshData — schedules FillNameDataJob per dirty bucket.
+        /// </summary>
+        internal JobHandle FillNameMeshes(JobHandle inputDeps)
+        {
+            JobHandle jobHandle = inputDeps;
+            if (m_LabelData == null)
+            {
+                return jobHandle;
+            }
+
+            for (int i = 0; i < m_LabelData.Count; i++)
+            {
+                MeshData meshData = m_LabelData[i];
+                if (!meshData.m_MeshDirty)
+                {
+                    continue;
+                }
+
+                meshData.m_MeshDirty = false;
+                if (meshData.m_Materials == null || meshData.m_Materials.Count == 0)
+                {
+                    continue;
+                }
+
+                m_LabelQuery.ResetFilter();
+                m_LabelQuery.SetSharedComponentFilter(new LabelMaterial { m_Index = i });
+                if (m_LabelQuery.IsEmptyIgnoreFilter)
+                {
+                    if (meshData.m_Materials != null)
+                    {
+                        for (int j = 0; j < meshData.m_Materials.Count; j++)
+                        {
+                            MaterialData value = meshData.m_Materials[j];
+                            value.m_HasMesh = false;
+                            meshData.m_Materials[j] = value;
+                        }
+                    }
+
+                    if (meshData.m_Mesh != null)
+                    {
+                        Object.Destroy(meshData.m_Mesh);
+                        meshData.m_Mesh = null;
+                    }
+
+                    if (meshData.m_HasMeshData)
+                    {
+                        meshData.m_HasMeshData = false;
+                        meshData.m_MeshData.Dispose();
+                    }
+
+                    meshData.m_HasMesh = false;
+                    continue;
+                }
+
+                JobHandle outJobHandle;
+                NativeList<ArchetypeChunk> chunks = m_LabelQuery.ToArchetypeChunkListAsync(Allocator.TempJob, out outJobHandle);
+                if (!meshData.m_HasMeshData)
+                {
+                    meshData.m_HasMeshData = true;
+                    meshData.m_MeshData = Mesh.AllocateWritableMeshData(1);
+                }
+
+                JobHandle jobHandle2 = new AdrRoadNameLabelMeshFillJobs.FillNameDataJob
+                {
+                    m_LabelExtentsType = GetComponentTypeHandle<LabelExtents>(true),
+                    m_PrefabRefType = GetComponentTypeHandle<PrefabRef>(true),
+                    m_TempType = GetComponentTypeHandle<Temp>(true),
+                    m_HiddenType = GetComponentTypeHandle<Hidden>(true),
+                    m_LabelPositionType = GetBufferTypeHandle<LabelPosition>(true),
+                    m_LabelVertexType = GetBufferTypeHandle<LabelVertex>(true),
+                    m_NetNameData = GetComponentLookup<NetNameData>(true),
+                    m_Chunks = chunks,
+                    m_SubMeshCount = meshData.m_Materials.Count,
+                    m_NameMeshData = meshData.m_MeshData
+                }.Schedule(JobHandle.CombineDependencies(outJobHandle, inputDeps));
+                chunks.Dispose(jobHandle2);
+                meshData.m_DataDependencies = jobHandle2;
+                jobHandle = JobHandle.CombineDependencies(jobHandle, jobHandle2);
+            }
+
+            m_LabelQuery.ResetFilter();
+            return jobHandle;
         }
 
         private JobHandle ScheduleLabelPlacement(JobHandle inputDeps)
@@ -634,17 +834,32 @@ namespace BelzontAdr
             for (int i = 0; i < m_LabelData.Count; i++)
             {
                 MeshData meshData = m_LabelData[i];
-                if (meshData.m_Materials == null)
+                meshData.m_DataDependencies.Complete();
+                meshData.m_DataDependencies = default;
+                if (meshData.m_Materials != null)
                 {
-                    continue;
+                    for (int j = 0; j < meshData.m_Materials.Count; j++)
+                    {
+                        MaterialData materialData = meshData.m_Materials[j];
+                        materialData.m_HasMesh = false;
+                        meshData.m_Materials[j] = materialData;
+                    }
                 }
 
-                for (int j = 0; j < meshData.m_Materials.Count; j++)
+                if (meshData.m_Mesh != null)
                 {
-                    MaterialData materialData = meshData.m_Materials[j];
-                    materialData.m_HasMesh = false;
-                    meshData.m_Materials[j] = materialData;
+                    Object.Destroy(meshData.m_Mesh);
+                    meshData.m_Mesh = null;
                 }
+
+                if (meshData.m_HasMeshData)
+                {
+                    meshData.m_MeshData.Dispose();
+                    meshData.m_HasMeshData = false;
+                }
+
+                meshData.m_HasMesh = false;
+                meshData.m_MeshDirty = false;
             }
         }
 
@@ -658,6 +873,20 @@ namespace BelzontAdr
             for (int i = 0; i < m_LabelData.Count; i++)
             {
                 MeshData meshData = m_LabelData[i];
+                meshData.m_DataDependencies.Complete();
+                meshData.m_DataDependencies = default;
+                if (meshData.m_HasMeshData)
+                {
+                    meshData.m_MeshData.Dispose();
+                    meshData.m_HasMeshData = false;
+                }
+
+                if (meshData.m_Mesh != null)
+                {
+                    Object.Destroy(meshData.m_Mesh);
+                    meshData.m_Mesh = null;
+                }
+
                 if (meshData.m_Materials == null)
                 {
                     continue;
