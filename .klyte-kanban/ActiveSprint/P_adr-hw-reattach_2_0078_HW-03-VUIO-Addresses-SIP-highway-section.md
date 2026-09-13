@@ -53,6 +53,7 @@ Third task. VUIO Addresses SIP: keep SeedManagement for both Aggregate types; ad
 8. i18n pending BelzontAdr/i18n/highway_aggregate_settings_entries.txt (en-US + pt-BR); RouteDirection.NONE added. npm run build succeeded.
 9. Mileage override storage corrected to mileageOverrideMeters (int meters) on ADRNameAggregateHighwayData; binder setMileageOverrideMeters. UI converts via game UnitSystem (Metric=km, Freedom=mi) with matching label keys MileageOverrideKm/Mi.
 10. Custom name on Aggregate/ADR no longer early-returns getEntityOptions — SIP title owns the name; seed + HighwayAggregateSettings still shown for road aggregation selections.
+11. Highway settings are a separate SIP AdrEntityType.HighwayAggregate InfoSection (like RoadMark), appended before custom-name early return. RoadAggregation section is seed-only. Road aggregations no longer emit CustomName Addresses block (title owns name).
 
 ---
 
