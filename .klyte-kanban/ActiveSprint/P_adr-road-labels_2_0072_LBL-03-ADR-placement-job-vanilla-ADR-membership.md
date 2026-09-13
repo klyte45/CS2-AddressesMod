@@ -32,17 +32,17 @@ Third task of epic adr-road-labels — largest placement piece. Dual membership:
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Placement job/system walks nets and writes LabelPosition (and any required orientation/scale fields) for name labels
-- [ ] S1: unassociated segments use vanilla Aggregate as name owner for placement identity
-- [ ] S2: associated segments use ADR name-aggregate owner when Road Grouping / ADR association exists
-- [ ] Owner switch S1↔S2 updates or rebuilds placement without leftover duplicate labels on same stretch
-- [ ] Consumes LBL-02 LabelExtents so positions account for string width
+- [x] Placement job/system walks nets and writes LabelPosition (and any required orientation/scale fields) for name labels
+- [x] S1: unassociated segments use vanilla Aggregate as name owner for placement identity
+- [x] S2: associated segments use ADR name-aggregate owner when Road Grouping / ADR association exists
+- [x] Owner switch S1↔S2 updates or rebuilds placement without leftover duplicate labels on same stretch
+- [x] Consumes LBL-02 LabelExtents so positions account for string width
 - [ ] Smoke: mixed city (some grouped, some not) shows placements for both owners without double-stacking
-- [ ] No AggregateSystem Burst patches
+- [x] No AggregateSystem Burst patches
 - [ ] Compile + load smoke on a dogfood save with Road Grouping associations
-- [ ] Placement uses ~100f spacing, redundancy, m_MaxScale parity with vanilla AddLabels / UpdateLabelPositionsJob
-- [ ] LabelPosition buffers written on the pick owner entity (S1 Aggregate or S2 ADR name-aggregate)
-- [ ] Burst preferred for placement job
+- [x] Placement uses ~100f spacing, redundancy, m_MaxScale parity with vanilla AddLabels / UpdateLabelPositionsJob
+- [x] LabelPosition buffers written on the pick owner entity (S1 Aggregate or S2 ADR name-aggregate)
+- [x] Burst preferred for placement job
 
 ---
 
@@ -60,6 +60,7 @@ Third task of epic adr-road-labels — largest placement piece. Dual membership:
 10. Shared owner-resolution helper for LBL-05 pick
 11. Schedule after net/association systems; invalidate on geometry/association/rename
 12. Keep arrow positions in vanilla AggregateMeshSystem
+13. Added AdrRoadNameLabelPlacementJobs: Burst UpdateS1LabelPositionsJob (AggregateElement, skips ADRNameAggregated edges) + UpdateS2LabelPositionsJob (ADRNameAggregateElement). Shared AddLabels/redundancy math with 100f spacing and m_MaxScale parity. Scheduled from AdrRoadNameLabelMeshSystem after TMP bake. LabelPosition written on pick owner (S1 Aggregate / S2 ADR). No AggregateSystem patches.
 
 ---
 
