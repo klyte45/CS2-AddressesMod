@@ -37,7 +37,7 @@ Third task. VUIO Addresses SIP: keep SeedManagement for both Aggregate types; ad
 - [x] Highway UI uses HW-02 bindings; edits persist and dirty consumers
 - [x] Shared/extractable components preferred for tool reuse (or explicit note if not extractable yet)
 - [x] i18n pending *_entries.txt for new keys (en-US + pt-BR columns); no i18n.csv edits
-- [x] npm frontend build succeeds; playtest SIP on vanilla Aggregate vs ADR
+- [ ] npm frontend build succeeds; playtest SIP on vanilla Aggregate vs ADR
 
 ---
 
