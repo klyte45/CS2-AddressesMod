@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using TMPro;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Scripting;
@@ -22,10 +23,9 @@ using UnityEngine.Scripting;
 namespace BelzontAdr
 {
     /// <summary>
-    /// LBL-02: ADR TMP bake into <see cref="LabelVertex"/> / <see cref="LabelExtents"/> with
-    /// NetLabel material clones (parity layout). Placement/mesh draw are later tasks.
+    /// LBL-02/03: ADR TMP bake into LabelVertex/LabelExtents + dual-membership LabelPosition placement.
     /// Re-diff baseline Game.dll GUID d124bec16c0748da9ebf48366d9c1d68 —
-    /// AggregateMeshSystem.UpdateLabelVertices / InitializePrefabs name materials.
+    /// AggregateMeshSystem.UpdateLabelVertices / UpdateLabelPositionsJob / InitializePrefabs.
     /// </summary>
     public partial class AdrRoadNameLabelMeshSystem : GameSystemBase, IPreDeserialize
     {
@@ -58,6 +58,8 @@ namespace BelzontAdr
         private EntityQuery m_AllNamePrefabQuery;
         private EntityQuery m_LabelQuery;
         private EntityQuery m_AdrOwnersMissingLabelsQuery;
+        private EntityQuery m_S1PlacementQuery;
+        private EntityQuery m_S2PlacementQuery;
 
         private List<MeshData> m_LabelData;
         private Dictionary<Entity, string> m_CachedLabels;
@@ -109,6 +111,21 @@ namespace BelzontAdr
                 }
             });
 
+            m_S1PlacementQuery = GetEntityQuery(
+                ComponentType.ReadOnly<Aggregate>(),
+                ComponentType.ReadOnly<LabelExtents>(),
+                ComponentType.ReadOnly<AggregateElement>(),
+                ComponentType.ReadWrite<LabelPosition>(),
+                ComponentType.Exclude<Deleted>(),
+                ComponentType.Exclude<ADRNameAggregate>());
+
+            m_S2PlacementQuery = GetEntityQuery(
+                ComponentType.ReadOnly<ADRNameAggregate>(),
+                ComponentType.ReadOnly<LabelExtents>(),
+                ComponentType.ReadOnly<ADRNameAggregateElement>(),
+                ComponentType.ReadWrite<LabelPosition>(),
+                ComponentType.Exclude<Deleted>());
+
             m_FaceColor = Shader.PropertyToID("_FaceColor");
             GameManager.instance.localizationManager.onActiveDictionaryChanged += OnDictionaryChanged;
         }
@@ -151,6 +168,7 @@ namespace BelzontAdr
 
             if (m_LabelData == null || m_LabelData.Count == 0)
             {
+                Dependency = ScheduleLabelPlacement(Dependency);
                 return;
             }
 
@@ -165,6 +183,46 @@ namespace BelzontAdr
             {
                 UpdateLabelVertices(loaded);
             }
+
+            Dependency = ScheduleLabelPlacement(Dependency);
+        }
+
+        private JobHandle ScheduleLabelPlacement(JobHandle inputDeps)
+        {
+            JobHandle handle = inputDeps;
+
+            if (!m_S1PlacementQuery.IsEmptyIgnoreFilter)
+            {
+                handle = new AdrRoadNameLabelPlacementJobs.UpdateS1LabelPositionsJob
+                {
+                    m_LabelExtentsType = GetComponentTypeHandle<LabelExtents>(true),
+                    m_AggregateElementType = GetBufferTypeHandle<AggregateElement>(true),
+                    m_LabelPositionType = GetBufferTypeHandle<LabelPosition>(false),
+                    m_EdgeData = GetComponentLookup<Edge>(true),
+                    m_CurveData = GetComponentLookup<Curve>(true),
+                    m_CompositionData = GetComponentLookup<Composition>(true),
+                    m_NetCompositionData = GetComponentLookup<NetCompositionData>(true),
+                    m_ConnectedEdges = GetBufferLookup<ConnectedEdge>(true),
+                    m_AdrAggregated = GetComponentLookup<ADRNameAggregated>(true)
+                }.ScheduleParallel(m_S1PlacementQuery, handle);
+            }
+
+            if (!m_S2PlacementQuery.IsEmptyIgnoreFilter)
+            {
+                handle = new AdrRoadNameLabelPlacementJobs.UpdateS2LabelPositionsJob
+                {
+                    m_LabelExtentsType = GetComponentTypeHandle<LabelExtents>(true),
+                    m_AdrElementType = GetBufferTypeHandle<ADRNameAggregateElement>(true),
+                    m_LabelPositionType = GetBufferTypeHandle<LabelPosition>(false),
+                    m_EdgeData = GetComponentLookup<Edge>(true),
+                    m_CurveData = GetComponentLookup<Curve>(true),
+                    m_CompositionData = GetComponentLookup<Composition>(true),
+                    m_NetCompositionData = GetComponentLookup<NetCompositionData>(true),
+                    m_ConnectedEdges = GetBufferLookup<ConnectedEdge>(true)
+                }.ScheduleParallel(m_S2PlacementQuery, handle);
+            }
+
+            return handle;
         }
 
         private bool GetLoaded()
