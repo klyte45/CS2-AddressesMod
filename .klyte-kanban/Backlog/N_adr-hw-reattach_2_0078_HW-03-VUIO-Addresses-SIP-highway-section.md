@@ -68,12 +68,14 @@ Third task. VUIO Addresses SIP: keep SeedManagement for both Aggregate types; ad
 
 ### Is dependent for
 
-
-
+- [0079] HW-03b-Road-Grouping-tool-options-parity
+- [0084] HW-08-Smoke-acceptance-checklist
 ### Groups with
 
 - HW-02-SIP-backend-isAdrAggregate-highway-bindings
 - HW-03b-Road-Grouping-tool-options-parity
+
+---
 
 ## Other Notes
 
