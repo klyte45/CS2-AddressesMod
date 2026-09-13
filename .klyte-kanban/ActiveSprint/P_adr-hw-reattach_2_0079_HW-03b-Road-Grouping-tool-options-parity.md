@@ -49,6 +49,10 @@ Fourth task. Expand RoadGroupingToolPanel: replace selected #Index display with 
 2. Wire AdrRoadGroupingController binders or reuse SIP binders with SelectedAggregation
 3. Before fork / non-ADR: keep pick prompt only — no highway block
 4. Do not add highway controls into overlay cards — tool options panel only
+5. RoadGroupingToolPanel: custom name StringInputField via get/setAggregateCustomName; SeedManagementOptions + HighwayAggregateSettings reuse SIP components against SelectedAggregation.
+6. SeedManagementOptions seed ops target response.entityValue (optional seedEntity override) instead of SIP selectedEntity.
+7. getEntityOptions: TryAppendAggregateSeedOption also runs under custom-name early return so tool/SIP keep seed for Aggregate/ADR hosts.
+8. i18n pending BelzontAdr/i18n/road_grouping_tool_options_entries.txt (customName). npm run build OK.
 
 ---
 
