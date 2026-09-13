@@ -66,8 +66,7 @@ Eighth task — REQUIRED in the same sprint (not optional). After ACT-01, AdrReg
 
 ### Is dependent for
 
-
-
+- [0084] HW-08-Smoke-acceptance-checklist
 ### Is related to
 
 - [0061] ACT-01-Strip-Aggregate-highway-host
@@ -76,6 +75,8 @@ Eighth task — REQUIRED in the same sprint (not optional). After ACT-01, AdrReg
 
 - HW-02-SIP-backend-isAdrAggregate-highway-bindings
 - HW-03-VUIO-Addresses-SIP-highway-section
+
+---
 
 ## Other Notes
 
