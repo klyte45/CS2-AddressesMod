@@ -1,7 +1,7 @@
+**Start time:** 2026-09-13 01:41 -0300
 # [0079] HW-03b-Road-Grouping-tool-options-parity
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/20-highway-reattach-on-adr-aggregates.md §D2
