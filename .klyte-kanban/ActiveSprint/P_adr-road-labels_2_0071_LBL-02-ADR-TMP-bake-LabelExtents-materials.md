@@ -37,8 +37,8 @@ Second task of epic adr-road-labels. After LBL-01 shuts down vanilla name TMP/me
 - [x] LabelMaterial / material references resolve to NetLabelPrefab (or documented ADR copy) TMP Material + FontAsset
 - [x] Bake invalidates/rebuilds when GetRenderedLabelName / ADR display name changes for an owner aggregate
 - [x] No live shared Texture2D with WE — copy/re-register only if any sprite path is touched (phase-1 text-only preferred)
-- [ ] Unit/smoke: sample aggregate name string bakes non-empty vertices and sane extents
-- [ ] Compile + load: no TMP/FontAsset null refs in bake path logs
+- [x] Unit/smoke: sample aggregate name string bakes non-empty vertices and sane extents
+- [x] Compile + load: no TMP/FontAsset null refs in bake path logs
 - [x] Parity layout: sizeDelta 250×100, fontSize 200, center alignment matching vanilla UpdateLabelVertices
 - [x] Clone materials + CopyFontAtlasParameters as vanilla
 - [x] Wire dirty via Updated; extend AdrMainSystem.ResetRoadsCache pattern to ADR owners as needed; cache string changes
