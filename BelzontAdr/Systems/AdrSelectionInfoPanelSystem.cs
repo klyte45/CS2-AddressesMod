@@ -1,4 +1,4 @@
-﻿using Belzont.Interfaces;
+using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Entities;
 using Colossal.UI.Binding;
@@ -101,9 +101,11 @@ namespace BelzontAdr
             {
                 resultList.Add(new() { type = AdrEntityType.VehicleSource });
             }
-            // Custom name hides seed/naming options; highway / mark / vehicle blocks already added above.
+            // Custom name: still expose aggregate seed (SIP erase-to-use-mod + Road Grouping tool).
+            // Station/building naming refs stay hidden while a custom name is set.
             if (hasCustomName)
             {
+                TryAppendAggregateSeedOption(e, resultList);
                 PreferNamingBlocksFirst(resultList);
                 return resultList;
             }
@@ -157,25 +159,7 @@ namespace BelzontAdr
             }
             if (EntityManager.HasComponent<Aggregate>(e) || EntityManager.HasComponent<ADRNameAggregate>(e))
             {
-                var result = new AdrEntityData
-                {
-                    targetEntityToName = e,
-                };
-                if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is Aggregate");
-                result.type = AdrEntityType.RoadAggregation;
-                bool foundRef = EntityManager.HasComponent<ADRNameAggregate>(e)
-                    ? mainSystem.FindReferenceRoad(e, out DynamicBuffer<ADRNameAggregateElement> _, out var refRoadAdr)
-                    : mainSystem.FindReferenceRoad(e, out DynamicBuffer<AggregateElement> _, out refRoadAdr);
-                if (foundRef)
-                {
-                    result.hasCustomNameList = mainSystem.GetRoadNameList(refRoadAdr, out var namesList);
-                    if (result.hasCustomNameList)
-                    {
-                        result.customNameListName = namesList.Name;
-                    }
-                }
-                result.entityValue = e;
-                resultList.Add(result);
+                TryAppendAggregateSeedOption(e, resultList);
             }
             if (EntityManager.HasComponent<District>(e))
             {
@@ -196,6 +180,35 @@ namespace BelzontAdr
 
             PreferNamingBlocksFirst(resultList);
             return resultList;
+        }
+
+        private void TryAppendAggregateSeedOption(Entity e, List<AdrEntityBase> resultList)
+        {
+            if (!EntityManager.HasComponent<Aggregate>(e) && !EntityManager.HasComponent<ADRNameAggregate>(e))
+            {
+                return;
+            }
+
+            var result = new AdrEntityData
+            {
+                targetEntityToName = e,
+                type = AdrEntityType.RoadAggregation,
+                entityValue = e,
+                isAdrAggregate = EntityManager.HasComponent<ADRNameAggregate>(e),
+            };
+            if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} is Aggregate");
+            bool foundRef = EntityManager.HasComponent<ADRNameAggregate>(e)
+                ? mainSystem.FindReferenceRoad(e, out DynamicBuffer<ADRNameAggregateElement> _, out var refRoadAdr)
+                : mainSystem.FindReferenceRoad(e, out DynamicBuffer<AggregateElement> _, out refRoadAdr);
+            if (foundRef)
+            {
+                result.hasCustomNameList = mainSystem.GetRoadNameList(refRoadAdr, out var namesList);
+                if (result.hasCustomNameList)
+                {
+                    result.customNameListName = namesList.Name;
+                }
+            }
+            resultList.Add(result);
         }
 
         /// <summary>

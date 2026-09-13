@@ -1,9 +1,12 @@
-import { Entity, MultiUIValueBinding, MultiUIValueBindingTools, VanillaComponentResolver } from "@klyte45/vuio-commons";
+import { AdrEntityType, EditorUISystemService, Entity, SelectInfoPanelService, SelectedInfoOptions, nameToString } from "adr";
+import { MultiUIValueBinding, MultiUIValueBindingTools, VanillaComponentResolver, VanillaWidgets } from "@klyte45/vuio-commons";
 import { useValue } from "cs2/api";
 import { tool } from "cs2/bindings";
 import { FocusDisabled } from "cs2/input";
 import { ModuleRegistryExtend } from "cs2/modding";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { HighwayAggregateSettings } from "components/HighwayAggregateSettings";
+import { SeedManagementOptionsComponent } from "components/SeedManagementOptions";
 import { translate } from "utility/translate";
 
 export const ROAD_GROUPING_TOOL_ID = "K45_ADR_AdrRoadGroupingTool";
@@ -62,7 +65,13 @@ export const RoadGroupingToolOptions: ModuleRegistryExtend = (Component: any) =>
 
 const RoadGroupingToolPanel = () => {
     const VCR = VanillaComponentResolver.instance;
+    const VW = VanillaWidgets.instance;
+    const editorModule = VW.editorItemModule;
     const [, setTick] = useState(0);
+    const [options, setOptions] = useState<SelectedInfoOptions[]>([]);
+    const [customName, setCustomName] = useState("");
+    const [effectiveName, setEffectiveName] = useState("");
+    const [loadingOptions, setLoadingOptions] = useState(false);
 
     useEffect(() => {
         const bump = async () => setTick((x) => x + 1);
@@ -77,15 +86,88 @@ const RoadGroupingToolPanel = () => {
     const showCards = !!RoadGroupingService.ShowNumberCards.value;
     const hasSelection = !isNullEntity(selected);
 
-    const body = hasSelection
-        ? `${translate("roadGrouping.toolOptions.selected")} #${selected!.Index}`
-        : translate("roadGrouping.toolOptions.pickPrompt");
+    const reloadSelectionUi = useCallback(async (entity: Entity | null | undefined) => {
+        if (isNullEntity(entity)) {
+            setOptions([]);
+            setCustomName("");
+            setEffectiveName("");
+            return;
+        }
+        setLoadingOptions(true);
+        try {
+            const [opts, name, entityData] = await Promise.all([
+                SelectInfoPanelService.getEntityOptions(entity!),
+                SelectInfoPanelService.getAggregateCustomName(entity!),
+                // Same NameSystem.GetName path SIP title uses (editorUI.getEntityData).
+                EditorUISystemService.getEntityData(entity!),
+            ]);
+            setOptions(opts ?? []);
+            setCustomName(name ?? "");
+            setEffectiveName(nameToString(entityData?.name) ?? "");
+        } finally {
+            setLoadingOptions(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        reloadSelectionUi(selected);
+    }, [selected?.Index, selected?.Version, reloadSelectionUi]);
+
+    const onSettingsChanged = useCallback(async () => {
+        await reloadSelectionUi(selected);
+        setTick((x) => x + 1);
+    }, [reloadSelectionUi, selected]);
+
+    const commitCustomName = useCallback(async () => {
+        if (isNullEntity(selected)) return;
+        await SelectInfoPanelService.setAggregateCustomName(selected!, customName);
+        await onSettingsChanged();
+    }, [selected, customName, onSettingsChanged]);
+
+    const seedOption = options.find((o) => o?.type?.value__ === AdrEntityType.RoadAggregation);
+    const highwayOption = options.find((o) => o?.type?.value__ === AdrEntityType.HighwayAggregate);
+    const isAdr = !!highwayOption || !!seedOption?.isAdrAggregate;
 
     return (
         <>
             <VCR.Section title={translate("roadGrouping.toolOptions.title")}>
-                {body}
+                {!hasSelection && translate("roadGrouping.toolOptions.pickPrompt")}
+                {hasSelection && loadingOptions && <>...</>}
+                {hasSelection && !loadingOptions && (effectiveName || translate("roadGrouping.toolOptions.selected"))}
             </VCR.Section>
+            {hasSelection && !loadingOptions && (
+                <>
+                    <VCR.InfoRow
+                        left={<>{translate("roadGrouping.toolOptions.customName")}</>}
+                        right={
+                            <VW.StringInputField
+                                className={editorModule.input}
+                                value={customName}
+                                onChange={setCustomName}
+                                onChangeEnd={() => { void commitCustomName(); }}
+                            />
+                        }
+                    />
+                    {seedOption && !customName && (
+                        <SeedManagementOptionsComponent
+                            response={seedOption}
+                            seedEntity={seedOption.entityValue ?? selected!}
+                            onChanged={onSettingsChanged}
+                            showNamingSource={false}
+                        />
+                    )}
+                    {isAdr && highwayOption && (
+                        <HighwayAggregateSettings
+                            response={highwayOption}
+                            hostEntity={highwayOption.entityValue ?? selected!}
+                            onChanged={onSettingsChanged}
+                        />
+                    )}
+                    {!isAdr && !seedOption && (
+                        <>{translate("roadGrouping.toolOptions.pickPrompt")}</>
+                    )}
+                </>
+            )}
             {hasSelection && (
                 <VCR.Section title={translate("roadGrouping.toolOptions.actions")}>
                     <FocusDisabled>
