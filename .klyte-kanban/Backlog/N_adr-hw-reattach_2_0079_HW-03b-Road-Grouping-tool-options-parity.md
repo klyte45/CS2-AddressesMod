@@ -70,8 +70,7 @@ Fourth task. Expand RoadGroupingToolPanel: replace selected #Index display with 
 
 ### Is dependent for
 
-
-
+- [0084] HW-08-Smoke-acceptance-checklist
 ### Is related to
 
 - [0067] ACT-05-Road-Grouping-ADR-mutations
@@ -80,6 +79,8 @@ Fourth task. Expand RoadGroupingToolPanel: replace selected #Index display with 
 
 - HW-03-VUIO-Addresses-SIP-highway-section
 - HW-04-Naming-highway-override-branch
+
+---
 
 ## Other Notes
 
