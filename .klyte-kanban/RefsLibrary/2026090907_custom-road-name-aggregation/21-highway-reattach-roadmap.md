@@ -140,10 +140,11 @@ See checklist below.
 - [ ] Empty / default `highwayDataId` behaves as non-highway
 - [ ] Destroying last ADR membership tears down highway component with the aggregate
 - [ ] No revive of Aggregate-hosted highway cache or marker↔Aggregate sync jobs
+- [ ] No save-migration work for old Aggregate/marker highway identity (**beta** — out of scope; manual re-assign OK)
 - [ ] i18n pending entries only (no agent edits to `i18n.csv`)
 - [ ] All HW-01…HW-08 completed in the **same** sprint
 
 ## Later (not this epic)
 
 - Highway shields / multi-recipe world name labels ([17](17-label-extensions-text-images-look.md))
-- Save migration from pre-ACT-01 Aggregate/marker highway identity
+- *(Not planned: save migration of pre-ACT-01 Aggregate/marker highway — beta breakage accepted)*
