@@ -1,7 +1,7 @@
+**Start time:** 2026-09-12 21:08 -0300
 # [0072] LBL-03-ADR-placement-job-vanilla-ADR-membership
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/18-label-takeover-sprint-roadmap.md LBL-03
