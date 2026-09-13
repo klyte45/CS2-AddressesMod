@@ -71,7 +71,7 @@ HW-01 ──► HW-02 ──► HW-03 ──► HW-03b
 
 ### HW-01 — Component + lifecycle
 
-- Add [`ADRNameAggregateHighwayData`](20-highway-reattach-on-adr-aggregates.md) (`highwayDataId`, `routeDirection`, `mileageOverrideActive`, `mileageOverrideKm`, `reverseCounting`).
+- Add [`ADRNameAggregateHighwayData`](20-highway-reattach-on-adr-aggregates.md) (`highwayDataId`, `routeDirection`, `mileageOverrideActive`, `mileageOverrideMeters`, `reverseCounting`).
 - `ISerializable`; register like other ADR components.
 - Attach on ADR aggregate create; destroy with entity; defaults = inactive / no route.
 - No cache struct; no `AdrHighwayRoutes2BSystem`.

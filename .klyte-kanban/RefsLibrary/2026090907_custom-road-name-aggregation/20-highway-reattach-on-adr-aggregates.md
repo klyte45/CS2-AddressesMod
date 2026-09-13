@@ -72,11 +72,11 @@ Historical field map (for implementers reading old saves / WE comments):
 | Old location | Old field | New location |
 |--------------|-----------|--------------|
 | Aggregate `ADRHighwayAggregationData` | `highwayDataId` | `ADRNameAggregateHighwayData.highwayDataId` |
-| Aggregate cache | `startDistanceOverrideKm` | authored `mileageOverrideKm` when override active (chain-start baseline) |
+| Aggregate cache | `startDistanceOverrideKm` | authored `mileageOverrideMeters` when override active (chain-start baseline, meters) |
 | Aggregate cache | `reverseCounting` | `ADRNameAggregateHighwayData.reverseCounting` |
 | Marker | `routeDataIndex` | `highwayDataId` on ADR aggregate |
 | Marker | `RouteDirection` | `routeDirection` on ADR aggregate |
-| Marker | `overrideMileage` / `newMileage` / `reverseMileageCounting` | `mileageOverrideActive` / `mileageOverrideKm` / `reverseCounting` |
+| Marker | `overrideMileage` / `newMileage` / `reverseMileageCounting` | `mileageOverrideActive` / `mileageOverrideMeters` / `reverseCounting` |
 
 ---
 
@@ -88,8 +88,8 @@ On entities that have `ADRNameAggregate`:
 |-------|------|---------|-------|
 | `highwayDataId` | `Hash128` | `default` | Link to registry; `default` = not a highway route |
 | `routeDirection` | enum (former marker `RouteDirection`) | `NONE` (or first enum value) | WE / display cardinals + INTERNAL/EXTERNAL |
-| `mileageOverrideActive` | `bool` | `false` | When false, ignore `mileageOverrideKm` |
-| `mileageOverrideKm` | `float` | `0` | When active: **chain-start** mileage baseline (former cache `startDistanceOverrideKm`). No marker-curve bake |
+| `mileageOverrideActive` | `bool` | `false` | When false, ignore `mileageOverrideMeters` |
+| `mileageOverrideMeters` | `int` | `0` | When active: **chain-start** mileage baseline in **meters** (UI shows km/mi from game unit settings). No marker-curve bake |
 | `reverseCounting` | `bool` | `false` | Mileage growth orientation along the ADR element walk |
 
 Serialization: `ISerializable` with version bump discipline like other ADR components. Prefer always present on ADR aggregates (defaults = inactive) so SIP does not special-case missing component; alternatively add on first SIP write — pick one in HW-01 and stick to it.
@@ -119,7 +119,7 @@ Selected RoadAggregation
   └─ only if isAdrAggregate: HighwayAggregateSettings
         ├─ highway registry picker (highwayDataId)
         ├─ routeDirection
-        ├─ mileageOverrideActive + mileageOverrideKm
+        ├─ mileageOverrideActive + mileageOverrideMeters
         └─ reverseCounting
 ```
 
@@ -169,7 +169,7 @@ Bindings may live on `AdrRoadGroupingController` (tool-scoped) calling the same 
 | Consumer | Required behavior |
 |----------|-------------------|
 | [`AdrNameSystemOverrides`](../../../BelzontAdr/Overrides/AdrNameSystemOverrides.cs) | If edge/ADR has non-default `highwayDataId`, highway name from registry (prefix/suffix/name rules as before ACT-01); honor custom name when set |
-| [`AdrRoadAddressNumbering`](../../../BelzontAdr/Utils/AdrRoadAddressNumbering.cs) / [`BuildingUtilsOverrides`](../../../BelzontAdr/Overrides/BuildingUtilsOverrides.cs) | Prefer ADR walk; when highway override active, use `mileageOverrideKm` + `reverseCounting` as chain baseline/orientation |
+| [`AdrRoadAddressNumbering`](../../../BelzontAdr/Utils/AdrRoadAddressNumbering.cs) / [`BuildingUtilsOverrides`](../../../BelzontAdr/Overrides/BuildingUtilsOverrides.cs) | Prefer ADR walk; when highway override active, use `mileageOverrideMeters` + `reverseCounting` as chain baseline/orientation |
 | Road Grouping number cards ([`AdrRoadGroupingController`](../../../BelzontAdr/Controllers/AdrRoadGroupingController.cs)) | Same numbering helpers; tool options own name/seed/highway UI (not the cards) |
 | [`AdrRegionsSystem`](../../../BelzontAdr/Systems/AdrRegionsSystem.cs) / Region map VUIO | **Required** (HW-07): class/hover by ADR `highwayDataId` |
 | WE default XML + WE integration | Restore formulae from ACT-02 `[Feature]` placeholders + XML comments; resolve route/mileage/direction via attached net → `ADRNameAggregated.m_Aggregate` → `ADRNameAggregateHighwayData` + registry |
