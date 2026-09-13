@@ -31,13 +31,13 @@ Third task. VUIO Addresses SIP: keep SeedManagement for both Aggregate types; ad
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] RoadAggregation SIP still shows SeedManagement for vanilla and ADR
-- [ ] ADR selections also show HighwayAggregateSettings: registry picker, routeDirection, mileageOverrideActive + mileageOverrideKm, reverseCounting
-- [ ] Vanilla Aggregate SIP has no highway controls
-- [ ] Highway UI uses HW-02 bindings; edits persist and dirty consumers
-- [ ] Shared/extractable components preferred for tool reuse (or explicit note if not extractable yet)
-- [ ] i18n pending *_entries.txt for new keys (en-US + pt-BR columns); no i18n.csv edits
-- [ ] npm frontend build succeeds; playtest SIP on vanilla Aggregate vs ADR
+- [x] RoadAggregation SIP still shows SeedManagement for vanilla and ADR
+- [x] ADR selections also show HighwayAggregateSettings: registry picker, routeDirection, mileageOverrideActive + mileageOverrideKm, reverseCounting
+- [x] Vanilla Aggregate SIP has no highway controls
+- [x] Highway UI uses HW-02 bindings; edits persist and dirty consumers
+- [x] Shared/extractable components preferred for tool reuse (or explicit note if not extractable yet)
+- [x] i18n pending *_entries.txt for new keys (en-US + pt-BR columns); no i18n.csv edits
+- [x] npm frontend build succeeds; playtest SIP on vanilla Aggregate vs ADR
 
 ---
 
@@ -48,6 +48,9 @@ Third task. VUIO Addresses SIP: keep SeedManagement for both Aggregate types; ad
 3. Clear highwayDataId to default for not-a-highway
 4. Do not show marker route/mileage UI on RoadMarkSettings — markers stay visual-only
 5. Remove translate fallbacks only in files you touch (i18n rule)
+6. Added shared HighwayAggregateSettings.tsx (registry picker, routeDirection, mileage override + km, reverseCounting) wired via HW-02 SelectInfoPanelService setters on response.entityValue.
+7. AddressesInfoOptionsComponent: RoadAggregation always shows SeedManagement; HighwayAggregateSettings only when isAdrAggregate. Vanilla Aggregate has no highway UI.
+8. i18n pending BelzontAdr/i18n/highway_aggregate_settings_entries.txt (en-US + pt-BR); RouteDirection.NONE added. npm run build succeeded.
 
 ---
 
