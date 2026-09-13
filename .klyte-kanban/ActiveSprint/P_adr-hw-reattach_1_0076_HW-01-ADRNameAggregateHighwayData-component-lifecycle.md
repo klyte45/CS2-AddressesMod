@@ -31,13 +31,13 @@ First task of epic adr-hw-reattach (single-sprint catalog in RefsLibrary 21). Re
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] New ADRNameAggregateHighwayData on ADRNameAggregate entities with fields: highwayDataId (Hash128), routeDirection (enum), mileageOverrideActive (bool), mileageOverrideKm (float), reverseCounting (bool)
-- [ ] ISerializable with version discipline; registered like other ADR components
-- [ ] Component created with ADR aggregate (defaults: highwayDataId default, override inactive, reverse false, direction NONE or equivalent)
-- [ ] Component destroyed when ADR aggregate is torn down
-- [ ] No ADRHighwayAggregationCacheData, DirtyHwId-on-Aggregate, CalculateHighwayCacheData, or AdrHighwayRoutes2BSystem revived
-- [ ] mileageOverrideKm semantics documented in code/comments: chain-start baseline when override active (former cache startDistanceOverrideKm)
-- [ ] RouteDirection enum restored with former marker values (NONE/cardinals/INTERNAL/EXTERNAL) for WE compatibility
+- [x] New ADRNameAggregateHighwayData on ADRNameAggregate entities with fields: highwayDataId (Hash128), routeDirection (enum), mileageOverrideActive (bool), mileageOverrideKm (float), reverseCounting (bool)
+- [x] ISerializable with version discipline; registered like other ADR components
+- [x] Component created with ADR aggregate (defaults: highwayDataId default, override inactive, reverse false, direction NONE or equivalent)
+- [x] Component destroyed when ADR aggregate is torn down
+- [x] No ADRHighwayAggregationCacheData, DirtyHwId-on-Aggregate, CalculateHighwayCacheData, or AdrHighwayRoutes2BSystem revived
+- [x] mileageOverrideKm semantics documented in code/comments: chain-start baseline when override active (former cache startDistanceOverrideKm)
+- [x] RouteDirection enum restored with former marker values (NONE/cardinals/INTERNAL/EXTERNAL) for WE compatibility
 - [ ] Compile succeeds after user builds solution
 
 ---
@@ -52,6 +52,9 @@ First task of epic adr-hw-reattach (single-sprint catalog in RefsLibrary 21). Re
 6. Do not serialize a separate cache struct
 7. Reference deleted types from git history e65d6fa^ for Aggregate Data/Cache shapes; d3eae02^ for marker RouteDirection/mileage
 8. Save migration of pre-strip Aggregate/marker highway identity is OUT OF SCOPE (mod is beta). Ignore leftover old data on load; players re-assign via SIP/tool.
+9. Added BelzontAdr/Components/ADRNameAggregateHighwayData.cs (ISerializable v0): highwayDataId, routeDirection (NONE…EXTERNAL; NONE replaces historical UNDEFINED at ordinal 0), mileageOverrideActive/Km, reverseCounting. Always-present defaults via CreateDefault().
+10. CreateAggregate() calls EnsureHighwayData(); DestroyAggregate/DestroyEntity tears down with the entity. Maintenance backfills EnsureHighwayData for ADR aggregates from pre-HW-01 saves.
+11. No cache/DirtyHwId/AdrHighwayRoutes2BSystem revived. Awaiting user solution compile for DoD compile item.
 
 ---
 
