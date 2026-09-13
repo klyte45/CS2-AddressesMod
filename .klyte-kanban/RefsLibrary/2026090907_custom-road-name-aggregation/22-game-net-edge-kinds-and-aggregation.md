@@ -52,14 +52,14 @@ Primary signal: **`PrefabRef` → prefab `*Data`**. Edge tags are secondary / co
 |------|----------------------|----------------------|-------|
 | Road (vehicle) | **`RoadData`** | `Road` **optional / unreliable** | Includes highway (`UseHighwayRules`) and `RoadType.PublicTransport` |
 | Pathway | **`PathwayData`** | **None** | Tags alone cannot see pathways |
-| Train | **`TrackData`** + `TrackTypes.Train` | `TrainTrack` | Tags also toggled by `LaneReferencesSystem` from lane composition |
-| Tram | **`TrackData`** + `TrackTypes.Tram` | `TramTrack` | Same dynamic tag path |
+| Train | **`TrackData`** + `TrackTypes.Train` (also **`Train\|Tram`**) | `TrainTrack` (and/or both train+tram tags) | Dual `Train\|Tram` → **Train** for ADR; tags also toggled by `LaneReferencesSystem` |
+| Tram | **`TrackData`** + `TrackTypes.Tram` only | `TramTrack` | Pure tram only — not dual with train |
 | Subway | **`TrackData`** + `TrackTypes.Subway` | `SubwayTrack` | |
 | Waterway | **`WaterwayData`** | `Waterway` | |
 | Taxiway | **`TaxiwayData`** | `Taxiway` | |
 | Out of scope | Fence / Pipeline / PowerLine prefabs | — | Not ADR grouping / label targets unless later proven |
 
-`TrackTypes`: `Train=1`, `Tram=2`, `Subway=4`. Prefab `Train|Tram` initially adds **no** track tag in `TrackPrefab.AddTrackType`; lanes may later add **both** `TrainTrack` and `TramTrack`.
+`TrackTypes`: `Train=1`, `Tram=2`, `Subway=4`. Prefab `Train|Tram` initially adds **no** track tag in `TrackPrefab.AddTrackType`; lanes may later add **both** `TrainTrack` and `TramTrack`. For ADR classification, **`Train|Tram` (and both edge tags) maps to `AdrNetKind.Train`** — not a separate kind ([23](23-adr-net-kind-gate-labels-seeds.md)).
 
 `NetData.m_RequiredLayers` (`Layer.Road`, `Layer.TrainTrack`, …) matches tool raycast masks; useful corroboration, not the ADR classifier.
 
@@ -114,6 +114,6 @@ These treat edge `Game.Net.Road` as authoritative and will miss playtest streets
 | Street ↔ highway | Same vehicle-road family; may mix for naming |
 | Cross-kind mix | Forbid (road vs track vs pathway vs waterway vs taxiway) |
 | Seeds / road namesets | Only for prefab-`RoadData` aggregates |
-| Labels | Per-kind `NetNameData` (ADR-owned AggregateNet-like prefabs) when vanilla AggregateNet lacks `NetLabel` |
+| Labels | Per-kind `NetNameData` for non-road kinds; outline-by-kind (see [23](23-adr-net-kind-gate-labels-seeds.md)) |
 
 Design: [23](23-adr-net-kind-gate-labels-seeds.md). Implementation catalog: [24](24-adr-net-kind-roadmap.md).

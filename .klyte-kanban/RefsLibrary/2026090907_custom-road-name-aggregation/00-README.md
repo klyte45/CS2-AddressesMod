@@ -42,8 +42,8 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Label extensions (shields / multi-recipe / look knobs) | **Feasibility** documented in [17](17-label-extensions-text-images-look.md); **product strategy deferred** to later research. WE sync = **copy/re-register only** (no live shared `Texture2D`) |
 | Pack depth | Analysis + design + tool specs + activation catalog + label research (14–17) + label sprint catalog (18) + highway reattach (20–21) + **net-kind (22–24)** |
 | Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR; BelzontWE for tool scaffold / WE atlas APIs |
-| Net kind classifier | **Prefab `*Data` first** (`RoadData` / `TrackData` / …); `Game.Net.Road` **unreliable** (streets/avenues may lack it). See [22](22-game-net-edge-kinds-and-aggregation.md) |
-| ADR kind mix | Exact `AdrNetKind` match; street↔highway **allowed**; cross-kind **forbidden**. Per-kind ADR `NetNameData` prefabs; road seeds only for `RoadData`. See [23](23-adr-net-kind-gate-labels-seeds.md) / [24](24-adr-net-kind-roadmap.md) |
+| Net kind classifier | **Prefab `*Data` first** (`RoadData` / `TrackData` / …); `Game.Net.Road` **unreliable** (streets/avenues may lack it). Dual `Train\|Tram` → **Train**. See [22](22-game-net-edge-kinds-and-aggregation.md) |
+| ADR kind mix | Exact `AdrNetKind` match; street↔highway **allowed**; cross-kind **forbidden**. Per-kind ADR `NetNameData` (non-road) + outline-by-kind (face `#FFFFFFC0`; Subway `#004400`, Road `#333333`, …). Road seeds only for `RoadData`. See [23](23-adr-net-kind-gate-labels-seeds.md) / [24](24-adr-net-kind-roadmap.md) |
 
 ## Reading order
 
