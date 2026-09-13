@@ -10,10 +10,10 @@ Vanilla road names gone with ADR loaded; ADR labels on aggregatable roads at par
 
 - **Sprint number**: 013
 - **Start date**: 2026-09-12 18:15 -0300
-- **End date**:
+- **End date**: 2026-09-12 23:08 -0300
 - **Original tasks**: 06
 - **Original task IDs**: [0070], [0071], [0072], [0073], [0074], [0075]
-- **Delivered tasks (from original)**:
+- **Delivered tasks (from original)**: 6
 - **Added tasks**: 0
-- **Delivered tasks (from added)**:
-- **Total delivered tasks**:
+- **Delivered tasks (from added)**: 0
+- **Total delivered tasks**: 6
