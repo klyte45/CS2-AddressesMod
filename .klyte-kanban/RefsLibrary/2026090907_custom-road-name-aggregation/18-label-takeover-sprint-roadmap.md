@@ -109,7 +109,7 @@ Board IDs assigned **2026-09-12** in backlog (`N`, epic `adr-road-labels`) — r
 | LBL-03 | **0072** | ADR placement job (vanilla + ADR membership) | 3 | LBL-02 [0071], ACT-03a+ | Port/adapt `UpdateLabelPositionsJob` / `AddLabels` (`100f` spacing, redundancy, `m_MaxScale`). Dual source: unassociated → vanilla `AggregateElement` on Aggregate; associated → `ADRNameAggregateElement` on ADR aggregate. Write vanilla-compatible `LabelPosition` buffers on the **pick owner** entity (S1/S2). Burst preferred. See [15](15-adr-citywide-name-label-takeover.md). |
 | LBL-04 | **0073** | ADR name mesh batch + DrawMesh | 4 | LBL-02 [0071], LBL-03 [0072] | Port `FillNameMeshData` warp/batch; ADR render system mirrors name half of `AggregateRenderSystem` (`hideOverlay`, Game/SceneView cameras, surface + underground submeshes). Do not draw arrows. Citywide visible names at parity. |
 | LBL-05 | **0074** | Forked pick + SIP Aggregate section parity | 5 | LBL-03 [0072], ACT-04 [0066] | **Pick:** Burst clone of `Game.Net.RaycastJobs.RaycastLabelsJob` (~150 lines); resolve `m_Owner` S1 vs S2; schedule from managed Harmony on `RaycastSystem` when `TypeMask.Labels`. Do **not** patch Burst job body. **SIP:** audit every InGame SIP section / gate that requires vanilla `Aggregate` and/or `AggregateElement` (at minimum `RoadSection`, `TitleSection.GetVirtualKeyboardLocaleKey`, Aggregate-path `ImageSystem` / icon — full list via Game.dll search at implement time). Managed Harmony so **ADR name-aggregate (S2)** shows the same sections and data as a vanilla Aggregate selection: `RoadSection` walk **`ADRNameAggregateElement`** with same per-edge math as [06](06-labels-vs-vanilla-sync-and-harmony.md); S1 remainder filtering when a vanilla Aggregate is still selected. Title locale `"RoadName"` for ADR entity. Ensure `SelectedInfoUISystem.GetAggregatePosition` works for S2 `LabelPosition`. **Traffic routes (required):** `ActionsSection.hasTrafficRoutes` for S2 + live `TrafficRoutesSystem` path (mirror `AggregateElement` from ADR + accept S2 like Aggregate for `FillTargetMapJob`). Prefer shipping **DefaultTool H1** highlight list job in this task when cheap (same membership helper as RoadSection); otherwise open **LBL-08**. **Look (cheap):** ADR name materials `_OutlineColor` `#004400` (ADR-style clones only). See [06](06-labels-vs-vanilla-sync-and-harmony.md) / [15](15-adr-citywide-name-label-takeover.md). |
-| LBL-06 | **0075** | Integration dogfood + game-update checklist | 6 | LBL-04 [0073], LBL-05 [0074] | Dogfood: load city, locale change, nameset/custom rename, Temp place/upgrade, tunnels, ADR fork/edit via Road Grouping, pick + **full SIP panel on S2** (stats, title rename key, icon) vs vanilla Aggregate. Document re-diff checklist against kcs2m GUID for mesh/render/raycast/SIP surfaces ([16](16-label-takeover-effort-and-risk.md)). Fix P0 parity holes or open LBL-07…09 for spill. |
+| LBL-06 | **0075** | Integration dogfood + game-update checklist | 6 | LBL-04 [0073], LBL-05 [0074] | Dogfood: load city, locale change, nameset/custom rename, Temp place/upgrade, tunnels, ADR fork/edit via Road Grouping, pick + **full SIP panel on S2** (stats, title rename key, icon) vs vanilla Aggregate. Written re-diff checklist: [19](19-game-update-re-diff-checklist.md) (GUID `d124bec1…`). Fix P0 parity holes or open LBL-07…09 for spill. |
 
 ### Optional spill tasks (Sprint 014)
 
@@ -143,6 +143,8 @@ Exact names follow repo conventions at implementation time.
 
 ## Acceptance sketches (parity)
 
+See also dogfood script in [19](19-game-update-re-diff-checklist.md).
+
 - [ ] With ADR loaded, vanilla road **name** overlays are gone; **arrows** still appear when tools require them.
 - [ ] All aggregatable roads show name labels at approximately vanilla density/scale/color/underground behavior.
 - [ ] Unassociated: click label selects vanilla `Aggregate` (S1); SIP road sections match today.
@@ -151,6 +153,7 @@ Exact names follow repo conventions at implementation time.
 - [ ] Rename / locale / nameset change refreshes labels without requiring save/reload.
 - [ ] Temp net edit does not leave stuck or duplicate name meshes (parity bar).
 - [ ] No Harmony inside `AggregateSystem` or Burst `RaycastLabelsJob` body.
+- [ ] Game-update re-diff checklist present ([19](19-game-update-re-diff-checklist.md)).
 
 ## Relation
 
@@ -158,5 +161,6 @@ Exact names follow repo conventions at implementation time.
 - [15](15-adr-citywide-name-label-takeover.md) — architecture / policy  
 - [16](16-label-takeover-effort-and-risk.md) — effort bands / risk  
 - [17](17-label-extensions-text-images-look.md) — deferred extensions  
+- [19](19-game-update-re-diff-checklist.md) — post-update re-diff + dogfood script  
 - [13](13-activation-sprint-roadmap.md) — activation prereq; this doc expands its labels backlog line  
 - [06](06-labels-vs-vanilla-sync-and-harmony.md) — pick/SIP archive; thin-edge approach superseded for epic scope  

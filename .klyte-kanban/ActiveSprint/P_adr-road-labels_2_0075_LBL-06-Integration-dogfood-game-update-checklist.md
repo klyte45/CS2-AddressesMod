@@ -57,6 +57,7 @@ Sixth and closing task of epic adr-road-labels phase-1 (Sprint 013 catalog). End
 8. Capture S1 vs S2 visual + pick + SIP notes
 9. If LBL-05 spilled H1/SIP to LBL-08, verify core path and mark spill in checklist
 10. Update 18 Board IDs / status when sprint closes
+11. Added RefsLibrary 19-game-update-re-diff-checklist.md (GUID d124bec1… surfaces 1–12 + dogfood script + known gaps). Linked from 16/18. H1 shipped in LBL-05 — no LBL-08 membership spill. Green selection tint cancelled. Optional spills: LBL-07 Temp deeper parity; LBL-09 mass dirty perf if hitch. Stopped for user extended playtest vs dogfood script in 19.
 
 ---
 

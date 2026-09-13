@@ -73,7 +73,7 @@ Calendar feel: **~1 sprint** (suggested **Sprint 013**) for someone familiar wit
 | `RaycastSystem` Labels schedule | Medium | Thin managed hook only |
 | Aggregate membership Validate/Combine | High if fought — **out of scope** | Leave vanilla |
 
-Re-verify against current kcs2m GUID (`d124bec16c0748da9ebf48366d9c1d68` as of this doc; older pack used `b5fd0b95…`).
+Re-verify against current kcs2m GUID (`d124bec16c0748da9ebf48366d9c1d68` as of this doc; older pack used `b5fd0b95…`). Full surface table + dogfood script: [19](19-game-update-re-diff-checklist.md).
 
 ## What existing docs already cover (reduces discovery)
 
@@ -84,6 +84,7 @@ Re-verify against current kcs2m GUID (`d124bec16c0748da9ebf48366d9c1d68` as of t
 | [14](14-vanilla-road-label-pipeline.md) | Full name pipeline |
 | [15](15-adr-citywide-name-label-takeover.md) | Shutdown + always-on + dual placement sources |
 | [11](11-road-grouping-tool-roadmap.md) / [13](13-activation-sprint-roadmap.md) | Sequencing: after ACT-06 |
+| [19](19-game-update-re-diff-checklist.md) | Post-update re-diff + dogfood (LBL-06) |
 
 ## Risks / gotchas
 
@@ -97,4 +98,5 @@ Re-verify against current kcs2m GUID (`d124bec16c0748da9ebf48366d9c1d68` as of t
 
 - [15](15-adr-citywide-name-label-takeover.md) — architecture  
 - [17](17-label-extensions-text-images-look.md) — deferred extension cost (not in parity bands)  
+- [19](19-game-update-re-diff-checklist.md) — game-update checklist  
 - [13](13-activation-sprint-roadmap.md) — “ADR world name labels + forked RaycastLabelsJob” later backlog  
