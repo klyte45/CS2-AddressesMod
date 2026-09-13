@@ -16,7 +16,7 @@ Supersedes “thin contract” as the next backend step. Road Grouping T0–T3 i
 | Highway on Aggregate | **Remove** now (not migrate in this wave): delete Aggregate highway struct fields/types; **ignore** previously saved Aggregate highway data on load |
 | Markers | **Visual-only** runtime/UI (strip route/mileage); **keep** pylon fields; **keep** highway **registry** settings for later tool epic |
 | WE layout | Keep formula XML tags; **`[Feature Name]`** placeholders + **XML comments** for old formulae |
-| Out of this wave | World labels / forked pick; SIP H1; highway reattach via tool |
+| Out of this wave | World labels / forked pick; SIP H1; highway reattach ([20](20-highway-reattach-on-adr-aggregates.md) / [21](21-highway-reattach-roadmap.md)) |
 
 ```text
 On first membership edit:
@@ -76,7 +76,7 @@ Does **not** include `ForkFromVanilla` or nameset seeding (those are ACT-03c).
 
 Save migration: on load, **ignore** previously saved Aggregate highway component data (drop/skip leftover components). **Do not** migrate/convert old `highwayDataId` or cache values. Beta OK.
 
-**Keep:** settings [`HighwayRegisterManagement.tsx`](../../../_Frontends/UI/k45_adr_vuio/src/settings/tabs/region/subpages/HighwayRegisterManagement.tsx) + registry APIs (orphaned from Aggregate until reattached via tool later). Marker route/mileage tool/SIP UI strip is **ACT-02**, not ACT-01.
+**Keep:** settings [`HighwayRegisterManagement.tsx`](../../../_Frontends/UI/k45_adr_vuio/src/settings/tabs/region/subpages/HighwayRegisterManagement.tsx) + registry APIs (orphaned from Aggregate until reattached via Addresses SIP later — [20](20-highway-reattach-on-adr-aggregates.md)). Marker route/mileage tool/SIP UI strip is **ACT-02**, not ACT-01.
 
 ---
 

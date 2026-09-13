@@ -81,7 +81,7 @@ Historical note (LBL-07): would have chased place/upgrade/replace/cancel ghost o
 | Theme | Doc | When |
 |-------|-----|------|
 | TMP sprite shields / multi-recipe / look knobs / WE copy-register | [17](17-label-extensions-text-images-look.md) | After later **product** research |
-| Highway reattach via tool | [13](13-activation-sprint-roadmap.md) | Independent of labels |
+| Highway reattach via Addresses SIP + tool options | [20](20-highway-reattach-on-adr-aggregates.md) / [21](21-highway-reattach-roadmap.md) | Independent of labels |
 
 ---
 

@@ -7,7 +7,7 @@
 - Let players define **custom road name associations** (which edges share one street name and one house-number sequence).
 - Avoid fighting vanilla `AggregateSystem` Validate/Combine/Create.
 - Keep **labels, SIP addresses, and building numbers** consistent when an edge is ADR-associated.
-- **Activation wave:** strip Aggregate-hosted highway components; markers visual-only; introduce full ADR Aggregate/Element/Aggregated and fork-from-vanilla. Highway **reattach via Road Grouping tool later** (not migrate-in-place this wave). See [12](12-activation-change-map.md).
+- **Activation wave:** strip Aggregate-hosted highway components; markers visual-only; introduce full ADR Aggregate/Element/Aggregated and fork-from-vanilla. Highway **reattach later** via Addresses SIP **and** Road Grouping tool options on ADR ([20](20-highway-reattach-on-adr-aggregates.md)) — not migrate-in-place in activation. See [12](12-activation-change-map.md).
 
 ## Non-goals
 
@@ -36,7 +36,7 @@ Use ADR-prefixed types so they never collide with vanilla:
 | `ADRNameAggregate` | Tag on ADR aggregate entity | Marks ADR-owned name-aggregate (parallel to vanilla `Aggregate`) |
 | `ADRNameAggregateElement` | Buffer on ADR aggregate | Ordered membership entries (edge + per-member flags) — source of truth for name + numbering walk |
 | `ADRNameAggregated` | Component on edge | Link to ADR aggregate when associated; absent ⇒ fall back to vanilla. Mirrors membership fields needed for edge queries |
-| Existing | On ADR aggregate | `ADRRandomizationData`, custom name storage (via vanilla NameSystem custom-name APIs if applicable). **`ADRHighwayAggregationData` / Dirty / Cache** — **not** on Aggregate in activation wave; reattach to ADR via tool in a **later** epic |
+| Existing | On ADR aggregate | `ADRRandomizationData`, custom name storage (via vanilla NameSystem custom-name APIs if applicable). **`ADRHighwayAggregationData` / Dirty / Cache** — **not** on Aggregate in activation wave; reattach as `ADRNameAggregateHighwayData` via Addresses SIP + Road Grouping tool options in a **later** epic ([20](20-highway-reattach-on-adr-aggregates.md)) |
 
 Do **not** revive `ADREdgeData.fixedAggregation` as the link field; prefer an explicit `ADRNameAggregated` (or rename clearly) so edge geometry metadata stays separate from association.
 
@@ -113,7 +113,7 @@ Fill `ADRNameAggregateElement` with a practical ordered walk (geometry / associa
 
 **Activation wave ([12](12-activation-change-map.md) ACT-01 / ACT-02 / ACT-03a…ACT-03c):** **Remove** Aggregate-hosted highway components. Markers become **visual-only** (strip route/mileage; keep pylons; WE `[Feature]` placeholders). Introduce ADR name-aggregate types (03a), membership CRUD (03b), then `ForkFromVanilla` + seeding (03c). **Keep** highway **registry** settings UI. Do **not** migrate highway onto ADR in this activation sprint.
 
-**Later epic:** reattach route/mileage onto `ADRNameAggregate` via Road Grouping tool; restore WE formulae from placeholders. Beta breakage on old Aggregate highway saves is acceptable when stripping.
+**Later epic:** reattach route/mileage/direction onto `ADRNameAggregate` via **Addresses SIP** and **Road Grouping tool options** (shared seed + highway + custom name); restore WE formulae from placeholders; **no** marker-derived mileage cache. Design: [20](20-highway-reattach-on-adr-aggregates.md); catalog: [21](21-highway-reattach-roadmap.md). Beta breakage on old Aggregate highway saves is acceptable when stripping.
 
 ## Labels and label pick (planned path — after activation)
 

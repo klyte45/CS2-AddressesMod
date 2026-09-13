@@ -75,7 +75,7 @@ Road Grouping T0–T3 is shipped. Next backend work is **full** ADR Aggregate/El
 
 | In activation sprint (ACT-01…ACT-06, with ACT-03a/b/c) | Later epics |
 |--------------------------------------|-------------|
-| Strip Aggregate highway host; markers visual-only | Highway reattach via tool |
+| Strip Aggregate highway host; markers visual-only | Highway reattach via Addresses SIP ([20](20-highway-reattach-on-adr-aggregates.md)) |
 | `ADRNameAggregate` / Element / Aggregated + serialize + ForkFromVanilla | World **name** labels + forked pick |
 | NameSystem + GetAddress prefer ADR | SIP / DefaultTool H1 |
 | Road Grouping real membership writes | |
@@ -97,7 +97,7 @@ ACT-03c. ForkFromVanilla + ADR seeding
 ACT-04. NameSystem / GetAddress / SIP seed prefer ADR
 ACT-05. Road Grouping mutations → ADR
 ACT-06. Membership maintenance (remap + gap-fill)
-Later: highway reattach via tool; world labels; fixedAggregation cleanup
+Later: highway reattach via Addresses SIP ([20](20-highway-reattach-on-adr-aggregates.md) / [21](21-highway-reattach-roadmap.md)); world labels; fixedAggregation cleanup
 
 Not in this wave: SIP / DefaultTool H1
 ```

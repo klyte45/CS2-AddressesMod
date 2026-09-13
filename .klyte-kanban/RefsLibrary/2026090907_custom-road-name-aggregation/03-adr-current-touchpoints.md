@@ -69,7 +69,7 @@ public Entity fixedAggregation;
 
 | Current behavior | Activation consequence |
 |------------------|------------------------|
-| Highway data on vanilla Aggregate | **Remove** Aggregate host (ACT-01); reattach via tool later |
+| Highway data on vanilla Aggregate | **Remove** Aggregate host (ACT-01); reattach via Addresses SIP later ([20](20-highway-reattach-on-adr-aggregates.md)) |
 | Markers with route/mileage | **Visual-only** (ACT-02); WE placeholders |
 | Namesets / seeds on Aggregate | Fork copies seed to ADR; vanilla `Redraw` (ACT-03c); types in ACT-03a; CRUD in ACT-03b |
 | `GetAggregateName` / GetAddress assume vanilla Aggregate | Prefer ADR when linked (ACT-04); split naming after fork |

@@ -9,7 +9,7 @@
 | Display vs simulation | Aggregation does **not** drive traffic sim; it drives naming, addressing, labels, SIP road panel, tools, one achievement ([02](02-consumer-audit.md)) |
 | Strategy | Parallel ADR system; do not override `AggregateSystem` |
 | Address scope | ADR association controls **name + house numbers** |
-| Highway data | **Activation:** strip Aggregate host; markers visual-only; registry kept. **Later:** reattach via tool onto ADR ([12](12-activation-change-map.md)) |
+| Highway data | **Activation:** strip Aggregate host; markers visual-only; registry kept. **Later:** reattach via Addresses SIP + Road Grouping tool options onto ADR ([20](20-highway-reattach-on-adr-aggregates.md) / [21](21-highway-reattach-roadmap.md)) |
 | World labels | **ADR-owned** draw + suppress vanilla on associated edges ([06](06-labels-vs-vanilla-sync-and-harmony.md)) |
 | Label pick | **Fork** `RaycastLabelsJob` (~150 lines); schedule via managed `RaycastSystem` hook — not Burst Harmony |
 | House-number chain order | **Not a research gap** — vanilla AggregateElement order is already rebuilt by Validate/Combine and is not a stable product guarantee; ADR already improves numbering (existing `GetAddress` / highway-cache overrides). Parallel ADR should keep using the same practical approach |
@@ -43,7 +43,7 @@ Vanilla: `GenerateEdgesSystem` can copy `Aggregated` from `Temp.m_Original`; `Ap
 
 **Settled continuity (gap-fill):** After a member leaves the ADR list (delete/replace/remap), auto-add any non-member edges that lie **between two still-member edges on the same vanilla Aggregate** when **both** endpoints have `preventPropagation == false`. Non-contiguous ADR is allowed via that membership flag. Per-member **`numberOverrideActive` (default false) + `numberOverride`** mirror highway marker override style. Full matrix: **[07-membership-maintenance-edge-cases.md](07-membership-maintenance-edge-cases.md)**; fields in [04](04-parallel-system-design-notes.md).
 
-**Needed for implementation:** Remap `ADRNameAggregated` via Temp original→new map; drop orphans; run gap-fill; teardown empty ADR aggregates; dirty names / tool overlays / highway cache.
+**Needed for implementation:** Remap `ADRNameAggregated` via Temp original→new map; drop orphans; run gap-fill; teardown empty ADR aggregates; dirty names / tool overlays / highway consumers (authored ADR highway data after reattach — [20](20-highway-reattach-on-adr-aggregates.md)).
 
 ### 3. `ADREdgeData` cleanup
 
@@ -63,7 +63,7 @@ Consumer audit focused on **Game.dll**. If other Managed DLLs reference Aggregat
 
 Order: strip Aggregate highway (ACT-01) → markers visual-only (ACT-02) → ADR components (ACT-03a) → membership CRUD (ACT-03b) → ForkFromVanilla + seed (ACT-03c) → name/address (ACT-04) → Road Grouping mutations (ACT-05) → membership maintenance (ACT-06).
 
-**Later (after ACT-06):** highway reattach via tool; **citywide ADR name labels** + forked pick — research [14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md); **task/sprint catalog [18](18-label-takeover-sprint-roadmap.md)** (supersedes thin-edge sketch in [06](06-labels-vs-vanilla-sync-and-harmony.md)); `fixedAggregation` cleanup.
+**Later (after ACT-06):** **highway reattach** via Addresses SIP + Road Grouping tool options — [20](20-highway-reattach-on-adr-aggregates.md) / [21](21-highway-reattach-roadmap.md); **citywide ADR name labels** + forked pick — research [14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md); **task/sprint catalog [18](18-label-takeover-sprint-roadmap.md)** (supersedes thin-edge sketch in [06](06-labels-vs-vanilla-sync-and-harmony.md)); `fixedAggregation` cleanup.
 
 **Explicitly deferred:** SIP `RoadSection` / `TitleSection` / ImageSystem / DefaultTool H1 — keep [06](06-labels-vs-vanilla-sync-and-harmony.md) as future reference only.
 

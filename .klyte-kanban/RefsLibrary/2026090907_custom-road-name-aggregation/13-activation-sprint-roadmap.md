@@ -37,7 +37,7 @@ Road Grouping **T0–T3** (tool, overlay, stubs, number cards) is already shippe
  └──► 3a ──► 3b ──► 3c ──► 4 ──► 5 ──► 6
 ```
 
-**Later backlog (after this sprint):** highway reattach via Road Grouping tool; world name labels + forked pick; `ADREdgeData` / `fixedAggregation` cleanup; SIP RoadSection / H1.
+**Later backlog (after this sprint):** highway reattach via Addresses SIP + Road Grouping tool options ([20](20-highway-reattach-on-adr-aggregates.md) / [21](21-highway-reattach-roadmap.md)); world name labels + forked pick; `ADREdgeData` / `fixedAggregation` cleanup; SIP RoadSection / H1.
 
 ---
 
@@ -75,7 +75,7 @@ Each task links to [12](12-activation-change-map.md).
 
 | Title | Notes |
 |-------|--------|
-| Highway reattach via Road Grouping tool | Re-host route/mileage on ADR aggregates; restore WE formulae from placeholders |
+| Highway reattach via Addresses SIP + Road Grouping tool options | Catalog: [21](21-highway-reattach-roadmap.md) (HW-01…08, incl. HW-03b; **single sprint**, HW-07 required); design: [20](20-highway-reattach-on-adr-aggregates.md). SIP + tool: seed, highway, custom name for ADR; regions map; WE restore; no mileage cache |
 | ADR world name labels + forked RaycastLabelsJob | Catalog: [18](18-label-takeover-sprint-roadmap.md) (LBL-01…06; Sprint 013). Arch: [15](15-adr-citywide-name-label-takeover.md). Archive pick notes: [06](06-labels-vs-vanilla-sync-and-harmony.md) |
 | Cleanup `ADREdgeData.fixedAggregation` | Delete or leave inert — [03](03-adr-current-touchpoints.md) |
 | SIP RoadSection / DefaultTool H1 | **In label epic:** SIP Aggregate-gated sections → [18](18-label-takeover-sprint-roadmap.md) **LBL-05**; DefaultTool H1 prefer LBL-05 / spill **LBL-08**. Design archive: [06](06-labels-vs-vanilla-sync-and-harmony.md) |

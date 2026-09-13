@@ -71,7 +71,7 @@ See activation **ACT-03a…ACT-06** in [13](13-activation-sprint-roadmap.md).
 
 - SIP / DefaultTool H1
 - World name labels / forked `RaycastLabelsJob`
-- Highway reattach via tool (after Aggregate strip)
+- Highway reattach via Addresses SIP (after Aggregate strip) — [20](20-highway-reattach-on-adr-aggregates.md) / [21](21-highway-reattach-roadmap.md)
 - Creating Kanban board items (catalog in [13](13-activation-sprint-roadmap.md) only)
 
 ## Relation
