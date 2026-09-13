@@ -21,7 +21,7 @@ This doc is **design only**. Implementation catalog: [21](21-highway-reattach-ro
 | WE | Restore formulae; resolve context from attached edge → `ADRNameAggregated` → `ADRNameAggregateHighwayData` (+ registry) |
 | Registry | Keep `HighwayData` + Region register UI |
 | Road Grouping tool options | When an ADR aggregate is selected: **custom name** input (replaces `Aggregation #Index`), **seed** controls (same as SIP), **highway** block (same as SIP). Membership gestures unchanged |
-| Saves | No migrate of pre-strip Aggregate/marker highway identity (beta OK) |
+| Saves | **Out of scope:** no migration of pre-strip Aggregate- or marker-hosted highway identity. Mod is **beta** — old highway-on-Aggregate / marker-route saves may lose that association; players re-assign via SIP/tool |
 
 ## Why no cache
 
@@ -181,7 +181,7 @@ Bindings may live on `AdrRoadGroupingController` (tool-scoped) calling the same 
 ## F. Explicit non-goals
 
 - Restoring marker-authored `routeDataIndex` / mileage / direction on `ADRHighwayMarkerData`
-- Migrating pre-strip Aggregate- or marker-hosted highway saves
+- **Save migration** of pre-strip Aggregate- or marker-hosted highway identity (**beta** — out of scope for this feature; re-assign manually)
 - Highway shields / shield+name on world name labels ([17](17-label-extensions-text-images-look.md) — still deferred)
 - Putting highway data back on vanilla `Aggregate`
 - Replacing Road Grouping **membership** gestures with SIP (membership stays tool-first; settings are dual-surface)

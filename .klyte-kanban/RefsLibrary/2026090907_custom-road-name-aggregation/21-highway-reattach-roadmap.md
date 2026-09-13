@@ -24,7 +24,7 @@ Do **not** start HW-* before ADR components exist; highway data has nowhere to l
 |----|-----|
 | `ADRNameAggregateHighwayData` on ADR aggregates | Highway fields on vanilla `Aggregate` |
 | Addresses SIP highway block for ADR only | Marker route/mileage authorship |
-| Road Grouping tool options: custom name + seed + highway (parity with ADR SIP) | Pre-strip save migration |
+| Road Grouping tool options: custom name + seed + highway (parity with ADR SIP) | **Save migration** (pre-ACT-01 Aggregate/marker highway) — **beta; out of scope** |
 | Naming + addressing + Road Grouping cards from authored fields | Highway shields on world name labels ([17](17-label-extensions-text-images-look.md)) |
 | WE formula restore + resolve via ADR aggregate | Separate mileage cache / `CalculateHighwayCacheData` / `AdrHighwayRoutes2BSystem` |
 | Regions map / registry hover by ADR `highwayDataId` (HW-07) | Replacing membership gestures with SIP |

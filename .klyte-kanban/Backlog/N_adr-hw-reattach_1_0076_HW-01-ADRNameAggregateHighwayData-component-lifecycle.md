@@ -51,6 +51,7 @@ First task of epic adr-hw-reattach (single-sprint catalog in RefsLibrary 21). Re
 5. Do not put highway fields on vanilla Aggregate or ADRHighwayMarkerData
 6. Do not serialize a separate cache struct
 7. Reference deleted types from git history e65d6fa^ for Aggregate Data/Cache shapes; d3eae02^ for marker RouteDirection/mileage
+8. Save migration of pre-strip Aggregate/marker highway identity is OUT OF SCOPE (mod is beta). Ignore leftover old data on load; players re-assign via SIP/tool.
 
 ---
 
