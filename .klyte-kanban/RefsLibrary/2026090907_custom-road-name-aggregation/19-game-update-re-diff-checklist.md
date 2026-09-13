@@ -11,7 +11,7 @@ After a Cities Skylines II Managed update, re-diff the surfaces ADR’s citywide
 1. Note new GUID from `kcs2m_backend_*` / boot.config.  
 2. For each row: search the listed symbols; compare signatures and call sites to ADR code paths.  
 3. Smoke the dogfood script at the bottom.  
-4. File gaps as LBL-07…09 (or new tasks) — do not silently absorb churn.
+4. File new gaps as new tasks if they appear — Sprint 014 spills (LBL-07…09) were discarded.
 
 ## Surfaces
 
@@ -41,11 +41,13 @@ After a Cities Skylines II Managed update, re-diff the surfaces ADR’s citywide
 
 ## Known gaps (optional spill)
 
-| Gap | Spill | Notes |
-|-----|-------|-------|
-| Deeper Temp / net-tool label parity beyond Select path | **LBL-07** | Create/upgrade/delete edge cases if dogfood finds stuck/dupe meshes |
-| H1 membership | — | Shipped in LBL-05; **no LBL-08** for membership |
-| Mass locale/nameset dirty performance | **LBL-09** | `AdrMainSystem` / mesh `m_LabelQuery` batching — profile only if hitch appears |
+**None planned.** Sprint 014 drafts discarded after dogfood:
+
+| Former spill | Disposition |
+|--------------|-------------|
+| LBL-07 Temp / net-tool label parity | Cancelled — symptoms not observed |
+| LBL-08 H1 highlight membership | Shipped in LBL-05 |
+| LBL-09 Mass-dirty performance | Cancelled — not needed |
 
 ## Dogfood script (LBL-06)
 
@@ -57,7 +59,7 @@ Baseline GUID: `d124bec16c0748da9ebf48366d9c1d68`.
 4. **Traffic routes:** enable on S2 selection — live paths over ADR edges.  
 5. **Look:** ADR name outline dark green `#004400`; vanilla Aggregate names black outline.  
 6. **Dirty:** locale change; nameset / custom rename; Road Grouping fork/edit/disassociate — labels refresh without permanent gaps/duplicates.  
-7. **Temp:** select S2 (labels stay); place/upgrade net on an associated stretch if available — no stuck/dupe name meshes (file LBL-07 if fail).  
+7. **Temp:** select S2 (labels stay); place/upgrade net on an associated stretch if available — no stuck/dupe name meshes.  
 8. **Tunnels / underground** view — underground name materials still readable.
 
 ## Relation

@@ -33,14 +33,14 @@ Do **not** start LBL-* before ADR components + name preference exist; otherwise 
 
 ## Recommended sprint plan
 
-Prefer **one primary sprint** for parity (matches [16](16-label-takeover-effort-and-risk.md) “~1 sprint, may spill”). Optional **spill / harden** sprint if placement or Temp-net work overruns.
+Prefer **one primary sprint** for parity (matches [16](16-label-takeover-effort-and-risk.md) “~1 sprint, may spill”). Optional harden sprint was drafted; **no longer needed** after dogfood.
 
 | Field | Value |
 |-------|--------|
 | Suggested epic label | **ADR road name-label takeover** |
 | Suggested epic slug | `adr-road-labels` |
 | Suggested primary sprint | **Sprint 013 — ADR road name labels (parity)** |
-| Optional spill sprint | **Sprint 014 — ADR road name labels harden** (only if needed) |
+| Optional spill sprint | ~~Sprint 014~~ — **cancelled** (LBL-07…09 discarded) |
 | Effort band | ~1.3–1.7× Road Grouping T0–T3; ~0.5–0.65× activation sprint ([16](16-label-takeover-effort-and-risk.md)) |
 
 ### Sprint 013 — parity (all LBL-01…LBL-06)
@@ -64,15 +64,17 @@ LBL-01 ──► LBL-02 ──► LBL-03 ──► LBL-04 ──► LBL-06
                  └── (materials shared with mesh)
 ```
 
-### Sprint 014 — harden (optional spill)
+### Sprint 014 — harden (discarded)
 
-Use only if Sprint 013 ships with known gaps. Draft tasks (create on board only if needed):
+Optional spill tasks were drafted; **all discarded after dogfood** (2026-09-12):
 
-| ID | Title | Notes |
-|----|-------|-------|
-| LBL-07 | Temp / net-tool label parity | Match vanilla Temp original remap / clear branches |
-| LBL-08 | DefaultTool H1 highlight membership | Same S1/S2 edge sets as SIP stats ([06](06-labels-vs-vanilla-sync-and-harmony.md)); spill if not finished in LBL-05 |
-| LBL-09 | Performance pass on mass dirty | Locale / nameset change should batch like vanilla `m_LabelQuery` |
+| ID | Title | Disposition |
+|----|-------|-------------|
+| LBL-07 | Temp / net-tool label parity | **Cancelled** — stuck/dupe/missing Temp labels not observed; LBL-03…05 Temp paths sufficient |
+| LBL-08 | DefaultTool H1 highlight membership | **Shipped in LBL-05** — never opened as spill |
+| LBL-09 | Mass-dirty performance | **Cancelled** — not needed |
+
+Historical note (LBL-07): would have chased place/upgrade/replace/cancel ghost or stuck name meshes beyond Select Temp parity. Re-open only if those symptoms appear later.
 
 ### Later (not this epic)
 
@@ -109,22 +111,18 @@ Board IDs assigned **2026-09-12** in backlog (`N`, epic `adr-road-labels`) — r
 | LBL-03 | **0072** | ADR placement job (vanilla + ADR membership) | 3 | LBL-02 [0071], ACT-03a+ | Port/adapt `UpdateLabelPositionsJob` / `AddLabels` (`100f` spacing, redundancy, `m_MaxScale`). Dual source: unassociated → vanilla `AggregateElement` on Aggregate; associated → `ADRNameAggregateElement` on ADR aggregate. Write vanilla-compatible `LabelPosition` buffers on the **pick owner** entity (S1/S2). Burst preferred. See [15](15-adr-citywide-name-label-takeover.md). |
 | LBL-04 | **0073** | ADR name mesh batch + DrawMesh | 4 | LBL-02 [0071], LBL-03 [0072] | Port `FillNameMeshData` warp/batch; ADR render system mirrors name half of `AggregateRenderSystem` (`hideOverlay`, Game/SceneView cameras, surface + underground submeshes). Do not draw arrows. Citywide visible names at parity. |
 | LBL-05 | **0074** | Forked pick + SIP Aggregate section parity | 5 | LBL-03 [0072], ACT-04 [0066] | **Pick:** Burst clone of `Game.Net.RaycastJobs.RaycastLabelsJob` (~150 lines); resolve `m_Owner` S1 vs S2; schedule from managed Harmony on `RaycastSystem` when `TypeMask.Labels`. Do **not** patch Burst job body. **SIP:** audit every InGame SIP section / gate that requires vanilla `Aggregate` and/or `AggregateElement` (at minimum `RoadSection`, `TitleSection.GetVirtualKeyboardLocaleKey`, Aggregate-path `ImageSystem` / icon — full list via Game.dll search at implement time). Managed Harmony so **ADR name-aggregate (S2)** shows the same sections and data as a vanilla Aggregate selection: `RoadSection` walk **`ADRNameAggregateElement`** with same per-edge math as [06](06-labels-vs-vanilla-sync-and-harmony.md); S1 remainder filtering when a vanilla Aggregate is still selected. Title locale `"RoadName"` for ADR entity. Ensure `SelectedInfoUISystem.GetAggregatePosition` works for S2 `LabelPosition`. **Traffic routes (required):** `ActionsSection.hasTrafficRoutes` for S2 + live `TrafficRoutesSystem` path (mirror `AggregateElement` from ADR + accept S2 like Aggregate for `FillTargetMapJob`). Prefer shipping **DefaultTool H1** highlight list job in this task when cheap (same membership helper as RoadSection); otherwise open **LBL-08**. **Look (cheap):** ADR name materials `_OutlineColor` `#004400` (ADR-style clones only). See [06](06-labels-vs-vanilla-sync-and-harmony.md) / [15](15-adr-citywide-name-label-takeover.md). |
-| LBL-06 | **0075** | Integration dogfood + game-update checklist | 6 | LBL-04 [0073], LBL-05 [0074] | Dogfood: load city, locale change, nameset/custom rename, Temp place/upgrade, tunnels, ADR fork/edit via Road Grouping, pick + **full SIP panel on S2** (stats, title rename key, icon) vs vanilla Aggregate. Written re-diff checklist: [19](19-game-update-re-diff-checklist.md) (GUID `d124bec1…`). Fix P0 parity holes or open LBL-07…09 for spill. |
+| LBL-06 | **0075** | Integration dogfood + game-update checklist | 6 | LBL-04 [0073], LBL-05 [0074] | Dogfood + written re-diff checklist [19](19-game-update-re-diff-checklist.md). Sprint 014 spills (LBL-07…09) discarded. |
 
 ### Optional spill tasks (Sprint 014)
 
-| ID | Board ID | Title | Depends | Description |
-|----|----------|-------|---------|-------------|
-| LBL-07 | *TBD* | Temp / net-tool label parity | LBL-06 | Close remaining Temp/original/clear gaps vs vanilla |
-| LBL-08 | *TBD* | DefaultTool H1 highlight membership | LBL-06 | If not done in LBL-05: ADR list job rewrites CreationDefinition `AggregateElement` (S1 remainder / S2 full ADR) before `GenerateAggregatesSystem` ([06](06-labels-vs-vanilla-sync-and-harmony.md)) |
-| LBL-09 | *TBD* | Mass-dirty performance | LBL-06 | Avoid worse-than-vanilla full-city rebuilds |
+**None.** LBL-07 / LBL-09 cancelled; LBL-08 shipped inside LBL-05. See Sprint 014 table above.
 
 ### Suggested board sprints
 
 | Board sprint | Tasks |
 |--------------|-------|
 | **Sprint 013 — ADR road name labels (parity)** | LBL-01…LBL-06 |
-| **Sprint 014 — ADR road name labels harden** *(optional)* | LBL-07…LBL-09 as needed |
+| ~~Sprint 014~~ | Discarded |
 
 ---
 

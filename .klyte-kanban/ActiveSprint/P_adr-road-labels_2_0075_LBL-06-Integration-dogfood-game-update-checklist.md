@@ -31,17 +31,17 @@ Sixth and closing task of epic adr-road-labels phase-1 (Sprint 013 catalog). End
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Dogfood save: citywide names visible via ADR (S1 + S2 stretches) after full chain LBL-01…05
-- [ ] Vanilla name path remains off; arrows still work in requireNetArrows tools
-- [ ] Rename / associate / disassociate refresh labels without duplicates or permanent gaps
-- [ ] Pick S1 and S2 opens correct SIP (core Aggregate-gated sections from LBL-05)
-- [ ] Written game-update checklist in RefsLibrary (or task notes promoted to 18/16 appendix) covering: AggregateMeshSystem name half, AggregateRenderSystem name loop, RaycastLabelsJob, NetLabelPrefab GUID d124bec1…, Label* component layout
-- [ ] Known gaps listed (optional LBL-07/08/09) — not silent
-- [ ] No player-facing vanilla-label fallback toggle
-- [ ] Compile + extended playtest session notes attached or linked
-- [ ] Dogfood: locale change, nameset/custom rename, Temp place/upgrade, tunnels, ADR fork/edit via Road Grouping refresh labels
-- [ ] Full SIP panel on S2 vs vanilla Aggregate: stats, title rename key, icon, focus position
-- [ ] P0 parity holes fixed in owning LBL or LBL-07…09 opened for spill — not silent
+- [x] Dogfood save: citywide names visible via ADR (S1 + S2 stretches) after full chain LBL-01…05
+- [x] Vanilla name path remains off; arrows still work in requireNetArrows tools
+- [x] Rename / associate / disassociate refresh labels without duplicates or permanent gaps
+- [x] Pick S1 and S2 opens correct SIP (core Aggregate-gated sections from LBL-05)
+- [x] Written game-update checklist in RefsLibrary (or task notes promoted to 18/16 appendix) covering: AggregateMeshSystem name half, AggregateRenderSystem name loop, RaycastLabelsJob, NetLabelPrefab GUID d124bec1…, Label* component layout
+- [x] Known gaps listed (optional LBL-07/08/09) — not silent
+- [x] No player-facing vanilla-label fallback toggle
+- [x] Compile + extended playtest session notes attached or linked
+- [x] Dogfood: locale change, nameset/custom rename, Temp place/upgrade, tunnels, ADR fork/edit via Road Grouping refresh labels
+- [x] Full SIP panel on S2 vs vanilla Aggregate: stats, title rename key, icon, focus position
+- [x] P0 parity holes fixed in owning LBL or LBL-07…09 opened for spill — not silent
 
 ---
 
@@ -58,6 +58,7 @@ Sixth and closing task of epic adr-road-labels phase-1 (Sprint 013 catalog). End
 9. If LBL-05 spilled H1/SIP to LBL-08, verify core path and mark spill in checklist
 10. Update 18 Board IDs / status when sprint closes
 11. Added RefsLibrary 19-game-update-re-diff-checklist.md (GUID d124bec1… surfaces 1–12 + dogfood script + known gaps). Linked from 16/18. H1 shipped in LBL-05 — no LBL-08 membership spill. Green selection tint cancelled. Optional spills: LBL-07 Temp deeper parity; LBL-09 mass dirty perf if hitch. Stopped for user extended playtest vs dogfood script in 19.
+12. Dogfood validated by user 2026-09-12. Sprint 014 spills discarded: LBL-07 Temp not observed, LBL-08 in LBL-05, LBL-09 not needed. Checklist 19 + links updated.
 
 ---
 

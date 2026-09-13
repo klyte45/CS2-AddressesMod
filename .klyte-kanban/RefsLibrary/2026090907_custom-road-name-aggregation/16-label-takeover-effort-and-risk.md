@@ -42,7 +42,7 @@ Existing research ([14](14-vanilla-road-label-pipeline.md)–[15](15-adr-citywid
 
 ## Suggested task split (4–6 tasks)
 
-Full Kanban catalog + sprint planning: **[18-label-takeover-sprint-roadmap.md](18-label-takeover-sprint-roadmap.md)** (LBL-01…LBL-06; optional spill LBL-07…09).
+Full Kanban catalog + sprint planning: **[18-label-takeover-sprint-roadmap.md](18-label-takeover-sprint-roadmap.md)** (LBL-01…LBL-06; Sprint 014 spills discarded).
 
 1. Shutdown vanilla name path + ADR render hook → **LBL-01**  
 2. TMP bake + material/atlas parity → **LBL-02**  
