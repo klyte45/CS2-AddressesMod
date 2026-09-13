@@ -51,6 +51,7 @@ Second task. Extend AdrSelectionInfoPanelSystem / AdrEntityData with isAdrAggreg
 6. Binder surface: AdrSelectionInfoPanelSystem (selectionPanel.*) — SIP and Road Grouping tool both pass the ADR aggregate entity (entityValue / SelectedAggregation). Vanilla Aggregate setters return false.
 7. getEntityOptions / AdrEntityData: isAdrAggregate + highway fields + customName for ADR RoadAggregation. Highway registry list remains highwayRoutes.listHighwaysRegistered.
 8. Setters: setHighwayDataId (registry-validated or clear), setRouteDirection, setMileageOverrideActive/Km, setReverseCounting, get/setAggregateCustomName via NameSystem. Writes call DirtyAdrAggregateConsumers (Updated + BatchesUpdated + MarkRoadsDirty).
+9. Clarification: SIP does not surface aggregate custom name in Addresses options — panel title input already owns it. get/setAggregateCustomName binders remain for Road Grouping tool options (HW-03b) only; removed customName from AdrEntityData / getEntityOptions.
 
 ---
 
