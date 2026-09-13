@@ -38,7 +38,7 @@ First task of epic adr-hw-reattach (single-sprint catalog in RefsLibrary 21). Re
 - [x] No ADRHighwayAggregationCacheData, DirtyHwId-on-Aggregate, CalculateHighwayCacheData, or AdrHighwayRoutes2BSystem revived
 - [x] mileageOverrideKm semantics documented in code/comments: chain-start baseline when override active (former cache startDistanceOverrideKm)
 - [x] RouteDirection enum restored with former marker values (NONE/cardinals/INTERNAL/EXTERNAL) for WE compatibility
-- [ ] Compile succeeds after user builds solution
+- [x] Compile succeeds after user builds solution
 
 ---
 
