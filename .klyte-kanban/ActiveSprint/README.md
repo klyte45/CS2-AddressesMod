@@ -14,6 +14,6 @@ Ship HW-01…HW-08 end-to-end: ADRNameAggregateHighwayData lifecycle, SIP/tool p
 - **Original tasks**: 09
 - **Original task IDs**: [0076], [0077], [0078], [0079], [0080], [0081], [0082], [0083], [0084]
 - **Delivered tasks (from original)**:
-- **Added tasks**: 0
+- **Added tasks**: 1
 - **Delivered tasks (from added)**:
 - **Total delivered tasks**:
