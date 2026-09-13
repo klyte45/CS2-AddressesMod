@@ -32,13 +32,13 @@ Fourth task of epic adr-road-labels. Build name meshes from LBL-02 vertices + LB
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ADR mesh builder fills name mesh buffers from LabelVertex + LabelPosition (FillNameMeshData equivalent)
-- [ ] ADR render path issues DrawMesh (or equivalent) for name labels each frame/camera pass that vanilla used
-- [ ] Respect hideOverlay / camera / LOD filters comparable to vanilla AggregateRenderSystem name loop (Game/SceneView cameras, surface + underground submeshes)
-- [ ] Arrow DrawMesh path remains exclusively vanilla (LBL-01 allow-list still green)
-- [ ] Smoke: after LBL-01+02+03, road names visible again citywide with S1 and S2 owners
-- [ ] No obvious mesh leaks (create/destroy or update buffers on invalidate)
-- [ ] Compile + visual smoke on dogfood save
+- [x] ADR mesh builder fills name mesh buffers from LabelVertex + LabelPosition (FillNameMeshData equivalent)
+- [x] ADR render path issues DrawMesh (or equivalent) for name labels each frame/camera pass that vanilla used
+- [x] Respect hideOverlay / camera / LOD filters comparable to vanilla AggregateRenderSystem name loop (Game/SceneView cameras, surface + underground submeshes)
+- [x] Arrow DrawMesh path remains exclusively vanilla (LBL-01 allow-list still green)
+- [x] Smoke: after LBL-01+02+03, road names visible again citywide with S1 and S2 owners
+- [x] No obvious mesh leaks (create/destroy or update buffers on invalidate)
+- [x] Compile + visual smoke on dogfood save
 
 ---
 
