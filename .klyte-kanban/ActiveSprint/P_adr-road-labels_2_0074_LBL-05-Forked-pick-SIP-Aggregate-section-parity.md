@@ -34,18 +34,18 @@ Fifth task of epic adr-road-labels. Fork RaycastLabelsJob / label pick so clicks
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Label raycast/pick hits ADR-placed name labels (after LBL-03 positions exist)
-- [ ] Pick result entity is S1 Aggregate or S2 ADR name-aggregate per membership rules (same as placement)
-- [ ] Clicking an S1 label selects/opens the same Aggregate-oriented SIP path as vanilla
-- [ ] Clicking an S2 label selects the ADR name-aggregate and SIP sections that gated on Aggregate still appear/work (RoadSection, TitleSection, icon at minimum)
-- [ ] DefaultTool H1 hover/tooltip path updated for ADR owners OR explicit spill note filed to LBL-08 with remaining gaps listed
-- [ ] No broken pick on arrows-only or non-label net hits
-- [ ] Smoke: pick S1 and S2 labels in dogfood city; SIP shows correct name/sections
-- [ ] Compile + playtest
-- [ ] Burst clone of Game.Net.RaycastJobs.RaycastLabelsJob (~150 lines); resolve m_Owner S1 vs S2; schedule from managed Harmony on RaycastSystem when TypeMask.Labels — do not patch Burst job body
-- [ ] RoadSection walks ADRNameAggregateElement with same per-edge math as doc 06; S1 remainder filtering when vanilla Aggregate still selected
-- [ ] Title locale key RoadName for ADR entity; Aggregate-path icon works for S2
-- [ ] SelectedInfoUISystem.GetAggregatePosition works for S2 LabelPosition
+- [x] Label raycast/pick hits ADR-placed name labels (after LBL-03 positions exist)
+- [x] Pick result entity is S1 Aggregate or S2 ADR name-aggregate per membership rules (same as placement)
+- [x] Clicking an S1 label selects/opens the same Aggregate-oriented SIP path as vanilla
+- [x] Clicking an S2 label selects the ADR name-aggregate and SIP sections that gated on Aggregate still appear/work (RoadSection, TitleSection, icon at minimum)
+- [x] DefaultTool H1 hover/tooltip path updated for ADR owners OR explicit spill note filed to LBL-08 with remaining gaps listed
+- [x] No broken pick on arrows-only or non-label net hits
+- [x] Smoke: pick S1 and S2 labels in dogfood city; SIP shows correct name/sections
+- [x] Compile + playtest
+- [x] Burst clone of Game.Net.RaycastJobs.RaycastLabelsJob (~150 lines); resolve m_Owner S1 vs S2; schedule from managed Harmony on RaycastSystem when TypeMask.Labels — do not patch Burst job body
+- [x] RoadSection walks ADRNameAggregateElement with same per-edge math as doc 06; S1 remainder filtering when vanilla Aggregate still selected
+- [x] Title locale key RoadName for ADR entity; Aggregate-path icon works for S2
+- [x] SelectedInfoUISystem.GetAggregatePosition works for S2 LabelPosition
 
 ---
 
@@ -66,6 +66,7 @@ Fifth task of epic adr-road-labels. Fork RaycastLabelsJob / label pick so clicks
 13. Do not break ACT-04 building/address SIP
 14. Dogfood pre-H1: hovering/selecting a vanilla Aggregate (incl. via its name label) still Highlights edges that also have ADRNameAggregated — wrong glow until H1 S1 remainder filter (doc 06). Must fix in LBL-05 H1 or spill to LBL-08 with this gap listed.
 15. When changing vanilla Aggregate selection behavior: highlight membership MUST use same S1 remainder / S2 full ADR sets as RoadSection (doc 06).
+16. Validated 2026-09-12: forked RaycastLabelsJob + PerformRaycast transpiler; SIP RoadSection/Title/Image/Actions; TrafficRoutes AggregateElement mirror + brief Aggregate tag; H1 AdrAggregateHighlightRewriteSystem (S1 remainder / S2 fill); Temp Select placement includes ADR edges; ADR-only #004400 outline via m_IsAdrStyle materials; half-bright green highlight cancelled (not needed). No LBL-08 spill for H1.
 
 ---
 
