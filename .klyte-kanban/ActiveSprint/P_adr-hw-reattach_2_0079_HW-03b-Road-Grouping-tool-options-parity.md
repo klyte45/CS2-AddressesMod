@@ -78,11 +78,13 @@ Fourth task. Expand RoadGroupingToolPanel: replace selected #Index display with 
 ### Is related to
 
 - [0067] ACT-05-Road-Grouping-ADR-mutations
-
+- [0085] HW-03c-Gate-road-seeds-namesets-to-roads-only
 ### Groups with
 
 - HW-03-VUIO-Addresses-SIP-highway-section
 - HW-04-Naming-highway-override-branch
+
+---
 
 ---
 

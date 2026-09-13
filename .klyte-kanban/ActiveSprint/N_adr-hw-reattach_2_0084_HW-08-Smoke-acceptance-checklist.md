@@ -77,7 +77,7 @@ Ninth and closing task of epic adr-hw-reattach. Integration QA against 21 accept
 - [0081] HW-05-Mileage-addressing-authored-fields
 - [0082] HW-06-WE-formula-restore-ADR-resolve
 - [0083] HW-07-Regions-map-ADR-highwayDataId
-
+- [0085] HW-03c-Gate-road-seeds-namesets-to-roads-only
 ### Is dependent for
 
 
@@ -97,6 +97,8 @@ Ninth and closing task of epic adr-hw-reattach. Integration QA against 21 accept
 - HW-05-Mileage-addressing-authored-fields
 - HW-06-WE-formula-restore-ADR-resolve
 - HW-07-Regions-map-ADR-highwayDataId
+
+---
 
 ## Other Notes
 
