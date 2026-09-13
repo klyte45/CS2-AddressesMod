@@ -1,3 +1,4 @@
+**End time:** 2026-09-13 02:50 -0300
 **Start time:** 2026-09-13 01:41 -0300
 # [0079] HW-03b-Road-Grouping-tool-options-parity
 
@@ -31,15 +32,15 @@ Fourth task. Expand RoadGroupingToolPanel: replace selected #Index display with 
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Primary tool label is no longer Aggregation # / entity Index
-- [ ] Custom name text input binds to selected ADR aggregate NameSystem custom name
-- [ ] Empty/cleared custom name falls back to nameset/highway/generator naming
-- [ ] SeedManagement controls appear for ADR selection (parity with SIP)
-- [ ] HighwayAggregateSettings appear for ADR selection (parity with SIP)
-- [ ] Edits from tool and SIP stay consistent on the same entity
-- [ ] Existing actions remain: show number cards, pick another
-- [ ] i18n pending entries for any new tool strings
-- [ ] npm build + playtest tool panel with ADR selection
+- [x] Primary tool label is no longer Aggregation # / entity Index
+- [x] Custom name text input binds to selected ADR aggregate NameSystem custom name
+- [x] Empty/cleared custom name falls back to nameset/highway/generator naming
+- [x] SeedManagement controls appear for ADR selection (parity with SIP)
+- [x] HighwayAggregateSettings appear for ADR selection (parity with SIP)
+- [x] Edits from tool and SIP stay consistent on the same entity
+- [x] Existing actions remain: show number cards, pick another
+- [x] i18n pending entries for any new tool strings
+- [x] npm build + playtest tool panel with ADR selection
 
 ---
 
@@ -53,6 +54,7 @@ Fourth task. Expand RoadGroupingToolPanel: replace selected #Index display with 
 6. SeedManagementOptions seed ops target response.entityValue (optional seedEntity override) instead of SIP selectedEntity.
 7. getEntityOptions: TryAppendAggregateSeedOption also runs under custom-name early return so tool/SIP keep seed for Aggregate/ADR hosts.
 8. i18n pending BelzontAdr/i18n/road_grouping_tool_options_entries.txt (customName). npm run build OK.
+9. Closed after tool parity implementation: custom name + SeedManagement + HighwayAggregateSettings on SelectedAggregation; seed ops via entityValue; pending i18n road_grouping_tool_options_entries.txt; non-road seed gate deferred to NET-04 (0086).
 
 ---
 
