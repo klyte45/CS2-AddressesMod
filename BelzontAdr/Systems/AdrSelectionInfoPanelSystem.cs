@@ -38,7 +38,7 @@ namespace BelzontAdr
             eventCaller("selectionPanel.setHighwayDataId", SetHighwayDataId);
             eventCaller("selectionPanel.setRouteDirection", SetRouteDirection);
             eventCaller("selectionPanel.setMileageOverrideActive", SetMileageOverrideActive);
-            eventCaller("selectionPanel.setMileageOverrideKm", SetMileageOverrideKm);
+            eventCaller("selectionPanel.setMileageOverrideMeters", SetMileageOverrideMeters);
             eventCaller("selectionPanel.setReverseCounting", SetReverseCounting);
         }
 
@@ -87,8 +87,13 @@ namespace BelzontAdr
             {
                 resultList.Add(new() { type = AdrEntityType.Vehicle });
             }
-            bool hasCustomName;
-            if (hasCustomName = EntityManager.HasComponent<CustomName>(e))
+
+            // Independent SIP block (same pattern as RoadMark / Vehicle) — not tied to naming/seed.
+            TryAppendHighwayAggregateOption(e, resultList);
+
+            bool hasCustomName = EntityManager.HasComponent<CustomName>(e);
+            // Informational Addresses block: custom name is edited in the SIP title; erase there to restore mod naming.
+            if (hasCustomName)
             {
                 resultList.Add(new() { type = AdrEntityType.CustomName });
             }
@@ -96,7 +101,12 @@ namespace BelzontAdr
             {
                 resultList.Add(new() { type = AdrEntityType.VehicleSource });
             }
-            if (hasCustomName) return resultList;
+            // Custom name hides seed/naming options; highway / mark / vehicle blocks already added above.
+            if (hasCustomName)
+            {
+                PreferNamingBlocksFirst(resultList);
+                return resultList;
+            }
             if (EntityManager.TryGetComponent<Building>(e, out var building))
             {
                 var result = new AdrEntityData
@@ -138,7 +148,6 @@ namespace BelzontAdr
                     result.entityValue = AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, e, out var adrAggregate)
                         ? adrAggregate
                         : agg.m_Aggregate;
-                    FillRoadAggregationHighwayFields(result);
                 }
                 else
                 {
@@ -166,7 +175,6 @@ namespace BelzontAdr
                     }
                 }
                 result.entityValue = e;
-                FillRoadAggregationHighwayFields(result);
                 resultList.Add(result);
             }
             if (EntityManager.HasComponent<District>(e))
@@ -186,8 +194,53 @@ namespace BelzontAdr
                 resultList.Add(result);
             }
 
+            PreferNamingBlocksFirst(resultList);
             return resultList;
         }
+
+        /// <summary>
+        /// Naming-reference SIP blocks always lead the list when present (highway / mark / vehicle trail).
+        /// </summary>
+        private static void PreferNamingBlocksFirst(List<AdrEntityBase> resultList)
+        {
+            if (resultList == null || resultList.Count <= 1)
+            {
+                return;
+            }
+
+            var naming = new List<AdrEntityBase>(resultList.Count);
+            var other = new List<AdrEntityBase>(resultList.Count);
+            foreach (var item in resultList)
+            {
+                if (IsNamingReferenceBlock(item.type))
+                {
+                    naming.Add(item);
+                }
+                else
+                {
+                    other.Add(item);
+                }
+            }
+
+            if (naming.Count == 0)
+            {
+                return;
+            }
+
+            resultList.Clear();
+            resultList.AddRange(naming);
+            resultList.AddRange(other);
+        }
+
+        private static bool IsNamingReferenceBlock(AdrEntityType type) => type switch
+        {
+            AdrEntityType.CustomName
+                or AdrEntityType.PublicTransportStation
+                or AdrEntityType.CargoTransportStation
+                or AdrEntityType.RoadAggregation
+                or AdrEntityType.District => true,
+            _ => false,
+        };
 
         private void StationRefFill(Entity e, AdrEntityData result, Building building)
         {
@@ -260,13 +313,28 @@ namespace BelzontAdr
             }
         }
 
-        private void FillRoadAggregationHighwayFields(AdrEntityData result)
+        private void TryAppendHighwayAggregateOption(Entity selected, List<AdrEntityBase> resultList)
+        {
+            if (!TryResolveAdrHighwayHost(selected, out Entity adrAggregate))
+            {
+                return;
+            }
+
+            var result = new AdrEntityData
+            {
+                type = AdrEntityType.HighwayAggregate,
+                targetEntityToName = selected,
+                entityValue = adrAggregate,
+                isAdrAggregate = true,
+            };
+            FillHighwayAggregateFields(result);
+            resultList.Add(result);
+        }
+
+        private void FillHighwayAggregateFields(AdrEntityData result)
         {
             Entity host = result.entityValue;
-            result.isAdrAggregate = host != Entity.Null
-                && EntityManager.Exists(host)
-                && EntityManager.HasComponent<ADRNameAggregate>(host);
-            if (!result.isAdrAggregate)
+            if (host == Entity.Null || !EntityManager.Exists(host))
             {
                 return;
             }
@@ -280,7 +348,7 @@ namespace BelzontAdr
             result.highwayDataId = highway.highwayDataId.ToString();
             result.routeDirection = (int)highway.routeDirection;
             result.mileageOverrideActive = highway.mileageOverrideActive;
-            result.mileageOverrideKm = highway.mileageOverrideKm;
+            result.mileageOverrideMeters = highway.mileageOverrideMeters;
             result.reverseCounting = highway.reverseCounting;
         }
 
@@ -397,7 +465,7 @@ namespace BelzontAdr
             return true;
         }
 
-        private bool SetMileageOverrideKm(Entity entity, float mileageKm)
+        private bool SetMileageOverrideMeters(Entity entity, int mileageMeters)
         {
             if (!TryResolveAdrHighwayHost(entity, out Entity adr)
                 || !EntityManager.TryGetComponent(adr, out ADRNameAggregateHighwayData highway))
@@ -405,7 +473,7 @@ namespace BelzontAdr
                 return false;
             }
 
-            highway.mileageOverrideKm = mileageKm;
+            highway.mileageOverrideMeters = mileageMeters;
             EntityManager.SetComponentData(adr, highway);
             DirtyAdrAggregateConsumers(adr);
             return true;
@@ -520,7 +588,7 @@ namespace BelzontAdr
             public string highwayDataId;
             public int routeDirection;
             public bool mileageOverrideActive;
-            public float mileageOverrideKm;
+            public int mileageOverrideMeters;
             public bool reverseCounting;
         }
 
@@ -534,8 +602,8 @@ namespace BelzontAdr
             District,
             Vehicle,
             RoadMark,
-            VehicleSource
-
+            VehicleSource,
+            HighwayAggregate,
         }
 
         private class EntityOption

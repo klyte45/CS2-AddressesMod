@@ -8,9 +8,9 @@ namespace BelzontAdr
     /// Authored highway route / mileage / direction on an <see cref="ADRNameAggregate"/> entity.
     /// Defaults mean inactive (not a highway). No derived cache — consumers read these fields directly.
     /// <para>
-    /// When <see cref="mileageOverrideActive"/> is true, <see cref="mileageOverrideKm"/> is the
-    /// chain-start mileage baseline (former Aggregate cache <c>startDistanceOverrideKm</c>), not a
-    /// per-marker curve bake.
+    /// When <see cref="mileageOverrideActive"/> is true, <see cref="mileageOverrideMeters"/> is the
+    /// chain-start mileage baseline in meters (UI may show km/mi from game unit settings). Replaces
+    /// former Aggregate cache <c>startDistanceOverrideKm</c> (stored converted to meters).
     /// </para>
     /// </summary>
     public struct ADRNameAggregateHighwayData : IComponentData, IQueryTypeParameter, ISerializable
@@ -21,10 +21,10 @@ namespace BelzontAdr
         public RouteDirection routeDirection;
         public bool mileageOverrideActive;
         /// <summary>
-        /// Chain-start mileage baseline (km) when <see cref="mileageOverrideActive"/> is true.
-        /// Former Aggregate cache field <c>startDistanceOverrideKm</c>.
+        /// Chain-start mileage baseline in meters when <see cref="mileageOverrideActive"/> is true.
+        /// Former Aggregate cache field <c>startDistanceOverrideKm</c> (×1000).
         /// </summary>
-        public float mileageOverrideKm;
+        public int mileageOverrideMeters;
         public bool reverseCounting;
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace BelzontAdr
             highwayDataId = default,
             routeDirection = RouteDirection.NONE,
             mileageOverrideActive = false,
-            mileageOverrideKm = 0f,
+            mileageOverrideMeters = 0,
             reverseCounting = false
         };
 
@@ -64,7 +64,7 @@ namespace BelzontAdr
             writer.Write(highwayDataId);
             writer.Write(routeDirection);
             writer.Write(mileageOverrideActive);
-            writer.Write(mileageOverrideKm);
+            writer.Write(mileageOverrideMeters);
             writer.Write(reverseCounting);
         }
 
@@ -74,7 +74,7 @@ namespace BelzontAdr
             reader.Read(out highwayDataId);
             reader.Read(out routeDirection);
             reader.Read(out mileageOverrideActive);
-            reader.Read(out mileageOverrideKm);
+            reader.Read(out mileageOverrideMeters);
             reader.Read(out reverseCounting);
         }
     }

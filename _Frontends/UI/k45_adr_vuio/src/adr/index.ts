@@ -363,7 +363,8 @@ export type SelectedInfoOptions = {
     highwayDataId?: string;
     routeDirection?: number;
     mileageOverrideActive?: boolean;
-    mileageOverrideKm?: number;
+    /** Chain-start baseline in meters (component storage). UI converts to km/mi. */
+    mileageOverrideMeters?: number;
     reverseCounting?: boolean;
 };
 
@@ -377,6 +378,7 @@ export enum AdrEntityType {
     Vehicle,
     RoadMark,
     VehicleSource,
+    HighwayAggregate,
 }
 
 export type EntityOption = {
@@ -410,10 +412,11 @@ export class SelectInfoPanelService {
     static async getAggregateCustomName(x: Entity): Promise<string> { return await engine.call("k45::adr.selectionPanel.getAggregateCustomName", x); }
     static async setAggregateCustomName(x: Entity, name?: string): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setAggregateCustomName", x, name); }
     /** Highway fields on ADRNameAggregateHighwayData. No-op / false for vanilla Aggregate. */
-    static async setHighwayDataId(x: Entity, highwayDataId?: string): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setHighwayDataId", x, highwayDataId); }
+    static async setHighwayDataId(x: Entity, highwayDataId: string = ""): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setHighwayDataId", x, highwayDataId ?? ""); }
     static async setRouteDirection(x: Entity, routeDirection: number): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setRouteDirection", x, routeDirection); }
     static async setMileageOverrideActive(x: Entity, active: boolean): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setMileageOverrideActive", x, active); }
-    static async setMileageOverrideKm(x: Entity, mileageKm: number): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setMileageOverrideKm", x, mileageKm); }
+    /** Pass meters; component storage is always meters. */
+    static async setMileageOverrideMeters(x: Entity, mileageMeters: number): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setMileageOverrideMeters", x, mileageMeters); }
     static async setReverseCounting(x: Entity, reverse: boolean): Promise<boolean> { return await engine.call("k45::adr.selectionPanel.setReverseCounting", x, reverse); }
 }
 

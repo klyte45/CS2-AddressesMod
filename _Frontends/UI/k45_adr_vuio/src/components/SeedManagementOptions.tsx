@@ -33,15 +33,20 @@ export const SeedManagementOptionsComponent = ({ response, onChanged }: Props) =
 
     if (response.hasCustomNameList) {
 
+        const theme = VR.themeGamepadToolOptions;
+        const btnClass = theme.iconButton;
         const right = <>
-            <VR.Tooltip tooltip={translate("SeedManagementOptions.UsePreviousNameInList")} >
-                <VR.IconButton focusKey={focusKey} onSelect={() => changeSeedRefDelta(-1)} theme={VR.themeGamepadToolOptions} src="Media/Glyphs/ThickStrokeArrowLeft.svg" tinted={true} />
+            <VR.Tooltip tooltip={translate("SeedManagementOptions.UsePreviousNameInList")}>
+                <VR.IconButton focusKey={focusKey} className={btnClass} theme={theme}
+                    onSelect={() => changeSeedRefDelta(-1)} src="Media/Glyphs/ThickStrokeArrowLeft.svg" tinted={true} />
             </VR.Tooltip>
             <VR.Tooltip tooltip={translate("SeedManagementOptions.RegenerateNameTooltip")}>
-                <VR.IconButton focusKey={focusKey} onSelect={() => randomizeSeed()} className="" theme={VR.themeGamepadToolOptions} src="Media/Glyphs/Dice.svg" tinted={true} />
+                <VR.IconButton focusKey={focusKey} className={btnClass} theme={theme}
+                    onSelect={() => randomizeSeed()} src="Media/Glyphs/Dice.svg" tinted={true} />
             </VR.Tooltip>
             <VR.Tooltip tooltip={translate("SeedManagementOptions.UseNextNameInList")}>
-                <VR.IconButton focusKey={focusKey} onSelect={() => changeSeedRefDelta(1)} className={VR.themeGamepadToolOptions.arrowButton} theme={VR.themeGamepadToolOptions} src="Media/Glyphs/ThickStrokeArrowRight.svg" tinted={true} />
+                <VR.IconButton focusKey={focusKey} className={btnClass} theme={theme}
+                    onSelect={() => changeSeedRefDelta(1)} src="Media/Glyphs/ThickStrokeArrowRight.svg" tinted={true} />
             </VR.Tooltip>
         </>
         return <>

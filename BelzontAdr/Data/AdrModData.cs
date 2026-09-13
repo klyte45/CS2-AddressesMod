@@ -6,14 +6,14 @@ using Game.UI.Widgets;
 
 namespace BelzontAdr
 {
-    [SettingsUIShowGroupName(kLogSection, kAlertModalsSection, kKeybindingSection, kToolControlsSection)]
+    [SettingsUIShowGroupName(kLogSection, kAlertModalsSection, kKeybindingTab, kToolControlsSection)]
     [SettingsUIMouseAction(kActionApplyMouse, ActionType.Button, RebindOptions.All, ModifierOptions.Allow, usages: new[] { "K45_ADR.Tool" })]
     [SettingsUIMouseAction(kActionCancelMouse, ActionType.Button, RebindOptions.All, ModifierOptions.Allow, usages: new[] { "K45_ADR.Tool" })]
     [SettingsUIMouseAction(kActionToggleMembership, ActionType.Button, RebindOptions.All, ModifierOptions.Allow, usages: new[] { "K45_ADR.Tool" })]
     [SettingsUIKeyboardAction(kActionEnableRoadGrouping, ActionType.Button, "K45_ADR.Tool")]
     public class AdrModData : BasicModData
     {
-        public const string kKeybindingSection = "Keybinding";
+        public const string kKeybindingTab = "Keybinding";
         public const string kToolControlsSection = "ToolControls";
 
         public const string kActionApplyMouse = "K45_ADR_RoadGroupingApply";
@@ -29,19 +29,19 @@ namespace BelzontAdr
         {
         }
 
-        [SettingsUISection(kKeybindingSection, kToolControlsSection)]
+        [SettingsUISection(kKeybindingTab, kToolControlsSection)]
         [SettingsUIKeyboardBinding(BindingKeyboard.A, kActionEnableRoadGrouping, ctrl: true, shift: true)]
         public ProxyBinding EnableRoadGroupingTool { get; set; }
 
-        [SettingsUISection(kKeybindingSection, kToolControlsSection)]
+        [SettingsUISection(kKeybindingTab, kToolControlsSection)]
         [SettingsUIMouseBinding(BindingMouse.Left, kActionApplyMouse)]
         public ProxyBinding RoadGroupingApply { get; set; }
 
-        [SettingsUISection(kKeybindingSection, kToolControlsSection)]
+        [SettingsUISection(kKeybindingTab, kToolControlsSection)]
         [SettingsUIMouseBinding(BindingMouse.Right, kActionCancelMouse)]
         public ProxyBinding RoadGroupingCancel { get; set; }
 
-        [SettingsUISection(kKeybindingSection, kToolControlsSection)]
+        [SettingsUISection(kKeybindingTab, kToolControlsSection)]
         [SettingsUIMouseBinding(BindingMouse.Left, kActionToggleMembership, ctrl: true)]
         public ProxyBinding RoadGroupingToggleMembership { get; set; }
     }

@@ -1,9 +1,9 @@
 import { AdrEntityType, Entity, SelectInfoPanelService, SelectedInfoOptions, toEntityTyped } from "adr";
 import { VanillaComponentResolver } from '@klyte45/vuio-commons';
-import { ValueBinding } from "cs2/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { translate } from "utility/translate";
 import { SeedManagementOptionsComponent } from "./SeedManagementOptions";
+import { HighwayAggregateSettings } from "./HighwayAggregateSettings";
 import { StationBuildingOptionsComponent } from "./StationBuildingOptions";
 import { VehicleDataDetailSection } from "./VehicleDataDetailSection";
 import { RoadMarkSettings } from "./RoadMarkSettings";
@@ -11,6 +11,14 @@ import { VehicleSourceSettings } from "./VehicleSourceSettings";
 import { selectedInfo } from "cs2/bindings";
 
 type Props = { isEditor?: boolean, onChange?: () => any };
+
+/** Session cache of ADR SIP foldout expanded state, keyed by AdrEntityType name. Defaults collapsed. */
+const adrSipFoldoutExpanded: Record<string, boolean> = {};
+
+const getAdrSipFoldoutExpanded = (blockKey: string) => adrSipFoldoutExpanded[blockKey] ?? false;
+const setAdrSipFoldoutExpanded = (blockKey: string, expanded: boolean) => {
+    adrSipFoldoutExpanded[blockKey] = expanded;
+};
 
 export const AddressesInfoOptionsComponent = ({ onChange }: Props) => {
 
@@ -37,6 +45,10 @@ export const AddressesInfoOptionsComponent = ({ onChange }: Props) => {
         await loadOptions(entity)
     }
 
+    const onToggleFoldout = useCallback((blockKey: string, expanded: boolean) => {
+        setAdrSipFoldoutExpanded(blockKey, expanded);
+    }, []);
+
 
     const getSubRows = (optionResult: SelectedInfoOptions) => {
         switch (optionResult?.type?.value__) {
@@ -46,6 +58,8 @@ export const AddressesInfoOptionsComponent = ({ onChange }: Props) => {
             case AdrEntityType.RoadAggregation:
             case AdrEntityType.District:
                 return <SeedManagementOptionsComponent onChanged={() => onValueChanged()} response={optionResult} />
+            case AdrEntityType.HighwayAggregate:
+                return <HighwayAggregateSettings onChanged={() => onValueChanged()} response={optionResult} />
             case AdrEntityType.Vehicle:
                 return <VehicleDataDetailSection />
             case AdrEntityType.RoadMark:
@@ -53,7 +67,7 @@ export const AddressesInfoOptionsComponent = ({ onChange }: Props) => {
             case AdrEntityType.VehicleSource:
                 return <VehicleSourceSettings />
             default:
-                return <></>
+                return null;
         }
     }
 
@@ -63,6 +77,7 @@ export const AddressesInfoOptionsComponent = ({ onChange }: Props) => {
                 return translate("AddressesInfoOptions.ExtraDataInformationFor");
             case AdrEntityType.RoadMark:
             case AdrEntityType.VehicleSource:
+            case AdrEntityType.HighwayAggregate:
                 return translate("AddressesInfoOptions.SettingsFor");
             default:
                 return translate("AddressesInfoOptions.NamingReference");
@@ -75,13 +90,30 @@ export const AddressesInfoOptionsComponent = ({ onChange }: Props) => {
     for (const optionResult of optionsResult) {
         const valueType = AdrEntityType[optionResult?.type?.value__];
         const VR = VanillaComponentResolver.instance;
-        result.push(<VR.InfoSection disableFocus={true} className="k45_modding" >
-            <VR.InfoRow uppercase={true} icon="coui://adr.k45/UI/images/ADR.svg"
-                left={<>{getLeftColumnText(optionResult)}</>}
-                right={<div style={{ whiteSpace: "pre-wrap" }}>{translate("AdrEntityType." + valueType)}</div>}
-                tooltip={<>{translate("AddressesInfoOptions.Tooltip." + valueType)}</>} />
-            {getSubRows(optionResult)}
-        </VR.InfoSection>)
+        const blockKey = String(valueType);
+        const subRows = getSubRows(optionResult);
+        const titleRow = <VR.InfoRow uppercase={true} disableFocus={true} icon="coui://adr.k45/UI/images/ADR.svg"
+            left={<>{getLeftColumnText(optionResult)}</>}
+            right={<div style={{ whiteSpace: "pre-wrap" }}>{translate("AdrEntityType." + valueType)}</div>}
+        />;
+        if (subRows) {
+            result.push(<VR.InfoSectionFoldout
+                key={"adr_sip_" + blockKey}
+                disableFocus={true}
+                className="k45_modding"
+                initialExpanded={getAdrSipFoldoutExpanded(blockKey)}
+                onToggleExpanded={(expanded: boolean) => onToggleFoldout(blockKey, expanded)}
+                tooltip={<>{translate("AddressesInfoOptions.Tooltip." + valueType)}</>}
+                header={titleRow}
+            >
+                {subRows}
+            </VR.InfoSectionFoldout>)
+        } else {
+            result.push(<VR.InfoSection key={"adr_sip_" + blockKey} disableFocus={true} className="k45_modding"
+                tooltip={<>{translate("AddressesInfoOptions.Tooltip." + valueType)}</>}>
+                {titleRow}
+            </VR.InfoSection>)
+        }
     }
     return <>{result}</>;
 
