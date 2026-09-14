@@ -40,7 +40,7 @@ First task of epic adr-net-kind (catalog RefsLibrary 24). Add AdrNetKind enum an
 - [x] CreateAggregate / ForkFromVanilla / first-member paths set stored kind from seed edge(s)
 - [x] Empty aggregate destroy clears kind with the entity
 - [x] No mix-gate reject, no NetNameData prefab creation, no GetAggregateName/seed UI changes in this task
-- [ ] Compile succeeds after user builds solution
+- [x] Compile succeeds after user builds solution
 
 ---
 
