@@ -33,13 +33,13 @@ First task of epic adr-net-kind (catalog RefsLibrary 24). Add AdrNetKind enum an
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrNetKind enum exists: None, Road, Pathway, Train, Tram, Subway, Waterway, Taxiway
-- [ ] TryGetNetKind(Entity edge) resolves from prefab *Data in locked order; RoadData wins regardless of edge Road presence/absence
-- [ ] TrackData maps: Subway→Subway; Tram-only→Tram; Train or Train|Tram→Train
-- [ ] Kind is stored on ADRNameAggregate (or equivalent always-present host field) and ISerializable with version discipline
-- [ ] CreateAggregate / ForkFromVanilla / first-member paths set stored kind from seed edge(s)
-- [ ] Empty aggregate destroy clears kind with the entity
-- [ ] No mix-gate reject, no NetNameData prefab creation, no GetAggregateName/seed UI changes in this task
+- [x] AdrNetKind enum exists: None, Road, Pathway, Train, Tram, Subway, Waterway, Taxiway
+- [x] TryGetNetKind(Entity edge) resolves from prefab *Data in locked order; RoadData wins regardless of edge Road presence/absence
+- [x] TrackData maps: Subway→Subway; Tram-only→Tram; Train or Train|Tram→Train
+- [x] Kind is stored on ADRNameAggregate (or equivalent always-present host field) and ISerializable with version discipline
+- [x] CreateAggregate / ForkFromVanilla / first-member paths set stored kind from seed edge(s)
+- [x] Empty aggregate destroy clears kind with the entity
+- [x] No mix-gate reject, no NetNameData prefab creation, no GetAggregateName/seed UI changes in this task
 - [ ] Compile succeeds after user builds solution
 
 ---
