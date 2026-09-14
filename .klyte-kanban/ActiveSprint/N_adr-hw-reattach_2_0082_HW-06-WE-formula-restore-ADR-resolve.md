@@ -48,6 +48,7 @@ Seventh task. Restore WE formulae from ACT-02 Feature placeholders / XML comment
 3. If edge has no ADR association, safe placeholders / empty — do not invent Aggregate host
 4. Keep pylons and displayInformation behavior
 5. Scope note: routeDirection is for WE formulae on visual highway markers (this task), not citywide world name labels. HW-04 labels stay prefix-suffix + name/custom only. Highway shields / direction on name labels remain deferred (RefsLibrary 17).
+6. Labels scope (deferred, not this task): world highway name labels will also show routeDirection using per-direction format strings in AdrModData (one text field per RouteDirection except NONE). Empty ModData → fall back to existing i18n RouteDirection.{NAME}. See RefsLibrary 17.
 
 ---
 
