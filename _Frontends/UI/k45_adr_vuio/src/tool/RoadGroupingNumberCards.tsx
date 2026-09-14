@@ -202,7 +202,7 @@ export const RoadGroupingNumberCardsOverlay = () => {
     }
 
     return (
-        <div className={styles.root} aria-hidden>
+        <div className={styles.k45_adr_numberCards_root} aria-hidden>
             <svg className={styles.connectors} width={viewport.w} height={viewport.h}>
                 {placed.map((p) => {
                     const end = connectorEnd(p);

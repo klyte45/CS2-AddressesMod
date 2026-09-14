@@ -1,97 +1,98 @@
-.root {
+.k45_adr_roadPrefixSettings_root {
     display: flex;
     flex-direction: column;
     height: 100%;
     min-height: 0;
-}
 
-.topBar {
-    display: flex;
-    flex-direction: row-reverse;
-    flex-wrap: wrap;
-    padding: 8rem;
-}
 
-.topBar button {
-    margin-left: 6rem;
-    margin-bottom: 4rem;
-}
+    .topBar {
+        display: flex;
+        flex-direction: row-reverse;
+        flex-wrap: wrap;
+        padding: 8rem;
+    }
 
-.body {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    min-height: 0;
-    padding: 0 8rem 8rem;
-}
+    .topBar button {
+        margin-left: 6rem;
+        margin-bottom: 4rem;
+    }
 
-.ruleShell {
-    display: flex;
-    flex-grow: 1;
-    min-height: 0;
-    margin-top: 8rem;
-    border-top: 3rem solid var(--menuBorderColor1);
-    overflow: hidden;
-}
+    .body {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        min-height: 0;
+        padding: 0 8rem 8rem;
+    }
 
-.rulesList {
-    flex-basis: 40%;
-    flex-grow: 0;
-    flex-shrink: 0;
-    background-color: var(--menuPanel1);
-    border-right: 3rem solid var(--menuBorderColor1);
-}
+    .ruleShell {
+        display: flex;
+        flex-grow: 1;
+        min-height: 0;
+        margin-top: 8rem;
+        border-top: 3rem solid var(--menuBorderColor1);
+        overflow: hidden;
+    }
 
-.ruleSettings {
-    flex-grow: 1;
-    flex-shrink: 1;
-    min-width: 0;
-    overflow: auto;
-    padding-left: 8rem;
-    background-color: var(--menuPanel1);
-}
+    .rulesList {
+        flex-basis: 40%;
+        flex-grow: 0;
+        flex-shrink: 0;
+        background-color: var(--menuPanel1);
+        border-right: 3rem solid var(--menuBorderColor1);
+    }
 
-.selectedItem {
-    background-color: var(--menuBorderColor2);
-    color: black;
-}
+    .ruleSettings {
+        flex-grow: 1;
+        flex-shrink: 1;
+        min-width: 0;
+        overflow: auto;
+        padding-left: 8rem;
+        background-color: var(--menuPanel1);
+    }
 
-.buttonPlaceholder {
-    width: 39rem;
-    height: 39rem;
-}
+    .selectedItem {
+        background-color: var(--menuBorderColor2);
+        color: black;
+    }
 
-.moveItemUp,
-.moveItemDown,
-.removeItem {    
-    width: 25rem;
-    height: 25rem;
-}
+    .buttonPlaceholder {
+        width: 39rem;
+        height: 39rem;
+    }
 
-.moveItemUp,
-.moveItemDown,
-.removeItem {
-    mask-size: 100%;
-    background-color: var(--normalTextColor);
-}
+    .moveItemUp,
+    .moveItemDown,
+    .removeItem {
+        width: 25rem;
+        height: 25rem;
+    }
 
-.moveItemUp {
-    mask-image: url(coui://uil/Standard/ArrowUpThickStroke.svg);
-}
+    .moveItemUp,
+    .moveItemDown,
+    .removeItem {
+        mask-size: 100%;
+        background-color: var(--normalTextColor);
+    }
 
-.moveItemDown {
-    mask-image: url(coui://uil/Standard/ArrowDownThickStroke.svg);
-}
+    .moveItemUp {
+        mask-image: url(coui://uil/Standard/ArrowUpThickStroke.svg);
+    }
 
-.removeItem {
-    mask-image: url(coui://uil/Standard/XClose.svg);
-}
+    .moveItemDown {
+        mask-image: url(coui://uil/Standard/ArrowDownThickStroke.svg);
+    }
 
-.sectionTitle {
-    margin: 12rem 0 6rem;
-}
+    .removeItem {
+        mask-image: url(coui://uil/Standard/XClose.svg);
+    }
 
-.numberInput {
-    max-width: 160rem;
-    text-align: right;
+    .sectionTitle {
+        margin: 12rem 0 6rem;
+    }
+
+    .numberInput {
+        max-width: 160rem;
+        text-align: right;
+    }
 }

@@ -148,7 +148,7 @@ export const RoadPrefixCmp = () => {
     };
 
     return (
-        <div className={`${styles.root} k45_btnHost`}>
+        <div className={`${styles.k45_adr_roadPrefixSettings_root} k45_btnHost`}>
             <div className={styles.topBar}>
                 <button
                     type="button"

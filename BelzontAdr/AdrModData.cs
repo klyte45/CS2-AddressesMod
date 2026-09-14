@@ -97,7 +97,7 @@ namespace BelzontAdr
         }
 
         public static bool IsAutomaticRefHalfHeight(int index)
-            => index >= RoadNameLabelRefHalfHeightIndexAutomatic;
+            => index <= RoadNameLabelRefHalfHeightIndexMin || index > RoadNameLabelRefHalfHeightIndexMax;
 
         /// <summary>RefHalfHeight for fixed steps: 2^(6+index)/10. Caller must not use this for automatic.</summary>
         public static float IndexToRefHalfHeight(int index)

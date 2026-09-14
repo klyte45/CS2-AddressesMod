@@ -1,46 +1,46 @@
-.root {
+.k45_adr_numberCards_root {
     position: fixed;
     inset: 0;
     width: 100vw;
     height: 100vh;
     pointer-events: none;
     overflow: hidden;
-    z-index: 10000;
-}
+    z-index: -10000;
 
-.connectors {
-    position: absolute;
-    inset: 0;
-    overflow: visible;
-}
+    .connectors {
+        position: absolute;
+        inset: 0;
+        overflow: visible;
+    }
 
-.connectorLine {
-    stroke: rgba(0, 187, 0, 0.85);
-    stroke-width: 2;
-    fill: none;
-}
+    .connectorLine {
+        stroke: rgba(0, 187, 0, 0.85);
+        stroke-width: 2;
+        fill: none;
+    }
 
-.anchorDot {
-    fill: rgba(0, 32, 0, 0.9);
-    stroke: rgba(0, 187, 0, 0.95);
-    stroke-width: 2;
-}
+    .anchorDot {
+        fill: rgba(0, 32, 0, 0.9);
+        stroke: rgba(0, 187, 0, 0.95);
+        stroke-width: 2;
+    }
 
-.card {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    box-sizing: border-box;
-    z-index: 1;
-    padding: 6rem 12rem;
-    border-radius: 6rem;
-    background: rgba(0, 32, 0, 0.96);
-    border: 2rem solid rgba(0, 187, 0, 0.9);
-    color: #e8ffe8;
-    font-size: 18rem;
-    font-weight: 600;
-    line-height: 1.2;
-    text-align: center;
-    white-space: nowrap;
-    box-shadow: 0 2rem 8rem rgba(0, 0, 0, 0.45);
-    pointer-events: none;
+    .card {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        box-sizing: border-box;
+        z-index: 1;
+        padding: 6rem 12rem;
+        border-radius: 6rem;
+        background: rgba(0, 32, 0, 0.96);
+        border: 2rem solid rgba(0, 187, 0, 0.9);
+        color: #e8ffe8;
+        font-size: 18rem;
+        font-weight: 600;
+        line-height: 1.2;
+        text-align: center;
+        white-space: nowrap;
+        box-shadow: 0 2rem 8rem rgba(0, 0, 0, 0.45);
+        pointer-events: none;
+    }
 }
