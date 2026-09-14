@@ -74,7 +74,8 @@ First task of epic adr-net-kind (catalog RefsLibrary 24). Add AdrNetKind enum an
 ### Is dependent for
 
 - [0086] NET-04-Road-only-seeds-namesets-prefab-RoadData
-
+- [0088] NET-02-Membership-Road-Grouping-mix-gate
+- [0089] NET-03-Per-kind-ADR-NetNameData-outline-by-kind
 ### Is related to
 
 - [0079] HW-03b-Road-Grouping-tool-options-parity
@@ -86,6 +87,8 @@ First task of epic adr-net-kind (catalog RefsLibrary 24). Add AdrNetKind enum an
 - NET-03-Per-kind-ADR-NetNameData-outline-by-kind
 - NET-04-Road-only-seeds-namesets-prefab-RoadData
 - NET-05-Playtest-matrix-smoke-notes
+
+---
 
 ## Other Notes
 
