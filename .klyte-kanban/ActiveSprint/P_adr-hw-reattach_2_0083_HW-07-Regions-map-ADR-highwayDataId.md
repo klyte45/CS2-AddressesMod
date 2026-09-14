@@ -32,12 +32,12 @@ Eighth task — REQUIRED in the same sprint (not optional). After ACT-01, AdrReg
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrRegionsSystem (or successor) exposes highway association from ADR highwayDataId for linked edges
-- [ ] Region map VUIO can class/hover by registry highway id for ADR-associated roads
-- [ ] Roads without ADR highway id remain non-associated (net classification alone does not fake registry membership)
-- [ ] Registry CRUD UI still works
-- [ ] No Aggregate-hosted highwayDataId revived
-- [ ] Compile + playtest Region map hover/class after assigning highway in SIP/tool
+- [x] AdrRegionsSystem (or successor) exposes highway association from ADR highwayDataId for linked edges
+- [x] Region map VUIO can class/hover by registry highway id for ADR-associated roads
+- [x] Roads without ADR highway id remain non-associated (net classification alone does not fake registry membership)
+- [x] Registry CRUD UI still works
+- [x] No Aggregate-hosted highwayDataId revived
+- [x] Compile + playtest Region map hover/class after assigning highway in SIP/tool
 
 ---
 
