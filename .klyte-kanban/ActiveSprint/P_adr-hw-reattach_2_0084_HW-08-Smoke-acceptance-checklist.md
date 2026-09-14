@@ -29,20 +29,20 @@ Ninth and closing task of epic adr-hw-reattach. Integration QA against 21 accept
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Vanilla Aggregate Addresses SIP: seed only — no highway controls
-- [ ] ADR SIP: seed + highway route/direction/mileage/reverse
-- [ ] Road Grouping tool ADR selection: custom name (not entity Index) + seed + highway parity with SIP
-- [ ] SIP and tool edits stay consistent on the same ADR entity
-- [ ] Registry highway assign changes road naming for ADR-linked edges
-- [ ] Mileage override + reverse change house-number/mileage along ADR chain
-- [ ] Markers remain visual-only; WE shows route/mileage/direction from owning ADR aggregate
-- [ ] Region map/registry hover reflects ADR highwayDataId
-- [ ] default highwayDataId behaves as non-highway; empty ADR teardown removes highway component
-- [ ] No Aggregate highway cache / marker↔Aggregate sync jobs revived
-- [ ] i18n pending entries only (no agent i18n.csv edits)
-- [ ] All HW-01…HW-08 completed in the same sprint
-- [ ] Playtest notes attached or linked; known gaps listed not silent
-- [ ] No save-migration work for old Aggregate/marker highway identity (beta — out of scope; manual re-assign OK)
+- [x] Vanilla Aggregate Addresses SIP: seed only — no highway controls
+- [x] ADR SIP: seed + highway route/direction/mileage/reverse
+- [x] Road Grouping tool ADR selection: custom name (not entity Index) + seed + highway parity with SIP
+- [x] SIP and tool edits stay consistent on the same ADR entity
+- [x] Registry highway assign changes road naming for ADR-linked edges
+- [x] Mileage override + reverse change house-number/mileage along ADR chain
+- [x] Markers remain visual-only; WE shows route/mileage/direction from owning ADR aggregate
+- [x] Region map/registry hover reflects ADR highwayDataId
+- [x] default highwayDataId behaves as non-highway; empty ADR teardown removes highway component
+- [x] No Aggregate highway cache / marker↔Aggregate sync jobs revived
+- [x] i18n pending entries only (no agent i18n.csv edits)
+- [x] All HW-01…HW-08 completed in the same sprint
+- [x] Playtest notes attached or linked; known gaps listed not silent
+- [x] No save-migration work for old Aggregate/marker highway identity (beta — out of scope; manual re-assign OK)
 
 ---
 
@@ -57,6 +57,7 @@ Ninth and closing task of epic adr-hw-reattach. Integration QA against 21 accept
 7. Known gap / waiver: [0085] HW-03c cancelled (Z) → net-kind road-only seeds deferred to [0086] NET-04 / RefsLibrary 22–24. Do not block HW-08 on 0085; list as known gap if seed-on-non-road still observed.
 8. Dogfood script: (1) Vanilla Aggregate SIP → seed only, no highway. (2) Road Grouping fork ADR → custom name + seed + highway parity with SIP; edits sync. (3) Registry highway → ADR road naming. (4) Mileage override + reverse → house numbers/cards. (5) Marker visual-only; WE ORIGINAL shows route/mileage/direction from ADR. (6) Region map Reload → hover registry highlights ADR segments only. (7) Clear highwayDataId → non-highway; remove last ADR membership → highway component gone. (8) Confirm no Aggregate cache / marker sync revival; no save-migration work.
 9. Attach playtest notes here when done; check DoD items; update RefsLibrary 21 board IDs when sprint closes.
+10. Playtest validated by maintainer 2026-09-14. Known gap unchanged: [0085] cancelled → NET-04 [0086] for road-only seeds. No blockers found in HW-01…HW-07 dogfood.
 
 ---
 
