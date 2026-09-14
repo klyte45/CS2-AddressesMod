@@ -1,7 +1,7 @@
+**Start time:** 2026-09-14 17:43 -0300
 # [0084] HW-08-Smoke-acceptance-checklist
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/21-highway-reattach-roadmap.md Acceptance checklist
