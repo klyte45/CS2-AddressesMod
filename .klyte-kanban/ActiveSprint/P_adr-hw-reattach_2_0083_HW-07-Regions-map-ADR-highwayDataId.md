@@ -50,6 +50,7 @@ Eighth task — REQUIRED in the same sprint (not optional). After ACT-01, AdrReg
 5. RegionEditor paths again apply hwId_${highwayId} class for HighwayRegisterManagement hover highlight (.hwId_hover).
 6. Map refresh after SIP/tool highway assign: use existing Region map Reload (listHighways re-reads ADR ids).
 7. Awaiting user compile + playtest: assign registry highway on ADR SIP/tool, reload Region map, hover registry list entry highlights associated roads.
+8. Fix: ListFromQuery groups per-edge by ADR aggregate + highwayDataId (or vanilla Aggregate + empty id). Hover only highlights ADR-associated segments; leftover vanilla-aggregate segments stay without registry hwId class.
 
 ---
 
