@@ -53,6 +53,10 @@ First task of epic adr-net-kind (catalog RefsLibrary 24). Add AdrNetKind enum an
 5. Maintenance backfill for pre-NET-01 saves: classify from first member when kind is None
 6. Do not mutate vanilla AggregateSystem
 7. Catalog: 24-adr-net-kind-roadmap.md NET-01
+8. Added BelzontAdr/Utils/AdrNetKind.cs: AdrNetKind enum (None/Road/Pathway/Train/Tram/Subway/Waterway/Taxiway) + AdrNetKindUtil.TryGetNetKind from PrefabRef *Data (RoadData first; never HasComponent Road). TrackTypes: Subway alone→Subway; Tram alone→Tram; Train or Train|Tram→Train. Out-of-scope prefabs → false/None.
+9. ADRNameAggregate upgraded from IEmptySerializable tag to ISerializable v0 carrying m_Kind; CreateDefault() = None. CreateAggregate uses AddComponentData(CreateDefault()).
+10. CreateAggregate(edges) / TryForkFromVanillaSeed / AddMemberCore assign kind when still None (first classifiable edge). EnsureNetKind() backfills from first member; maintenance calls it alongside EnsureHighwayData. Cross-kind reject deferred to NET-02.
+11. Awaiting user solution compile for DoD compile item. Validate pre-NET-01 save load (empty→ISerializable upgrade).
 
 ---
 
