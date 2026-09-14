@@ -46,6 +46,10 @@ Eighth task — REQUIRED in the same sprint (not optional). After ACT-01, AdrReg
 1. Prefer ADRNameAggregated → ADRNameAggregateHighwayData over Aggregated → Aggregate
 2. Restore any frontend bindings removed in ACT-01 that only need ADR-sourced ids
 3. Coordinate dirty/refresh when SIP/tool changes highwayDataId
+4. AdrRegionsSystem.AggregationData.highwayId restored: ResolveAdrHighwayId walks group edges via ADRNameAggregated → ADRNameAggregateHighwayData.highwayDataId (first HasHighwayRoute). Net-only highways stay default/empty — no Aggregate-hosted id.
+5. RegionEditor paths again apply hwId_${highwayId} class for HighwayRegisterManagement hover highlight (.hwId_hover).
+6. Map refresh after SIP/tool highway assign: use existing Region map Reload (listHighways re-reads ADR ids).
+7. Awaiting user compile + playtest: assign registry highway on ADR SIP/tool, reload Region map, hover registry list entry highlights associated roads.
 
 ---
 
