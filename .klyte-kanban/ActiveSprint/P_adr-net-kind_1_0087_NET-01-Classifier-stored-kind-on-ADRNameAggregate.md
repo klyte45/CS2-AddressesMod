@@ -1,7 +1,7 @@
+**Start time:** 2026-09-14 19:56 -0300
 # [0087] NET-01-Classifier-stored-kind-on-ADRNameAggregate
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/22-game-net-edge-kinds-and-aggregation.md
