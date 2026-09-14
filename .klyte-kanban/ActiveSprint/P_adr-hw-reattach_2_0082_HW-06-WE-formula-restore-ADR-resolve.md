@@ -1,7 +1,7 @@
+**Start time:** 2026-09-13 23:19 -0300
 # [0082] HW-06-WE-formula-restore-ADR-resolve
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/20-highway-reattach-on-adr-aggregates.md §E WE
