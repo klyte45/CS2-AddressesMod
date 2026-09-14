@@ -17,6 +17,7 @@ namespace BelzontAdr
     [SettingsUIKeyboardAction(kActionEnableRoadGrouping, ActionType.Button, "K45_ADR.Tool")]
     public class AdrModData : BasicModData
     {
+        public static new AdrModData Instance => (AdrModData)BasicModData.Instance;
         public const string kGeneralTab = "General";
         public const string kToolControlsSection = "ToolControls";
         public const string kRoadNameLabelsSection = "RoadNameLabels";
@@ -34,6 +35,8 @@ namespace BelzontAdr
 
         private int roadNameLabelRefHalfHeightIndex = 0;
 
+        private bool displayDirectionBeforeNameLabel = false;
+
         public AdrModData(IMod mod) : base(mod)
         {
         }
@@ -41,6 +44,7 @@ namespace BelzontAdr
         public override void OnSetDefaults()
         {
             roadNameLabelRefHalfHeightIndex = 0;
+            displayDirectionBeforeNameLabel = false;
         }
 
         [SettingsUISection(kGeneralTab, kToolControlsSection)]
@@ -86,7 +90,23 @@ namespace BelzontAdr
                 }
 
                 roadNameLabelRefHalfHeightIndex = clamped;
-                NotifyRoadNameLabelRefHalfHeightChanged();
+                NotifyRoadNameLabelParamChanged();
+            }
+        }
+
+        [SettingsUISection(kGeneralTab, kRoadNameLabelsSection)]
+        public bool DisplayDirectionBeforeNameLabel
+        {
+            get => displayDirectionBeforeNameLabel;
+            set
+            {
+                if (displayDirectionBeforeNameLabel == value)
+                {
+                    return;
+                }
+
+                displayDirectionBeforeNameLabel = value;
+                NotifyRoadNameLabelParamChanged();
             }
         }
 
@@ -115,7 +135,7 @@ namespace BelzontAdr
             };
         }
 
-        private void NotifyRoadNameLabelRefHalfHeightChanged()
+        private void NotifyRoadNameLabelParamChanged()
         {
             var world = World.DefaultGameObjectInjectionWorld;
             if (world == null || !world.IsCreated)
@@ -123,8 +143,9 @@ namespace BelzontAdr
                 return;
             }
 
-            var main = world.GetExistingSystemManaged<AdrMainSystem>();
-            main?.OnChangedRoadNameGenerationRules();
+            // Call the mesh system directly (same as locale OnDictionaryChanged) so we do not
+            // depend on AdrMainSystem running before Updated is stripped this frame.
+            world.GetExistingSystemManaged<AdrRoadNameLabelMeshSystem>()?.ForceRegenerateLabels();
         }
     }
 }

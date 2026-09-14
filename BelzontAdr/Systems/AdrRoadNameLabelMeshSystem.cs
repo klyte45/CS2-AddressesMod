@@ -160,10 +160,20 @@ namespace BelzontAdr
             m_Loaded = true;
         }
 
-        private void OnDictionaryChanged()
+        private void OnDictionaryChanged() => ForceRegenerateLabels();
+
+        /// <summary>
+        /// Same path as <c>localizationManager.onActiveDictionaryChanged</c> /
+        /// vanilla <c>AggregateMeshSystem.OnDictionaryChanged</c>: mark all road name
+        /// label owners <see cref="Updated"/>, drop the rendered-string cache, and
+        /// force a full vertex pass next update (survives Updated being cleared before
+        /// this system runs in the same frame).
+        /// </summary>
+        internal void ForceRegenerateLabels()
         {
             EntityManager.AddComponent<Updated>(m_LabelQuery);
             m_CachedLabels?.Clear();
+            m_Loaded = true;
         }
 
         [Preserve]

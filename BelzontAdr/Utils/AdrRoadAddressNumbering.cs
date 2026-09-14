@@ -324,6 +324,71 @@ namespace BelzontAdr
             return TryGetAddress(entityManager, adrMainSystem, highwayRoutesSystem, Entity.Null, edge, curvePos, out _, out number);
         }
 
+        /// <summary>
+        /// Chain distance (meters) along an ADR aggregate at <paramref name="curvePos"/> on <paramref name="edge"/>,
+        /// using authored highway orientation / reverse / baseline context.
+        /// </summary>
+        public static bool TryGetDistanceAlongAdr(
+            EntityManager entityManager,
+            AdrMainSystem adrMainSystem,
+            AdrHighwayRoutesSystem highwayRoutesSystem,
+            Entity edge,
+            float curvePos,
+            out float distanceAlongMeters,
+            out HighwayNumberingContext hwCtx)
+        {
+            distanceAlongMeters = 0f;
+            hwCtx = default;
+
+            if (!TryGetAdrAggregate(entityManager, edge, out Entity adrAggregate)
+                || !entityManager.TryGetBuffer(adrAggregate, true, out DynamicBuffer<ADRNameAggregateElement> aggregationBuffer)
+                || aggregationBuffer.Length == 0)
+            {
+                return false;
+            }
+
+            hwCtx = HighwayNumberingContext.FromAdrAggregate(
+                entityManager, adrMainSystem, highwayRoutesSystem, adrAggregate);
+
+            if (!TryResolveInverseAggregate(entityManager, aggregationBuffer, hwCtx.OrientationRef, out bool isInverseAggregate))
+            {
+                return false;
+            }
+
+            float currentDistance = 0f;
+            for (int i = isInverseAggregate ? aggregationBuffer.Length - 1 : 0;
+                 isInverseAggregate ? i >= 0 : i < aggregationBuffer.Length;
+                 i += isInverseAggregate ? -1 : 1)
+            {
+                ADRNameAggregateElement aggregateElement = aggregationBuffer[i];
+                float newDistance = currentDistance;
+                bool hasCurve = entityManager.TryGetComponent(aggregateElement.m_Edge, out Curve curve);
+                if (hasCurve)
+                {
+                    newDistance += curve.m_Length;
+                }
+
+                if (aggregateElement.m_Edge != edge)
+                {
+                    currentDistance = newDistance;
+                    continue;
+                }
+
+                if (!hasCurve)
+                {
+                    return false;
+                }
+
+                bool isReversedSegment = CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
+                var t = new Bounds1(isReversedSegment ? curvePos : 0f, isReversedSegment ? 1f : curvePos);
+                float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
+                distanceAlongMeters = math.lerp(currentDistance, newDistance, s);
+                return true;
+            }
+
+            return false;
+        }
+
         private static bool TryGetAddressAlongAdr(
             EntityManager entityManager,
             AdrMainSystem adrMainSystem,

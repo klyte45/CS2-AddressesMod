@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Unity.Entities;
 using Unity.Mathematics;
-using static Colossal.IO.AssetDatabase.AtlasFrame;
 using static Game.UI.NameSystem;
 using AreaType = Game.Zones.AreaType;
 using CargoTransportStation = Game.Buildings.CargoTransportStation;
@@ -81,11 +80,24 @@ namespace BelzontAdr
         {
             // ADR highway labels only (never vanilla Aggregate). Prefix-suffix shield always
             // shown when highwayDataId is set; custom name wins the name line when present.
-            if (TryGetAdrHighwayRegistryName(entity, out var hwData))
+            if (TryGetAdrHighwayRegistryName(entity, out var hwData, out var aggData))
             {
+                var hwDirectionSuffix = "";
+                var hwDirectionPrefix = "";
+                if (aggData.routeDirection != ADRNameAggregateHighwayData.RouteDirection.NONE)
+                {
+                    if (AdrModData.Instance.DisplayDirectionBeforeNameLabel)
+                    {
+                        hwDirectionPrefix = Name.LocalizedName($"K45::ADR.vuio[RouteDirectionShort.{aggData.routeDirection}]").Translate() + " ";
+                    }
+                    else
+                    {
+                        hwDirectionSuffix = " " + Name.LocalizedName($"K45::ADR.vuio[RouteDirectionShort.{aggData.routeDirection}]").Translate();
+                    }
+                }
                 __result = m_nameSystem.TryGetCustomName(entity, out var customName)
-                    ? $"<color=\"yellow\">{hwData.prefix}-{hwData.suffix}</color>\n{customName}"
-                    : $"<color=\"yellow\">{hwData.prefix}-{hwData.suffix}</color>\n{hwData.name}";
+                    ? $"<color=\"yellow\">{hwDirectionPrefix}{hwData.prefix}-{hwData.suffix}{hwDirectionSuffix}</color>\n{customName}"
+                    : $"<color=\"yellow\">{hwDirectionPrefix}{hwData.prefix}-{hwData.suffix}{hwDirectionSuffix}</color>\n{hwData.name}";
                 return false;
             }
 
@@ -496,7 +508,7 @@ namespace BelzontAdr
             if (m_nameSystem.TryGetCustomName(entity, out _)) return true;
 
             // Highway registry name for ADR aggregates with a non-default highwayDataId.
-            if (TryGetAdrHighwayRegistryName(entity, out var hwData))
+            if (TryGetAdrHighwayRegistryName(entity, out var hwData, out _))
             {
                 format = hwData.name;
                 name = "";
@@ -584,11 +596,12 @@ namespace BelzontAdr
         /// Resolves highway registry data from an ADR name-aggregate only.
         /// Does not read vanilla Aggregate or former Aggregate-hosted highway components.
         /// </summary>
-        private static bool TryGetAdrHighwayRegistryName(Entity entity, out HighwayData hwData)
+        private static bool TryGetAdrHighwayRegistryName(Entity entity, out HighwayData hwData, out ADRNameAggregateHighwayData highwayData)
         {
             hwData = null;
+            highwayData = default;
             return entityManager.HasComponent<ADRNameAggregate>(entity)
-                && entityManager.TryGetComponent(entity, out ADRNameAggregateHighwayData highwayData)
+                && entityManager.TryGetComponent(entity, out highwayData)
                 && highwayData.HasHighwayRoute
                 && m_adrHighwayRoutesSystem != null
                 && m_adrHighwayRoutesSystem.TryGetHighwayData(highwayData.highwayDataId, out hwData);

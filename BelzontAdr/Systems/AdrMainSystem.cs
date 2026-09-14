@@ -7,10 +7,12 @@ using Game;
 using Game.Areas;
 using Game.Common;
 using Game.Net;
+using Game.Rendering;
 using Game.SceneFlow;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -23,7 +25,15 @@ namespace BelzontAdr
         private AdrDistrictsSystem districtsSystem;
         private Queue<Action> actionsToGoOnUpdate;
         private AdrNamesetSystem namesetSystem;
-        private EntityQuery m_LabelQuery;
+        private AdrRoadNameLabelMeshSystem roadNameLabelMeshSystem;
+        private AreaBufferSystem areaBufferSystem;
+        /// <summary>District areas — same shape as <c>AreaBufferSystem</c> district <c>m_AreaQuery</c>.</summary>
+        private EntityQuery m_DistrictAreaQuery;
+
+        private static readonly FieldInfo s_AreaBufferLoadedField =
+            typeof(AreaBufferSystem).GetField("m_Loaded", ReflectionUtils.allFlags);
+        private static readonly FieldInfo s_AreaBufferCachedLabelsField =
+            typeof(AreaBufferSystem).GetField("m_CachedLabels", ReflectionUtils.allFlags);
 
         public AdrCitywideSettings CurrentCitySettings { get; private set; } = new();
 
@@ -96,20 +106,15 @@ namespace BelzontAdr
             districtsSystem = World.GetOrCreateSystemManaged<AdrDistrictsSystem>();
             actionsToGoOnUpdate = new Queue<Action>();
             namesetSystem = World.GetOrCreateSystemManaged<AdrNamesetSystem>();
-            m_LabelQuery = base.GetEntityQuery(new EntityQueryDesc[]
-            {
-                new EntityQueryDesc
-                {
-                    All = new ComponentType[]
-                    {
-                        ComponentType.ReadOnly<LabelMaterial>()
-                    },
-                    None = new ComponentType[]
-                    {
-                        ComponentType.ReadOnly<Deleted>()
-                    }
-                }
-            });
+            roadNameLabelMeshSystem = World.GetOrCreateSystemManaged<AdrRoadNameLabelMeshSystem>();
+            areaBufferSystem = World.GetOrCreateSystemManaged<AreaBufferSystem>();
+            // Mirrors AreaBufferSystem.InitializeAreaData<District>().m_AreaQuery used by OnDictionaryChanged.
+            m_DistrictAreaQuery = GetEntityQuery(
+                ComponentType.ReadOnly<Area>(),
+                ComponentType.ReadOnly<District>(),
+                ComponentType.ReadOnly<Game.Areas.Node>(),
+                ComponentType.ReadOnly<Triangle>(),
+                ComponentType.Exclude<Deleted>());
         }
 
         private void EnqueueToRunOnUpdate(Action a)
@@ -122,16 +127,35 @@ namespace BelzontAdr
 
         private void ResetRoadsCache()
         {
-            if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Run action typeof(AggregateMeshSystem).GetMethod(\"OnDictionaryChanged\",...)");
-            EntityManager.AddComponent<Updated>(m_LabelQuery);
+            // Vanilla AggregateMeshSystem.OnDictionaryChanged + ADR label takeover cache clear.
+            if (BasicIMod.TraceMode) LogUtils.DoTraceLog("ResetRoadsCache: ForceRegenerateLabels (OnDictionaryChanged parity)");
+            roadNameLabelMeshSystem.ForceRegenerateLabels();
             isDirtyRoads = false;
         }
 
         private void ResetDistrictsCache()
         {
-            if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"Run action typeof(AreaBufferSystem).GetMethod(\"OnDictionaryChanged\", ...)");
-            EntityManager.AddComponent<Updated>(m_LabelQuery);
+            // Vanilla AreaBufferSystem.OnDictionaryChanged for District (m_AreaTypeData[1]),
+            // plus m_Loaded + cache clear so a late Updated add still rebakes next update
+            // (same frame-order fix as AdrRoadNameLabelMeshSystem.ForceRegenerateLabels).
+            if (BasicIMod.TraceMode) LogUtils.DoTraceLog("ResetDistrictsCache: ForceRegenerateDistrictLabels");
+            ForceRegenerateDistrictLabels();
             isDirtyDistricts = false;
+        }
+
+        private void ForceRegenerateDistrictLabels()
+        {
+            EntityManager.AddComponent<Updated>(m_DistrictAreaQuery);
+            if (areaBufferSystem == null)
+            {
+                return;
+            }
+
+            s_AreaBufferLoadedField?.SetValue(areaBufferSystem, true);
+            if (s_AreaBufferCachedLabelsField?.GetValue(areaBufferSystem) is Dictionary<Entity, string> cachedLabels)
+            {
+                cachedLabels.Clear();
+            }
         }
 
         public void OnChangedRoadNameGenerationRules() => EnqueueToRunOnUpdate(ResetRoadsCache);
