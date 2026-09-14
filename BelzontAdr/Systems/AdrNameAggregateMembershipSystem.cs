@@ -54,7 +54,7 @@ namespace BelzontAdr
         public Entity CreateAggregate()
         {
             var aggregate = EntityManager.CreateEntity();
-            EntityManager.AddComponent<ADRNameAggregate>(aggregate);
+            EntityManager.AddComponentData(aggregate, ADRNameAggregate.CreateDefault());
             EntityManager.AddBuffer<ADRNameAggregateElement>(aggregate);
             EnsureHighwayData(aggregate);
             return aggregate;
@@ -73,6 +73,59 @@ namespace BelzontAdr
             }
 
             EntityManager.AddComponentData(aggregate, ADRNameAggregateHighwayData.CreateDefault());
+        }
+
+        /// <summary>
+        /// Backfill stored <see cref="AdrNetKind"/> from the first classifiable member when kind is None
+        /// (pre-NET-01 saves or empty create before first member). Out-of-scope prefabs leave None.
+        /// </summary>
+        public void EnsureNetKind(Entity aggregate)
+        {
+            if (!IsAdrNameAggregate(aggregate)
+                || !EntityManager.TryGetComponent(aggregate, out ADRNameAggregate host)
+                || host.m_Kind != AdrNetKind.None)
+            {
+                return;
+            }
+
+            if (!EntityManager.TryGetBuffer(aggregate, true, out DynamicBuffer<ADRNameAggregateElement> elements)
+                || elements.Length == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < elements.Length; i++)
+            {
+                if (AdrNetKindUtil.TryGetNetKind(EntityManager, elements[i].m_Edge, out AdrNetKind kind)
+                    && kind != AdrNetKind.None)
+                {
+                    host.m_Kind = kind;
+                    EntityManager.SetComponentData(aggregate, host);
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set stored kind when still None. Does not enforce cross-kind reject (NET-02).
+        /// </summary>
+        private void TryAssignNetKindFromEdge(Entity aggregate, Entity edge)
+        {
+            if (!IsAdrNameAggregate(aggregate)
+                || !EntityManager.TryGetComponent(aggregate, out ADRNameAggregate host)
+                || host.m_Kind != AdrNetKind.None)
+            {
+                return;
+            }
+
+            if (!AdrNetKindUtil.TryGetNetKind(EntityManager, edge, out AdrNetKind kind)
+                || kind == AdrNetKind.None)
+            {
+                return;
+            }
+
+            host.m_Kind = kind;
+            EntityManager.SetComponentData(aggregate, host);
         }
 
         /// <summary>
@@ -95,6 +148,7 @@ namespace BelzontAdr
             {
                 AddMemberCore(aggregate, edges[i], insertIndex: -1, allowSteal: true, out _);
             }
+            EnsureNetKind(aggregate);
             ResortMembers(aggregate);
             Entity prefabSource = Entity.Null;
             if (edges.Length > 0
@@ -263,6 +317,8 @@ namespace BelzontAdr
                 AddMemberCore(adrAggregate, edgesToSeed[i], insertIndex: -1, allowSteal: false, out _);
             }
 
+            EnsureNetKind(adrAggregate);
+
             if (!EntityManager.TryGetBuffer(adrAggregate, true, out DynamicBuffer<ADRNameAggregateElement> seeded)
                 || seeded.Length == 0)
             {
@@ -424,6 +480,7 @@ namespace BelzontAdr
             if (existingIndex >= 0)
             {
                 ApplyEdgeLink(edge, aggregate, buffer[existingIndex]);
+                TryAssignNetKindFromEdge(aggregate, edge);
                 return true;
             }
 
@@ -437,6 +494,7 @@ namespace BelzontAdr
                 buffer.Insert(insertIndex, element);
             }
             ApplyEdgeLink(edge, aggregate, element);
+            TryAssignNetKindFromEdge(aggregate, edge);
             return true;
         }
 

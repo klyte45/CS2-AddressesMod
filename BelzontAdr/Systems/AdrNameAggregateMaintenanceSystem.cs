@@ -124,6 +124,8 @@ namespace BelzontAdr
 
                 // Backfill highway component on ADR aggregates from saves predating HW-01.
                 m_membership.EnsureHighwayData(aggregate);
+                // Backfill stored AdrNetKind from first member when None (pre-NET-01 saves).
+                m_membership.EnsureNetKind(aggregate);
 
                 bool touched = RemapAndDropDeadMembers(aggregate, oldToNew, out bool changed);
                 if (!m_membership.IsAdrNameAggregate(aggregate))
