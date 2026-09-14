@@ -119,12 +119,13 @@ namespace BelzontAdr
             string roadName = GetAggregateName(out var pattern, out var genName, roadEntity)
                ? Original_GetName(m_nameSystem, roadEntity).Translate()
                : pattern.Replace("{name}", genName);
+            string numberText = AdrRoadAddressNumbering.FormatHouseNumber(num);
 
             var customFmt = adrMainSystem?.CurrentCitySettings?.AddressFormatPattern;
             if (!string.IsNullOrEmpty(customFmt))
             {
                 GetDistrictForEntity(stop, num, out string districtName, out var _);
-                __result = Name.CustomName(ApplyCustomAddressFormat(customFmt, num.ToString(), roadName, districtName, null));
+                __result = Name.CustomName(ApplyCustomAddressFormat(customFmt, numberText, roadName, districtName, null));
                 return false;
 
             }
@@ -134,7 +135,7 @@ namespace BelzontAdr
                         "ROAD",
                         roadName,
                         "NUMBER",
-                        num.ToString()
+                        numberText
                });
             return false;
         }
@@ -188,6 +189,7 @@ namespace BelzontAdr
             string roadName = GetAggregateName(out var pattern, out var genName, aggregateEntity)
                 ? Original_GetName(m_nameSystem, aggregateEntity).Translate()
                 : pattern.Replace("{name}", genName);
+            string numberText = AdrRoadAddressNumbering.FormatHouseNumber(num);
             bool hasBrandCapability = !omitBrand && entityManager.TryGetComponent<ZoneData>(zone, out var prefab) && prefab.m_AreaType != AreaType.Residential;
             string brandId = hasBrandCapability ? GetBrandId(building) : null;
 
@@ -195,7 +197,7 @@ namespace BelzontAdr
             if (!string.IsNullOrEmpty(customFmt))
             {
                 GetDistrictForEntity(building, num, out string districtName, out var _);
-                __result = Name.CustomName(ApplyCustomAddressFormat(customFmt, num.ToString(), roadName, districtName, Name.LocalizedName(brandId).Translate()));
+                __result = Name.CustomName(ApplyCustomAddressFormat(customFmt, numberText, roadName, districtName, Name.LocalizedName(brandId).Translate()));
                 return false;
             }
 
@@ -208,7 +210,7 @@ namespace BelzontAdr
                     "ROAD",
                     roadName,
                     "NUMBER",
-                    num.ToString()
+                    numberText
                 });
                 return false;
             }
@@ -217,7 +219,7 @@ namespace BelzontAdr
                 "ROAD",
                 roadName,
                 "NUMBER",
-                num.ToString()
+                numberText
             });
             return false;
         }

@@ -83,6 +83,23 @@ Phase-1: **do not** ship these knobs — parity only.
 |---------|--------|--------|
 | Name material outline `#004400` (very dark green) instead of black | **LBL-05** — separate ADR-style material clones (`m_IsAdrStyle`); only ADR / Temp-of-ADR get `_OutlineColor`; vanilla Aggregate keeps default black | `AdrRoadNameLabelMeshSystem` |
 
+## Highway direction on world name labels (product scope — later labels task)
+
+*Locked 2026-09-13 · Not in current `adr-hw-reattach` sprint (HW-04 labels stay prefix–suffix + name/custom only; HW-06 is WE on markers only).*
+
+When a later **labels** task adds `routeDirection` to citywide highway name labels (beyond HW-04 parity):
+
+| Rule | Detail |
+|------|--------|
+| When | ADR name-aggregate has non-default `highwayDataId` **and** `routeDirection != NONE` |
+| What | Label text includes a **direction fragment** from player-configurable formats |
+| Where configured | **`AdrModData`** (settings / ModData) — one **string input field per** `ADRNameAggregateHighwayData.RouteDirection` value **except `NONE`** (NORTH … EXTERNAL, including INTERNAL/EXTERNAL) |
+| Default | Empty ModData string → use existing i18n entry `RouteDirection.{NAME}` (same keys as SIP/tool highway direction dropdown, e.g. `RouteDirection.NORTH`) |
+| Override | Non-empty ModData string for that direction → use as the fragment (player-defined format / free text; may include markup only if label bake escapes custom names consistently) |
+| `NONE` | No direction fragment; no ModData field |
+
+Cross-links: authored field on ADR aggregate — [20](20-highway-reattach-on-adr-aggregates.md); HW-04 naming branch — [21](21-highway-reattach-roadmap.md); ModData section pattern already under `AdrModData` `RoadNameLabels`. Create board task when explicitly requested (not auto-spawned from this note).
+
 ## WE / BelzontWE shield sync
 
 ### Settled: no live shared `Texture2D`
@@ -118,7 +135,10 @@ Gotchas: always delete before re-register (`DuplicateNameException`); bridge `on
 ```text
 Phase-1 (label epic): citywide name parity — [15] / [16]
 Later research:       shields in labels? multi-recipe? WE register product path?
-Later implementation: TMP sprites / knobs / multi-recipe as chosen by that research
+Later implementation: TMP sprites / knobs / multi-recipe as chosen by that research;
+                      highway direction fragment on name labels via AdrModData
+                      per-direction strings (except NONE) → i18n RouteDirection.* fallback
+                      (see section above)
 Never (this family):  live shared Texture2D with BelzontWE
 ```
 

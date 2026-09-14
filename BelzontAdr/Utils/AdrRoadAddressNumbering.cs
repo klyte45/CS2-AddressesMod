@@ -211,13 +211,36 @@ namespace BelzontAdr
         {
             culture ??= GetUiCulture();
             string prefix = freedom ? "mi" : "km";
-            float roundedHalf = math.round(majorUnits * 2f) / 2f;
+            bool negative = majorUnits < 0f;
+            float absUnits = math.abs(majorUnits);
+            float roundedHalf = math.round(absUnits * 2f) / 2f;
+            string body;
             if (math.abs(roundedHalf - math.round(roundedHalf)) < 0.01f)
             {
-                return $"{prefix} {((int)math.round(roundedHalf)).ToString(culture)}";
+                body = ((int)math.round(roundedHalf)).ToString(culture);
+            }
+            else
+            {
+                body = roundedHalf.ToString("0.0", culture);
             }
 
-            return $"{prefix} {roundedHalf.ToString("0.0", culture)}";
+            // Negative mileage zone: absolute value + "-N" (never show a leading minus).
+            return negative ? $"{prefix} {body}-N" : $"{prefix} {body}";
+        }
+
+        /// <summary>
+        /// Display house number. Negative computed values render as absolute + "-N"
+        /// (e.g. -42 → "42-N"); zero and positive stay as-is.
+        /// </summary>
+        public static string FormatHouseNumber(int number, CultureInfo culture = null)
+        {
+            culture ??= GetUiCulture();
+            if (number < 0)
+            {
+                return $"{(-number).ToString(culture)}-N";
+            }
+
+            return number.ToString(culture);
         }
 
         public static string FormatHouseNumberRange(int low, int high, CultureInfo culture = null)
@@ -225,10 +248,10 @@ namespace BelzontAdr
             culture ??= GetUiCulture();
             if (low == high)
             {
-                return low.ToString(culture);
+                return FormatHouseNumber(low, culture);
             }
 
-            return $"{low.ToString(culture)}–{high.ToString(culture)}";
+            return $"{FormatHouseNumber(low, culture)}–{FormatHouseNumber(high, culture)}";
         }
 
         /// <summary>

@@ -183,6 +183,7 @@ Bindings may live on `AdrRoadGroupingController` (tool-scoped) calling the same 
 - Restoring marker-authored `routeDataIndex` / mileage / direction on `ADRHighwayMarkerData`
 - **Save migration** of pre-strip Aggregate- or marker-hosted highway identity (**beta** — out of scope for this feature; re-assign manually)
 - Highway shields / shield+name on world name labels ([17](17-label-extensions-text-images-look.md) — still deferred)
+- **Highway direction fragment on world name labels** — deferred to a later labels task: `AdrModData` string per `RouteDirection` except `NONE`; empty → i18n `RouteDirection.{NAME}` ([17](17-label-extensions-text-images-look.md) § direction on labels). Not HW-04 / HW-06.
 - Putting highway data back on vanilla `Aggregate`
 - Replacing Road Grouping **membership** gestures with SIP (membership stays tool-first; settings are dual-surface)
 

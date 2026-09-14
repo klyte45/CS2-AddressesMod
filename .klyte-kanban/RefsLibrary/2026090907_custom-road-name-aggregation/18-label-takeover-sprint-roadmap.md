@@ -117,6 +117,12 @@ Board IDs assigned **2026-09-12** in backlog (`N`, epic `adr-road-labels`) — r
 
 **None.** LBL-07 / LBL-09 cancelled; LBL-08 shipped inside LBL-05. See Sprint 014 table above.
 
+### Later (post-parity / post–highway-reattach) — not boarded yet
+
+| Idea | Scope note |
+|------|------------|
+| Highway **direction** on world name labels | When `routeDirection != NONE`, append/include a direction fragment. Formats live in **`AdrModData`**: one string field per `RouteDirection` **except `NONE`**. Empty → i18n `RouteDirection.{NAME}`. See [17](17-label-extensions-text-images-look.md). Create board task only when explicitly requested. |
+
 ### Suggested board sprints
 
 | Board sprint | Tasks |
