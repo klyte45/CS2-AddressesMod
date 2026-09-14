@@ -32,13 +32,13 @@ Sixth task. Plumb AdrRoadAddressNumbering / BuildingUtilsOverrides to read autho
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] When mileageOverrideActive, numbering uses mileageOverrideKm as chain-start baseline
-- [ ] reverseCounting flips mileage/house-number growth orientation along ADR element walk
-- [ ] When override inactive, behavior matches post-ACT-01 non-highway ADR numbering
-- [ ] Road Grouping segment number cards reflect the same helpers
-- [ ] No marker SubObject scan for mileage overrides
-- [ ] No ADRHighwayAggregationCacheData
-- [ ] Compile + playtest cards + building address on overridden ADR highway
+- [x] When mileageOverrideActive, numbering uses mileageOverrideKm as chain-start baseline
+- [x] reverseCounting flips mileage/house-number growth orientation along ADR element walk
+- [x] When override inactive, behavior matches post-ACT-01 non-highway ADR numbering
+- [x] Road Grouping segment number cards reflect the same helpers
+- [x] No marker SubObject scan for mileage overrides
+- [x] No ADRHighwayAggregationCacheData
+- [x] Compile + playtest cards + building address on overridden ADR highway
 
 ---
 
