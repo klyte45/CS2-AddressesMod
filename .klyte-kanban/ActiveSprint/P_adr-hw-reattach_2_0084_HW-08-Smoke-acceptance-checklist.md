@@ -53,6 +53,10 @@ Ninth and closing task of epic adr-hw-reattach. Integration QA against 21 accept
 3. Update 21 Board IDs section when closing
 4. Do not expand into highway shields (RefsLibrary 17)
 5. Do not open follow-up tasks for Aggregate/marker highway save migration — beta; out of scope for this feature.
+6. Integration QA only — no new product code for HW-08. Dogfood against RefsLibrary 21 acceptance checklist.
+7. Known gap / waiver: [0085] HW-03c cancelled (Z) → net-kind road-only seeds deferred to [0086] NET-04 / RefsLibrary 22–24. Do not block HW-08 on 0085; list as known gap if seed-on-non-road still observed.
+8. Dogfood script: (1) Vanilla Aggregate SIP → seed only, no highway. (2) Road Grouping fork ADR → custom name + seed + highway parity with SIP; edits sync. (3) Registry highway → ADR road naming. (4) Mileage override + reverse → house numbers/cards. (5) Marker visual-only; WE ORIGINAL shows route/mileage/direction from ADR. (6) Region map Reload → hover registry highlights ADR segments only. (7) Clear highwayDataId → non-highway; remove last ADR membership → highway component gone. (8) Confirm no Aggregate cache / marker sync revival; no save-migration work.
+9. Attach playtest notes here when done; check DoD items; update RefsLibrary 21 board IDs when sprint closes.
 
 ---
 
