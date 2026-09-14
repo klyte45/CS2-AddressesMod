@@ -47,6 +47,11 @@ Sixth task. Plumb AdrRoadAddressNumbering / BuildingUtilsOverrides to read autho
 1. Former cache startDistanceOverrideKm is now authored mileageOverrideKm — do not subtract marker curve position
 2. Keep per-edge numberOverride* for house numbers separate from highway km
 3. Orientation may still use registry refStartPoint where applicable — document interaction with reverseCounting
+4. AdrRoadAddressNumbering.HighwayNumberingContext: reads ADRNameAggregateHighwayData (mileageOverrideActive→ChainStartBaselineMeters, reverseCounting, registry refStartPoint for orientation).
+5. ComputeHouseNumberAtDistance restores pre-ACT-01 formula with chain-start baseline in meters (no marker curve bake / no Aggregate cache).
+6. TryGetAddressAlongAdr + BuildingUtilsOverrides pass AdrHighwayRoutesSystem; per-edge numberOverride* unchanged.
+7. Road Grouping house-number cards use same TryGetOddNumberAtCurvePos path; mileage cards use ComputeMileageMajorUnits + ADR orientation. Cards refresh on Updated while tool open.
+8. Awaiting user solution compile + playtest cards/building address with mileage override + reverse.
 
 ---
 
