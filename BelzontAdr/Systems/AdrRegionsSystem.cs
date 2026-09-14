@@ -159,6 +159,11 @@ namespace BelzontAdr
             public string name;
             public float[][][] curves;
             public Entity[] nodes;
+            /// <summary>
+            /// Registry highway id from ADR <see cref="ADRNameAggregateHighwayData.highwayDataId"/>
+            /// on linked edges (empty/default when not ADR-associated or no route set).
+            /// </summary>
+            public string highwayId;
         }
 
         private AggregationData[] ListHighways() => ListFromQuery(m_highwaysQuery);
@@ -170,18 +175,49 @@ namespace BelzontAdr
             using var listEdge = query.ToComponentDataArray<Edge>(Allocator.Temp);
             using var listCurve = query.ToComponentDataArray<Curve>(Allocator.Temp);
             using var listAggregated = query.ToComponentDataArray<Aggregated>(Allocator.Temp);
-            return list.ToArray().Select((x, i) => (x, i)).GroupBy(x => listAggregated[x.i].m_Aggregate)
-                .Select(x => new AggregationData
+            var defaultHighwayId = default(Colossal.Hash128).ToString();
+
+            // Per-edge ADR highway id: one vanilla Aggregate may split into several map paths
+            // (ADR-associated segments with a registry id vs remaining segments without).
+            return list.ToArray()
+                .Select((x, i) =>
                 {
-                    entity = x.Key,
-                    name = m_nameSystem.GetName(x.Key).Translate(),
-                    curves = x.Select(x =>
+                    bool hasAdrRoute = TryGetAdrHighwayRoute(x, out Entity adrAggregate, out string highwayId);
+                    Entity groupEntity = hasAdrRoute ? adrAggregate : listAggregated[i].m_Aggregate;
+                    return (edge: x, i, groupEntity, highwayId: hasAdrRoute ? highwayId : defaultHighwayId);
+                })
+                .GroupBy(x => (x.groupEntity, x.highwayId))
+                .Select(g => new AggregationData
+                {
+                    entity = g.Key.groupEntity,
+                    name = m_nameSystem.GetName(g.Key.groupEntity).Translate(),
+                    curves = g.Select(x =>
                     {
                         var bez = listCurve[x.i].m_Bezier;
                         return new[] { bez.a.ToArray(), bez.b.ToArray(), bez.c.ToArray(), bez.d.ToArray() };
                     }).ToArray(),
-                    nodes = x.SelectMany(x => new[] { listEdge[x.i].m_Start, listEdge[x.i].m_End }).ToHashSet().ToArray(),
+                    nodes = g.SelectMany(x => new[] { listEdge[x.i].m_Start, listEdge[x.i].m_End }).ToHashSet().ToArray(),
+                    highwayId = g.Key.highwayId,
                 }).ToArray();
+        }
+
+        /// <summary>
+        /// ADR registry highway on this edge only (ADRNameAggregated → ADRNameAggregateHighwayData).
+        /// Net classification alone does not invent a registry association.
+        /// </summary>
+        private bool TryGetAdrHighwayRoute(Entity edge, out Entity adrAggregate, out string highwayId)
+        {
+            highwayId = default;
+            adrAggregate = Entity.Null;
+            if (!AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, edge, out adrAggregate)
+                || !EntityManager.TryGetComponent(adrAggregate, out ADRNameAggregateHighwayData highway)
+                || !highway.HasHighwayRoute)
+            {
+                return false;
+            }
+
+            highwayId = highway.highwayDataId.ToString();
+            return true;
         }
         #endregion
 

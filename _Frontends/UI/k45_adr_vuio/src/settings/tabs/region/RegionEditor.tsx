@@ -40,6 +40,8 @@ interface AggregationData {
     name: string;
     curves: [[number, number, number], [number, number, number], [number, number, number], [number, number, number]][];
     nodes: Entity[];
+    /** Registry highway id from ADR aggregate; empty/default when not associated. */
+    highwayId: string;
 }
 
 export type ExtraMapPoint = {
@@ -212,9 +214,9 @@ export const RegionEditor = () => {
                         className={styles.pathsOverlay}
                         style={{ transform: `translate(-${50 - 50 / mapBeyondBordersSizeMultiplier}%, -${50 - 50 / mapBeyondBordersSizeMultiplier}%) scaleY(-1)` }}
                     >
-                        {urbanRoads.map((item, i) => <path key={`urban_${i}`} d={item.curves.map((curve) => `M ${curve[0][0]} ${curve[0][2]} C ${curve[1][0]} ${curve[1][2]}, ${curve[2][0]} ${curve[2][2]}, ${curve[3][0]} ${curve[3][2]}`).join(" ")} className={styles.mapUrbanRoads} id={`rd_${item.entity.Index}_${item.entity.Version}`} />)}
-                        {trainTracks.map((item, i) => <path key={`train_${i}`} d={item.curves.map((curve) => `M ${curve[0][0]} ${curve[0][2]} C ${curve[1][0]} ${curve[1][2]}, ${curve[2][0]} ${curve[2][2]}, ${curve[3][0]} ${curve[3][2]}`).join(" ")} className={styles.mapTrainTrack} id={`hw_${item.entity.Index}_${item.entity.Version}`} />)}
-                        {highways.map((item, i) => <path key={`highway_${i}`} d={item.curves.map((curve) => `M ${curve[0][0]} ${curve[0][2]} C ${curve[1][0]} ${curve[1][2]}, ${curve[2][0]} ${curve[2][2]}, ${curve[3][0]} ${curve[3][2]}`).join(" ")} className={styles.mapHighway} id={`tr_${item.entity.Index}_${item.entity.Version}`} />)}
+                        {urbanRoads.map((item, i) => <path key={`urban_${i}`} d={item.curves.map((curve) => `M ${curve[0][0]} ${curve[0][2]} C ${curve[1][0]} ${curve[1][2]}, ${curve[2][0]} ${curve[2][2]}, ${curve[3][0]} ${curve[3][2]}`).join(" ")} className={[styles.mapUrbanRoads, `hwId_${item.highwayId}`].join(" ")} id={`rd_${item.entity.Index}_${item.entity.Version}`} />)}
+                        {trainTracks.map((item, i) => <path key={`train_${i}`} d={item.curves.map((curve) => `M ${curve[0][0]} ${curve[0][2]} C ${curve[1][0]} ${curve[1][2]}, ${curve[2][0]} ${curve[2][2]}, ${curve[3][0]} ${curve[3][2]}`).join(" ")} className={[styles.mapTrainTrack, `hwId_${item.highwayId}`].join(" ")} id={`hw_${item.entity.Index}_${item.entity.Version}`} />)}
+                        {highways.map((item, i) => <path key={`highway_${i}`} d={item.curves.map((curve) => `M ${curve[0][0]} ${curve[0][2]} C ${curve[1][0]} ${curve[1][2]}, ${curve[2][0]} ${curve[2][2]}, ${curve[3][0]} ${curve[3][2]}`).join(" ")} className={[styles.mapHighway, `hwId_${item.highwayId}`].join(" ")} id={`tr_${item.entity.Index}_${item.entity.Version}`} />)}
                     </svg>
                     {extraMapPoints.map((item, i) => {
                         const { bottom, left } = asRelativePosition(item, mapOffset, mapSize);
