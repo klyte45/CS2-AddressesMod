@@ -31,11 +31,11 @@ Second task of epic adr-net-kind. Enforce exact AdrNetKind match on membership a
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AddMemberCore (and steal-in) rejects when edge kind ≠ stored aggregate kind
-- [ ] Create/fork with multiple seed edges requires all seeds share one kind
-- [ ] Road Grouping tool soft-fails / no-ops on cross-kind attach with player-visible feedback
-- [ ] Street↔highway membership still allowed (both AdrNetKind.Road)
-- [ ] Vanilla AggregateSystem / AggregateType join rules unchanged
+- [x] AddMemberCore (and steal-in) rejects when edge kind ≠ stored aggregate kind
+- [x] Create/fork with multiple seed edges requires all seeds share one kind
+- [x] Road Grouping tool soft-fails / no-ops on cross-kind attach with player-visible feedback
+- [x] Street↔highway membership still allowed (both AdrNetKind.Road)
+- [x] Vanilla AggregateSystem / AggregateType join rules unchanged
 - [ ] Compile + playtest: road+pathway reject; street+highway accept
 
 ---
@@ -47,6 +47,10 @@ Second task of epic adr-net-kind. Enforce exact AdrNetKind match on membership a
 3. Do not invent TrainTram super-kind; exact enum equality only
 4. Fence/pipe/power remain out of scope (TryGetNetKind fails → reject)
 5. Catalog: 24-adr-net-kind-roadmap.md NET-02
+6. AddMemberCore gates on EvaluateNetKindJoin: Unclassified (no prefab *Data) and Mismatch (edge kind ≠ stored) reject; Ok when host kind None (first assign) or exact match. Street↔highway both Road → allowed. Steal-in uses same gate before steal.
+7. CreateAggregate(edges) and TryForkFromVanillaSeed require TryResolveSharedNetKind on seed list; mixed/unclassified seeds abort (Null/false).
+8. AdrRoadGroupingTool: Ctrl-toggle and endpoint-drag soft-fail with NotificationSystem.Pop Warning + DoWarnLog; path preview omits kind-incompatible adds. i18n pending: BelzontAdr/i18n/roadGrouping_kind_gate_entries.txt (kindMismatch / kindUnclassified).
+9. Vanilla AggregateSystem untouched. Awaiting user compile + playtest road+pathway reject / street+highway accept.
 
 ---
 
