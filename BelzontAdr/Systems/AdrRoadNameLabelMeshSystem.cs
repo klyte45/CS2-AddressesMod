@@ -1,3 +1,4 @@
+using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Entities;
 using Colossal.Mathematics;
@@ -395,6 +396,7 @@ namespace BelzontAdr
         private JobHandle ScheduleLabelPlacement(JobHandle inputDeps)
         {
             JobHandle handle = inputDeps;
+            ResolveRefHalfHeightSettings(out bool useExtentsHalfHeight, out float refHalfHeight);
 
             if (!m_S1PlacementQuery.IsEmptyIgnoreFilter)
             {
@@ -409,7 +411,9 @@ namespace BelzontAdr
                     m_NetCompositionData = GetComponentLookup<NetCompositionData>(true),
                     m_ConnectedEdges = GetBufferLookup<ConnectedEdge>(true),
                     m_AdrAggregated = GetComponentLookup<ADRNameAggregated>(true),
-                    m_TempType = GetComponentTypeHandle<Temp>(true)
+                    m_TempType = GetComponentTypeHandle<Temp>(true),
+                    m_UseExtentsHalfHeight = useExtentsHalfHeight,
+                    m_RefHalfHeight = refHalfHeight
                 }.ScheduleParallel(m_S1PlacementQuery, handle);
             }
 
@@ -424,11 +428,27 @@ namespace BelzontAdr
                     m_CurveData = GetComponentLookup<Curve>(true),
                     m_CompositionData = GetComponentLookup<Composition>(true),
                     m_NetCompositionData = GetComponentLookup<NetCompositionData>(true),
-                    m_ConnectedEdges = GetBufferLookup<ConnectedEdge>(true)
+                    m_ConnectedEdges = GetBufferLookup<ConnectedEdge>(true),
+                    m_UseExtentsHalfHeight = useExtentsHalfHeight,
+                    m_RefHalfHeight = refHalfHeight
                 }.ScheduleParallel(m_S2PlacementQuery, handle);
             }
 
             return handle;
+        }
+
+        private static void ResolveRefHalfHeightSettings(out bool useExtentsHalfHeight, out float refHalfHeight)
+        {
+            int index = AdrModData.RoadNameLabelRefHalfHeightIndexMin + 1;
+            if (BasicModData.Instance is AdrModData adrSettings)
+            {
+                index = adrSettings.RoadNameLabelRefHalfHeightIndex;
+            }
+
+            useExtentsHalfHeight = AdrModData.IsAutomaticRefHalfHeight(index);
+            refHalfHeight = useExtentsHalfHeight
+                ? 1f
+                : AdrModData.IndexToRefHalfHeight(index);
         }
 
         private bool GetLoaded()

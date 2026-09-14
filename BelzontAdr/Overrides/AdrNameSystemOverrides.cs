@@ -37,6 +37,7 @@ namespace BelzontAdr
             entityManager = world.EntityManager;
             entityExists = entityManager.UniversalQuery.GetEntityQueryMask();
             m_EndFrameBarrier = world.GetOrCreateSystemManaged<EndFrameBarrier>();
+            m_adrHighwayRoutesSystem = world.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
             var getCitizenName = typeof(NameSystem).GetMethod("GetCitizenName", RedirectorUtils.allFlags);
             AddRedirect(getCitizenName, GetType().GetMethod(nameof(GetCitizenName), RedirectorUtils.allFlags));
 
@@ -68,6 +69,7 @@ namespace BelzontAdr
         private static AdrMainSystem adrMainSystem;
         private static EntityQueryMask entityExists;
         private static NameSystem m_nameSystem;
+        private static AdrHighwayRoutesSystem m_adrHighwayRoutesSystem;
         private static readonly Regex RemoveBrandSegment =
             new(@"([^|}]|^)*\{brand\}([^{|]|$)*", RegexOptions.Compiled);
         private static readonly Regex RemoveDistrictSegment =
@@ -77,6 +79,16 @@ namespace BelzontAdr
 
         public static bool GetRenderedLabelName(ref string __result, ref NameSystem __instance, ref Entity entity)
         {
+            // ADR highway labels only (never vanilla Aggregate). Prefix-suffix shield always
+            // shown when highwayDataId is set; custom name wins the name line when present.
+            if (TryGetAdrHighwayRegistryName(entity, out var hwData))
+            {
+                __result = m_nameSystem.TryGetCustomName(entity, out var customName)
+                    ? $"<color=\"yellow\">{hwData.prefix}-{hwData.suffix}</color>\n{customName}"
+                    : $"<color=\"yellow\">{hwData.prefix}-{hwData.suffix}</color>\n{hwData.name}";
+                return false;
+            }
+
             Name n = default;
             if (GetName_Internal(ref n, ref __instance, entity))
             {
@@ -468,10 +480,26 @@ namespace BelzontAdr
         }
 
 
+        /// <summary>
+        /// Name priority for ADR aggregates (same as pre-ACT-01 Aggregate highway rules, ADR host only):
+        /// 1. Custom name (SIP/tool) — wins over highway and nameset
+        /// 2. Non-default <see cref="ADRNameAggregateHighwayData.highwayDataId"/> → registry highway name
+        /// 3. Nameset + road-prefix rules
+        /// Vanilla Aggregate-only roads never enter the highway branch.
+        /// </summary>
         private static bool GetAggregateName(out string format, out string name, Entity entity)
         {
             name = format = null;
+            // Custom name: defer to NameSystem original path (callers use Original_GetName / GetName).
             if (m_nameSystem.TryGetCustomName(entity, out _)) return true;
+
+            // Highway registry name for ADR aggregates with a non-default highwayDataId.
+            if (TryGetAdrHighwayRegistryName(entity, out var hwData))
+            {
+                format = hwData.name;
+                name = "";
+                return false;
+            }
 
             Entity refRoad;
             bool fullBridge = true;
@@ -548,6 +576,20 @@ namespace BelzontAdr
 
             name = GetFromList(roadsNamesList, entity, allowNull: true);
             return false;
+        }
+
+        /// <summary>
+        /// Resolves highway registry data from an ADR name-aggregate only.
+        /// Does not read vanilla Aggregate or former Aggregate-hosted highway components.
+        /// </summary>
+        private static bool TryGetAdrHighwayRegistryName(Entity entity, out HighwayData hwData)
+        {
+            hwData = null;
+            return entityManager.HasComponent<ADRNameAggregate>(entity)
+                && entityManager.TryGetComponent(entity, out ADRNameAggregateHighwayData highwayData)
+                && highwayData.HasHighwayRoute
+                && m_adrHighwayRoutesSystem != null
+                && m_adrHighwayRoutesSystem.TryGetHighwayData(highwayData.highwayDataId, out hwData);
         }
 
 

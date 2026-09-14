@@ -34,6 +34,8 @@ namespace BelzontAdr
             [ReadOnly] public BufferLookup<ConnectedEdge> m_ConnectedEdges;
             [ReadOnly] public ComponentLookup<ADRNameAggregated> m_AdrAggregated;
             [ReadOnly] public ComponentTypeHandle<Temp> m_TempType;
+            public bool m_UseExtentsHalfHeight;
+            public float m_RefHalfHeight;
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
@@ -151,6 +153,7 @@ namespace BelzontAdr
             {
                 AdrLabelPlacementMath.AddLabels(
                     startIndex, endIndex, labelExtents, redundancyBuffer, edges, labelPositions,
+                    m_UseExtentsHalfHeight, m_RefHalfHeight,
                     ref m_CurveData, ref m_CompositionData, ref m_NetCompositionData);
             }
 
@@ -173,6 +176,8 @@ namespace BelzontAdr
             [ReadOnly] public ComponentLookup<Composition> m_CompositionData;
             [ReadOnly] public ComponentLookup<NetCompositionData> m_NetCompositionData;
             [ReadOnly] public BufferLookup<ConnectedEdge> m_ConnectedEdges;
+            public bool m_UseExtentsHalfHeight;
+            public float m_RefHalfHeight;
 
             public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
             {
@@ -242,6 +247,7 @@ namespace BelzontAdr
                         {
                             AdrLabelPlacementMath.AddLabels(
                                 startIndex, j, labelExtents, redundancyBuffer, edges, labelPositions,
+                                m_UseExtentsHalfHeight, m_RefHalfHeight,
                                 ref m_CurveData, ref m_CompositionData, ref m_NetCompositionData);
                             startIndex = j;
                         }
@@ -252,6 +258,7 @@ namespace BelzontAdr
                         {
                             AdrLabelPlacementMath.AddLabels(
                                 startIndex, j, labelExtents, redundancyBuffer, edges, labelPositions,
+                                m_UseExtentsHalfHeight, m_RefHalfHeight,
                                 ref m_CurveData, ref m_CompositionData, ref m_NetCompositionData);
                             startIndex = j;
                         }
@@ -260,6 +267,7 @@ namespace BelzontAdr
                     {
                         AdrLabelPlacementMath.AddLabels(
                             startIndex, j, labelExtents, redundancyBuffer, edges, labelPositions,
+                            m_UseExtentsHalfHeight, m_RefHalfHeight,
                             ref m_CurveData, ref m_CompositionData, ref m_NetCompositionData);
                         startIndex = j;
                     }
@@ -268,6 +276,7 @@ namespace BelzontAdr
 
                 AdrLabelPlacementMath.AddLabels(
                     startIndex, j, labelExtents, redundancyBuffer, edges, labelPositions,
+                    m_UseExtentsHalfHeight, m_RefHalfHeight,
                     ref m_CurveData, ref m_CompositionData, ref m_NetCompositionData);
                 AdrLabelPlacementMath.ApplyRedundancy(labelPositions, redundancyBuffer);
                 redundancyBuffer.Clear();
@@ -284,6 +293,8 @@ namespace BelzontAdr
                 NativeList<float> redundancyBuffer,
                 NativeList<Entity> edges,
                 DynamicBuffer<LabelPosition> labelPositions,
+                bool useExtentsHalfHeight,
+                float refHalfHeight,
                 ref ComponentLookup<Curve> curveData,
                 ref ComponentLookup<Composition> compositionData,
                 ref ComponentLookup<NetCompositionData> netCompositionData)
@@ -292,6 +303,10 @@ namespace BelzontAdr
                 {
                     return;
                 }
+
+                float halfHeight = useExtentsHalfHeight
+                    ? math.max(1f, math.max(0f - labelExtents.m_Bounds.min.y, labelExtents.m_Bounds.max.y))
+                    : refHalfHeight;
 
                 float num = 0f;
                 for (int i = startIndex; i < endIndex; i++)
@@ -328,8 +343,7 @@ namespace BelzontAdr
                         elem.m_Curve = curve3.m_Bezier;
                         elem.m_ElementIndex = j;
                         elem.m_HalfLength = curve3.m_Length * 0.5f;
-                        elem.m_MaxScale = netCompositionData1.m_Width * 0.5f
-                            / math.max(1f, math.max(0f - labelExtents.m_Bounds.min.y, labelExtents.m_Bounds.max.y));
+                        elem.m_MaxScale = netCompositionData1.m_Width * 0.5f / halfHeight;
                         elem.m_IsUnderground = (netCompositionData1.m_Flags.m_General & CompositionFlags.General.Tunnel) != 0;
                         labelPositions.Add(elem);
                         redundancyBuffer.Add(in value);
@@ -359,8 +373,7 @@ namespace BelzontAdr
                     elem2.m_Curve = curve4.m_Bezier;
                     elem2.m_ElementIndex = num7;
                     elem2.m_HalfLength = curve4.m_Length * 0.5f;
-                    elem2.m_MaxScale = netCompositionData2.m_Width * 0.5f
-                        / math.max(1f, math.max(0f - labelExtents.m_Bounds.min.y, labelExtents.m_Bounds.max.y));
+                    elem2.m_MaxScale = netCompositionData2.m_Width * 0.5f / halfHeight;
                     elem2.m_IsUnderground = (netCompositionData2.m_Flags.m_General & CompositionFlags.General.Tunnel) != 0;
                     labelPositions.Add(elem2);
                     redundancyBuffer.Add(in value);
