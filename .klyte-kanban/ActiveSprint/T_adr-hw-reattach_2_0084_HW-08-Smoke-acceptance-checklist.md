@@ -1,3 +1,4 @@
+**End time:** 2026-09-14 17:48 -0300
 **Start time:** 2026-09-14 17:43 -0300
 # [0084] HW-08-Smoke-acceptance-checklist
 
