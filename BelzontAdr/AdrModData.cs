@@ -9,16 +9,16 @@ using Unity.Mathematics;
 
 namespace BelzontAdr
 {
-    [SettingsUIShowGroupName(kLogSection, kAlertModalsSection, kKeybindingTab, kToolControlsSection, kRoadNameLabelsSection)]
-    [SettingsUIMouseAction(kActionApplyMouse, ActionType.Button, RebindOptions.All, ModifierOptions.Allow, usages: new[] { "K45_ADR.Tool" })]
-    [SettingsUIMouseAction(kActionCancelMouse, ActionType.Button, RebindOptions.All, ModifierOptions.Allow, usages: new[] { "K45_ADR.Tool" })]
-    [SettingsUIMouseAction(kActionToggleMembership, ActionType.Button, RebindOptions.All, ModifierOptions.Allow, usages: new[] { "K45_ADR.Tool" })]
+    [SettingsUIShowGroupName(kLogSection, kAlertModalsSection, kToolControlsSection, kRoadNameLabelsSection)]
+    // Tool mouse gestures are fixed (not rebindable); still registered for InputManager / tool usage.
+    [SettingsUIMouseAction(kActionApplyMouse, ActionType.Button, RebindOptions.None, ModifierOptions.Allow, canBeEmpty: false, usages: new[] { "K45_ADR.Tool" })]
+    [SettingsUIMouseAction(kActionCancelMouse, ActionType.Button, RebindOptions.None, ModifierOptions.Allow, canBeEmpty: false, usages: new[] { "K45_ADR.Tool" })]
+    [SettingsUIMouseAction(kActionToggleMembership, ActionType.Button, RebindOptions.None, ModifierOptions.Allow, canBeEmpty: false, usages: new[] { "K45_ADR.Tool" })]
     [SettingsUIKeyboardAction(kActionEnableRoadGrouping, ActionType.Button, "K45_ADR.Tool")]
     public class AdrModData : BasicModData
     {
-        public const string kKeybindingTab = "Keybinding";
+        public const string kGeneralTab = "General";
         public const string kToolControlsSection = "ToolControls";
-        public const string kLabelsTab = "Labels";
         public const string kRoadNameLabelsSection = "RoadNameLabels";
 
         public const string kActionApplyMouse = "K45_ADR_RoadGroupingApply";
@@ -29,10 +29,10 @@ namespace BelzontAdr
         /// <summary>Slider index 0..4 → half-height = 2^(6+index)/10. Index 4 (102.4) = automatic (extents).</summary>
         public const int RoadNameLabelRefHalfHeightIndexMin = 0;
         public const int RoadNameLabelRefHalfHeightIndexMax = 4;
-        public const int RoadNameLabelRefHalfHeightIndexAutomatic = 4;
-        public const int RoadNameLabelRefHalfHeightExponentBase = 6;
+        public const int RoadNameLabelRefHalfHeightIndexAutomatic = 0;
+        public const int RoadNameLabelRefHalfHeightExponentBase = 5;
 
-        private int roadNameLabelRefHalfHeightIndex = 1;
+        private int roadNameLabelRefHalfHeightIndex = 0;
 
         public AdrModData(IMod mod) : base(mod)
         {
@@ -40,22 +40,25 @@ namespace BelzontAdr
 
         public override void OnSetDefaults()
         {
-            roadNameLabelRefHalfHeightIndex = 1;
+            roadNameLabelRefHalfHeightIndex = 0;
         }
 
-        [SettingsUISection(kKeybindingTab, kToolControlsSection)]
+        [SettingsUISection(kGeneralTab, kToolControlsSection)]
         [SettingsUIKeyboardBinding(BindingKeyboard.A, kActionEnableRoadGrouping, ctrl: true, shift: true)]
         public ProxyBinding EnableRoadGroupingTool { get; set; }
 
-        [SettingsUISection(kKeybindingTab, kToolControlsSection)]
+        /// <summary>LMB select — fixed; hidden from options (RebindOptions.None).</summary>
+        [SettingsUIHidden]
         [SettingsUIMouseBinding(BindingMouse.Left, kActionApplyMouse)]
         public ProxyBinding RoadGroupingApply { get; set; }
 
-        [SettingsUISection(kKeybindingTab, kToolControlsSection)]
+        /// <summary>RMB cancel — fixed; hidden from options (RebindOptions.None).</summary>
+        [SettingsUIHidden]
         [SettingsUIMouseBinding(BindingMouse.Right, kActionCancelMouse)]
         public ProxyBinding RoadGroupingCancel { get; set; }
 
-        [SettingsUISection(kKeybindingTab, kToolControlsSection)]
+        /// <summary>Ctrl+LMB toggle membership — fixed; hidden from options (RebindOptions.None).</summary>
+        [SettingsUIHidden]
         [SettingsUIMouseBinding(BindingMouse.Left, kActionToggleMembership, ctrl: true)]
         public ProxyBinding RoadGroupingToggleMembership { get; set; }
 
@@ -63,7 +66,7 @@ namespace BelzontAdr
         /// Linear slider index. Maps to RefHalfHeight = 2^(6+index)/10 (6.4 … 102.4).
         /// Max index uses the old per-label extents formula (automatic).
         /// </summary>
-        [SettingsUISection(kLabelsTab, kRoadNameLabelsSection)]
+        [SettingsUISection(kGeneralTab, kRoadNameLabelsSection)]
         [SettingsUISlider(
             min = RoadNameLabelRefHalfHeightIndexMin,
             max = RoadNameLabelRefHalfHeightIndexMax,
@@ -104,10 +107,10 @@ namespace BelzontAdr
         {
             return index switch
             {
-                0 => LocalizationExtensions.Translate(GetOptionLabelLocaleID("RoadNameLabelRefHalfHeight0")),
-                1 => LocalizationExtensions.Translate(GetOptionLabelLocaleID("RoadNameLabelRefHalfHeight1")),
-                2 => LocalizationExtensions.Translate(GetOptionLabelLocaleID("RoadNameLabelRefHalfHeight2")),
-                3 => LocalizationExtensions.Translate(GetOptionLabelLocaleID("RoadNameLabelRefHalfHeight3")),
+                1 => LocalizationExtensions.Translate(GetOptionLabelLocaleID("RoadNameLabelRefHalfHeight0")),
+                2 => LocalizationExtensions.Translate(GetOptionLabelLocaleID("RoadNameLabelRefHalfHeight1")),
+                3 => LocalizationExtensions.Translate(GetOptionLabelLocaleID("RoadNameLabelRefHalfHeight2")),
+                4 => LocalizationExtensions.Translate(GetOptionLabelLocaleID("RoadNameLabelRefHalfHeight3")),
                 _ => LocalizationExtensions.Translate(GetOptionLabelLocaleID("RoadNameLabelRefHalfHeightAutomatic"))
             };
         }
