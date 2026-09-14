@@ -1,6 +1,7 @@
 import { Entity, HighwayData, HighwayRoutesService, SelectInfoPanelService, SelectedInfoOptions } from "adr";
-import { LocElementType, VanillaComponentResolver, VanillaFnResolver, VanillaWidgets } from "@klyte45/vuio-commons";
+import { LocElementType, VanillaComponentResolver, VanillaFnResolver, VanillaWidgets, VectorSectionEditable } from "@klyte45/vuio-commons";
 import { DropdownItem, LocElement } from "cs2/bindings";
+import { FocusDisabled } from "cs2/input";
 import { ObjectTyped } from "object-typed";
 import { useEffect, useState } from "react";
 import { translate } from "utility/translate";
@@ -19,6 +20,10 @@ export enum AdrHighwayRouteDirection {
     INTERNAL = 9,
     EXTERNAL = 10,
 }
+
+/** Same boolean affordance as AddressesToolOptions road-marker double-pole toggle. */
+const i_ToggleOn = "coui://uil/Standard/Checkmark.svg";
+const i_ToggleOff = "coui://uil/Standard/XClose.svg";
 
 /** Matches cs2/l10n UnitSystem.Freedom (Metric = 0). */
 const UNIT_SYSTEM_FREEDOM = 1;
@@ -47,30 +52,49 @@ function displayToMeters(display: number, useMiles: boolean): number {
     return Math.round(meters);
 }
 
+type Surface = "sip" | "tool";
+
 type Props = {
     response: SelectedInfoOptions;
     onChanged: () => Promise<any>;
     /** Override host entity (defaults to response.entityValue). */
     hostEntity?: Entity;
+    /**
+     * `sip` — InfoRow + Checkbox (RoadMarkSettings).
+     * `tool` — Section + ToolButton (AddressesToolOptions road-marker tool).
+     */
+    surface?: Surface;
 };
 
-/**
- * Shared ADR highway settings for Addresses SIP and Road Grouping tool options.
- * Expects an ADR name-aggregate host; callers gate on isAdrAggregate.
- */
-export const HighwayAggregateSettings = ({ response, onChanged, hostEntity }: Props) => {
-    const VR = VanillaComponentResolver.instance;
-    const VW = VanillaWidgets.instance;
-    const StringDD = VW.DropdownField<string>();
-    const NumberDD = VW.DropdownField<number>();
-    const editorModule = VW.editorItemModule;
+type HighwayUiState = {
+    host: Entity;
+    busy: boolean;
+    currentHighwayId: string;
+    hasHighwayRoute: boolean;
+    routeDirection: number;
+    mileageOverrideActive: boolean;
+    mileageOverrideMeters: number;
+    mileageDraft: number;
+    setMileageDraft: (v: number) => void;
+    reverseCounting: boolean;
+    mileageOverrideLabel: string;
+    highwayItems: DropdownItem<string>[];
+    directionItems: DropdownItem<number>[];
+    run: (action: () => Promise<boolean>) => Promise<void>;
+    commitMileageDraft: (v?: number) => Promise<void>;
+};
+
+function useHighwayAggregateUi(
+    response: SelectedInfoOptions,
+    onChanged: () => Promise<any>,
+    hostEntity?: Entity,
+): HighwayUiState | null {
     const loc = VanillaFnResolver.instance.localization.useCachedLocalization();
     const useMiles = loc.unitSettings.unitSystem === UNIT_SYSTEM_FREEDOM;
 
-    const [loading, setLoading] = useState(false);
+    const [busy, setBusy] = useState(false);
     const [highways, setHighways] = useState<HighwayData[]>([]);
 
-    // entityValue is already the ADR/vanilla aggregate host from getEntityOptions.
     const host = hostEntity ?? response.entityValue;
     const currentHighwayId = highwayDropdownValue(response.highwayDataId);
     const hasHighwayRoute = currentHighwayId !== DEFAULT_HIGHWAY_ID;
@@ -82,6 +106,11 @@ export const HighwayAggregateSettings = ({ response, onChanged, hostEntity }: Pr
     const mileageOverrideLabel = useMiles
         ? translate("HighwayAggregateSettings.MileageOverrideMi")
         : translate("HighwayAggregateSettings.MileageOverrideKm");
+
+    const [mileageDraft, setMileageDraft] = useState(mileageOverrideDisplay);
+    useEffect(() => {
+        setMileageDraft(mileageOverrideDisplay);
+    }, [mileageOverrideMeters, useMiles, host?.Index, host?.Version]);
 
     useEffect(() => {
         HighwayRoutesService.listHighwaysRegistered().then((items) =>
@@ -96,17 +125,25 @@ export const HighwayAggregateSettings = ({ response, onChanged, hostEntity }: Pr
     }, []);
 
     const run = async (action: () => Promise<boolean>) => {
-        setLoading(true);
+        setBusy(true);
         try {
             await action();
             await onChanged();
         } finally {
-            setLoading(false);
+            setBusy(false);
         }
     };
 
-    if (!VR || !response) return <></>;
-    if (loading) return <>Loading...</>;
+    const commitMileageDraft = async (newVal?: number) => {
+        const effectiveValue = newVal ?? mileageDraft;
+        if (newVal !== undefined) setMileageDraft(newVal);
+        const meters = displayToMeters(effectiveValue, useMiles);
+        if (meters === mileageOverrideMeters) return;
+        await SelectInfoPanelService.setMileageOverrideMeters(host, meters);
+        await onChanged();
+    };
+
+    if (!response) return null;
 
     const highwayItems: DropdownItem<string>[] = [
         {
@@ -129,6 +166,33 @@ export const HighwayAggregateSettings = ({ response, onChanged, hostEntity }: Pr
             displayName: { __Type: LocElementType.String, value: translate("RouteDirection." + x[0]) } as LocElement,
         }));
 
+    return {
+        host,
+        busy,
+        currentHighwayId,
+        hasHighwayRoute,
+        routeDirection,
+        mileageOverrideActive,
+        mileageOverrideMeters,
+        mileageDraft,
+        setMileageDraft,
+        reverseCounting,
+        mileageOverrideLabel,
+        highwayItems,
+        directionItems,
+        run,
+        commitMileageDraft,
+    };
+}
+
+/** SIP: InfoRow + Checkbox / FloatInputStandalone — matches RoadMarkSettings. */
+const HighwayAggregateSettingsSip = ({ ui }: { ui: HighwayUiState }) => {
+    const VR = VanillaComponentResolver.instance;
+    const VW = VanillaWidgets.instance;
+    const StringDD = VW.DropdownField<string>();
+    const NumberDD = VW.DropdownField<number>();
+    const editorModule = VW.editorItemModule;
+
     return (
         <>
             <VR.InfoRow
@@ -136,71 +200,152 @@ export const HighwayAggregateSettings = ({ response, onChanged, hostEntity }: Pr
                 right={
                     <div>
                         <StringDD
-                            items={highwayItems}
-                            value={currentHighwayId}
+                            items={ui.highwayItems}
+                            value={ui.currentHighwayId}
+                            disabled={ui.busy}
                             onChange={(id) =>
-                                run(() => SelectInfoPanelService.setHighwayDataId(host, highwayDropdownValue(id)))
+                                ui.run(() => SelectInfoPanelService.setHighwayDataId(ui.host, highwayDropdownValue(id)))
                             }
                         />
                     </div>
                 }
             />
-            {hasHighwayRoute && (
+            {ui.hasHighwayRoute && (
                 <>
                     <VR.InfoRow
                         left={<>{translate("HighwayAggregateSettings.RouteDirection")}</>}
                         right={
                             <div>
                                 <NumberDD
-                                    items={directionItems}
-                                    value={routeDirection}
-                                    onChange={(dir) => run(() => SelectInfoPanelService.setRouteDirection(host, dir))}
+                                    items={ui.directionItems}
+                                    value={ui.routeDirection}
+                                    disabled={ui.busy}
+                                    onChange={(dir) => ui.run(() => SelectInfoPanelService.setRouteDirection(ui.host, dir))}
                                 />
                             </div>
                         }
                     />
-                    <VR.InfoRow
-                        left={<>{translate("HighwayAggregateSettings.MileageOverride")}</>}
-                        right={
-                            <VW.Checkbox
-                                checked={mileageOverrideActive}
-                                onChange={(active) =>
-                                    run(() => SelectInfoPanelService.setMileageOverrideActive(host, active))
-                                }
-                            />
+                    <VR.InfoRow left={<>{translate("HighwayAggregateSettings.MileageOverride")}</>} right={<VW.Checkbox
+                        onChange={(active) =>
+                            ui.run(() => SelectInfoPanelService.setMileageOverrideActive(ui.host, active))
                         }
-                    />
-                    {mileageOverrideActive && (
+                        checked={ui.mileageOverrideActive}
+                    />} />
+                    {ui.mileageOverrideActive && (
                         <VR.InfoRow
                             subRow={true}
-                            left={<>{mileageOverrideLabel}</>}
+                            left={<>{ui.mileageOverrideLabel}</>}
                             right={
                                 <VW.FloatInputStandalone
                                     className={editorModule.input}
-                                    value={mileageOverrideDisplay}
+                                    value={ui.mileageDraft}
                                     fractionDigits={3}
-                                    onChange={(displayValue) => {
-                                        const meters = displayToMeters(displayValue, useMiles);
-                                        return run(() => SelectInfoPanelService.setMileageOverrideMeters(host, meters));
-                                    }}
+                                    disabled={ui.busy}
+                                    onChange={ui.setMileageDraft}
+                                    onBlur={() => { void ui.commitMileageDraft(); }}
                                     style={{ maxWidth: "150rem", textAlign: "right" }}
                                 />
                             }
                         />
                     )}
-                    <VR.InfoRow
-                        left={<>{translate("HighwayAggregateSettings.ReverseCounting")}</>}
-                        right={
-                            <VW.Checkbox
-                                checked={reverseCounting}
-                                onChange={(reverse) =>
-                                    run(() => SelectInfoPanelService.setReverseCounting(host, reverse))
-                                }
-                            />
+                    <VR.InfoRow left={<>{translate("HighwayAggregateSettings.ReverseCounting")}</>} right={<VW.Checkbox
+                        onChange={(reverse) =>
+                            ui.run(() => SelectInfoPanelService.setReverseCounting(ui.host, reverse))
                         }
-                    />
+                        checked={ui.reverseCounting}
+                    />} />
                 </>
             )}
         </>
     );
+};
+
+/** Tool: Section + ToolButton / FloatInputField — matches AddressesToolOptions road-marker tool. */
+const HighwayAggregateSettingsTool = ({ ui }: { ui: HighwayUiState }) => {
+    const VR = VanillaComponentResolver.instance;
+    const VW = VanillaWidgets.instance;
+    const StringDD = VW.DropdownField<string>();
+    const NumberDD = VW.DropdownField<number>();
+
+    return (
+        <>
+            <VR.Section title={translate("HighwayAggregateSettings.HighwayRoute")}>
+                <StringDD
+                    items={ui.highwayItems}
+                    value={ui.currentHighwayId}
+                    disabled={ui.busy}
+                    onChange={(id) =>
+                        ui.run(() => SelectInfoPanelService.setHighwayDataId(ui.host, highwayDropdownValue(id)))
+                    }
+                />
+            </VR.Section>
+            {ui.hasHighwayRoute && (
+                <>
+                    <VR.Section title={translate("HighwayAggregateSettings.RouteDirection")}>
+                        <NumberDD
+                            items={ui.directionItems}
+                            value={ui.routeDirection}
+                            disabled={ui.busy}
+                            onChange={(dir) => ui.run(() => SelectInfoPanelService.setRouteDirection(ui.host, dir))}
+                        />
+                    </VR.Section>
+                    <VR.Section title={translate("HighwayAggregateSettings.MileageOverride")}>
+                        <FocusDisabled>
+                            <VR.ToolButton
+                                selected={ui.mileageOverrideActive}
+                                multiSelect
+                                disabled={ui.busy}
+                                onSelect={() =>
+                                    ui.run(() =>
+                                        SelectInfoPanelService.setMileageOverrideActive(ui.host, !ui.mileageOverrideActive),
+                                    )
+                                }
+                                src={ui.mileageOverrideActive ? i_ToggleOn : i_ToggleOff}
+                                focusKey={VR.FOCUS_DISABLED}
+                                className={VR.toolButtonTheme.button}
+                            />
+                        </FocusDisabled>
+                    </VR.Section>
+                    {ui.mileageOverrideActive && (
+                        <VectorSectionEditable
+                            onValueChanged={async (_, numberStr) => {
+                                await ui.commitMileageDraft(parseFloat(numberStr));
+                            }}
+
+                            title={ui.mileageOverrideLabel}
+                            valueGetter={() => [ui.mileageDraft.toFixed(3)]}
+                            valueGetterFormatted={() => [VanillaFnResolver.instance.localizedNumber.useNumberFormat(VanillaFnResolver.instance.unit.Unit.Length, false)(ui.mileageDraft * 1000)]}
+                        />
+                    )}
+                    <VR.Section title={translate("HighwayAggregateSettings.ReverseCounting")}>
+                        <FocusDisabled>
+                            <VR.ToolButton
+                                selected={ui.reverseCounting}
+                                multiSelect
+                                disabled={ui.busy}
+                                onSelect={() =>
+                                    ui.run(() => SelectInfoPanelService.setReverseCounting(ui.host, !ui.reverseCounting))
+                                }
+                                src={ui.reverseCounting ? i_ToggleOn : i_ToggleOff}
+                                focusKey={VR.FOCUS_DISABLED}
+                                className={VR.toolButtonTheme.button}
+                            />
+                        </FocusDisabled>
+                    </VR.Section>
+                </>
+            )}
+        </>
+    );
+};
+
+/**
+ * ADR highway settings. Pass `surface="tool"` from Road Grouping tool options;
+ * SIP (Addresses) keeps the default InfoRow + Checkbox layout.
+ */
+export const HighwayAggregateSettings = ({ response, onChanged, hostEntity, surface = "sip" }: Props) => {
+    const ui = useHighwayAggregateUi(response, onChanged, hostEntity);
+    if (!VanillaComponentResolver.instance || !ui) return <></>;
+    return surface === "tool"
+        ? <HighwayAggregateSettingsTool ui={ui} />
+        : <HighwayAggregateSettingsSip ui={ui} />;
 };

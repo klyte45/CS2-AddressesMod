@@ -20,6 +20,65 @@ namespace BelzontAdr
         public const float HalfKilometerMeters = 500f;
         public const float HalfMileMeters = 804.672f; // 0.5 * 1609.344
 
+        /// <summary>
+        /// Authored ADR highway numbering context (no marker scan / no Aggregate cache).
+        /// <list type="bullet">
+        /// <item><see cref="ChainStartBaselineMeters"/> — when override active, former cache <c>startDistanceOverrideKm</c>×1000 at chain start (not marker curve position).</item>
+        /// <item><see cref="ReverseCounting"/> — flips half-distance sign in house numbers / mileage growth (independent of override active).</item>
+        /// <item><see cref="OrientationRef"/> — highway registry <c>refStartPoint</c> when linked; else city zero marker. Chooses which chain end is distance 0 (<c>isInverseAggregate</c>). Distinct from <see cref="ReverseCounting"/>.</item>
+        /// </list>
+        /// </summary>
+        public readonly struct HighwayNumberingContext
+        {
+            public readonly float2 OrientationRef;
+            public readonly float ChainStartBaselineMeters;
+            public readonly bool ReverseCounting;
+
+            public HighwayNumberingContext(float2 orientationRef, float chainStartBaselineMeters, bool reverseCounting)
+            {
+                OrientationRef = orientationRef;
+                ChainStartBaselineMeters = chainStartBaselineMeters;
+                ReverseCounting = reverseCounting;
+            }
+
+            public static HighwayNumberingContext ForCityZero(AdrMainSystem adrMainSystem)
+                => new(adrMainSystem.GetZeroMarkerPosition(), 0f, false);
+
+            /// <summary>
+            /// Reads <see cref="ADRNameAggregateHighwayData"/> on an ADR aggregate; resolves registry
+            /// <c>refStartPoint</c> when <c>highwayDataId</c> is set. Defaults match post-ACT-01 non-highway ADR numbering.
+            /// </summary>
+            public static HighwayNumberingContext FromAdrAggregate(
+                EntityManager entityManager,
+                AdrMainSystem adrMainSystem,
+                AdrHighwayRoutesSystem highwayRoutesSystem,
+                Entity adrAggregate)
+            {
+                float2 orientation = adrMainSystem.GetZeroMarkerPosition();
+                float baselineMeters = 0f;
+                bool reverse = false;
+
+                if (entityManager.TryGetComponent(adrAggregate, out ADRNameAggregateHighwayData highway))
+                {
+                    if (highway.mileageOverrideActive)
+                    {
+                        baselineMeters = highway.mileageOverrideMeters;
+                    }
+
+                    reverse = highway.reverseCounting;
+
+                    if (highway.HasHighwayRoute
+                        && highwayRoutesSystem != null
+                        && highwayRoutesSystem.TryGetHighwayData(highway.highwayDataId, out var hwData))
+                    {
+                        orientation = hwData.refStartPoint;
+                    }
+                }
+
+                return new HighwayNumberingContext(orientation, baselineMeters, reverse);
+            }
+        }
+
         public static bool TryGetAdrAggregate(EntityManager entityManager, Entity edge, out Entity adrAggregate)
         {
             adrAggregate = Entity.Null;
@@ -40,30 +99,14 @@ namespace BelzontAdr
             DynamicBuffer<AggregateElement> aggregationBuffer,
             out bool isInverseAggregate)
         {
-            isInverseAggregate = false;
-            if (aggregationBuffer.Length == 0
-                || !entityManager.TryGetComponent(aggregationBuffer[0].m_Edge, out Curve e0)
-                || !entityManager.TryGetComponent(aggregationBuffer[^1].m_Edge, out Curve e1))
-            {
-                return false;
-            }
-
-            var refE0 = CheckSegmentReversion(entityManager, aggregationBuffer, false, 0, aggregationBuffer[0])
-                ? e0.m_Bezier.d.xz
-                : e0.m_Bezier.a.xz;
-            var refE1 = CheckSegmentReversion(entityManager, aggregationBuffer, false, aggregationBuffer.Length - 1, aggregationBuffer[^1])
-                ? e1.m_Bezier.a.xz
-                : e1.m_Bezier.d.xz;
-
-            var zeroMarker = adrMainSystem.GetZeroMarkerPosition();
-            isInverseAggregate = math.distancesq(refE0, zeroMarker) > math.distancesq(refE1, zeroMarker);
-            return true;
+            return TryResolveInverseAggregate(
+                entityManager, aggregationBuffer, adrMainSystem.GetZeroMarkerPosition(), out isInverseAggregate);
         }
 
         public static bool TryResolveInverseAggregate(
             EntityManager entityManager,
-            AdrMainSystem adrMainSystem,
-            DynamicBuffer<ADRNameAggregateElement> aggregationBuffer,
+            DynamicBuffer<AggregateElement> aggregationBuffer,
+            float2 orientationRef,
             out bool isInverseAggregate)
         {
             isInverseAggregate = false;
@@ -81,9 +124,65 @@ namespace BelzontAdr
                 ? e1.m_Bezier.a.xz
                 : e1.m_Bezier.d.xz;
 
-            var zeroMarker = adrMainSystem.GetZeroMarkerPosition();
-            isInverseAggregate = math.distancesq(refE0, zeroMarker) > math.distancesq(refE1, zeroMarker);
+            isInverseAggregate = math.distancesq(refE0, orientationRef) > math.distancesq(refE1, orientationRef);
             return true;
+        }
+
+        public static bool TryResolveInverseAggregate(
+            EntityManager entityManager,
+            AdrMainSystem adrMainSystem,
+            DynamicBuffer<ADRNameAggregateElement> aggregationBuffer,
+            out bool isInverseAggregate)
+        {
+            return TryResolveInverseAggregate(
+                entityManager, aggregationBuffer, adrMainSystem.GetZeroMarkerPosition(), out isInverseAggregate);
+        }
+
+        public static bool TryResolveInverseAggregate(
+            EntityManager entityManager,
+            DynamicBuffer<ADRNameAggregateElement> aggregationBuffer,
+            float2 orientationRef,
+            out bool isInverseAggregate)
+        {
+            isInverseAggregate = false;
+            if (aggregationBuffer.Length == 0
+                || !entityManager.TryGetComponent(aggregationBuffer[0].m_Edge, out Curve e0)
+                || !entityManager.TryGetComponent(aggregationBuffer[^1].m_Edge, out Curve e1))
+            {
+                return false;
+            }
+
+            var refE0 = CheckSegmentReversion(entityManager, aggregationBuffer, false, 0, aggregationBuffer[0])
+                ? e0.m_Bezier.d.xz
+                : e0.m_Bezier.a.xz;
+            var refE1 = CheckSegmentReversion(entityManager, aggregationBuffer, false, aggregationBuffer.Length - 1, aggregationBuffer[^1])
+                ? e1.m_Bezier.a.xz
+                : e1.m_Bezier.d.xz;
+
+            isInverseAggregate = math.distancesq(refE0, orientationRef) > math.distancesq(refE1, orientationRef);
+            return true;
+        }
+
+        /// <summary>
+        /// Pre-ACT-01 Aggregate cache house-number formula with chain-start baseline in meters
+        /// (<c>startDistanceOverrideKm * 500</c> ≡ <c>baselineMeters * 0.5</c>) and optional reverse sign.
+        /// No marker-position rebake — baseline is always at chain distance 0.
+        /// </summary>
+        public static int ComputeHouseNumberAtDistance(float distanceAlongMeters, in HighwayNumberingContext ctx)
+        {
+            var unitMultiplier = IsFreedomUnitSystem() ? 1.09361329f : 1f;
+            float halfFactor = ctx.ReverseCounting ? -0.5f : 0.5f;
+            float baselineHalf = ctx.ChainStartBaselineMeters * 0.5f;
+            return (Mathf.RoundToInt((baselineHalf + halfFactor * distanceAlongMeters) * unitMultiplier) * 2) + 1;
+        }
+
+        /// <summary>
+        /// Mileage major-units (km or mi) at chain distance, applying authored baseline + reverseCounting.
+        /// </summary>
+        public static float ComputeMileageMajorUnits(float distanceAlongMeters, in HighwayNumberingContext ctx, float metersPerMajor)
+        {
+            float signed = ctx.ReverseCounting ? -distanceAlongMeters : distanceAlongMeters;
+            return (ctx.ChainStartBaselineMeters + signed) / math.max(1f, metersPerMajor);
         }
 
         public static bool IsFreedomUnitSystem() =>
@@ -143,6 +242,21 @@ namespace BelzontAdr
             float curvePos,
             out Entity road,
             out int number)
+            => TryGetAddress(entityManager, adrMainSystem, null, sideEntity, edge, curvePos, out road, out number);
+
+        /// <summary>
+        /// Resolves road naming entity + house number. Prefers ADR membership when linked.
+        /// Pass <paramref name="highwayRoutesSystem"/> so ADR highway <c>refStartPoint</c> / mileage fields apply.
+        /// </summary>
+        public static bool TryGetAddress(
+            EntityManager entityManager,
+            AdrMainSystem adrMainSystem,
+            AdrHighwayRoutesSystem highwayRoutesSystem,
+            Entity sideEntity,
+            Entity edge,
+            float curvePos,
+            out Entity road,
+            out int number)
         {
             road = Entity.Null;
             number = 0;
@@ -152,7 +266,7 @@ namespace BelzontAdr
                 && adrBuffer.Length > 0)
             {
                 return TryGetAddressAlongAdr(
-                    entityManager, adrMainSystem, sideEntity, edge, curvePos, adrAggregate, adrBuffer,
+                    entityManager, adrMainSystem, highwayRoutesSystem, sideEntity, edge, curvePos, adrAggregate, adrBuffer,
                     out road, out number);
             }
 
@@ -174,13 +288,23 @@ namespace BelzontAdr
             Entity edge,
             float curvePos,
             out int number)
+            => TryGetOddNumberAtCurvePos(entityManager, adrMainSystem, null, edge, curvePos, out number);
+
+        public static bool TryGetOddNumberAtCurvePos(
+            EntityManager entityManager,
+            AdrMainSystem adrMainSystem,
+            AdrHighwayRoutesSystem highwayRoutesSystem,
+            Entity edge,
+            float curvePos,
+            out int number)
         {
-            return TryGetAddress(entityManager, adrMainSystem, Entity.Null, edge, curvePos, out _, out number);
+            return TryGetAddress(entityManager, adrMainSystem, highwayRoutesSystem, Entity.Null, edge, curvePos, out _, out number);
         }
 
         private static bool TryGetAddressAlongAdr(
             EntityManager entityManager,
             AdrMainSystem adrMainSystem,
+            AdrHighwayRoutesSystem highwayRoutesSystem,
             Entity sideEntity,
             Entity edge,
             float curvePos,
@@ -191,7 +315,11 @@ namespace BelzontAdr
         {
             road = Entity.Null;
             number = 0;
-            if (!TryResolveInverseAggregate(entityManager, adrMainSystem, aggregationBuffer, out bool isInverseAggregate))
+
+            var hwCtx = HighwayNumberingContext.FromAdrAggregate(
+                entityManager, adrMainSystem, highwayRoutesSystem, adrAggregate);
+
+            if (!TryResolveInverseAggregate(entityManager, aggregationBuffer, hwCtx.OrientationRef, out bool isInverseAggregate))
             {
                 return false;
             }
@@ -218,6 +346,7 @@ namespace BelzontAdr
                 road = adrAggregate;
                 bool isReversedSegment = CheckSegmentReversion(entityManager, aggregationBuffer, isInverseAggregate, i, aggregateElement);
 
+                // Per-edge house-number override stays separate from highway km baseline.
                 if (aggregateElement.numberOverrideActive)
                 {
                     number = aggregateElement.numberOverride;
@@ -226,8 +355,8 @@ namespace BelzontAdr
                 {
                     var t = new Bounds1(isReversedSegment ? curvePos : 0f, isReversedSegment ? 1f : curvePos);
                     float s = math.saturate(MathUtils.Length(curve.m_Bezier, t) / math.max(1f, curve.m_Length));
-                    var unitMultiplier = IsFreedomUnitSystem() ? 1.09361329f : 1f;
-                    number = (Mathf.RoundToInt((.5f * math.lerp(currentDistance, newDistance, s)) * unitMultiplier) * 2) + 1;
+                    float distanceAlong = math.lerp(currentDistance, newDistance, s);
+                    number = ComputeHouseNumberAtDistance(distanceAlong, hwCtx);
                 }
                 else
                 {

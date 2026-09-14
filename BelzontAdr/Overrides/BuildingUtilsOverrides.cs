@@ -12,6 +12,7 @@ namespace BelzontAdr
         public void DoPatches(World world)
         {
             adrMainSystem = world.GetOrCreateSystemManaged<AdrMainSystem>();
+            highwayRoutesSystem = world.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
 
             var GetAddress = typeof(BuildingUtils).GetMethod("GetAddress", RedirectorUtils.allFlags, null, new[]
             {
@@ -33,7 +34,8 @@ namespace BelzontAdr
                 curvePos = temp.m_CurvePosition;
             }
 
-            if (AdrRoadAddressNumbering.TryGetAddress(entityManager, adrMainSystem, entity, edge, curvePos, out road, out number))
+            if (AdrRoadAddressNumbering.TryGetAddress(
+                    entityManager, adrMainSystem, highwayRoutesSystem, entity, edge, curvePos, out road, out number))
             {
                 __result = true;
                 return false;
@@ -44,5 +46,6 @@ namespace BelzontAdr
         }
 
         private static AdrMainSystem adrMainSystem;
+        private static AdrHighwayRoutesSystem highwayRoutesSystem;
     }
 }

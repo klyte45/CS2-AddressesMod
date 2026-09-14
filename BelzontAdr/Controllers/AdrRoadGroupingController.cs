@@ -2,6 +2,7 @@ using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Entities;
 using Colossal.Mathematics;
+using Game.Common;
 using Game.Net;
 using Game.Rendering;
 using Game.SceneFlow;
@@ -26,6 +27,7 @@ namespace BelzontAdr
         private ToolSystem m_ToolSystem;
         private AdrRoadGroupingTool m_Tool;
         private AdrMainSystem m_AdrMainSystem;
+        private AdrHighwayRoutesSystem m_HighwayRoutesSystem;
         private CameraUpdateSystem m_CameraUpdateSystem;
 
         private Entity m_LastAggregation = Entity.Null;
@@ -99,6 +101,7 @@ namespace BelzontAdr
             m_ToolSystem = World.GetOrCreateSystemManaged<ToolSystem>();
             m_Tool = World.GetOrCreateSystemManaged<AdrRoadGroupingTool>();
             m_AdrMainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
+            m_HighwayRoutesSystem = World.GetOrCreateSystemManaged<AdrHighwayRoutesSystem>();
             m_CameraUpdateSystem = World.GetOrCreateSystemManaged<CameraUpdateSystem>();
             GameManager.instance.userInterface.view.Listener.BindingsReleased += () => m_initialized = false;
         }
@@ -113,6 +116,12 @@ namespace BelzontAdr
             bool toolActive = m_ToolSystem.activeTool == m_Tool;
             Entity aggregation = toolActive && SelectedAggregation != null ? SelectedAggregation.Value : Entity.Null;
             bool showCards = toolActive && ShowNumberCards != null && ShowNumberCards.Value && aggregation != Entity.Null;
+
+            // SIP/tool highway or custom-name writes add Updated — refresh cards while tool stays open.
+            if (showCards && EntityManager.HasComponent<Updated>(aggregation))
+            {
+                m_CardsDirty = true;
+            }
 
             if (aggregation != m_LastAggregation || showCards != m_LastShowNumberCards)
             {
@@ -311,9 +320,9 @@ namespace BelzontAdr
                     }
 
                     if (AdrRoadAddressNumbering.TryGetOddNumberAtCurvePos(
-                            EntityManager, m_AdrMainSystem, edge, 0f, out int n0)
+                            EntityManager, m_AdrMainSystem, m_HighwayRoutesSystem, edge, 0f, out int n0)
                         && AdrRoadAddressNumbering.TryGetOddNumberAtCurvePos(
-                            EntityManager, m_AdrMainSystem, edge, 1f, out int n1))
+                            EntityManager, m_AdrMainSystem, m_HighwayRoutesSystem, edge, 1f, out int n1))
                     {
                         card.numberLow = math.min(n0, n1);
                         card.numberHigh = math.max(n0, n1);
@@ -335,6 +344,31 @@ namespace BelzontAdr
 
         private AdrRoadGroupingSegmentCard[] BuildMileageCards(
             Entity aggregation,
+            DynamicBuffer<ADRNameAggregateElement> elements,
+            Camera camera)
+        {
+            var hwCtx = AdrRoadAddressNumbering.HighwayNumberingContext.FromAdrAggregate(
+                EntityManager, m_AdrMainSystem, m_HighwayRoutesSystem, aggregation);
+
+            if (!AdrRoadAddressNumbering.TryResolveInverseAggregate(
+                    EntityManager, elements, hwCtx.OrientationRef,
+                    out bool isInverseAggregate))
+            {
+                return EmptyCards;
+            }
+
+            return BuildMileageCardsCore(
+                elements.Length,
+                i => elements[i].m_Edge,
+                (i, edge) => AdrRoadAddressNumbering.CheckSegmentReversion(
+                    EntityManager, elements, isInverseAggregate, i, elements[i]),
+                isInverseAggregate,
+                hwCtx,
+                camera);
+        }
+
+        private AdrRoadGroupingSegmentCard[] BuildMileageCards(
+            Entity aggregation,
             DynamicBuffer<AggregateElement> elements,
             Camera camera)
         {
@@ -351,6 +385,7 @@ namespace BelzontAdr
                 (i, edge) => AdrRoadAddressNumbering.CheckSegmentReversion(
                     EntityManager, elements, isInverseAggregate, i, elements[i]),
                 isInverseAggregate,
+                AdrRoadAddressNumbering.HighwayNumberingContext.ForCityZero(m_AdrMainSystem),
                 camera);
         }
 
@@ -367,6 +402,7 @@ namespace BelzontAdr
                 i => edges[i],
                 (i, edge) => CheckSegmentReversionFromEdges(edges, isInverseAggregate, i),
                 isInverseAggregate,
+                AdrRoadAddressNumbering.HighwayNumberingContext.ForCityZero(m_AdrMainSystem),
                 camera);
         }
 
@@ -419,32 +455,12 @@ namespace BelzontAdr
             return isReversedSegment;
         }
 
-        private AdrRoadGroupingSegmentCard[] BuildMileageCards(
-            Entity aggregation,
-            DynamicBuffer<ADRNameAggregateElement> elements,
-            Camera camera)
-        {
-            if (!AdrRoadAddressNumbering.TryResolveInverseAggregate(
-                    EntityManager, m_AdrMainSystem, elements,
-                    out bool isInverseAggregate))
-            {
-                return EmptyCards;
-            }
-
-            return BuildMileageCardsCore(
-                elements.Length,
-                i => elements[i].m_Edge,
-                (i, edge) => AdrRoadAddressNumbering.CheckSegmentReversion(
-                    EntityManager, elements, isInverseAggregate, i, elements[i]),
-                isInverseAggregate,
-                camera);
-        }
-
         private AdrRoadGroupingSegmentCard[] BuildMileageCardsCore(
             int length,
             Func<int, Entity> edgeAt,
             Func<int, Entity, bool> isReversedAt,
             bool isInverseAggregate,
+            AdrRoadAddressNumbering.HighwayNumberingContext hwCtx,
             Camera camera)
         {
             bool freedom = AdrRoadAddressNumbering.IsFreedomUnitSystem();
@@ -477,7 +493,8 @@ namespace BelzontAdr
                     float local = math.saturate((nextMarker - currentDistance) / curve.m_Length);
                     float curvePos = reversed ? 1f - local : local;
                     float3 pos = MathUtils.Position(curve.m_Bezier, curvePos);
-                    float majorUnits = nextMarker / metersPerMajor;
+                    float majorUnits = AdrRoadAddressNumbering.ComputeMileageMajorUnits(
+                        nextMarker, hwCtx, metersPerMajor);
 
                     var card = new AdrRoadGroupingSegmentCard
                     {

@@ -86,26 +86,31 @@ const RoadGroupingToolPanel = () => {
     const showCards = !!RoadGroupingService.ShowNumberCards.value;
     const hasSelection = !isNullEntity(selected);
 
-    const reloadSelectionUi = useCallback(async (entity: Entity | null | undefined) => {
+    const reloadSelectionUi = useCallback(async (entity: Entity | null | undefined, opts?: { keepMounted?: boolean }) => {
         if (isNullEntity(entity)) {
             setOptions([]);
             setCustomName("");
             setEffectiveName("");
             return;
         }
-        setLoadingOptions(true);
+        // keepMounted: refresh without unmounting fields (mileage FloatInputField / custom name).
+        if (!opts?.keepMounted) {
+            setLoadingOptions(true);
+        }
         try {
-            const [opts, name, entityData] = await Promise.all([
+            const [optsResult, name, entityData] = await Promise.all([
                 SelectInfoPanelService.getEntityOptions(entity!),
                 SelectInfoPanelService.getAggregateCustomName(entity!),
                 // Same NameSystem.GetName path SIP title uses (editorUI.getEntityData).
                 EditorUISystemService.getEntityData(entity!),
             ]);
-            setOptions(opts ?? []);
+            setOptions(optsResult ?? []);
             setCustomName(name ?? "");
             setEffectiveName(nameToString(entityData?.name) ?? "");
         } finally {
-            setLoadingOptions(false);
+            if (!opts?.keepMounted) {
+                setLoadingOptions(false);
+            }
         }
     }, []);
 
@@ -114,7 +119,7 @@ const RoadGroupingToolPanel = () => {
     }, [selected?.Index, selected?.Version, reloadSelectionUi]);
 
     const onSettingsChanged = useCallback(async () => {
-        await reloadSelectionUi(selected);
+        await reloadSelectionUi(selected, { keepMounted: true });
         setTick((x) => x + 1);
     }, [reloadSelectionUi, selected]);
 
@@ -161,6 +166,7 @@ const RoadGroupingToolPanel = () => {
                             response={highwayOption}
                             hostEntity={highwayOption.entityValue ?? selected!}
                             onChanged={onSettingsChanged}
+                            surface="tool"
                         />
                     )}
                     {!isAdr && !seedOption && (
