@@ -10,10 +10,10 @@ Ship HW-01…HW-08 end-to-end: ADRNameAggregateHighwayData lifecycle, SIP/tool p
 
 - **Sprint number**: 014
 - **Start date**: 2026-09-12 23:49 -0300
-- **End date**:
+- **End date**: 2026-09-14 17:48 -0300
 - **Original tasks**: 09
 - **Original task IDs**: [0076], [0077], [0078], [0079], [0080], [0081], [0082], [0083], [0084]
-- **Delivered tasks (from original)**:
+- **Delivered tasks (from original)**: 9
 - **Added tasks**: 1
-- **Delivered tasks (from added)**:
-- **Total delivered tasks**:
+- **Delivered tasks (from added)**: 0
+- **Total delivered tasks**: 9

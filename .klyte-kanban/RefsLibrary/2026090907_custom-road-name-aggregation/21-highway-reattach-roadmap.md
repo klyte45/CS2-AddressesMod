@@ -1,12 +1,12 @@
 # Highway reattach — implementation roadmap & Kanban catalog
 
-*Added: 2026-09-12 · Updated: 2026-09-12 (tool options parity + custom name; HW-07 required; single sprint; board IDs **0076–0084**) · Design: [20](20-highway-reattach-on-adr-aggregates.md) · Activation strip: [12](12-activation-change-map.md) ACT-01/ACT-02 · Membership: [07](07-membership-maintenance-edge-cases.md)*
+*Added: 2026-09-12 · Updated: 2026-09-14 (Sprint 014 closed — HW-01…HW-08 delivered; HW-03c/0085 cancelled → NET-04) · Design: [20](20-highway-reattach-on-adr-aggregates.md) · Activation strip: [12](12-activation-change-map.md) ACT-01/ACT-02 · Membership: [07](07-membership-maintenance-edge-cases.md)*
 
 ## Goal
 
 Define the **implementation roadmap** for re-hosting highway route / mileage / direction on **ADR name-aggregates**, edited from the **Addresses SIP** and **Road Grouping tool options** (shared ADR field set + custom name), with WE formulae restored from ADR-hosted data.
 
-Board items are in backlog epic **`adr-hw-reattach`**, status **N** (ready to pull into a sprint after review). IDs **0076–0084**.
+Board epic **`adr-hw-reattach`** delivered in **Sprint 014** (IDs **0076–0084**; **0085** cancelled → [0086] NET-04).
 
 ## Prerequisites
 
@@ -36,7 +36,7 @@ Do **not** start HW-* before ADR components exist; highway data has nowhere to l
 |-------|--------|
 | Epic label | **ADR highway reattach** |
 | Epic slug | `adr-hw-reattach` (≤15 chars for board) |
-| Sprint plan | **One sprint** containing **all** HW-01…HW-08 (incl. HW-03b). Not started yet — backlog **N** pending review |
+| Sprint plan | **Sprint 014** closed 2026-09-14 — HW-01…HW-08 done; HW-03c (**0085**) cancelled → NET-04 |
 | Effort band | Sized to fit a single sprint end-to-end |
 | Board IDs | **0076–0084** |
 
@@ -128,21 +128,23 @@ See checklist below.
 
 ## Acceptance checklist
 
-- [ ] Selecting a **vanilla** Aggregate (or edge without ADR) shows Addresses seed UI only — **no** highway controls
-- [ ] Selecting an **ADR** name-aggregate (or ADR-linked edge) shows seed UI **plus** highway route / direction / mileage override / reverse
-- [ ] Road Grouping tool with ADR selection shows **custom name** input (not entity Index / `Aggregation #`)
-- [ ] Tool options expose the **same seed + highway** controls as ADR Addresses SIP; edits from either surface stay consistent
-- [ ] Assigning a registry highway changes road naming for ADR-linked edges
-- [ ] Mileage override + reverse change house-number / mileage labels along the ADR chain
-- [ ] Road markers remain visual-only in marker tool + marker SIP; no route/mileage fields on marker component
-- [ ] WE on markers shows route / mileage / direction from the owning ADR aggregate’s highway data
-- [ ] Region map / registry hover reflects ADR `highwayDataId` for linked roads
-- [ ] Empty / default `highwayDataId` behaves as non-highway
-- [ ] Destroying last ADR membership tears down highway component with the aggregate
-- [ ] No revive of Aggregate-hosted highway cache or marker↔Aggregate sync jobs
-- [ ] No save-migration work for old Aggregate/marker highway identity (**beta** — out of scope; manual re-assign OK)
-- [ ] i18n pending entries only (no agent edits to `i18n.csv`)
-- [ ] All HW-01…HW-08 completed in the **same** sprint
+- [x] Selecting a **vanilla** Aggregate (or edge without ADR) shows Addresses seed UI only — **no** highway controls
+- [x] Selecting an **ADR** name-aggregate (or ADR-linked edge) shows seed UI **plus** highway route / direction / mileage override / reverse
+- [x] Road Grouping tool with ADR selection shows **custom name** input (not entity Index / `Aggregation #`)
+- [x] Tool options expose the **same seed + highway** controls as ADR Addresses SIP; edits from either surface stay consistent
+- [x] Assigning a registry highway changes road naming for ADR-linked edges
+- [x] Mileage override + reverse change house-number / mileage labels along the ADR chain
+- [x] Road markers remain visual-only in marker tool + marker SIP; no route/mileage fields on marker component
+- [x] WE on markers shows route / mileage / direction from the owning ADR aggregate’s highway data
+- [x] Region map / registry hover reflects ADR `highwayDataId` for linked roads
+- [x] Empty / default `highwayDataId` behaves as non-highway
+- [x] Destroying last ADR membership tears down highway component with the aggregate
+- [x] No revive of Aggregate-hosted highway cache or marker↔Aggregate sync jobs
+- [x] No save-migration work for old Aggregate/marker highway identity (**beta** — out of scope; manual re-assign OK)
+- [x] i18n pending entries only (no agent edits to `i18n.csv`)
+- [x] All HW-01…HW-08 completed in the **same** sprint
+
+*Sprint 014 dogfood 2026-09-14. Known gap: road-only seed gate (former HW-03c / **0085**) deferred to NET-04 **0086**.*
 
 ## Later (not this epic)
 
