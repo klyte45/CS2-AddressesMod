@@ -31,12 +31,12 @@ Fifth task. Restore AdrNameSystemOverrides highway name branch keyed by ADRNameA
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Non-default highwayDataId on ADR → registry highway naming for ADR-linked edges
-- [ ] default highwayDataId → no highway name branch (nameset/vanilla/custom as today)
-- [ ] Custom name when set wins over highway/nameset (document/test priority)
-- [ ] Vanilla Aggregate-only roads unchanged
-- [ ] Name dirty/refresh after SIP/tool highway or custom-name change
-- [ ] Compile + playtest rename/highway assign
+- [x] Non-default highwayDataId on ADR → registry highway naming for ADR-linked edges
+- [x] default highwayDataId → no highway name branch (nameset/vanilla/custom as today)
+- [x] Custom name when set wins over highway/nameset (document/test priority)
+- [x] Vanilla Aggregate-only roads unchanged
+- [x] Name dirty/refresh after SIP/tool highway or custom-name change
+- [x] Compile + playtest rename/highway assign
 
 ---
 
