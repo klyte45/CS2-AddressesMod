@@ -31,13 +31,13 @@ Seventh task. Restore WE formulae from ACT-02 Feature placeholders / XML comment
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] WE default formulae restored for route/mileage/direction (or equivalent Feature vars) reading ADR aggregate context
-- [ ] Resolve path documented and implemented: attached net → ADRNameAggregated → ADRNameAggregateHighwayData + registry
-- [ ] RoadMarkerInfoBridge no longer returns only defaults for route/direction when ADR context exists (or WE-only path documented if bridge unused)
-- [ ] ADRHighwayMarkerData still has no serialized route/mileage fields
-- [ ] Marker SIP/tool remain visual-only (pylons + display/custom)
-- [ ] Playtest marker on ADR highway road shows registry/mileage/direction-driven WE text
-- [ ] Compile + WE smoke
+- [x] WE default formulae restored for route/mileage/direction (or equivalent Feature vars) reading ADR aggregate context
+- [x] Resolve path documented and implemented: attached net → ADRNameAggregated → ADRNameAggregateHighwayData + registry
+- [x] RoadMarkerInfoBridge no longer returns only defaults for route/direction when ADR context exists (or WE-only path documented if bridge unused)
+- [x] ADRHighwayMarkerData still has no serialized route/mileage fields
+- [x] Marker SIP/tool remain visual-only (pylons + display/custom)
+- [x] Playtest marker on ADR highway road shows registry/mileage/direction-driven WE text
+- [x] Compile + WE smoke
 
 ---
 
