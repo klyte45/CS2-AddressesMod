@@ -19,7 +19,7 @@ Overflown from [0085] HW-03c-Gate-road-seeds-namesets-to-roads-only (ActiveSprin
 
 ## Background
 
-Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint because seed-only scope was too narrow and edge Game.Net.Road gating is wrong (playtest: streets/avenues may lack Road). Full design: RefsLibrary 22–24. This backlog item is catalog NET-04: road nameset/seed/SIP gating via prefab RoadData / AdrNetKind.Road. Depends conceptually on NET-01 (classifier) and prefer NET-02 (mix gate); create those board IDs when explicitly requested.
+Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint because seed-only scope was too narrow and edge Game.Net.Road gating is wrong (playtest: streets/avenues may lack Road). Full design: RefsLibrary 22–24. Catalog NET-04 under epic adr-net-kind: road nameset/seed/SIP gating via prefab RoadData / AdrNetKind.Road. Depends on NET-01 [0087] classifier; prefer NET-02 [0088] mix gate first.
 
 ---
 
@@ -69,8 +69,8 @@ Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint
 
 ### Depends on
 
-
-
+- [0087] NET-01-Classifier-stored-kind-on-ADRNameAggregate
+- [0088] NET-02-Membership-Road-Grouping-mix-gate
 ### Is dependent for
 
 
@@ -80,7 +80,8 @@ Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint
 - [0085] HW-03c-Gate-road-seeds-namesets-to-roads-only
 - [0079] HW-03b-Road-Grouping-tool-options-parity
 - [0080] HW-04-Naming-highway-override-branch
-
+- [0089] NET-03-Per-kind-ADR-NetNameData-outline-by-kind
+- [0090] NET-05-Playtest-matrix-smoke-notes
 ### Groups with
 
 - HW-03b-Road-Grouping-tool-options-parity
@@ -89,6 +90,10 @@ Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint
 ### Overflown from
 
 - [0085] HW-03c-Gate-road-seeds-namesets-to-roads-only
+
+---
+
+---
 
 ## Other Notes
 
