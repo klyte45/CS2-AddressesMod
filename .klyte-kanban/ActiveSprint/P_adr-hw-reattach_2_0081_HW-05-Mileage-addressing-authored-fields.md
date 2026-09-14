@@ -1,7 +1,7 @@
+**Start time:** 2026-09-13 21:54 -0300
 # [0081] HW-05-Mileage-addressing-authored-fields
 
-**Developed by:** 
-
+**Developed by:** Leandro Klyte (klyte@kwyt.com.br)
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/20-highway-reattach-on-adr-aggregates.md §E / Why no cache
