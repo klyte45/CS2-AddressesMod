@@ -4,7 +4,7 @@
 
 Reference pack for **player-customizable road name aggregation**, implemented as an **ADR-owned parallel system** that does **not** override vanilla `AggregateSystem` / `Aggregated` / `Aggregate` lifecycle.
 
-This pack is **documentation only** for research/design. Activation Kanban tasks live in **Sprint 012** (`adr-activation`, board IDs **0061–0068**) — catalog detail in [13](13-activation-sprint-roadmap.md). Citywide **road name-label takeover** research: [14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md); implementation catalog: [18](18-label-takeover-sprint-roadmap.md). **Highway reattach** on ADR aggregates: [20](20-highway-reattach-on-adr-aggregates.md)–[21](21-highway-reattach-roadmap.md). **Net-kind mix gate / NetNameData:** [22](22-game-net-edge-kinds-and-aggregation.md)–[24](24-adr-net-kind-roadmap.md).
+This pack is **documentation only** for research/design. Activation Kanban tasks live in **Sprint 012** (`adr-activation`, board IDs **0061–0068**) — catalog detail in [13](13-activation-sprint-roadmap.md). Citywide **road name-label takeover** research: [14](14-vanilla-road-label-pipeline.md)–[17](17-label-extensions-text-images-look.md); implementation catalog: [18](18-label-takeover-sprint-roadmap.md). **Highway reattach** on ADR aggregates: [20](20-highway-reattach-on-adr-aggregates.md)–[21](21-highway-reattach-roadmap.md). **Net-kind mix gate / NetNameData:** [22](22-game-net-edge-kinds-and-aggregation.md)–[24](24-adr-net-kind-roadmap.md). **Citywide bulk ADR convert:** [26](26-bulk-citywide-adr-aggregation.md) (board **0091**).
 
 ## Scope
 
