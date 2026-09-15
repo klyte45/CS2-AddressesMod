@@ -47,6 +47,7 @@ namespace BelzontAdr
             updateSystem.UpdateAt<WaterVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<AirVehiclePlateEditorController>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<TempRoadMarkerTooltip>(SystemUpdatePhase.UITooltip);
+            updateSystem.UpdateAt<AdrRoadGroupingTooltipSystem>(SystemUpdatePhase.UITooltip);
             updateSystem.UpdateAt<AdrHighwayRoutesSystem>(SystemUpdatePhase.ModificationEnd);
             updateSystem.UpdateAt<AdrRegionsSystem>(SystemUpdatePhase.ModificationEnd);
             // UIUpdate: segment number-card projection tracks camera like SelectedInfoUISystem.
