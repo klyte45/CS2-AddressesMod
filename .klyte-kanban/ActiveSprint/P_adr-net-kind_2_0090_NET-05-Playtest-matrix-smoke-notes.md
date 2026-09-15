@@ -28,14 +28,14 @@ Final catalog task of epic adr-net-kind. Dogfood the playtest matrix from RefsLi
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Street/avenue edges without edge Game.Net.Road classify as Road and can use seeds
-- [ ] Street↔highway ADR membership allowed in playtest
-- [ ] Road↔pathway/track/waterway/taxiway membership rejected with feedback
-- [ ] Non-road aggregates do not show road seed dice / road namesets
-- [ ] Non-road S2 labels work when NET-03 in scope; outlines match kind table
-- [ ] ADR Road labels use outline #333333
-- [ ] Vanilla AggregateSystem unchanged (verified by no Harmony on AggregateSystem for this epic)
-- [ ] Written smoke notes attached to this task or RefsLibrary pointer
+- [x] Street/avenue edges without edge Game.Net.Road classify as Road and can use seeds
+- [x] Street↔highway ADR membership allowed in playtest
+- [x] Road↔pathway/track/waterway/taxiway membership rejected with feedback
+- [x] Non-road aggregates do not show road seed dice / road namesets
+- [x] Non-road S2 labels work when NET-03 in scope; outlines match kind table
+- [x] ADR Road labels use outline #333333
+- [x] Vanilla AggregateSystem unchanged (verified by no Harmony on AggregateSystem for this epic)
+- [x] Written smoke notes attached to this task or RefsLibrary pointer
 
 ---
 
@@ -45,6 +45,7 @@ Final catalog task of epic adr-net-kind. Dogfood the playtest matrix from RefsLi
 2. Capture findings in task notes / short smoke doc — do not invent new board epics here
 3. Catalog: 24-adr-net-kind-roadmap.md NET-05
 4. Wrote RefsLibrary/2026090907_custom-road-name-aggregation/27-adr-net-kind-playtest-smoke-notes.md — matrix #1–14 from Sprint 015 validation (NET-01…04). Linked from 00-README + 24 success criteria. Awaiting user confirmation of smoke notes accuracy before checking DoD / close.
+5. User validated smoke notes doc 27.
 
 ---
 
