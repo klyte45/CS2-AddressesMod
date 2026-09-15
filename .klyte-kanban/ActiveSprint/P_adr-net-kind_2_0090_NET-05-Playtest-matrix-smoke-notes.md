@@ -44,6 +44,7 @@ Final catalog task of epic adr-net-kind. Dogfood the playtest matrix from RefsLi
 1. Playtest matrix: street without Road; street+highway mix; pathway/track reject; seed UI on/off by kind; label outlines
 2. Capture findings in task notes / short smoke doc — do not invent new board epics here
 3. Catalog: 24-adr-net-kind-roadmap.md NET-05
+4. Wrote RefsLibrary/2026090907_custom-road-name-aggregation/27-adr-net-kind-playtest-smoke-notes.md — matrix #1–14 from Sprint 015 validation (NET-01…04). Linked from 00-README + 24 success criteria. Awaiting user confirmation of smoke notes accuracy before checking DoD / close.
 
 ---
 

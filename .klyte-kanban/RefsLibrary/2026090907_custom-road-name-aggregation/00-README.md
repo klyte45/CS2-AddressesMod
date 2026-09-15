@@ -24,6 +24,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Net-kind typing + mix gate + per-kind NetNameData ([22](22-game-net-edge-kinds-and-aggregation.md)–[24](24-adr-net-kind-roadmap.md)) | Creating NET-* board tasks until explicitly requested; mutating vanilla AggregateNet assets |
 | Road Grouping tooltips draft ([25](25-road-grouping-tooltips-draft.md)) | Shipping tooltip UX until detailed + requested |
 | Citywide bulk ADR aggregation settings ([26](26-bulk-citywide-adr-aggregation.md)) | Shipping convert-all UI until board task pulled |
+| Net-kind playtest smoke notes ([27](27-adr-net-kind-playtest-smoke-notes.md)) | Replacing notes without product ask |
 
 ## Confirmed decisions
 
@@ -76,6 +77,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 24. [24-adr-net-kind-roadmap.md](24-adr-net-kind-roadmap.md) — NET-01…NET-06 catalog (NET-04 board **0086**; **0085** Z-overflowed)
 25. [25-road-grouping-tooltips-draft.md](25-road-grouping-tooltips-draft.md) — **draft** Road Grouping tooltips (errors + commands; expand later)
 26. [26-bulk-citywide-adr-aggregation.md](26-bulk-citywide-adr-aggregation.md) — citywide “convert applicable segments to ADR” settings UX + kind checkboxes
+27. [27-adr-net-kind-playtest-smoke-notes.md](27-adr-net-kind-playtest-smoke-notes.md) — NET-05 playtest matrix results (Sprint 015)
 
 ## Success criteria (this research pack)
 
@@ -105,6 +107,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 - [x] Net-kind implementation catalog documented ([24](24-adr-net-kind-roadmap.md))
 - [x] Road Grouping tooltips draft stub ([25](25-road-grouping-tooltips-draft.md))
 - [x] Citywide bulk ADR aggregation settings UX documented ([26](26-bulk-citywide-adr-aggregation.md))
+- [x] Net-kind playtest smoke notes ([27](27-adr-net-kind-playtest-smoke-notes.md))
 
 ## Related packs
 
