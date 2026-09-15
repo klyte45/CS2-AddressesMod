@@ -109,6 +109,10 @@
       <HintPath>$(CSII_MANAGEDPATH)\UnityEngine.InputLegacyModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.InputSystem">
+      <HintPath>$(CSII_MANAGEDPATH)\Unity.InputSystem.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="Colossal.Mono.Cecil">
       <HintPath>$(CSII_MANAGEDPATH)\Colossal.Mono.Cecil.dll</HintPath>
       <Private>False</Private>
