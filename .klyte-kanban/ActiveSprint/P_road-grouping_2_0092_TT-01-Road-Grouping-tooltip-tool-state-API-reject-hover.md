@@ -1,7 +1,7 @@
+**Start time:** 2026-09-15 00:38 -0300
 # [0092] TT-01-Road-Grouping-tooltip-tool-state-API-reject-hover
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/25-road-grouping-tooltips.md TT-01; BelzontAdr/Tools/AdrRoadGroupingTool.cs
