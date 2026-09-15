@@ -1,7 +1,7 @@
+**Start time:** 2026-09-15 00:43 -0300
 # [0096] TT-05-Road-Grouping-remove-PSI-kind-reject-pops
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/25-road-grouping-tooltips.md TT-05; BelzontAdr/Tools/AdrRoadGroupingTool.cs NotifyNetKindReject
