@@ -1,7 +1,7 @@
+**Start time:** 2026-09-14 21:11 -0300
 # [0089] NET-03-Per-kind-ADR-NetNameData-outline-by-kind
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/22-game-net-edge-kinds-and-aggregation.md
