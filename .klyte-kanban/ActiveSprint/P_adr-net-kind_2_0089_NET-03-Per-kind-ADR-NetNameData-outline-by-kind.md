@@ -31,12 +31,12 @@ Third task of epic adr-net-kind. Non-road AggregateNets often lack NetLabel/NetN
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] ADR-owned prefab entities with NetNameData exist for Pathway, Train, Tram, Subway, Waterway, Taxiway
-- [ ] Face/text color #FFFFFFC0 on NetNameData for ADR kind prefabs
-- [ ] Outline colors match locked table including Road #333333 and Subway #004400
-- [ ] EnsureRoadNameLabelComponents (or successor) resolves PrefabRef to a prefab with NetNameData; outline follows stored AdrNetKind
-- [ ] m_IsAdrStyle generalized to per-kind outline lookup — Road no longer forced to former single green
-- [ ] No mutation of vanilla AggregateNet assets
+- [x] ADR-owned prefab entities with NetNameData exist for Pathway, Train, Tram, Subway, Waterway, Taxiway
+- [x] Face/text color #FFFFFFC0 on NetNameData for ADR kind prefabs
+- [x] Outline colors match locked table including Road #333333 and Subway #004400
+- [x] EnsureRoadNameLabelComponents (or successor) resolves PrefabRef to a prefab with NetNameData; outline follows stored AdrNetKind
+- [x] m_IsAdrStyle generalized to per-kind outline lookup — Road no longer forced to former single green
+- [x] No mutation of vanilla AggregateNet assets
 - [ ] Compile + smoke: non-road S2 labels draw; Road S2 outline is #333333
 
 ---
@@ -48,6 +48,9 @@ Third task of epic adr-net-kind. Non-road AggregateNets often lack NetLabel/NetN
 3. Prefer vanilla AggregateNet PrefabRef for Road when it already has NetNameData; still apply Road outline #333333 on ADR-style clones
 4. Do not invent BelzontWE live shared Texture2D
 5. Catalog: 24-adr-net-kind-roadmap.md NET-03
+6. Added AdrNetKindUtil outline/face color table (#FFFFFFC0 face; Subway #004400, Road #333333, Pathway #666666, Train #331A00, Tram #330033, Waterway #002244, Taxiway #33001A).
+7. AdrRoadNameLabelMeshSystem: m_IsAdrStyle → m_AdrOutlineKind; ApplyAdrOutline(kind); ADR face uses #FFFFFFC0. EnsureAdrKindNamePrefabs creates ADR-owned NetNameData entities for non-road kinds (material index 0 from vanilla AggregateNet bake; no vanilla asset mutation). Ensure/ResolveOwnerNamePrefabRef points non-road ADR PrefabRef at kind prefabs; Road keeps vanilla AggregateNet NetNameData when present.
+8. Awaiting user compile + smoke: non-road S2 labels; Road S2 outline #333333.
 
 ---
 
