@@ -26,11 +26,11 @@ Verify locked tooltip UX from doc 25 after TT-02/03/05 land. Extend playtest not
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Hover kind reject shows Error tooltip; no PSI
-- [ ] Ctrl+toggle soft-fail shows Error tooltip; no PSI; logs remain
-- [ ] Invalid endpoint drag shows Error tooltip; valid drag shows Apply/Cancel hints
-- [ ] Mode matrix hints verified for no-selection, selected, and dragging
-- [ ] Esc/RMB cancel behavior unchanged
+- [x] Hover kind reject shows Error tooltip; no PSI
+- [x] Ctrl+toggle soft-fail shows Error tooltip; no PSI; logs remain
+- [x] Invalid endpoint drag shows Error tooltip; valid drag shows Apply/Cancel hints
+- [x] Mode matrix hints verified for no-selection, selected, and dragging
+- [x] Esc/RMB cancel behavior unchanged
 
 ---
 

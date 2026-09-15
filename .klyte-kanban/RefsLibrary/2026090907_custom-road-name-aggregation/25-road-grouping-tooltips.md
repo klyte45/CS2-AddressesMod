@@ -102,17 +102,29 @@ Keep **generic** mismatch copy for v1 (no host/edge kind interpolation).
 
 File: `BelzontAdr/i18n/roadGrouping_tooltips_entries.txt` (7 columns).
 
+**Error / reject** (assembled key used as-is):
+
 | Assembled key | Mock en-US | Mock pt-BR |
 |---------------|------------|------------|
 | `K45::ADR.vuio[roadGrouping.reject.dragUnreachable]` | Cannot reach that destination from this end. | Não é possível alcançar esse destino a partir desta extremidade. |
-| `K45::ADR.vuio[roadGrouping.hint.select]` | Select road group | Selecionar grupo de vias |
-| `K45::ADR.vuio[roadGrouping.hint.toggleAdd]` | Add to group | Adicionar ao grupo |
-| `K45::ADR.vuio[roadGrouping.hint.toggleRemove]` | Remove from group | Remover do grupo |
-| `K45::ADR.vuio[roadGrouping.hint.dragStart]` | Extend or shrink group | Estender ou encolher grupo |
-| `K45::ADR.vuio[roadGrouping.hint.dragApply]` | Apply path change | Aplicar alteração do caminho |
-| `K45::ADR.vuio[roadGrouping.hint.cancelSelection]` | Clear selection | Limpar seleção |
-| `K45::ADR.vuio[roadGrouping.hint.exitTool]` | Exit tool | Sair da ferramenta |
-| `K45::ADR.vuio[roadGrouping.hint.cancelDrag]` | Cancel drag | Cancelar arraste |
+
+**InputHint labels** use Settings action-hint IDs (`::H` → `Common.ACTION[{AdrModData.id}/{suffix}]`). CSV rows are `::H…`. Runtime `DisplayNameOverride.displayName` is the **inner hash** `{id}/{suffix}` (frontend `Sc.Common.ACTION` wraps it).
+
+- **Apply / Cancel:** mutate ToolBaseSystem’s existing `Mouse Apply` / `Mouse Cancel` `UIInputAction.State.displayName` (field access — `toolActionCollection` is internal to Game.dll) and drive `shouldBeEnabled`. Vanilla `InputHintsTooltipSystem` emits them (`baseToolActions`). Do **not** hand-emit ModData Apply/Cancel — when `displayOverride` is unpublished, `InputHint.Create` falls back to `action.title` → raw `Common.ACTION[…/K45_ADR_RoadGroupingCancel]`.
+- **Toggle (Ctrl+LMB):** ModData action is not in `baseToolActions` — hand-emit one `InputHintTooltip` only when `action.displayOverride ==` our override (never title fallback).
+
+| CSV key (`::H`) | Resolved (runtime) | Mock en-US | Mock pt-BR |
+|-----------------|--------------------|------------|------------|
+| `::HroadGrouping.hint.select` | `Common.ACTION[…/roadGrouping.hint.select]` | Select road group | Selecionar grupo de vias |
+| `::HroadGrouping.hint.toggleAdd` | `Common.ACTION[…/roadGrouping.hint.toggleAdd]` | Add to group | Adicionar ao grupo |
+| `::HroadGrouping.hint.toggleRemove` | `Common.ACTION[…/roadGrouping.hint.toggleRemove]` | Remove from group | Remover do grupo |
+| `::HroadGrouping.hint.dragStart` | `Common.ACTION[…/roadGrouping.hint.dragStart]` | Extend or shrink group | Estender ou encolher grupo |
+| `::HroadGrouping.hint.dragApply` | `Common.ACTION[…/roadGrouping.hint.dragApply]` | Apply path change | Aplicar alteração do caminho |
+| `::HroadGrouping.hint.cancelSelection` | `Common.ACTION[…/roadGrouping.hint.cancelSelection]` | Clear selection | Limpar seleção |
+| `::HroadGrouping.hint.exitTool` | `Common.ACTION[…/roadGrouping.hint.exitTool]` | Exit tool | Sair da ferramenta |
+| `::HroadGrouping.hint.cancelDrag` | `Common.ACTION[…/roadGrouping.hint.cancelDrag]` | Cancel drag | Cancelar arraste |
+
+Do **not** keep superseded `K45::ADR.vuio[roadGrouping.hint.*]` rows once `::H` entries are merged.
 
 Optional later (only if tool surfaces a distinct pin-block reject): `roadGrouping.reject.fixedPinBlocks`.
 
