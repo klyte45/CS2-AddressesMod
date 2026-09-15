@@ -2,12 +2,15 @@ using System.Collections.Generic;
 using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Entities;
+using Colossal.PSI.Common;
 using Game.Common;
 using Game.Input;
 using Game.Net;
 using Game.Notifications;
 using Game.Prefabs;
+using Game.PSI;
 using Game.Tools;
+using Game.UI.Localization;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -44,6 +47,12 @@ namespace BelzontAdr
         /// </summary>
         public Entity FixedMembershipEdge { get; private set; }
 
+        /// <summary>Hover edge while endpoint-dragging (may be null on node-only hits).</summary>
+        public Entity DragHoverEdge => m_DragHoverEdge;
+
+        /// <summary>True when the live drag path passed destination/path validation.</summary>
+        public bool IsDragDestinationValid => m_DragPathValid;
+
         private ProxyAction m_ApplyAction;
         private ProxyAction m_CancelAction;
         private ProxyAction m_ToggleAction;
@@ -54,6 +63,9 @@ namespace BelzontAdr
         private bool m_Dragging;
         private Entity m_DragStartNode;
         private Entity m_DragHoverNode;
+        private Entity m_DragHoverEdge;
+        private bool m_DragPathValid;
+        private AdrNetKindJoinResult m_DragRejectReason;
         private Entity m_PendingFixEdge;
         private float m_PendingFixTime;
         private const float DoubleClickSeconds = 0.35f;
@@ -192,6 +204,16 @@ namespace BelzontAdr
                 }
             }
 
+            // With an ADR focus, still hover non-Aggregated nets so unsupported kinds can show red reject wash.
+            if (collide
+                && HoveredEdge == Entity.Null
+                && selected != Entity.Null
+                && m_Membership.IsAdrNameAggregate(selected)
+                && TryResolveAnyEdge(entity, out Entity anyEdge))
+            {
+                HoveredEdge = anyEdge;
+            }
+
             if (selected == Entity.Null)
             {
                 ClearFixedMembership();
@@ -215,14 +237,14 @@ namespace BelzontAdr
                 if (!overUi && collide)
                 {
                     m_DragHoverNode = ResolveHoverNode(entity, hit);
+                    m_DragHoverEdge = ResolveHoverEdge(entity);
                     HoveredDragHandle = m_DragHoverNode;
                     RefreshLivePathPreview(selected);
                 }
                 else
                 {
-                    m_PathEdges.Clear();
-                    m_PreviewAddEdges.Clear();
-                    m_PreviewRemoveEdges.Clear();
+                    // No valid drop under cursor (UI / empty space) — cancel preview; release will no-op.
+                    InvalidateDragDestination();
                 }
 
                 if (m_ApplyAction.WasReleasedThisFrame() || !m_ApplyAction.IsPressed())
@@ -313,6 +335,9 @@ namespace BelzontAdr
             m_PathEdges.Clear();
             m_PreviewAddEdges.Clear();
             m_PreviewRemoveEdges.Clear();
+            m_DragPathValid = false;
+            m_DragRejectReason = AdrNetKindJoinResult.Ok;
+
             if (selectedAggregate == Entity.Null
                 || m_DragStartNode == Entity.Null
                 || m_DragHoverNode == Entity.Null
@@ -322,12 +347,26 @@ namespace BelzontAdr
             }
 
             RefreshMembershipSet(selectedAggregate);
+
+            // Dropping onto a non-joinable edge fails the whole drag (no partial shrink/extend).
+            if (!TryValidateDragDestinationEdge(selectedAggregate, m_DragHoverEdge, out m_DragRejectReason))
+            {
+                return;
+            }
+
             if (!TryBuildPreferredPath(m_DragStartNode, m_DragHoverNode, selectedAggregate, m_PathEdges))
             {
                 return;
             }
 
+            if (!TryValidateDragPathAdds(selectedAggregate, m_PathEdges, out m_DragRejectReason))
+            {
+                m_PathEdges.Clear();
+                return;
+            }
+
             ClassifyPathMembership(m_PathEdges, m_PreviewAddEdges, m_PreviewRemoveEdges);
+            m_DragPathValid = true;
         }
 
         private void BeginEndpointDrag(Entity selectedAggregate, Entity handleNode)
@@ -335,6 +374,9 @@ namespace BelzontAdr
             m_Dragging = true;
             m_DragStartNode = handleNode;
             m_DragHoverNode = handleNode;
+            m_DragHoverEdge = Entity.Null;
+            m_DragPathValid = false;
+            m_DragRejectReason = AdrNetKindJoinResult.Ok;
             RefreshMembershipSet(selectedAggregate);
             LogUtils.DoInfoLog(
                 "RoadGrouping endpoint drag start: aggregate={0}:{1} node={2}:{3}",
@@ -348,6 +390,11 @@ namespace BelzontAdr
         {
             Entity hoverNode = m_DragHoverNode;
             Entity startNode = m_DragStartNode;
+            bool pathValid = m_DragPathValid;
+            AdrNetKindJoinResult reject = m_DragRejectReason;
+            // Snapshot preview lists before ClearDrag wipes them.
+            var addEdges = new List<Entity>(m_PreviewAddEdges);
+            var removeEdges = new List<Entity>(m_PreviewRemoveEdges);
             ClearDrag(keepMembership: true);
 
             if (selectedAggregate == Entity.Null
@@ -359,21 +406,38 @@ namespace BelzontAdr
                 return;
             }
 
-            if (!TryBuildPreferredPath(startNode, hoverNode, selectedAggregate, m_PathEdges))
+            if (!pathValid)
             {
-                LogUtils.DoInfoLog(
-                    "RoadGrouping endpoint drag: no path from node {0}:{1} to {2}:{3}",
-                    startNode.Index,
-                    startNode.Version,
-                    hoverNode.Index,
-                    hoverNode.Version);
+                if (reject != AdrNetKindJoinResult.Ok)
+                {
+                    NotifyNetKindReject(reject);
+                }
+                else
+                {
+                    LogUtils.DoInfoLog(
+                        "RoadGrouping endpoint drag aborted: could not reach drop destination from node {0}:{1} to {2}:{3}",
+                        startNode.Index,
+                        startNode.Version,
+                        hoverNode.Index,
+                        hoverNode.Version);
+                }
+
                 m_MembershipEdges.Clear();
                 return;
             }
 
-            ClassifyPathMembership(m_PathEdges, m_PreviewAddEdges, m_PreviewRemoveEdges);
-            ApplyPathMembership(selectedAggregate, m_PreviewAddEdges, m_PreviewRemoveEdges);
+            // Atomic apply — ApplyPathMembership aborts entirely if any add would fail.
+            ApplyPathMembership(selectedAggregate, addEdges, removeEdges);
             m_MembershipEdges.Clear();
+        }
+
+        private void InvalidateDragDestination()
+        {
+            m_DragHoverNode = Entity.Null;
+            m_DragHoverEdge = Entity.Null;
+            m_DragPathValid = false;
+            m_DragRejectReason = AdrNetKindJoinResult.Ok;
+            m_PathEdges.Clear();
             m_PreviewAddEdges.Clear();
             m_PreviewRemoveEdges.Clear();
         }
@@ -383,6 +447,9 @@ namespace BelzontAdr
             m_Dragging = false;
             m_DragStartNode = Entity.Null;
             m_DragHoverNode = Entity.Null;
+            m_DragHoverEdge = Entity.Null;
+            m_DragPathValid = false;
+            m_DragRejectReason = AdrNetKindJoinResult.Ok;
             m_DragHandles.Clear();
             m_PathEdges.Clear();
             m_PreviewAddEdges.Clear();
@@ -448,6 +515,16 @@ namespace BelzontAdr
             }
 
             bool currentlyMember = IsMemberEdge(edge, working);
+            if (!currentlyMember)
+            {
+                AdrNetKindJoinResult kindJoin = m_Membership.EvaluateNetKindJoin(working, edge);
+                if (kindJoin != AdrNetKindJoinResult.Ok)
+                {
+                    NotifyNetKindReject(kindJoin);
+                    return;
+                }
+            }
+
             bool ok = currentlyMember
                 ? m_Membership.RemoveMember(working, edge)
                 : m_Membership.AddMember(working, edge);
@@ -488,6 +565,20 @@ namespace BelzontAdr
                 m_Controller.SelectedAggregation.Value = adrAggregate;
             }
 
+            // All-or-nothing: if any would-add fails kind join, apply neither adds nor removes.
+            if (addEdges != null)
+            {
+                for (int i = 0; i < addEdges.Count; i++)
+                {
+                    AdrNetKindJoinResult kindJoin = m_Membership.EvaluateNetKindJoin(working, addEdges[i]);
+                    if (kindJoin != AdrNetKindJoinResult.Ok)
+                    {
+                        NotifyNetKindReject(kindJoin);
+                        return;
+                    }
+                }
+            }
+
             if (removeEdges != null)
             {
                 for (int i = 0; i < removeEdges.Count; i++)
@@ -506,7 +597,16 @@ namespace BelzontAdr
             {
                 for (int i = 0; i < addEdges.Count; i++)
                 {
-                    m_Membership.AddMember(working, addEdges[i]);
+                    if (!m_Membership.AddMember(working, addEdges[i]))
+                    {
+                        // Unexpected after preflight — treat as failed drag (membership may be partial).
+                        LogUtils.DoWarnLog(
+                            "RoadGrouping endpoint drag: AddMember failed after preflight for edge {0}:{1}",
+                            addEdges[i].Index,
+                            addEdges[i].Version);
+                        NotifyNetKindReject(AdrNetKindJoinResult.Mismatch);
+                        return;
+                    }
                 }
             }
 
@@ -536,6 +636,32 @@ namespace BelzontAdr
         {
             FixedMembershipEdge = Entity.Null;
             ClearPendingFixClick();
+        }
+
+        private void NotifyNetKindReject(AdrNetKindJoinResult result)
+        {
+            if (result == AdrNetKindJoinResult.Ok)
+            {
+                return;
+            }
+
+            string textKey = result == AdrNetKindJoinResult.Unclassified
+                ? "K45::ADR.vuio[roadGrouping.kindUnclassified]"
+                : "K45::ADR.vuio[roadGrouping.kindMismatch]";
+            const string titleKey = "K45::ADR.vuio[roadGrouping.toolOptions.title]";
+            const string notificationId = "K45_ADR_roadGrouping_kindReject";
+
+            NotificationSystem.Pop(
+                notificationId,
+                4f,
+                LocalizedString.Id(titleKey),
+                LocalizedString.Id(textKey),
+                progressState: ProgressState.Warning);
+
+            LogUtils.DoInfoLog(
+                "RoadGrouping net-kind reject: {0} (notification {1})",
+                result,
+                textKey);
         }
 
         private bool IsMemberEdge(Entity edge, Entity aggregate)
@@ -625,6 +751,62 @@ namespace BelzontAdr
                     addOut.Add(edge);
                 }
             }
+        }
+
+        /// <summary>
+        /// Drop target edge must already be a member or be joinable by kind.
+        /// Null edge (node-only hover) is allowed — path validation still applies.
+        /// </summary>
+        private bool TryValidateDragDestinationEdge(
+            Entity aggregate,
+            Entity hoverEdge,
+            out AdrNetKindJoinResult reject)
+        {
+            reject = AdrNetKindJoinResult.Ok;
+            if (hoverEdge == Entity.Null || !EntityManager.Exists(hoverEdge))
+            {
+                return true;
+            }
+
+            if (IsMemberEdge(hoverEdge, aggregate) || m_MembershipEdges.Contains(hoverEdge))
+            {
+                return true;
+            }
+
+            reject = m_Membership.EvaluateNetKindJoin(aggregate, hoverEdge);
+            return reject == AdrNetKindJoinResult.Ok;
+        }
+
+        /// <summary>
+        /// Every non-member edge on the would-apply path must be joinable; otherwise the drag fails wholly.
+        /// </summary>
+        private bool TryValidateDragPathAdds(
+            Entity aggregate,
+            List<Entity> pathEdges,
+            out AdrNetKindJoinResult reject)
+        {
+            reject = AdrNetKindJoinResult.Ok;
+            if (pathEdges == null)
+            {
+                return true;
+            }
+
+            for (int i = 0; i < pathEdges.Count; i++)
+            {
+                Entity edge = pathEdges[i];
+                if (m_MembershipEdges.Contains(edge) || IsMemberEdge(edge, aggregate))
+                {
+                    continue;
+                }
+
+                reject = m_Membership.EvaluateNetKindJoin(aggregate, edge);
+                if (reject != AdrNetKindJoinResult.Ok)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -805,6 +987,25 @@ namespace BelzontAdr
             }
 
             return Entity.Null;
+        }
+
+        private Entity ResolveHoverEdge(Entity hitEntity)
+        {
+            // Only an explicit edge hit is a destination segment. Node hits leave edge null;
+            // path-add validation still rejects unjoinable edges on the walk.
+            return TryResolveAnyEdge(hitEntity, out Entity edge) ? edge : Entity.Null;
+        }
+
+        private bool TryResolveAnyEdge(Entity hit, out Entity edge)
+        {
+            edge = Entity.Null;
+            if (EntityManager.HasComponent<Edge>(hit))
+            {
+                edge = hit;
+                return true;
+            }
+
+            return false;
         }
 
         private Entity CloserNode(Edge edge, float3 probe)

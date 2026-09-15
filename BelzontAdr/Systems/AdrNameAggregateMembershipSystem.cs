@@ -15,6 +15,16 @@ namespace BelzontAdr
         RemoveMember = 1
     }
 
+    /// <summary>Result of prefab-kind membership checks (NET-02).</summary>
+    public enum AdrNetKindJoinResult : byte
+    {
+        Ok = 0,
+        /// <summary>Edge has no classifiable prefab *Data (fence/pipe/power/out of scope).</summary>
+        Unclassified = 1,
+        /// <summary>Edge kind differs from stored aggregate kind.</summary>
+        Mismatch = 2
+    }
+
     public partial class AdrNameAggregateMembershipSystem : SystemBase
     {
         public static AdrNameAggregateMembershipSystem Instance { get; private set; }
@@ -76,6 +86,91 @@ namespace BelzontAdr
         }
 
         /// <summary>
+        /// Exact <see cref="AdrNetKind"/> match for membership join.
+        /// <see cref="AdrNetKind.None"/> on the host allows the first classifiable edge to assign kind.
+        /// Street↔highway both resolve as <see cref="AdrNetKind.Road"/> and are allowed.
+        /// </summary>
+        public AdrNetKindJoinResult EvaluateNetKindJoin(Entity aggregate, Entity edge)
+        {
+            if (!IsAdrNameAggregate(aggregate)
+                || edge == Entity.Null
+                || !EntityManager.Exists(edge))
+            {
+                return AdrNetKindJoinResult.Unclassified;
+            }
+
+            if (!AdrNetKindUtil.TryGetNetKind(EntityManager, edge, out AdrNetKind edgeKind)
+                || edgeKind == AdrNetKind.None)
+            {
+                return AdrNetKindJoinResult.Unclassified;
+            }
+
+            if (!EntityManager.TryGetComponent(aggregate, out ADRNameAggregate host)
+                || host.m_Kind == AdrNetKind.None)
+            {
+                return AdrNetKindJoinResult.Ok;
+            }
+
+            return host.m_Kind == edgeKind
+                ? AdrNetKindJoinResult.Ok
+                : AdrNetKindJoinResult.Mismatch;
+        }
+
+        /// <summary>
+        /// True when every non-null edge shares one classifiable kind.
+        /// Empty list succeeds with <see cref="AdrNetKind.None"/>.
+        /// </summary>
+        public bool TryResolveSharedNetKind(IReadOnlyList<Entity> edges, out AdrNetKind kind)
+        {
+            kind = AdrNetKind.None;
+            if (edges == null || edges.Count == 0)
+            {
+                return true;
+            }
+
+            for (int i = 0; i < edges.Count; i++)
+            {
+                Entity edge = edges[i];
+                if (edge == Entity.Null || !EntityManager.Exists(edge))
+                {
+                    continue;
+                }
+
+                if (!AdrNetKindUtil.TryGetNetKind(EntityManager, edge, out AdrNetKind edgeKind)
+                    || edgeKind == AdrNetKind.None)
+                {
+                    kind = AdrNetKind.None;
+                    return false;
+                }
+
+                if (kind == AdrNetKind.None)
+                {
+                    kind = edgeKind;
+                }
+                else if (kind != edgeKind)
+                {
+                    kind = AdrNetKind.None;
+                    return false;
+                }
+            }
+
+            return kind != AdrNetKind.None || CountExistingEdges(edges) == 0;
+        }
+
+        private static int CountExistingEdges(IReadOnlyList<Entity> edges)
+        {
+            int n = 0;
+            for (int i = 0; i < edges.Count; i++)
+            {
+                if (edges[i] != Entity.Null)
+                {
+                    n++;
+                }
+            }
+            return n;
+        }
+
+        /// <summary>
         /// Backfill stored <see cref="AdrNetKind"/> from the first classifiable member when kind is None
         /// (pre-NET-01 saves or empty create before first member). Out-of-scope prefabs leave None.
         /// </summary>
@@ -107,7 +202,7 @@ namespace BelzontAdr
         }
 
         /// <summary>
-        /// Set stored kind when still None. Does not enforce cross-kind reject (NET-02).
+        /// Set stored kind when still None (first classifiable member).
         /// </summary>
         private void TryAssignNetKindFromEdge(Entity aggregate, Entity edge)
         {
@@ -140,15 +235,32 @@ namespace BelzontAdr
         public Entity CreateAggregate(Entity[] edges)
         {
             var aggregate = CreateAggregate();
-            if (edges == null)
+            if (edges == null || edges.Length == 0)
             {
                 return aggregate;
             }
+
+            if (!TryResolveSharedNetKind(edges, out AdrNetKind sharedKind))
+            {
+                DestroyAggregate(aggregate);
+                return Entity.Null;
+            }
+
             for (int i = 0; i < edges.Length; i++)
             {
                 AddMemberCore(aggregate, edges[i], insertIndex: -1, allowSteal: true, out _);
             }
-            EnsureNetKind(aggregate);
+            if (sharedKind != AdrNetKind.None
+                && EntityManager.TryGetComponent(aggregate, out ADRNameAggregate host)
+                && host.m_Kind == AdrNetKind.None)
+            {
+                host.m_Kind = sharedKind;
+                EntityManager.SetComponentData(aggregate, host);
+            }
+            else
+            {
+                EnsureNetKind(aggregate);
+            }
             ResortMembers(aggregate);
             Entity prefabSource = Entity.Null;
             if (edges.Length > 0
@@ -290,6 +402,11 @@ namespace BelzontAdr
             }
 
             if (edgesToSeed.Count == 0)
+            {
+                return false;
+            }
+
+            if (!TryResolveSharedNetKind(edgesToSeed, out _))
             {
                 return false;
             }
@@ -439,13 +556,20 @@ namespace BelzontAdr
                 return false;
             }
 
-            if (EntityManager.TryGetComponent(edge, out ADRNameAggregated existing))
+            if (EntityManager.TryGetComponent(edge, out ADRNameAggregated existing)
+                && existing.m_Aggregate == aggregate)
             {
-                if (existing.m_Aggregate == aggregate)
-                {
-                    return true;
-                }
+                return true;
+            }
 
+            AdrNetKindJoinResult kindJoin = EvaluateNetKindJoin(aggregate, edge);
+            if (kindJoin != AdrNetKindJoinResult.Ok)
+            {
+                return false;
+            }
+
+            if (EntityManager.TryGetComponent(edge, out existing))
+            {
                 if (IsAdrNameAggregate(existing.m_Aggregate))
                 {
                     if (!allowSteal)

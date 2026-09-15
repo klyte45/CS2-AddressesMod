@@ -41,6 +41,7 @@ namespace BelzontAdr
         private static readonly Color BelongingColor = new(0f, 0x88 / 255f, 0f, 1f);
         private static readonly Color HighlightColor = new(0f, 0xBB / 255f, 0f, 1f);
         private static readonly Color HoverPreviewColor = new(0f, 0x44 / 255f, 0f, 1f);
+        private static readonly Color UnsupportedHoverColor = new(1f, 0f, 0f, 1f); // #FF0000 — cannot join selected ADR
         private static readonly Color RemainderColor = new(0x2A / 255f, 0x3A / 255f, 0x2E / 255f, 1f); // dark gray-green
         private static readonly Color RemovePreviewColor = new(1f, 0x88 / 255f, 0f, 1f); // #FF8800 would-remove
         private static readonly Color FixedMembershipColor = new(1f, 1f, 0f, 1f); // #FFFF00 fixed pin
@@ -52,6 +53,7 @@ namespace BelzontAdr
         private AdrMainSystem m_AdrMainSystem;
         private AdrRoadGroupingTool m_Tool;
         private AdrRoadGroupingController m_Controller;
+        private AdrNameAggregateMembershipSystem m_Membership;
         private EntityQuery m_RouteConfigQuery;
 
         private Mesh m_Mesh;
@@ -104,6 +106,7 @@ namespace BelzontAdr
             m_AdrMainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
             m_Tool = World.GetOrCreateSystemManaged<AdrRoadGroupingTool>();
             m_Controller = World.GetOrCreateSystemManaged<AdrRoadGroupingController>();
+            m_Membership = World.GetOrCreateSystemManaged<AdrNameAggregateMembershipSystem>();
             m_RouteConfigQuery = GetEntityQuery(ComponentType.ReadOnly<RouteConfigurationData>());
             m_BelongingSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
             m_RemainderSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
@@ -326,6 +329,7 @@ namespace BelzontAdr
 
         /// <summary>
         /// Preview layer: endpoint-drag would-add / would-remove, else hovered non-member.
+        /// Unsupported kind for the selected ADR uses <see cref="UnsupportedHoverColor"/>.
         /// </summary>
         private void BuildHighlightPreview(Entity selected, bool isAdrSelection)
         {
@@ -336,6 +340,17 @@ namespace BelzontAdr
                 if ((addPath == null || addPath.Count == 0)
                     && (removePath == null || removePath.Count == 0))
                 {
+                    // Failed / unsupported drop: show red wash on the hovered destination edge.
+                    if (isAdrSelection
+                        && !m_Tool.IsDragDestinationValid
+                        && TryGetUnsupportedHoverEdge(selected, out Entity rejectEdge))
+                    {
+                        m_PreviewDrawColor = UnsupportedHoverColor;
+                        AddEdgeSegment(rejectEdge, m_PreviewSegments, ref m_PreviewBounds);
+                        SaturateOpacities(m_PreviewSegments);
+                        m_HasPreview = m_PreviewSegments.Length > 0;
+                    }
+
                     return;
                 }
 
@@ -391,6 +406,10 @@ namespace BelzontAdr
                 {
                     return;
                 }
+
+                m_PreviewDrawColor = m_Membership.EvaluateNetKindJoin(selected, hoveredEdge) == AdrNetKindJoinResult.Ok
+                    ? HoverPreviewColor
+                    : UnsupportedHoverColor;
             }
             else if (!EntityManager.TryGetComponent(hoveredEdge, out Aggregated aggregated)
                      || aggregated.m_Aggregate == selected
@@ -398,11 +417,36 @@ namespace BelzontAdr
             {
                 return;
             }
+            else
+            {
+                m_PreviewDrawColor = HoverPreviewColor;
+            }
 
-            m_PreviewDrawColor = HoverPreviewColor;
             AddEdgeSegment(hoveredEdge, m_PreviewSegments, ref m_PreviewBounds);
             SaturateOpacities(m_PreviewSegments);
             m_HasPreview = m_PreviewSegments.Length > 0;
+        }
+
+        private bool TryGetUnsupportedHoverEdge(Entity selected, out Entity edge)
+        {
+            edge = m_Tool.DragHoverEdge;
+            if (edge == Entity.Null)
+            {
+                edge = m_Tool.HoveredEdge;
+            }
+
+            if (edge == Entity.Null || !EntityManager.Exists(edge))
+            {
+                return false;
+            }
+
+            if (EntityManager.TryGetComponent(edge, out ADRNameAggregated link)
+                && link.m_Aggregate == selected)
+            {
+                return false;
+            }
+
+            return m_Membership.EvaluateNetKindJoin(selected, edge) != AdrNetKindJoinResult.Ok;
         }
 
         private void BuildRouteSegments(

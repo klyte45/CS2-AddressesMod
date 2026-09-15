@@ -425,16 +425,18 @@ namespace BelzontAdr
                 return false;
             }
 
-            Colossal.Hash128 id;
-            if (string.IsNullOrWhiteSpace(highwayDataId))
+            // Frontend uses all-zero Hash128 as the "Not a highway" dropdown sentinel (empty string
+            // does not select in vanilla DropdownField). Hash128.TryParse returns false for the
+            // zero hash (isValid == false), so treat that sentinel as clear — do not reject.
+            if (IsClearedHighwayDataId(highwayDataId))
             {
-                id = default;
+                EntityManager.SetComponentData(adr, ADRNameAggregateHighwayData.CreateDefault());
+                DirtyAdrAggregateConsumers(adr);
+                return true;
             }
-            else if (!Colossal.Hash128.TryParse(highwayDataId, out id))
-            {
-                return false;
-            }
-            else if (id != default && !highwayRoutesSystem.TryGetHighwayData(id, out _))
+
+            if (!Colossal.Hash128.TryParse(highwayDataId, out Colossal.Hash128 id)
+                || !highwayRoutesSystem.TryGetHighwayData(id, out _))
             {
                 return false;
             }
@@ -443,6 +445,20 @@ namespace BelzontAdr
             EntityManager.SetComponentData(adr, highway);
             DirtyAdrAggregateConsumers(adr);
             return true;
+        }
+
+        /// <summary>
+        /// Empty / whitespace / all-zero Hash128 (and Guid-empty form) mean unset highway route.
+        /// </summary>
+        private static bool IsClearedHighwayDataId(string highwayDataId)
+        {
+            if (string.IsNullOrWhiteSpace(highwayDataId))
+            {
+                return true;
+            }
+
+            return highwayDataId.Equals("00000000000000000000000000000000", StringComparison.OrdinalIgnoreCase)
+                || highwayDataId.Equals("00000000-0000-0000-0000-000000000000", StringComparison.OrdinalIgnoreCase);
         }
 
         private bool SetRouteDirection(Entity entity, int routeDirection)
