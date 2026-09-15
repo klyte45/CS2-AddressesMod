@@ -563,11 +563,12 @@ namespace BelzontAdr
                 return false;
             }
 
-            // Highway registry name for ADR Road aggregates with a non-default highwayDataId.
+            // Highway registry: format keeps the long registry name (labels / address pattern);
+            // name is the route code (yellow label line) so station/omit-qualifier callers get a usable string.
             if (TryGetAdrHighwayRegistryName(entity, out var hwData, out _))
             {
                 format = hwData.name;
-                name = "";
+                name = $"{hwData.prefix}-{hwData.suffix}";
                 return false;
             }
 
