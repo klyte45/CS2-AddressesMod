@@ -34,14 +34,14 @@ Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Classifier uses prefab RoadData / stored AdrNetKind.Road — never HasComponent Road as sole gate
-- [ ] GetAggregateName applies road namesets/prefixes only for AdrNetKind.Road; no TrackData→RoadData fake for road naming
-- [ ] TryAppendAggregateSeedOption / SIP / Road Grouping show road seed UX only for Road kind
-- [ ] Street and avenue edges without edge Game.Net.Road still get road seeds when prefab has RoadData
-- [ ] Street↔highway mix remains allowed for Road kind; cross-kind seed path remains closed
-- [ ] District/citizen/household seed paths unchanged
-- [ ] Compile + playtest road seed; non-road kinds keep vanilla name and no road seed UI
-- [ ] Docs 22–24 referenced; coordinate with NET-01…03 when those board items exist
+- [x] Classifier uses prefab RoadData / stored AdrNetKind.Road — never HasComponent Road as sole gate
+- [x] GetAggregateName applies road namesets/prefixes only for AdrNetKind.Road; no TrackData→RoadData fake for road naming
+- [x] TryAppendAggregateSeedOption / SIP / Road Grouping show road seed UX only for Road kind
+- [x] Street and avenue edges without edge Game.Net.Road still get road seeds when prefab has RoadData
+- [x] Street↔highway mix remains allowed for Road kind; cross-kind seed path remains closed
+- [x] District/citizen/household seed paths unchanged
+- [x] Compile + playtest road seed; non-road kinds use ADR netKind locale defaults and no road seed UI
+- [x] Docs 22–24 referenced; coordinate with NET-01…03 when those board items exist
 
 ---
 
@@ -59,6 +59,7 @@ Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint
 10. TryAppendAggregateSeedOption: hasCustomNameList only when kind is Road. Aggregated edge SIP RoadAggregation typed via IsRoadEdge (not HasComponent Road). Highway option gated to Road kind. Station nearby-walk + GetMainReferenceAggregate use IsRoadEdge.
 11. Docs 23/24 notes updated. Awaiting user compile + playtest: road seed still works without edge Road; non-road keeps vanilla name and no seed dice.
 12. Non-road default names: ADR locale keys K45::ADR.main[netKind.*] via Name.LocalizedName (vanilla AggregateNet has no usable translation). Pending i18n merge: BelzontAdr/i18n/netKind_entries.txt (Road/Pathway/Train/Tram/Subway/Waterway/Taxiway; en-US + pt-BR).
+13. User validated. Non-road defaults use K45::ADR.main[netKind.*]; i18n merged into i18n.csv/xlsm.
 
 ---
 
