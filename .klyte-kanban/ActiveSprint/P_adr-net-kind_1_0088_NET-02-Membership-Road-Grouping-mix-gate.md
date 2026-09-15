@@ -36,7 +36,7 @@ Second task of epic adr-net-kind. Enforce exact AdrNetKind match on membership a
 - [x] Road Grouping tool soft-fails / no-ops on cross-kind attach with player-visible feedback
 - [x] Street↔highway membership still allowed (both AdrNetKind.Road)
 - [x] Vanilla AggregateSystem / AggregateType join rules unchanged
-- [ ] Compile + playtest: road+pathway reject; street+highway accept
+- [x] Compile + playtest: road+pathway reject; street+highway accept
 
 ---
 
@@ -51,6 +51,7 @@ Second task of epic adr-net-kind. Enforce exact AdrNetKind match on membership a
 7. CreateAggregate(edges) and TryForkFromVanillaSeed require TryResolveSharedNetKind on seed list; mixed/unclassified seeds abort (Null/false).
 8. AdrRoadGroupingTool: Ctrl-toggle and endpoint-drag soft-fail with NotificationSystem.Pop Warning + DoWarnLog; path preview omits kind-incompatible adds. i18n pending: BelzontAdr/i18n/roadGrouping_kind_gate_entries.txt (kindMismatch / kindUnclassified).
 9. Vanilla AggregateSystem untouched. Awaiting user compile + playtest road+pathway reject / street+highway accept.
+10. Validated: compile + playtest OK. Endpoint drag is atomic on unsupported destination; unsupported hover uses #FF0000; kind-reject log is Info; highway unset fix (zero Hash128 sentinel) shipped in same validation window; tooltips draft RefsLibrary 25 for later.
 
 ---
 

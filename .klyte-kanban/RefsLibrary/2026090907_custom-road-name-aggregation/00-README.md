@@ -22,6 +22,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Label takeover sprint / task catalog ([18](18-label-takeover-sprint-roadmap.md)) | Creating board items until explicitly requested |
 | Highway reattach design + roadmap ([20](20-highway-reattach-on-adr-aggregates.md)–[21](21-highway-reattach-roadmap.md)) | Shipping HW-* product code until explicitly requested |
 | Net-kind typing + mix gate + per-kind NetNameData ([22](22-game-net-edge-kinds-and-aggregation.md)–[24](24-adr-net-kind-roadmap.md)) | Creating NET-* board tasks until explicitly requested; mutating vanilla AggregateNet assets |
+| Road Grouping tooltips draft ([25](25-road-grouping-tooltips-draft.md)) | Shipping tooltip UX until detailed + requested |
 
 ## Confirmed decisions
 
@@ -71,6 +72,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 22. [22-game-net-edge-kinds-and-aggregation.md](22-game-net-edge-kinds-and-aggregation.md) — Game.Net kinds, AggregateType, Road vs RoadData, NetNameData gap
 23. [23-adr-net-kind-gate-labels-seeds.md](23-adr-net-kind-gate-labels-seeds.md) — ADR kind gate, per-kind labels, road-only seeds
 24. [24-adr-net-kind-roadmap.md](24-adr-net-kind-roadmap.md) — NET-01…NET-05 catalog (NET-04 board **0086**; **0085** Z-overflowed)
+25. [25-road-grouping-tooltips-draft.md](25-road-grouping-tooltips-draft.md) — **draft** Road Grouping tooltips (errors + commands; expand later)
 
 ## Success criteria (this research pack)
 
@@ -98,6 +100,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 - [x] Game.Net edge kinds + AggregateType + NetNameData gap documented ([22](22-game-net-edge-kinds-and-aggregation.md))
 - [x] ADR net-kind gate / labels / seeds designed ([23](23-adr-net-kind-gate-labels-seeds.md))
 - [x] Net-kind implementation catalog documented ([24](24-adr-net-kind-roadmap.md))
+- [x] Road Grouping tooltips draft stub ([25](25-road-grouping-tooltips-draft.md))
 
 ## Related packs
 
