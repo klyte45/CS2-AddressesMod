@@ -33,9 +33,10 @@ Board items are **catalog only** here. Do **not** create NET-* tasks via MCP unt
 |-------|-----|-------|-------|------|---------|---------|
 | 1 | NET-01 | *(create when asked)* | Classifier + stored kind on `ADRNameAggregate` | M | ACT-03a+ | `TryGetNetKind` from prefab `*Data`; serialize kind; set on create/fork |
 | 2 | NET-02 | *(create when asked)* | Membership + Road Grouping mix gate | M | NET-01 | `AddMemberCore` / tool reject cross-kind; UX feedback |
-| 3 | NET-03 | *(create when asked)* | Per-kind ADR NetNameData + outline-by-kind | M | NET-01, LBL-02+ | Create NetNameData for non-road kinds; face `#FFFFFFC0`; outlines: Subway `#004400`, Road `#333333`, Pathway `#666666`, Train `#331A00`, Tram `#330033`, Waterway `#002244`, Taxiway `#33001A`; generalize `m_IsAdrStyle` → kind outline; no vanilla AggregateNet mutation |
+| 3 | NET-03 | **0089** T | Per-kind ADR NetNameData + outline-by-kind | M | NET-01, LBL-02+ | Create NetNameData for non-road kinds; face `#FFFFFFC0`; outlines: Subway `#004400`, Road `#333333`, Pathway `#666666`, Train `#331A00`, Tram `#330033`, Waterway `#002244`, Taxiway `#33001A`; generalize `m_IsAdrStyle` → kind outline; no vanilla AggregateNet mutation; PrefabRef stays real AggregateNet; LabelMaterial borrow + Temp Ensure for unlabeled kinds |
 | 4 | NET-04 | **0086** (backlog L; overflown from **0085** Z) | Road-only seeds / namesets / SIP DTO | M | NET-01 (prefer NET-02) | `GetAggregateName` road path only for `RoadData` kind; no TrackData fake; seed UI only for Road; **not** `HasComponent<Road>` |
 | 5 | NET-05 | *(create when asked)* | Playtest matrix + smoke notes | S | NET-02…04 | Street without edge `Road` still Road kind; street↔highway mix OK; pathway/track reject; labels on non-road if in scope |
+| 6 | NET-06 | *(create when asked)* | Citywide bulk ADR aggregation (kind checkboxes) | M | NET-01…03 | Settings button on Roads and Districts above per-district road namesets; confirm dialog with kind checkboxes; convert applicable segments to ADR. Spec: [26](26-bulk-citywide-adr-aggregation.md) |
 
 ### NET-04 / board **0086** (was **0085**)
 
@@ -49,12 +50,12 @@ Former in-sprint **HW-03c [0085]** was Z-overflowed mid-sprint (seed-only scope 
 ## Suggested pull order
 
 ```text
-NET-01 → NET-02 → NET-03
-                ↘ NET-04 (0085)
+NET-01 → NET-02 → NET-03 → NET-06 (bulk citywide convert)
+                ↘ NET-04 (0086)
                      → NET-05
 ```
 
-May land NET-04 after NET-01 alone if seed bugs block playtest, but membership mix bugs remain until NET-02.
+May land NET-04 after NET-01 alone if seed bugs block playtest, but membership mix bugs remain until NET-02. NET-06 needs kind gate + labels (NET-01…03).
 
 ## Relation to Sprint 014 (highway reattach)
 
@@ -71,6 +72,7 @@ May land NET-04 after NET-01 alone if seed bugs block playtest, but membership m
 - [ ] Street ↔ highway ADR membership allowed
 - [ ] Road ↔ track/pathway/waterway/taxiway membership rejected
 - [ ] Non-road aggregates do not get road namesets / seed dice
-- [ ] Non-road S2 labels work via ADR NetNameData prefabs; outlines match kind table in [23](23-adr-net-kind-gate-labels-seeds.md) (Subway = former `#004400`)
-- [ ] ADR Road labels use outline `#333333` (not the old one-size green)
+- [x] Non-road S2 labels work via ADR NetNameData prefabs; outlines match kind table in [23](23-adr-net-kind-gate-labels-seeds.md) (Subway = former `#004400`) — NET-03 **0089**
+- [x] ADR Road labels use outline `#333333` (not the old one-size green) — NET-03 **0089**
 - [ ] Vanilla AggregateSystem unchanged
+- [ ] Citywide bulk convert (kind checkboxes) on Roads and Districts — NET-06 / [26](26-bulk-citywide-adr-aggregation.md)

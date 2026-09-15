@@ -14,6 +14,6 @@ Ship adr-net-kind epic NET-01…NET-05 so ADR associations classify by prefab *D
 - **Original tasks**: 05
 - **Original task IDs**: [0086], [0087], [0088], [0089], [0090]
 - **Delivered tasks (from original)**:
-- **Added tasks**: 0
+- **Added tasks**: 1
 - **Delivered tasks (from added)**:
 - **Total delivered tasks**:

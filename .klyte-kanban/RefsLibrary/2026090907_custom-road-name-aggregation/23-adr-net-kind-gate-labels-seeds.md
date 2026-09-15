@@ -98,10 +98,16 @@ Problem: S2 label owners need `PrefabRef` → AggregateNet with `NetNameData`. N
 | **Waterway** | `#002244` | ADR kind prefab + NetNameData required |
 | **Taxiway** | `#33001A` | ADR kind prefab + NetNameData required |
 
-4. `EnsureRoadNameLabelComponents` (rename later if needed): resolve owner `PrefabRef` to a prefab that has `NetNameData` — vanilla AggregateNet when present for Road if desired for material index, but **outline material selection must follow stored `AdrNetKind`**. For kinds without vanilla `NetNameData`, point at the ADR kind prefab.
+4. `EnsureRoadNameLabelComponents` (rename later if needed):
+   - Keep owner **`PrefabRef` on a real AggregateNet with `PrefabData`** (required for edit/highlight `CreationDefinition` — synthetic NetNameData-only entities hard-crash PrefabSystem).
+   - ADR-owned NetNameData entities are **color metadata only** — never PrefabRef targets.
+   - AggregateNets without `NetLabel`/`NetNameData` (train/pathway/…): borrow **`LabelMaterial`** index from baked AggregateNet name materials; outline still follows stored `AdrNetKind`.
+   - Selection **Temp** Aggregates from unlabeled AggregateNets must still receive Label* (Ensure and/or CreationDefinition prefab with NetNameData) because the ADR original is `Hidden` on hover.
 5. Generalize `m_IsAdrStyle` (bool) toward **per-kind outline** (enum / color lookup keyed by `AdrNetKind`) so Subway keeps dark green and Road uses `#333333`.
 
-**NET-03** owns creating the non-road NetNameData prefabs + wiring outline-by-kind.
+**NET-03** owns creating the non-road NetNameData prefabs + wiring outline-by-kind (shipped; see crash/hover notes above).
+
+**NET-06** citywide bulk convert (settings): see [26](26-bulk-citywide-adr-aggregation.md).
 
 ## Seeds / namesets / highway
 

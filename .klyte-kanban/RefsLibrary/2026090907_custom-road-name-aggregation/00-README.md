@@ -23,6 +23,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Highway reattach design + roadmap ([20](20-highway-reattach-on-adr-aggregates.md)–[21](21-highway-reattach-roadmap.md)) | Shipping HW-* product code until explicitly requested |
 | Net-kind typing + mix gate + per-kind NetNameData ([22](22-game-net-edge-kinds-and-aggregation.md)–[24](24-adr-net-kind-roadmap.md)) | Creating NET-* board tasks until explicitly requested; mutating vanilla AggregateNet assets |
 | Road Grouping tooltips draft ([25](25-road-grouping-tooltips-draft.md)) | Shipping tooltip UX until detailed + requested |
+| Citywide bulk ADR aggregation settings ([26](26-bulk-citywide-adr-aggregation.md)) | Shipping convert-all UI until board task pulled |
 
 ## Confirmed decisions
 
@@ -45,6 +46,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR; BelzontWE for tool scaffold / WE atlas APIs |
 | Net kind classifier | **Prefab `*Data` first** (`RoadData` / `TrackData` / …); `Game.Net.Road` **unreliable** (streets/avenues may lack it). Dual `Train\|Tram` → **Train**. See [22](22-game-net-edge-kinds-and-aggregation.md) |
 | ADR kind mix | Exact `AdrNetKind` match; street↔highway **allowed**; cross-kind **forbidden**. Per-kind ADR `NetNameData` (non-road) + outline-by-kind (face `#FFFFFFC0`; Subway `#004400`, Road `#333333`, …). Road seeds only for `RoadData`. See [23](23-adr-net-kind-gate-labels-seeds.md) / [24](24-adr-net-kind-roadmap.md) |
+| Citywide bulk ADR convert | Settings button on **Roads and Districts** (above per-district road namesets); confirm dialog with **kind checkboxes**. See [26](26-bulk-citywide-adr-aggregation.md) |
 
 ## Reading order
 
@@ -71,8 +73,9 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 21. [21-highway-reattach-roadmap.md](21-highway-reattach-roadmap.md) — **highway reattach task catalog** (HW-01…HW-08)
 22. [22-game-net-edge-kinds-and-aggregation.md](22-game-net-edge-kinds-and-aggregation.md) — Game.Net kinds, AggregateType, Road vs RoadData, NetNameData gap
 23. [23-adr-net-kind-gate-labels-seeds.md](23-adr-net-kind-gate-labels-seeds.md) — ADR kind gate, per-kind labels, road-only seeds
-24. [24-adr-net-kind-roadmap.md](24-adr-net-kind-roadmap.md) — NET-01…NET-05 catalog (NET-04 board **0086**; **0085** Z-overflowed)
+24. [24-adr-net-kind-roadmap.md](24-adr-net-kind-roadmap.md) — NET-01…NET-06 catalog (NET-04 board **0086**; **0085** Z-overflowed)
 25. [25-road-grouping-tooltips-draft.md](25-road-grouping-tooltips-draft.md) — **draft** Road Grouping tooltips (errors + commands; expand later)
+26. [26-bulk-citywide-adr-aggregation.md](26-bulk-citywide-adr-aggregation.md) — citywide “convert applicable segments to ADR” settings UX + kind checkboxes
 
 ## Success criteria (this research pack)
 
