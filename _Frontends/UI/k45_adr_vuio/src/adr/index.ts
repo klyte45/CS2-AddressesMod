@@ -270,6 +270,10 @@ export class NamingRulesService {
     static async setRoadNameAsNameStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setRoadNameAsNameStation", x); }
     static async setRoadNameAsNameCargoStation(x: boolean): Promise<void> { await engine.call("k45::adr.main.setRoadNameAsNameCargoStation", x); }
     static async setAddressFormatPattern(x: string): Promise<void> { await engine.call("k45::adr.main.setAddressFormatPattern", x); }
+    /** kindMask: bit (1 << AdrNetKind) for each checked kind (Road=1<<1, …). */
+    static async convertAllToAdrAggregates(kindMask: number): Promise<AdrBulkConvertResult> {
+        return await engine.call("k45::adr.main.convertAllToAdrAggregates", kindMask);
+    }
 
     static async setMaxSurnames(x: number): Promise<string> { return await engine.call("k45::adr.main.setMaxSurnames", x); }
     static async setMaxGivenNames(x: number): Promise<string> { return await engine.call("k45::adr.main.setMaxGivenNames", x); }
@@ -346,6 +350,14 @@ export type RegionCityEditingDTO = {
     reachableByWater: boolean;
     reachableByAir: boolean;
     mapColor: `#${string}`;
+};
+
+export type AdrBulkConvertResult = {
+    AggregatesConverted: number;
+    AggregatesCreatedPartial: number;
+    SkippedAlreadyAdr: number;
+    SkippedNoMatch: number;
+    Failed: number;
 };
 
 export type SelectedInfoOptions = {

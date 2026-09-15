@@ -183,5 +183,24 @@ namespace BelzontAdr
 
             return refEdge != Entity.Null && TryGetNetKind(entityManager, refEdge, out kind);
         }
+
+        /// <summary>Bit in a kind-mask int: <c>1 &lt;&lt; (int)kind</c> (None = 0).</summary>
+        public static int KindMaskBit(AdrNetKind kind)
+            => kind == AdrNetKind.None ? 0 : 1 << (int)kind;
+
+        public static bool IsKindInMask(AdrNetKind kind, int kindMask)
+            => kind != AdrNetKind.None && (kindMask & KindMaskBit(kind)) != 0;
+
+        /// <summary>Aggregable kinds offered by citywide bulk convert / settings checkboxes.</summary>
+        public static readonly AdrNetKind[] AggregableKindsForBulkConvert =
+        {
+            AdrNetKind.Road,
+            AdrNetKind.Pathway,
+            AdrNetKind.Train,
+            AdrNetKind.Tram,
+            AdrNetKind.Subway,
+            AdrNetKind.Waterway,
+            AdrNetKind.Taxiway
+        };
     }
 }

@@ -9,3 +9,10 @@
     overflow: auto;
     padding: 8rem;
 }
+
+.bulkConvertKindRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8rem;
+    margin-top: 12rem;
+}

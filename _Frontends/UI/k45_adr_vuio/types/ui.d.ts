@@ -45,6 +45,11 @@ declare module "cs2/ui" {
   	onCancel?: () => void;
   	dismissable?: boolean;
   	cancellable?: boolean;
+  	/** When true, confirm is disabled (vanilla UITriggeredConfirmationDialog). */
+  	disableContinue?: boolean;
+  	disabled?: boolean;
+  	zIndex?: number;
+  	children?: ReactNode;
   }
   export const UITriggeredConfirmationDialog: React.FC<ConfirmationDialogProps>;
   export enum UISound {

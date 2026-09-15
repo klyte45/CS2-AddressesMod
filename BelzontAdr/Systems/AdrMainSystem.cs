@@ -55,6 +55,19 @@ namespace BelzontAdr
             doBindLink("main.setRoadNameAsNameStation", (bool x) => { CurrentCitySettings.roadNameAsNameStation = x; NotifyChanges(); });
             doBindLink("main.setRoadNameAsNameCargoStation", (bool x) => { CurrentCitySettings.roadNameAsNameCargoStation = x; NotifyChanges(); });
             doBindLink("main.setAddressFormatPattern", (string x) => { CurrentCitySettings.AddressFormatPattern = x; MarkRoadsDirty(); NotifyChanges(); });
+            doBindLink("main.convertAllToAdrAggregates", (int kindMask) =>
+            {
+                var membership = World.GetExistingSystemManaged<AdrNameAggregateMembershipSystem>();
+                if (membership == null)
+                {
+                    return new AdrBulkConvertResult();
+                }
+
+                AdrBulkConvertResult result = membership.ConvertCitywideToAdrAggregates(kindMask);
+                MarkRoadsDirty();
+                NotifyChanges();
+                return result;
+            });
             doBindLink("main.exploreToRoadPrefixRulesFileDefault", () => RemoteProcess.OpenFolder(DefaultRoadPrefixFilename));
             doBindLink("main.saveRoadPrefixRulesFileDefault", () => File.WriteAllText(DefaultRoadPrefixFilename, XmlUtils.DefaultXmlSerialize(CurrentCitySettings.roadPrefixSetting)));
             doBindLink("main.loadRoadPrefixRulesFileDefault", () =>

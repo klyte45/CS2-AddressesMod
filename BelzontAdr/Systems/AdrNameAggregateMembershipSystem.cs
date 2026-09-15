@@ -1,4 +1,5 @@
 using Colossal.Entities;
+using Game.Buildings;
 using Game.Common;
 using Game.Net;
 using Game.Prefabs;
@@ -31,12 +32,18 @@ namespace BelzontAdr
 
         private NameSystem m_nameSystem;
         private readonly Queue<Action> m_runOnUpdate = new();
+        private EntityQuery m_VanillaAggregatesQuery;
 
         protected override void OnCreate()
         {
             base.OnCreate();
             Instance = this;
             m_nameSystem = World.GetOrCreateSystemManaged<NameSystem>();
+            m_VanillaAggregatesQuery = GetEntityQuery(
+                ComponentType.ReadOnly<Aggregate>(),
+                ComponentType.ReadOnly<AggregateElement>(),
+                ComponentType.Exclude<Deleted>(),
+                ComponentType.Exclude<ADRNameAggregate>());
         }
 
         protected override void OnDestroy()
@@ -462,6 +469,196 @@ namespace BelzontAdr
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Citywide convert: for each vanilla Aggregate, fork remainder edges whose kind is in
+        /// <paramref name="kindMask"/> into ADR aggregates. Idempotent for already-ADR edges.
+        /// Prefer full <see cref="TryForkFromVanillaSeed"/> when the entire remainder matches the mask
+        /// and shares one kind; otherwise <see cref="CreateAggregate(Entity[])"/> per kind bucket.
+        /// Aggregates whose live members are all building-owned are skipped; building-owned edges
+        /// are never converted (and block seed-fork so they are not pulled into ADR).
+        /// </summary>
+        public AdrBulkConvertResult ConvertCitywideToAdrAggregates(int kindMask)
+        {
+            var result = new AdrBulkConvertResult();
+            if (kindMask == 0)
+            {
+                return result;
+            }
+
+            using var aggregates = m_VanillaAggregatesQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+            for (int a = 0; a < aggregates.Length; a++)
+            {
+                Entity vanilla = aggregates[a];
+                if (!EntityManager.TryGetBuffer(vanilla, true, out DynamicBuffer<AggregateElement> elements)
+                    || elements.Length == 0)
+                {
+                    continue;
+                }
+
+                if (IsAggregateOnlyBuildingOwned(elements))
+                {
+                    result.SkippedNoMatch++;
+                    continue;
+                }
+
+                var remainder = new List<Entity>(elements.Length);
+                var byKind = new Dictionary<AdrNetKind, List<Entity>>();
+                bool hasBuildingOwnedNonAdr = false;
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    Entity edge = elements[i].m_Edge;
+                    if (edge == Entity.Null || !EntityManager.Exists(edge))
+                    {
+                        continue;
+                    }
+
+                    if (AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, edge, out _))
+                    {
+                        continue;
+                    }
+
+                    // Building sub-nets (Owner → Building) stay on vanilla Aggregate.
+                    if (IsEdgeOwnedByBuilding(edge))
+                    {
+                        hasBuildingOwnedNonAdr = true;
+                        continue;
+                    }
+
+                    remainder.Add(edge);
+                    if (!AdrNetKindUtil.TryGetNetKind(EntityManager, edge, out AdrNetKind kind)
+                        || !AdrNetKindUtil.IsKindInMask(kind, kindMask))
+                    {
+                        continue;
+                    }
+
+                    if (!byKind.TryGetValue(kind, out List<Entity> list))
+                    {
+                        list = new List<Entity>();
+                        byKind[kind] = list;
+                    }
+
+                    list.Add(edge);
+                }
+
+                if (remainder.Count == 0)
+                {
+                    // No convertible city edges left (already ADR and/or building-only leftovers).
+                    if (hasBuildingOwnedNonAdr)
+                    {
+                        result.SkippedNoMatch++;
+                    }
+                    else
+                    {
+                        result.SkippedAlreadyAdr++;
+                    }
+
+                    continue;
+                }
+
+                int candidateCount = 0;
+                foreach (var kv in byKind)
+                {
+                    candidateCount += kv.Value.Count;
+                }
+
+                if (candidateCount == 0)
+                {
+                    result.SkippedNoMatch++;
+                    continue;
+                }
+
+                // Full seed fork only when every non-ADR member is a convertible city edge of one kind.
+                // Building-owned leftovers would still be pulled in by TryForkFromVanillaSeed.
+                if (!hasBuildingOwnedNonAdr
+                    && candidateCount == remainder.Count
+                    && byKind.Count == 1
+                    && TryResolveSharedNetKind(remainder, out _))
+                {
+                    if (TryForkFromVanillaSeed(vanilla, out _))
+                    {
+                        result.AggregatesConverted++;
+                    }
+                    else
+                    {
+                        result.Failed++;
+                    }
+
+                    continue;
+                }
+
+                // Partial / multi-kind / building leftovers: create one ADR per kind bucket (never cross-kind).
+                foreach (var kv in byKind)
+                {
+                    Entity[] edges = kv.Value.ToArray();
+                    if (!TryResolveSharedNetKind(edges, out _))
+                    {
+                        result.Failed++;
+                        continue;
+                    }
+
+                    Entity created = CreateAggregate(edges);
+                    if (created == Entity.Null)
+                    {
+                        result.Failed++;
+                    }
+                    else
+                    {
+                        result.AggregatesCreatedPartial++;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// True when every live AggregateElement edge walks Owner to a <see cref="Building"/>.
+        /// </summary>
+        private bool IsAggregateOnlyBuildingOwned(DynamicBuffer<AggregateElement> elements)
+        {
+            int live = 0;
+            for (int i = 0; i < elements.Length; i++)
+            {
+                Entity edge = elements[i].m_Edge;
+                if (edge == Entity.Null || !EntityManager.Exists(edge))
+                {
+                    continue;
+                }
+
+                live++;
+                if (!IsEdgeOwnedByBuilding(edge))
+                {
+                    return false;
+                }
+            }
+
+            return live > 0;
+        }
+
+        /// <summary>
+        /// Building sub-net edges carry <see cref="Owner"/> whose chain reaches a <see cref="Building"/>.
+        /// </summary>
+        private bool IsEdgeOwnedByBuilding(Entity edge)
+        {
+            Entity current = edge;
+            int guard = 0;
+            while (guard++ < 8 && EntityManager.TryGetComponent(current, out Owner owner))
+            {
+                current = owner.m_Owner;
+                if (current == Entity.Null)
+                {
+                    return false;
+                }
+
+                if (EntityManager.HasComponent<Building>(current))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
