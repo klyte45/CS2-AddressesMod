@@ -26,10 +26,10 @@ New hint and drag-unreachable strings must ship via pending entries file only. A
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] BelzontAdr/i18n/roadGrouping_tooltips_entries.txt exists with 7-column rows for all new keys listed in doc 25
-- [ ] en-US and pt-BR mock copy present
-- [ ] No edits to i18n.csv / locale CSVs by this task
-- [ ] No translate() fallbacks for new keys
+- [x] BelzontAdr/i18n/roadGrouping_tooltips_entries.txt exists with 7-column rows for all new keys listed in doc 25
+- [x] en-US and pt-BR mock copy present
+- [x] No edits to i18n.csv / locale CSVs by this task
+- [x] No translate() fallbacks for new keys
 
 ---
 
@@ -37,6 +37,8 @@ New hint and drag-unreachable strings must ship via pending entries file only. A
 
 1. Keys: reject.dragUnreachable; hint.select; hint.toggleAdd; hint.toggleRemove; hint.dragStart; hint.dragApply; hint.cancelSelection; hint.exitTool; hint.cancelDrag
 2. Reuse existing kindMismatch / kindUnclassified — do not duplicate
+3. Created BelzontAdr/i18n/roadGrouping_tooltips_entries.txt with 9 rows (7-col)
+4. Reused existing kindMismatch / kindUnclassified — not duplicated
 
 ---
 
