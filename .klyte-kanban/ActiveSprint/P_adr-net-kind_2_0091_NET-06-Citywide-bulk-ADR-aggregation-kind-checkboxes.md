@@ -1,7 +1,7 @@
+**Start time:** 2026-09-14 23:12 -0300
 # [0091] NET-06-Citywide-bulk-ADR-aggregation-kind-checkboxes
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/26-bulk-citywide-adr-aggregation.md
