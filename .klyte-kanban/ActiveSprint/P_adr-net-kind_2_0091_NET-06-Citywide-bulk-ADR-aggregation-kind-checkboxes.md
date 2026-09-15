@@ -50,6 +50,9 @@ Sixth slice of epic adr-net-kind. Players need a settings-side bulk convert afte
 2. Backend: binder/system calling membership fork/create for edges matching checked kinds; skip ADRNameAggregated; prefer per-vanilla-Aggregate when members share one checked kind
 3. Progress/result toast or summary dialog for large cities
 4. Catalog: 24-adr-net-kind-roadmap.md NET-06; design: 26-bulk-citywide-adr-aggregation.md
+5. Backend: AdrNameAggregateMembershipSystem.ConvertCitywideToAdrAggregates(kindMask) — full TryForkFromVanillaSeed when remainder matches mask+shared kind; else CreateAggregate per kind bucket. Binder main.convertAllToAdrAggregates. Result DTO AdrBulkConvertResult.
+6. UI: OverrideRoadsDistrictsTab button above perDistrictRoadsFile; ConfirmationDialog with kind checkboxes (Road default on); result dialog with counts.
+7. i18n pending: BelzontAdr/i18n/bulkConvert_entries.txt (reuse main netKind.* for checkbox labels). Awaiting compile + smoke.
 
 ---
 
