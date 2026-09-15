@@ -10,10 +10,10 @@ Ship adr-net-kind epic NET-01…NET-05 so ADR associations classify by prefab *D
 
 - **Sprint number**: 015
 - **Start date**: 2026-09-14 19:35 -0300
-- **End date**:
+- **End date**: 2026-09-15 00:22 -0300
 - **Original tasks**: 05
 - **Original task IDs**: [0086], [0087], [0088], [0089], [0090]
-- **Delivered tasks (from original)**:
+- **Delivered tasks (from original)**: 5
 - **Added tasks**: 1
-- **Delivered tasks (from added)**:
-- **Total delivered tasks**:
+- **Delivered tasks (from added)**: 1
+- **Total delivered tasks**: 6
