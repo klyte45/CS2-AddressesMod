@@ -1,7 +1,7 @@
+**Start time:** 2026-09-15 00:39 -0300
 # [0093] TT-02-Road-Grouping-Error-StringTooltip-system
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/25-road-grouping-tooltips.md TT-02; BelzontAdr/Tooltips/TempRoadMarkerTooltip.cs
