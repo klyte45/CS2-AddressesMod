@@ -29,6 +29,7 @@ InputHintsTooltipSystem only shows hints for actions on activeTool.actions with 
 - [ ] DisplayNameOverride labels follow the locked mode matrix in doc 25
 - [ ] Remapped keybinds display correctly via vanilla InputHintTooltip
 - [ ] When Error tooltip applies to the hover/drag target, conflicting Apply/Toggle hints are suppressed
+- [ ] ModData Apply/Cancel/Toggle show vanilla InputHintTooltip rows via DisplayNameOverride (toolActions override blocked by private protected across assemblies)
 
 ---
 
