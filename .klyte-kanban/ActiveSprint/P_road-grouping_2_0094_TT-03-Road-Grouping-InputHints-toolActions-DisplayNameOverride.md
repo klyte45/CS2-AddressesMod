@@ -26,7 +26,6 @@ InputHintsTooltipSystem only shows hints for actions on activeTool.actions with 
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] toolActions yields Apply / Cancel / ToggleMembership ProxyActions
 - [ ] DisplayNameOverride labels follow the locked mode matrix in doc 25
 - [ ] Remapped keybinds display correctly via vanilla InputHintTooltip
 - [ ] When Error tooltip applies to the hover/drag target, conflicting Apply/Toggle hints are suppressed
@@ -39,6 +38,7 @@ InputHintsTooltipSystem only shows hints for actions on activeTool.actions with 
 2. Own DisplayNameOverride instances; update displayName/active each OnUpdate from mode+hover
 3. Locale ids from roadGrouping.hint.* (TT-04)
 4. Do not invent InputHint for double-click fixed pin
+5. ToolBaseSystem.toolActions is private protected — cannot override from BelzontAdr. Emit InputHintTooltip from AdrRoadGroupingTooltipSystem for ModData Apply/Cancel/Toggle with DisplayNameOverride instead (same widgets vanilla InputHints uses).
 
 ---
 
