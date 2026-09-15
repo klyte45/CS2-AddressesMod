@@ -26,9 +26,9 @@ Locked product decision: once Error tooltips work, remove in-tool NotificationSy
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] NotifyNetKindReject no longer calls NotificationSystem.Pop for in-tool kind rejects
-- [ ] LogUtils diagnostic line remains
-- [ ] Ctrl+toggle and drag soft-fails still surface via TT-02 Error tooltips
+- [x] NotifyNetKindReject no longer calls NotificationSystem.Pop for in-tool kind rejects
+- [x] LogUtils diagnostic line remains
+- [x] Ctrl+toggle and drag soft-fails still surface via TT-02 Error tooltips
 
 ---
 
@@ -37,6 +37,7 @@ Locked product decision: once Error tooltips work, remove in-tool NotificationSy
 1. Edit AdrRoadGroupingTool.NotifyNetKindReject
 2. Do not remove overlay red wash
 3. Coordinate playtest with TT-06
+4. NotifyNetKindReject no longer calls NotificationSystem.Pop; LogUtils remains
 
 ---
 
