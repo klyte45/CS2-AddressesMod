@@ -42,7 +42,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Initial UX | **Net-only Road Grouping tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. Spec: [09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md); activation: [12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md) |
 | Tool naming | Product/code: **Road Grouping** (`AdrRoadGrouping*`). Doc [08](08-association-tool-first-ux.md) keeps historical “association” filename |
 | Label extensions (shields / multi-recipe / look knobs) | **Feasibility** documented in [17](17-label-extensions-text-images-look.md); **product strategy deferred** to later research. WE sync = **copy/re-register only** (no live shared `Texture2D`) |
-| Pack depth | Analysis + design + tool specs + activation catalog + label research (14–17) + label sprint catalog (18) + highway reattach (20–21) + **net-kind (22–24)** |
+| Pack depth | Analysis + design + tool specs + activation catalog + label research (14–17) + label sprint catalog (18) + highway reattach (20–21) + **net-kind (22–24)** + tooltips draft (25) + **bulk citywide ADR (26)** |
 | Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR; BelzontWE for tool scaffold / WE atlas APIs |
 | Net kind classifier | **Prefab `*Data` first** (`RoadData` / `TrackData` / …); `Game.Net.Road` **unreliable** (streets/avenues may lack it). Dual `Train\|Tram` → **Train**. See [22](22-game-net-edge-kinds-and-aggregation.md) |
 | ADR kind mix | Exact `AdrNetKind` match; street↔highway **allowed**; cross-kind **forbidden**. Per-kind ADR `NetNameData` (non-road) + outline-by-kind (face `#FFFFFFC0`; Subway `#004400`, Road `#333333`, …). Road seeds only for `RoadData`. See [23](23-adr-net-kind-gate-labels-seeds.md) / [24](24-adr-net-kind-roadmap.md) |
@@ -104,6 +104,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 - [x] ADR net-kind gate / labels / seeds designed ([23](23-adr-net-kind-gate-labels-seeds.md))
 - [x] Net-kind implementation catalog documented ([24](24-adr-net-kind-roadmap.md))
 - [x] Road Grouping tooltips draft stub ([25](25-road-grouping-tooltips-draft.md))
+- [x] Citywide bulk ADR aggregation settings UX documented ([26](26-bulk-citywide-adr-aggregation.md))
 
 ## Related packs
 

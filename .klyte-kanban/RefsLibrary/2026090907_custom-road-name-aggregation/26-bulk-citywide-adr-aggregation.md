@@ -65,4 +65,4 @@ Omit non-aggregable nets (fence, pipeline, powerline, …).
 
 ## Related board
 
-Catalog id **NET-06** (create when requested). Depends NET-01…03 (kind + membership + labels).
+Catalog id **NET-06** — board **[0091]** (Sprint 015). Depends NET-01…03 (kind + membership + labels).

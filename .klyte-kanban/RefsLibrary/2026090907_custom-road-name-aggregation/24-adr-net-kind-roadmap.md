@@ -36,7 +36,7 @@ Board items are **catalog only** here. Do **not** create NET-* tasks via MCP unt
 | 3 | NET-03 | **0089** T | Per-kind ADR NetNameData + outline-by-kind | M | NET-01, LBL-02+ | Create NetNameData for non-road kinds; face `#FFFFFFC0`; outlines: Subway `#004400`, Road `#333333`, Pathway `#666666`, Train `#331A00`, Tram `#330033`, Waterway `#002244`, Taxiway `#33001A`; generalize `m_IsAdrStyle` → kind outline; no vanilla AggregateNet mutation; PrefabRef stays real AggregateNet; LabelMaterial borrow + Temp Ensure for unlabeled kinds |
 | 4 | NET-04 | **0086** (backlog L; overflown from **0085** Z) | Road-only seeds / namesets / SIP DTO | M | NET-01 (prefer NET-02) | `GetAggregateName` road path only for `RoadData` kind; no TrackData fake; seed UI only for Road; **not** `HasComponent<Road>` |
 | 5 | NET-05 | *(create when asked)* | Playtest matrix + smoke notes | S | NET-02…04 | Street without edge `Road` still Road kind; street↔highway mix OK; pathway/track reject; labels on non-road if in scope |
-| 6 | NET-06 | *(create when asked)* | Citywide bulk ADR aggregation (kind checkboxes) | M | NET-01…03 | Settings button on Roads and Districts above per-district road namesets; confirm dialog with kind checkboxes; convert applicable segments to ADR. Spec: [26](26-bulk-citywide-adr-aggregation.md) |
+| 6 | NET-06 | **0091** N | Citywide bulk ADR aggregation (kind checkboxes) | M | NET-01…03 | Settings button on Roads and Districts above per-district road namesets; confirm dialog with kind checkboxes; convert applicable segments to ADR. Spec: [26](26-bulk-citywide-adr-aggregation.md) |
 
 ### NET-04 / board **0086** (was **0085**)
 
