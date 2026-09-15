@@ -2,15 +2,11 @@ using System.Collections.Generic;
 using Belzont.Interfaces;
 using Belzont.Utils;
 using Colossal.Entities;
-using Colossal.PSI.Common;
 using Game.Common;
 using Game.Input;
 using Game.Net;
-using Game.Notifications;
 using Game.Prefabs;
-using Game.PSI;
 using Game.Tools;
-using Game.UI.Localization;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -848,21 +844,13 @@ namespace BelzontAdr
                 return;
             }
 
+            // Player-facing copy is the Error mouse tooltip (TT-02). Keep diagnostics only.
             string textKey = result == AdrNetKindJoinResult.Unclassified
                 ? "K45::ADR.vuio[roadGrouping.kindUnclassified]"
                 : "K45::ADR.vuio[roadGrouping.kindMismatch]";
-            const string titleKey = "K45::ADR.vuio[roadGrouping.toolOptions.title]";
-            const string notificationId = "K45_ADR_roadGrouping_kindReject";
-
-            NotificationSystem.Pop(
-                notificationId,
-                4f,
-                LocalizedString.Id(titleKey),
-                LocalizedString.Id(textKey),
-                progressState: ProgressState.Warning);
 
             LogUtils.DoInfoLog(
-                "RoadGrouping net-kind reject: {0} (notification {1})",
+                "RoadGrouping net-kind reject: {0} (tooltip {1})",
                 result,
                 textKey);
         }
