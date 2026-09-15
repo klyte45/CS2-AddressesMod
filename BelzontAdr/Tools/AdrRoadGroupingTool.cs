@@ -79,9 +79,35 @@ namespace BelzontAdr
         private ProxyAction m_ApplyAction;
         private ProxyAction m_CancelAction;
         private ProxyAction m_ToggleAction;
+        private DisplayNameOverride m_ApplyHint;
+        private DisplayNameOverride m_CancelHint;
+        private DisplayNameOverride m_ToggleHint;
         private AdrRoadGroupingController m_Controller;
         private AdrRoadGroupingOverlayRenderSystem m_Overlay;
         private AdrNameAggregateMembershipSystem m_Membership;
+
+        /// <summary>ModData Apply action — used by tooltip InputHints (TT-03).</summary>
+        public ProxyAction HintApplyAction => m_ApplyAction;
+
+        /// <summary>ModData Cancel (RMB) action — used by tooltip InputHints (TT-03).</summary>
+        public ProxyAction HintCancelAction => m_CancelAction;
+
+        /// <summary>ModData Toggle membership (Ctrl+LMB) action — used by tooltip InputHints (TT-03).</summary>
+        public ProxyAction HintToggleAction => m_ToggleAction;
+
+        /// <summary>True when Error StringTooltip should suppress Apply/Toggle hints.</summary>
+        public bool HasSoftFailTooltip
+        {
+            get
+            {
+                if (m_Dragging)
+                {
+                    return m_DragRejectReason != AdrNetKindJoinResult.Ok || IsDragDestinationUnreachable;
+                }
+
+                return CurrentHoverJoinResult != AdrNetKindJoinResult.Ok;
+            }
+        }
 
         private bool m_Dragging;
         private Entity m_DragStartNode;
@@ -92,6 +118,15 @@ namespace BelzontAdr
         private Entity m_PendingFixEdge;
         private float m_PendingFixTime;
         private const float DoubleClickSeconds = 0.35f;
+        private const int HintDisplayPriority = 1;
+        private const string HintSelectKey = "K45::ADR.vuio[roadGrouping.hint.select]";
+        private const string HintToggleAddKey = "K45::ADR.vuio[roadGrouping.hint.toggleAdd]";
+        private const string HintToggleRemoveKey = "K45::ADR.vuio[roadGrouping.hint.toggleRemove]";
+        private const string HintDragStartKey = "K45::ADR.vuio[roadGrouping.hint.dragStart]";
+        private const string HintDragApplyKey = "K45::ADR.vuio[roadGrouping.hint.dragApply]";
+        private const string HintCancelSelectionKey = "K45::ADR.vuio[roadGrouping.hint.cancelSelection]";
+        private const string HintExitToolKey = "K45::ADR.vuio[roadGrouping.hint.exitTool]";
+        private const string HintCancelDragKey = "K45::ADR.vuio[roadGrouping.hint.cancelDrag]";
         private readonly HashSet<Entity> m_DragHandles = new();
         private readonly HashSet<Entity> m_MembershipEdges = new();
         private readonly List<Entity> m_PathEdges = new();
@@ -110,9 +145,24 @@ namespace BelzontAdr
             m_ApplyAction = AdrModData.Instance.GetAction(AdrModData.kActionApplyMouse);
             m_CancelAction = AdrModData.Instance.GetAction(AdrModData.kActionCancelMouse);
             m_ToggleAction = AdrModData.Instance.GetAction(AdrModData.kActionToggleMembership);
+            // toolActions is private protected in Game.dll — emit InputHints from tooltip system instead.
+            m_ApplyHint = new DisplayNameOverride(nameof(AdrRoadGroupingTool), m_ApplyAction, null, HintDisplayPriority);
+            m_CancelHint = new DisplayNameOverride(nameof(AdrRoadGroupingTool), m_CancelAction, null, HintDisplayPriority);
+            m_ToggleHint = new DisplayNameOverride(nameof(AdrRoadGroupingTool), m_ToggleAction, null, HintDisplayPriority);
             m_Controller = World.GetOrCreateSystemManaged<AdrRoadGroupingController>();
             m_Overlay = World.GetOrCreateSystemManaged<AdrRoadGroupingOverlayRenderSystem>();
             m_Membership = World.GetOrCreateSystemManaged<AdrNameAggregateMembershipSystem>();
+        }
+
+        protected override void OnDestroy()
+        {
+            m_ApplyHint?.Dispose();
+            m_CancelHint?.Dispose();
+            m_ToggleHint?.Dispose();
+            m_ApplyHint = null;
+            m_CancelHint = null;
+            m_ToggleHint = null;
+            base.OnDestroy();
         }
 
         public override PrefabBase GetPrefab() => null;
@@ -135,6 +185,9 @@ namespace BelzontAdr
             m_CancelAction.shouldBeEnabled = false;
             m_ToggleAction.shouldBeEnabled = false;
             cancelAction.shouldBeEnabled = false;
+            SetHintInactive(m_ApplyHint);
+            SetHintInactive(m_CancelHint);
+            SetHintInactive(m_ToggleHint);
             HoveredEdge = Entity.Null;
             HoveredDragHandle = Entity.Null;
             CurrentHoverJoinResult = AdrNetKindJoinResult.Ok;
@@ -355,16 +408,109 @@ namespace BelzontAdr
                 || !m_Membership.IsAdrNameAggregate(selected)
                 || HoveredDragHandle != Entity.Null)
             {
+                RefreshInputHintOverrides(selected);
                 return;
             }
 
             Entity hovered = HoveredEdge;
             if (hovered == Entity.Null || IsMemberEdge(hovered, selected))
             {
+                RefreshInputHintOverrides(selected);
                 return;
             }
 
             CurrentHoverJoinResult = m_Membership.EvaluateNetKindJoin(selected, hovered);
+            RefreshInputHintOverrides(selected);
+        }
+
+        /// <summary>
+        /// Mode matrix for DisplayNameOverride labels (doc 25). Apply/Toggle suppressed while soft-fail Error is active.
+        /// </summary>
+        private void RefreshInputHintOverrides(Entity selected)
+        {
+            if (!IsSelected)
+            {
+                SetHintInactive(m_ApplyHint);
+                SetHintInactive(m_CancelHint);
+                SetHintInactive(m_ToggleHint);
+                return;
+            }
+
+            bool suppressApplyToggle = HasSoftFailTooltip;
+            string applyLabel = null;
+            string cancelLabel = null;
+            string toggleLabel = null;
+
+            if (m_Dragging)
+            {
+                if (!suppressApplyToggle)
+                {
+                    applyLabel = HintDragApplyKey;
+                }
+
+                cancelLabel = HintCancelDragKey;
+            }
+            else if (selected == Entity.Null)
+            {
+                if (HoveredEdge != Entity.Null)
+                {
+                    applyLabel = HintSelectKey;
+                }
+
+                cancelLabel = HintExitToolKey;
+            }
+            else
+            {
+                cancelLabel = HintCancelSelectionKey;
+                if (HoveredDragHandle != Entity.Null)
+                {
+                    applyLabel = HintDragStartKey;
+                }
+                else if (HoveredEdge != Entity.Null)
+                {
+                    if (IsMemberEdge(HoveredEdge, selected))
+                    {
+                        if (!suppressApplyToggle)
+                        {
+                            toggleLabel = HintToggleRemoveKey;
+                        }
+                    }
+                    else if (!suppressApplyToggle)
+                    {
+                        toggleLabel = HintToggleAddKey;
+                    }
+                }
+            }
+
+            SetHint(m_ApplyHint, applyLabel);
+            SetHint(m_CancelHint, cancelLabel);
+            SetHint(m_ToggleHint, toggleLabel);
+        }
+
+        private static void SetHint(DisplayNameOverride hint, string localeId)
+        {
+            if (hint == null)
+            {
+                return;
+            }
+
+            if (localeId != null)
+            {
+                hint.displayName = localeId;
+                hint.active = true;
+            }
+            else
+            {
+                hint.active = false;
+            }
+        }
+
+        private static void SetHintInactive(DisplayNameOverride hint)
+        {
+            if (hint != null)
+            {
+                hint.active = false;
+            }
         }
 
         private bool IsDoubleClickOn(Entity edge)
