@@ -116,9 +116,11 @@ Problem: S2 label owners need `PrefabRef` → AggregateNet with `NetNameData`. N
 | Road | Yes (existing road nameset) | Yes — **no** TrackData→RoadData fake | Yes (HW-* when ADR) |
 | Pathway / Track* / Waterway / Taxiway | No road seed | Return vanilla (shall-run-original) | No |
 
-SIP `TryAppendAggregateSeedOption`: set `hasCustomNameList` only when kind is Road **and** road nameset resolves. Prefer omitting misleading road-seed block for non-roads (custom name still available).
+SIP `TryAppendAggregateSeedOption`: set `hasCustomNameList` only when kind is Road **and** road nameset resolves. Prefer omitting misleading road-seed block for non-roads (custom name still available). Highway SIP/tool option only for Road kind.
 
-Replace any `HasComponent<Road>` gates with prefab-`RoadData` / stored `AdrNetKind`.
+Replace any `HasComponent<Road>` gates with prefab-`RoadData` / stored `AdrNetKind` (NET-04).
+
+**NET-04 naming:** `GetAggregateName` applies road namesets/prefixes only for `AdrNetKind.Road`; drops TrackData→RoadData fake. Non-road aggregates defer to vanilla NameSystem (localized AggregateNet type: Railway, Pathway, …).
 
 ## Touch map
 

@@ -54,6 +54,10 @@ Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint
 5. Replace ADR HasComponent<Road> seed/address gates with RoadData or stored kind
 6. Catalog: 24-adr-net-kind-roadmap.md NET-04
 7. Default names for non-road aggregations shall be the localized aggregation type (Railway, Pathway, etc)
+8. GetAggregateName: early-out unless AdrNetKind.Road (stored kind or prefab RoadData on ref edge); highway branch only after Road gate; deleted TrackData→RoadData fake; non-road defers to vanilla NameSystem (localized AggregateNet type).
+9. AdrNetKindUtil: IsRoadEdge + TryResolveOwnerKind helpers.
+10. TryAppendAggregateSeedOption: hasCustomNameList only when kind is Road. Aggregated edge SIP RoadAggregation typed via IsRoadEdge (not HasComponent Road). Highway option gated to Road kind. Station nearby-walk + GetMainReferenceAggregate use IsRoadEdge.
+11. Docs 23/24 notes updated. Awaiting user compile + playtest: road seed still works without edge Road; non-road keeps vanilla name and no seed dice.
 
 ---
 
