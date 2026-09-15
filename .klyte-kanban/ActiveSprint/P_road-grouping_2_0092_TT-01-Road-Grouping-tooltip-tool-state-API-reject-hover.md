@@ -26,9 +26,9 @@ Road Grouping soft-fails and hover rejects today leave m_DragRejectReason privat
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Public accessors expose current hover join result and drag reject reason without duplicating EvaluateNetKindJoin logic
-- [ ] Overlay and future tooltip system can read the same reject state
-- [ ] No player-visible behavior change required beyond exposure / consolidation
+- [x] Public accessors expose current hover join result and drag reject reason without duplicating EvaluateNetKindJoin logic
+- [x] Overlay and future tooltip system can read the same reject state
+- [x] No player-visible behavior change required beyond exposure / consolidation
 
 ---
 
