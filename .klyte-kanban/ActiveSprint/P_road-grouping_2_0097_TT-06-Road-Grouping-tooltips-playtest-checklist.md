@@ -1,7 +1,7 @@
+**Start time:** 2026-09-15 00:46 -0300
 # [0097] TT-06-Road-Grouping-tooltips-playtest-checklist
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/25-road-grouping-tooltips.md TT-06
