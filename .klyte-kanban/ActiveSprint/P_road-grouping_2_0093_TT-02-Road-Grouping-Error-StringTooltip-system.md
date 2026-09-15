@@ -26,10 +26,10 @@ Vanilla Error/Warning tooltips use TooltipSystemBase + StringTooltip at UIToolti
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] AdrRoadGroupingTooltipSystem registered at SystemUpdatePhase.UITooltip
-- [ ] While Road Grouping is active, kind mismatch / unclassified / drag unreachable show TooltipColor.Error StringTooltip
-- [ ] Tooltips gate on activeTool == AdrRoadGroupingTool and use TT-01 public reject state
-- [ ] No PSI required for these rejects (removal is TT-05)
+- [x] AdrRoadGroupingTooltipSystem registered at SystemUpdatePhase.UITooltip
+- [x] While Road Grouping is active, kind mismatch / unclassified / drag unreachable show TooltipColor.Error StringTooltip
+- [x] Tooltips gate on activeTool == AdrRoadGroupingTool and use TT-01 public reject state
+- [x] No PSI required for these rejects (removal is TT-05)
 
 ---
 
@@ -39,6 +39,9 @@ Vanilla Error/Warning tooltips use TooltipSystemBase + StringTooltip at UIToolti
 2. Reuse kindMismatch / kindUnclassified keys; consume dragUnreachable from TT-04 when present
 3. Register beside TempRoadMarkerTooltip in AddressesCs2Mod
 4. Suppress conflicting Apply/Toggle hints is TT-03; this task focuses on Error StringTooltips
+5. Added BelzontAdr/Tooltips/AdrRoadGroupingTooltipSystem.cs
+6. Registered at UITooltip beside TempRoadMarkerTooltip
+7. Uses CurrentHoverJoinResult / CurrentDragRejectReason / IsDragDestinationUnreachable
 
 ---
 
