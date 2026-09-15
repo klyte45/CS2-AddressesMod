@@ -1,7 +1,7 @@
+**Start time:** 2026-09-15 00:41 -0300
 # [0094] TT-03-Road-Grouping-InputHints-toolActions-DisplayNameOverride
 
-**Developed by:** 
-
+**Developed by:** Auto <auto@kwyt.com.br>
 ## Reference
 
 RefsLibrary/2026090907_custom-road-name-aggregation/25-road-grouping-tooltips.md TT-03; Game.UI.Tooltip.InputHintsTooltipSystem
