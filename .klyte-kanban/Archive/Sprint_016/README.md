@@ -10,10 +10,10 @@ Ship TT-01…TT-05 so players see cursor Error tooltips and mode-dependent Input
 
 - **Sprint number**: 016
 - **Start date**: 2026-09-15 00:37 -0300
-- **End date**:
+- **End date**: 2026-09-15 01:33 -0300
 - **Original tasks**: 06
 - **Original task IDs**: [0092], [0093], [0094], [0095], [0096], [0097]
-- **Delivered tasks (from original)**:
+- **Delivered tasks (from original)**: 6
 - **Added tasks**: 0
-- **Delivered tasks (from added)**:
-- **Total delivered tasks**:
+- **Delivered tasks (from added)**: 0
+- **Total delivered tasks**: 6

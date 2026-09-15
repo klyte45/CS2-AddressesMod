@@ -8,9 +8,10 @@ using UnityEngine.Scripting;
 namespace BelzontAdr
 {
     /// <summary>
-    /// Mouse Error tooltips + InputHint rows for Road Grouping.
-    /// Hint actions use ModData <see cref="ProxyAction"/>s with <see cref="DisplayNameOverride"/>
-    /// because <c>ToolBaseSystem.toolActions</c> is <c>private protected</c> (not overridable from this assembly).
+    /// Mouse Error tooltips + Toggle InputHint for Road Grouping.
+    /// Apply/Cancel rows come from vanilla <see cref="InputHintsTooltipSystem"/> via Tool
+    /// Mouse Apply / Mouse Cancel States (mutated display names in the tool).
+    /// Toggle is ModData-only (not in baseToolActions) — hand-emit one row when its override is published.
     /// </summary>
     public partial class AdrRoadGroupingTooltipSystem : TooltipSystemBase
     {
@@ -21,8 +22,6 @@ namespace BelzontAdr
         private ToolSystem m_ToolSystem;
         private AdrRoadGroupingTool m_RoadGroupingTool;
         private StringTooltip m_ErrorTooltip;
-        private InputHintTooltip m_ApplyHintTooltip;
-        private InputHintTooltip m_CancelHintTooltip;
         private InputHintTooltip m_ToggleHintTooltip;
 
         [Preserve]
@@ -53,55 +52,41 @@ namespace BelzontAdr
                 AddMouseTooltip(m_ErrorTooltip);
             }
 
-            EnsureHintTooltips();
+            TryAddToggleHint();
+        }
+
+        /// <summary>
+        /// Mirror <see cref="InputHintsTooltipSystem"/> gate: only emit when
+        /// <see cref="ProxyAction.displayOverride"/> is our published override (never fall back to action.title).
+        /// </summary>
+        private void TryAddToggleHint()
+        {
+            ProxyAction action = m_RoadGroupingTool.HintToggleAction;
+            DisplayNameOverride hint = m_RoadGroupingTool.HintToggleOverride;
+            if (action == null || hint == null || !hint.active || hint.priority == -1)
+            {
+                return;
+            }
+
+            if (action.displayOverride != hint || string.IsNullOrEmpty(hint.displayName))
+            {
+                return;
+            }
+
             InputManager.DeviceType device = InputManager.instance.activeControlScheme.ToDeviceType();
-            TryAddHint(m_ApplyHintTooltip, m_RoadGroupingTool.HintApplyAction, device);
-            TryAddHint(m_CancelHintTooltip, m_RoadGroupingTool.HintCancelAction, device);
-            TryAddHint(m_ToggleHintTooltip, m_RoadGroupingTool.HintToggleAction, device);
-        }
-
-        private void EnsureHintTooltips()
-        {
-            ProxyAction apply = m_RoadGroupingTool.HintApplyAction;
-            ProxyAction cancel = m_RoadGroupingTool.HintCancelAction;
-            ProxyAction toggle = m_RoadGroupingTool.HintToggleAction;
-            if (apply != null && (m_ApplyHintTooltip == null || m_ApplyHintTooltip.m_Action != apply))
-            {
-                m_ApplyHintTooltip = new InputHintTooltip(apply);
-            }
-
-            if (cancel != null && (m_CancelHintTooltip == null || m_CancelHintTooltip.m_Action != cancel))
-            {
-                m_CancelHintTooltip = new InputHintTooltip(cancel);
-            }
-
-            if (toggle != null && (m_ToggleHintTooltip == null || m_ToggleHintTooltip.m_Action != toggle))
-            {
-                m_ToggleHintTooltip = new InputHintTooltip(toggle);
-            }
-        }
-
-        private void TryAddHint(InputHintTooltip tooltip, ProxyAction action, InputManager.DeviceType device)
-        {
-            if (tooltip == null || action == null)
-            {
-                return;
-            }
-
-            DisplayNameOverride display = action.displayOverride;
-            if (display == null || !display.active || display.priority <= 0)
-            {
-                return;
-            }
-
             InputManager.DeviceType mask = action.displayMask & device;
             if (mask == InputManager.DeviceType.None)
             {
                 return;
             }
 
-            tooltip.Refresh(mask);
-            AddMouseTooltip(tooltip);
+            if (m_ToggleHintTooltip == null || m_ToggleHintTooltip.m_Action != action)
+            {
+                m_ToggleHintTooltip = new InputHintTooltip(action);
+            }
+
+            m_ToggleHintTooltip.Refresh(mask);
+            AddMouseTooltip(m_ToggleHintTooltip);
         }
 
         private bool TryResolveError(out string localeId)

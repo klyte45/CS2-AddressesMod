@@ -7,6 +7,7 @@ using Game.Input;
 using Game.Net;
 using Game.Prefabs;
 using Game.Tools;
+using HarmonyLib;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -72,24 +73,28 @@ namespace BelzontAdr
             && m_DragHoverNode != Entity.Null
             && m_DragHoverNode != m_DragStartNode;
 
-        private ProxyAction m_ApplyAction;
-        private ProxyAction m_CancelAction;
         private ProxyAction m_ToggleAction;
-        private DisplayNameOverride m_ApplyHint;
-        private DisplayNameOverride m_CancelHint;
         private DisplayNameOverride m_ToggleHint;
+        private UIInputAction.State m_MouseApplyState;
+        private UIInputAction.State m_MouseCancelState;
         private AdrRoadGroupingController m_Controller;
         private AdrRoadGroupingOverlayRenderSystem m_Overlay;
         private AdrNameAggregateMembershipSystem m_Membership;
 
-        /// <summary>ModData Apply action — used by tooltip InputHints (TT-03).</summary>
-        public ProxyAction HintApplyAction => m_ApplyAction;
+        // toolActionCollection / m_Mouse* are internal / private protected in Game.dll.
+        private static readonly AccessTools.FieldRef<ToolBaseSystem, IProxyAction> s_MouseApply =
+            AccessTools.FieldRefAccess<ToolBaseSystem, IProxyAction>("m_MouseApply");
+        private static readonly AccessTools.FieldRef<ToolBaseSystem, IProxyAction> s_MouseCancel =
+            AccessTools.FieldRefAccess<ToolBaseSystem, IProxyAction>("m_MouseCancel");
 
-        /// <summary>ModData Cancel (RMB) action — used by tooltip InputHints (TT-03).</summary>
-        public ProxyAction HintCancelAction => m_CancelAction;
-
-        /// <summary>ModData Toggle membership (Ctrl+LMB) action — used by tooltip InputHints (TT-03).</summary>
+        /// <summary>
+        /// ModData Toggle (Ctrl+LMB) — not in <c>baseToolActions</c>, so the tooltip system hand-emits it.
+        /// Apply/Cancel hints use Tool Mouse Apply / Mouse Cancel (vanilla InputHintsTooltipSystem).
+        /// </summary>
         public ProxyAction HintToggleAction => m_ToggleAction;
+
+        /// <summary>Toggle DisplayNameOverride — tooltip gate for hand-emitted InputHint.</summary>
+        public DisplayNameOverride HintToggleOverride => m_ToggleHint;
 
         /// <summary>True when Error StringTooltip should suppress Apply/Toggle hints.</summary>
         public bool HasSoftFailTooltip
@@ -115,14 +120,15 @@ namespace BelzontAdr
         private float m_PendingFixTime;
         private const float DoubleClickSeconds = 0.35f;
         private const int HintDisplayPriority = 1;
-        private const string HintSelectKey = "K45::ADR.vuio[roadGrouping.hint.select]";
-        private const string HintToggleAddKey = "K45::ADR.vuio[roadGrouping.hint.toggleAdd]";
-        private const string HintToggleRemoveKey = "K45::ADR.vuio[roadGrouping.hint.toggleRemove]";
-        private const string HintDragStartKey = "K45::ADR.vuio[roadGrouping.hint.dragStart]";
-        private const string HintDragApplyKey = "K45::ADR.vuio[roadGrouping.hint.dragApply]";
-        private const string HintCancelSelectionKey = "K45::ADR.vuio[roadGrouping.hint.cancelSelection]";
-        private const string HintExitToolKey = "K45::ADR.vuio[roadGrouping.hint.exitTool]";
-        private const string HintCancelDragKey = "K45::ADR.vuio[roadGrouping.hint.cancelDrag]";
+        /// <summary>Suffix for Common.ACTION hash (i18n ::H → Common.ACTION[modId/suffix]).</summary>
+        private const string HintSelectAction = "roadGrouping.hint.select";
+        private const string HintToggleAddAction = "roadGrouping.hint.toggleAdd";
+        private const string HintToggleRemoveAction = "roadGrouping.hint.toggleRemove";
+        private const string HintDragStartAction = "roadGrouping.hint.dragStart";
+        private const string HintDragApplyAction = "roadGrouping.hint.dragApply";
+        private const string HintCancelSelectionAction = "roadGrouping.hint.cancelSelection";
+        private const string HintExitToolAction = "roadGrouping.hint.exitTool";
+        private const string HintCancelDragAction = "roadGrouping.hint.cancelDrag";
         private readonly HashSet<Entity> m_DragHandles = new();
         private readonly HashSet<Entity> m_MembershipEdges = new();
         private readonly List<Entity> m_PathEdges = new();
@@ -138,13 +144,18 @@ namespace BelzontAdr
         protected override void OnCreateWithBarrier()
         {
             Enabled = false;
-            m_ApplyAction = AdrModData.Instance.GetAction(AdrModData.kActionApplyMouse);
-            m_CancelAction = AdrModData.Instance.GetAction(AdrModData.kActionCancelMouse);
+            // Reuse ToolBaseSystem Mouse Apply / Cancel States (created in base.OnCreate).
+            // toolActionCollection is internal — cannot call GetActionState from this assembly.
+            m_MouseApplyState = s_MouseApply(this) as UIInputAction.State;
+            m_MouseCancelState = s_MouseCancel(this) as UIInputAction.State;
+            // Ctrl+LMB toggle stays on ModData (not in baseToolActions; hand-emitted by tooltip system).
             m_ToggleAction = AdrModData.Instance.GetAction(AdrModData.kActionToggleMembership);
-            // toolActions is private protected in Game.dll — emit InputHints from tooltip system instead.
-            m_ApplyHint = new DisplayNameOverride(nameof(AdrRoadGroupingTool), m_ApplyAction, null, HintDisplayPriority);
-            m_CancelHint = new DisplayNameOverride(nameof(AdrRoadGroupingTool), m_CancelAction, null, HintDisplayPriority);
-            m_ToggleHint = new DisplayNameOverride(nameof(AdrRoadGroupingTool), m_ToggleAction, null, HintDisplayPriority);
+            m_ToggleHint = new DisplayNameOverride(
+                nameof(AdrRoadGroupingTool),
+                m_ToggleAction,
+                null,
+                HintDisplayPriority,
+                InputManager.DeviceType.Mouse);
             m_Controller = World.GetOrCreateSystemManaged<AdrRoadGroupingController>();
             m_Overlay = World.GetOrCreateSystemManaged<AdrRoadGroupingOverlayRenderSystem>();
             m_Membership = World.GetOrCreateSystemManaged<AdrNameAggregateMembershipSystem>();
@@ -152,12 +163,11 @@ namespace BelzontAdr
 
         protected override void OnDestroy()
         {
-            m_ApplyHint?.Dispose();
-            m_CancelHint?.Dispose();
             m_ToggleHint?.Dispose();
-            m_ApplyHint = null;
-            m_CancelHint = null;
             m_ToggleHint = null;
+            // Do not Dispose mouse States — owned by ToolBaseSystem.
+            m_MouseApplyState = null;
+            m_MouseCancelState = null;
             base.OnDestroy();
         }
 
@@ -168,22 +178,24 @@ namespace BelzontAdr
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
-            m_ApplyAction.shouldBeEnabled = true;
-            m_CancelAction.shouldBeEnabled = true;
-            m_ToggleAction.shouldBeEnabled = true;
             cancelAction.shouldBeEnabled = true; // Escape (Tool "Cancel")
+            // Mouse Apply / Cancel / Toggle activators are driven from RefreshInputHintOverrides.
         }
 
         protected override void OnStopRunning()
         {
             base.OnStopRunning();
-            m_ApplyAction.shouldBeEnabled = false;
-            m_CancelAction.shouldBeEnabled = false;
-            m_ToggleAction.shouldBeEnabled = false;
+            SetMouseActionEnabled(m_MouseApplyState, false);
+            SetMouseActionEnabled(m_MouseCancelState, false);
+            if (m_ToggleAction != null)
+            {
+                m_ToggleAction.shouldBeEnabled = false;
+            }
+
             cancelAction.shouldBeEnabled = false;
-            SetHintInactive(m_ApplyHint);
-            SetHintInactive(m_CancelHint);
             SetHintInactive(m_ToggleHint);
+            ClearMouseHint(m_MouseApplyState);
+            ClearMouseHint(m_MouseCancelState);
             HoveredEdge = Entity.Null;
             HoveredDragHandle = Entity.Null;
             CurrentHoverJoinResult = AdrNetKindJoinResult.Ok;
@@ -234,12 +246,12 @@ namespace BelzontAdr
             m_ToolRaycastSystem.typeMask = TypeMask.Net;
             m_ToolRaycastSystem.raycastFlags = RaycastFlags.SubElements | RaycastFlags.IgnoreSecondary;
             m_ToolRaycastSystem.netLayerMask = (Layer)~0u;
-            m_ToolRaycastSystem.iconLayerMask = IconLayerMask.None;
+            m_ToolRaycastSystem.iconLayerMask = Game.Notifications.IconLayerMask.None;
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (m_CancelAction.WasPressedThisFrame() || cancelAction.WasPressedThisFrame())
+            if (WasMouseCancelPressed() || cancelAction.WasPressedThisFrame())
             {
                 HandleCancel();
                 Entity selectedAfterCancel = m_Controller.SelectedAggregation?.Value ?? Entity.Null;
@@ -322,7 +334,7 @@ namespace BelzontAdr
                     InvalidateDragDestination();
                 }
 
-                if (m_ApplyAction.WasReleasedThisFrame() || !m_ApplyAction.IsPressed())
+                if (WasMouseApplyReleased() || !IsMouseApplyPressed())
                 {
                     FinishEndpointDrag(selected);
                 }
@@ -339,7 +351,7 @@ namespace BelzontAdr
 
             if (selected == Entity.Null)
             {
-                if (m_ApplyAction.WasPressedThisFrame()
+                if (WasMouseApplyPressed()
                     && eligibleEdge != Entity.Null
                     && m_Membership.TryEnsureAdrForEdge(eligibleEdge, out Entity adrFocus))
                 {
@@ -353,7 +365,7 @@ namespace BelzontAdr
 
             // Group focused: dedicated Ctrl+Apply binding toggles; plain Apply starts end-handle drag
             // or double-clicks a member to pin/unpin fixed membership.
-            if (m_ToggleAction.WasPressedThisFrame())
+            if (m_ToggleAction != null && m_ToggleAction.WasPressedThisFrame())
             {
                 ClearPendingFixClick();
                 if (eligibleEdge != Entity.Null
@@ -366,7 +378,7 @@ namespace BelzontAdr
                 return inputDeps;
             }
 
-            if (!m_ApplyAction.WasPressedThisFrame())
+            if (!WasMouseApplyPressed())
             {
                 RefreshHoverJoinResult(selected);
                 return inputDeps;
@@ -420,14 +432,24 @@ namespace BelzontAdr
         }
 
         /// <summary>
-        /// Mode matrix for DisplayNameOverride labels (doc 25). Apply/Toggle suppressed while soft-fail Error is active.
+        /// Mode matrix for InputHint labels (doc 25).
+        /// Apply/Cancel: Tool Mouse Apply / Mouse Cancel States (vanilla InputHintsTooltipSystem).
+        /// Toggle: ModData DisplayNameOverride (hand-emitted — not in baseToolActions).
+        /// Apply/Toggle suppressed while soft-fail Error is active (Apply stays enabled while dragging for release).
         /// </summary>
         private void RefreshInputHintOverrides(Entity selected)
         {
             if (!IsSelected)
             {
-                SetHintInactive(m_ApplyHint);
-                SetHintInactive(m_CancelHint);
+                SetMouseActionEnabled(m_MouseApplyState, false);
+                SetMouseActionEnabled(m_MouseCancelState, false);
+                if (m_ToggleAction != null)
+                {
+                    m_ToggleAction.shouldBeEnabled = false;
+                }
+
+                ClearMouseHint(m_MouseApplyState);
+                ClearMouseHint(m_MouseCancelState);
                 SetHintInactive(m_ToggleHint);
                 return;
             }
@@ -441,26 +463,26 @@ namespace BelzontAdr
             {
                 if (!suppressApplyToggle)
                 {
-                    applyLabel = HintDragApplyKey;
+                    applyLabel = HintLocale(HintDragApplyAction);
                 }
 
-                cancelLabel = HintCancelDragKey;
+                cancelLabel = HintLocale(HintCancelDragAction);
             }
             else if (selected == Entity.Null)
             {
                 if (HoveredEdge != Entity.Null)
                 {
-                    applyLabel = HintSelectKey;
+                    applyLabel = HintLocale(HintSelectAction);
                 }
 
-                cancelLabel = HintExitToolKey;
+                cancelLabel = HintLocale(HintExitToolAction);
             }
             else
             {
-                cancelLabel = HintCancelSelectionKey;
+                cancelLabel = HintLocale(HintCancelSelectionAction);
                 if (HoveredDragHandle != Entity.Null)
                 {
-                    applyLabel = HintDragStartKey;
+                    applyLabel = HintLocale(HintDragStartAction);
                 }
                 else if (HoveredEdge != Entity.Null)
                 {
@@ -468,19 +490,78 @@ namespace BelzontAdr
                     {
                         if (!suppressApplyToggle)
                         {
-                            toggleLabel = HintToggleRemoveKey;
+                            toggleLabel = HintLocale(HintToggleRemoveAction);
                         }
                     }
                     else if (!suppressApplyToggle)
                     {
-                        toggleLabel = HintToggleAddKey;
+                        toggleLabel = HintLocale(HintToggleAddAction);
                     }
                 }
             }
 
-            SetHint(m_ApplyHint, applyLabel);
-            SetHint(m_CancelHint, cancelLabel);
+            // Input: Apply stays on while dragging even if the hint is suppressed (soft-fail).
+            bool enableApply = m_Dragging || applyLabel != null;
+            bool enableCancel = cancelLabel != null;
+            bool enableToggle = toggleLabel != null;
+
+            SetMouseActionEnabled(m_MouseApplyState, enableApply);
+            SetMouseActionEnabled(m_MouseCancelState, enableCancel);
+            if (m_ToggleAction != null)
+            {
+                m_ToggleAction.shouldBeEnabled = enableToggle;
+            }
+
+            SetMouseHintLabel(m_MouseApplyState, applyLabel);
+            SetMouseHintLabel(m_MouseCancelState, cancelLabel);
             SetHint(m_ToggleHint, toggleLabel);
+        }
+
+        /// <summary>
+        /// Hash for <c>Sc.Common.ACTION</c> (frontend wraps as Common.ACTION[hash]).
+        /// Matches ProcessKey(::H) / GetBindingKeyHintLocaleID inner id/suffix.
+        /// </summary>
+        private static string HintLocale(string actionName) =>
+            AdrModData.Instance.id + "/" + actionName;
+
+        private static void SetMouseActionEnabled(UIInputAction.State state, bool enabled)
+        {
+            if (state != null)
+            {
+                state.shouldBeEnabled = enabled;
+            }
+        }
+
+        /// <summary>
+        /// Mutate Tool Mouse State's DisplayNameOverride. Priority -1 hides the row while the activator can stay on.
+        /// </summary>
+        private static void SetMouseHintLabel(UIInputAction.State state, string localeId)
+        {
+            DisplayNameOverride hint = state?.displayName;
+            if (hint == null)
+            {
+                return;
+            }
+
+            if (localeId != null)
+            {
+                hint.displayName = localeId;
+                hint.displayMask = InputManager.DeviceType.Mouse;
+                hint.priority = HintDisplayPriority;
+            }
+            else
+            {
+                hint.priority = DisplayNameOverride.kDisabledPriority;
+            }
+        }
+
+        private static void ClearMouseHint(UIInputAction.State state)
+        {
+            DisplayNameOverride hint = state?.displayName;
+            if (hint != null)
+            {
+                hint.priority = DisplayNameOverride.kDisabledPriority;
+            }
         }
 
         private static void SetHint(DisplayNameOverride hint, string localeId)
@@ -508,6 +589,14 @@ namespace BelzontAdr
                 hint.active = false;
             }
         }
+
+        private bool WasMouseApplyPressed() => m_MouseApplyState?.WasPressedThisFrame() ?? false;
+
+        private bool WasMouseApplyReleased() => m_MouseApplyState?.WasReleasedThisFrame() ?? false;
+
+        private bool IsMouseApplyPressed() => m_MouseApplyState?.IsPressed() ?? false;
+
+        private bool WasMouseCancelPressed() => m_MouseCancelState?.WasPressedThisFrame() ?? false;
 
         private bool IsDoubleClickOn(Entity edge)
         {

@@ -378,3 +378,13 @@ K45::ADR.main[bulkRevert.cancel]	Cancel	Cancelar
 K45::ADR.main[bulkRevert.highways]	Highways	Rodovias
 K45::ADR.main[bulkRevert.resultTitle]	Removal finished	Remoção concluída
 K45::ADR.main[bulkRevert.resultBody]	Removed: {removed}\nNo matching kind: {noMatch}\nKept (highway): {highway}\nFailed: {failed}	Removidas: {removed}\nSem tipo correspondente: {noMatch}\nMantidas (rodovia): {highway}\nFalhas: {failed}
+K45::ADR.vuio[roadGrouping.reject.dragUnreachable]	Cannot reach that destination from this end.	Não é possível alcançar esse destino a partir desta extremidade.
+K45::ADR.vuio[roadGrouping.hint.cancelDrag]	Cancel drag	Cancelar arraste
+::HroadGrouping.hint.select	Select road group	Selecionar grupo de vias
+::HroadGrouping.hint.toggleAdd	Add to group	Adicionar ao grupo
+::HroadGrouping.hint.toggleRemove	Remove from group	Remover do grupo
+::HroadGrouping.hint.dragStart	Extend or shrink group	Estender ou encolher grupo
+::HroadGrouping.hint.dragApply	Apply path change	Aplicar alteração do caminho
+::HroadGrouping.hint.cancelSelection	Clear selection	Limpar seleção
+::HroadGrouping.hint.exitTool	Exit tool	Sair da ferramenta
+::HroadGrouping.hint.cancelDrag	Cancel drag	Cancelar arraste
