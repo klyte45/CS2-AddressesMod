@@ -1,0 +1,9 @@
+K45::ADR	vuio	roadGrouping	reject.dragUnreachable	K45::ADR.vuio[roadGrouping.reject.dragUnreachable]	Cannot reach that destination from this end.	Não é possível alcançar esse destino a partir desta extremidade.
+K45::ADR	vuio	roadGrouping	hint.select	K45::ADR.vuio[roadGrouping.hint.select]	Select road group	Selecionar grupo de vias
+K45::ADR	vuio	roadGrouping	hint.toggleAdd	K45::ADR.vuio[roadGrouping.hint.toggleAdd]	Add to group	Adicionar ao grupo
+K45::ADR	vuio	roadGrouping	hint.toggleRemove	K45::ADR.vuio[roadGrouping.hint.toggleRemove]	Remove from group	Remover do grupo
+K45::ADR	vuio	roadGrouping	hint.dragStart	K45::ADR.vuio[roadGrouping.hint.dragStart]	Extend or shrink group	Estender ou encolher grupo
+K45::ADR	vuio	roadGrouping	hint.dragApply	K45::ADR.vuio[roadGrouping.hint.dragApply]	Apply path change	Aplicar alteração do caminho
+K45::ADR	vuio	roadGrouping	hint.cancelSelection	K45::ADR.vuio[roadGrouping.hint.cancelSelection]	Clear selection	Limpar seleção
+K45::ADR	vuio	roadGrouping	hint.exitTool	K45::ADR.vuio[roadGrouping.hint.exitTool]	Exit tool	Sair da ferramenta
+K45::ADR	vuio	roadGrouping	hint.cancelDrag	K45::ADR.vuio[roadGrouping.hint.cancelDrag]	Cancel drag	Cancelar arraste
