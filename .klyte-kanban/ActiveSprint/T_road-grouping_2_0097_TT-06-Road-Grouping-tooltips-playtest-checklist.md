@@ -1,3 +1,4 @@
+**End time:** 2026-09-15 01:33 -0300
 **Start time:** 2026-09-15 00:46 -0300
 # [0097] TT-06-Road-Grouping-tooltips-playtest-checklist
 
