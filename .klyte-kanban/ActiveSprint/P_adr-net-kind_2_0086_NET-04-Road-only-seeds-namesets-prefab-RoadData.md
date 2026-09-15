@@ -58,6 +58,7 @@ Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint
 9. AdrNetKindUtil: IsRoadEdge + TryResolveOwnerKind helpers.
 10. TryAppendAggregateSeedOption: hasCustomNameList only when kind is Road. Aggregated edge SIP RoadAggregation typed via IsRoadEdge (not HasComponent Road). Highway option gated to Road kind. Station nearby-walk + GetMainReferenceAggregate use IsRoadEdge.
 11. Docs 23/24 notes updated. Awaiting user compile + playtest: road seed still works without edge Road; non-road keeps vanilla name and no seed dice.
+12. Non-road default names: ADR locale keys K45::ADR.main[netKind.*] via Name.LocalizedName (vanilla AggregateNet has no usable translation). Pending i18n merge: BelzontAdr/i18n/netKind_entries.txt (Road/Pathway/Train/Tram/Subway/Waterway/Taxiway; en-US + pt-BR).
 
 ---
 

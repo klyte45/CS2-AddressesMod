@@ -120,7 +120,7 @@ SIP `TryAppendAggregateSeedOption`: set `hasCustomNameList` only when kind is Ro
 
 Replace any `HasComponent<Road>` gates with prefab-`RoadData` / stored `AdrNetKind` (NET-04).
 
-**NET-04 naming:** `GetAggregateName` applies road namesets/prefixes only for `AdrNetKind.Road`; drops TrackData→RoadData fake. Non-road aggregates defer to vanilla NameSystem (localized AggregateNet type: Railway, Pathway, …).
+**NET-04 naming:** `GetAggregateName` applies road namesets/prefixes only for `AdrNetKind.Road`; drops TrackData→RoadData fake. Non-road aggregates use ADR locale defaults `K45::ADR.main[netKind.*]` (vanilla AggregateNet assets have no usable player-facing translation) — pending merge from `BelzontAdr/i18n/netKind_entries.txt`.
 
 ## Touch map
 
