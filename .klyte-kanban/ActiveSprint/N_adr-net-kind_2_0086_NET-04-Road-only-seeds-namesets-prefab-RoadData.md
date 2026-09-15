@@ -53,6 +53,7 @@ Continuation of Sprint 014 task 0085 (HW-03c), which was Z-overflowed mid-sprint
 4. TryAppendAggregateSeedOption: hasCustomNameList only when AdrNetKind.Road
 5. Replace ADR HasComponent<Road> seed/address gates with RoadData or stored kind
 6. Catalog: 24-adr-net-kind-roadmap.md NET-04
+7. Default names for non-road aggregations shall be the localized aggregation type (Railway, Pathway, etc)
 
 ---
 
