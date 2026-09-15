@@ -37,7 +37,7 @@ Third task of epic adr-net-kind. Non-road AggregateNets often lack NetLabel/NetN
 - [x] EnsureRoadNameLabelComponents (or successor) resolves PrefabRef to a prefab with NetNameData; outline follows stored AdrNetKind
 - [x] m_IsAdrStyle generalized to per-kind outline lookup — Road no longer forced to former single green
 - [x] No mutation of vanilla AggregateNet assets
-- [ ] Compile + smoke: non-road S2 labels draw; Road S2 outline is #333333
+- [x] Compile + smoke: non-road S2 labels draw; Road S2 outline is #333333
 
 ---
 
@@ -51,6 +51,10 @@ Third task of epic adr-net-kind. Non-road AggregateNets often lack NetLabel/NetN
 6. Added AdrNetKindUtil outline/face color table (#FFFFFFC0 face; Subway #004400, Road #333333, Pathway #666666, Train #331A00, Tram #330033, Waterway #002244, Taxiway #33001A).
 7. AdrRoadNameLabelMeshSystem: m_IsAdrStyle → m_AdrOutlineKind; ApplyAdrOutline(kind); ADR face uses #FFFFFFC0. EnsureAdrKindNamePrefabs creates ADR-owned NetNameData entities for non-road kinds (material index 0 from vanilla AggregateNet bake; no vanilla asset mutation). Ensure/ResolveOwnerNamePrefabRef points non-road ADR PrefabRef at kind prefabs; Road keeps vanilla AggregateNet NetNameData when present.
 8. Awaiting user compile + smoke: non-road S2 labels; Road S2 outline #333333.
+9. Crash fix: PrefabRef on ADR stays a real AggregateNet with PrefabData — never ADR synthetic NetNameData-only entities (PrefabSystem/CreationDefinition hard-crash on train edit). ADR-owned NetNameData entities remain color metadata only.
+10. Train/pathway AggregateNets lack NetLabel/NetNameData: LabelMaterial index borrows baked AggregateNet name materials; UpdateLabelVertices + FillNameDataJob tolerate missing NetNameData.
+11. Hover fix: selection Temp Aggregate from AggregateNets without NetLabel had no Label* while ADR original is Hidden — Ensure Temp Aggregates missing LabelMaterial; CreationDefinition prefers AggregateNet with NetNameData (safe labeled prefab) for Temp archetype.
+12. Validated by user (compile + smoke including train edit + non-road hover labels).
 
 ---
 
