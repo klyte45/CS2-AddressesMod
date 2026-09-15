@@ -33,14 +33,14 @@ Sixth slice of epic adr-net-kind. Players need a settings-side bulk convert afte
 
 ## Acceptance Criteria / Definition of Done (DoD)
 
-- [ ] Feature button on Roads and Districts tab immediately above per-district road nameset section
-- [ ] Confirm dialog body lists checkboxes for aggregable AdrNetKinds; only checked kinds are converted
-- [ ] Citywide pass forks/creates ADR aggregates for applicable edges of selected kinds
-- [ ] Already-ADR edges skipped; operation is safe to re-run
-- [ ] Cross-kind membership never created (NET-02 gate respected)
-- [ ] Result feedback (counts or equivalent) after run
-- [ ] i18n via pending *_entries.txt (no agent CSV edit)
-- [ ] Compile + smoke: convert roads-only; convert roads+train; cancel leaves city unchanged
+- [x] Feature button on Roads and Districts tab immediately above per-district road nameset section
+- [x] Confirm dialog body lists checkboxes for aggregable AdrNetKinds; only checked kinds are converted
+- [x] Citywide pass forks/creates ADR aggregates for applicable edges of selected kinds
+- [x] Already-ADR edges skipped; operation is safe to re-run
+- [x] Cross-kind membership never created (NET-02 gate respected)
+- [x] Result feedback (counts or equivalent) after run
+- [x] i18n via pending *_entries.txt (no agent CSV edit)
+- [x] Compile + smoke: convert roads-only; convert roads+train; cancel leaves city unchanged
 
 ---
 
@@ -53,6 +53,7 @@ Sixth slice of epic adr-net-kind. Players need a settings-side bulk convert afte
 5. Backend: AdrNameAggregateMembershipSystem.ConvertCitywideToAdrAggregates(kindMask) — full TryForkFromVanillaSeed when remainder matches mask+shared kind; else CreateAggregate per kind bucket. Binder main.convertAllToAdrAggregates. Result DTO AdrBulkConvertResult.
 6. UI: OverrideRoadsDistrictsTab button above perDistrictRoadsFile; ConfirmationDialog with kind checkboxes (Road default on); result dialog with counts.
 7. i18n pending: BelzontAdr/i18n/bulkConvert_entries.txt (reuse main netKind.* for checkbox labels). Awaiting compile + smoke.
+8. Validated: convert + revert UI; building-owned aggregates skipped on convert; highways-only revert removes highway ADR aggregates without Road checkbox; i18n UTF-8 export fixed in xlsm macro.
 
 ---
 
