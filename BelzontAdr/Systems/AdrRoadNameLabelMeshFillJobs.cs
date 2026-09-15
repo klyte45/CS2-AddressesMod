@@ -51,6 +51,9 @@ namespace BelzontAdr
             [ReadOnly] public ComponentLookup<NetNameData> m_NetNameData;
             [ReadOnly] public NativeList<ArchetypeChunk> m_Chunks;
             [ReadOnly] public int m_SubMeshCount;
+            /// <summary>Used when PrefabRef has no <see cref="NetNameData"/> (e.g. train AggregateNet).</summary>
+            [ReadOnly] public Color32 m_FallbackColor;
+            [ReadOnly] public Color32 m_FallbackSelectedColor;
             public Mesh.MeshDataArray m_NameMeshData;
 
             public void Execute()
@@ -139,15 +142,24 @@ namespace BelzontAdr
                     for (int num3 = 0; num3 < bufferAccessor4.Length; num3++)
                     {
                         LabelExtents labelExtents = nativeArray[num3];
-                        PrefabRef prefabRef = nativeArray2[num3];
                         DynamicBuffer<LabelPosition> dynamicBuffer3 = bufferAccessor3[num3];
                         DynamicBuffer<LabelVertex> dynamicBuffer4 = bufferAccessor4[num3];
-                        NetNameData netNameData = m_NetNameData[prefabRef.m_Prefab];
-                        Color32 color = netNameData.m_Color;
+                        Color32 color = m_FallbackColor;
+                        Color32 selectedColor = m_FallbackSelectedColor;
+                        if (nativeArray2.Length > num3)
+                        {
+                            PrefabRef prefabRef = nativeArray2[num3];
+                            if (m_NetNameData.TryGetComponent(prefabRef.m_Prefab, out NetNameData netNameData))
+                            {
+                                color = netNameData.m_Color;
+                                selectedColor = netNameData.m_SelectedColor;
+                            }
+                        }
+
                         if (nativeArray3.Length != 0
                             && (nativeArray3[num3].m_Flags & (TempFlags.Create | TempFlags.Delete | TempFlags.Select | TempFlags.Modify | TempFlags.Replace)) != 0)
                         {
-                            color = netNameData.m_SelectedColor;
+                            color = selectedColor;
                         }
 
                         float num4 = math.length(math.max(-labelExtents.m_Bounds.min, labelExtents.m_Bounds.max));

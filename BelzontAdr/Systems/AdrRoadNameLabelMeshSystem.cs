@@ -35,8 +35,10 @@ namespace BelzontAdr
         {
             public Material m_Material;
             public bool m_IsUnderground;
-            /// <summary>True = ADR S2 (or Temp of ADR) style — dark green outline; false = vanilla Aggregate black outline.</summary>
-            public bool m_IsAdrStyle;
+            /// <summary>
+            /// <see cref="AdrNetKind.None"/> = vanilla Aggregate outline; otherwise ADR outline-by-kind.
+            /// </summary>
+            public AdrNetKind m_AdrOutlineKind;
             public bool m_HasMesh;
         }
 
@@ -67,14 +69,24 @@ namespace BelzontAdr
         private EntityQuery m_AllNamePrefabQuery;
         private EntityQuery m_LabelQuery;
         private EntityQuery m_AdrOwnersMissingLabelsQuery;
+        private EntityQuery m_TempAggregatesMissingLabelsQuery;
+        private EntityQuery m_AllAdrAggregatesQuery;
         private EntityQuery m_S1PlacementQuery;
         private EntityQuery m_S2PlacementQuery;
 
         private List<MeshData> m_LabelData;
         private Dictionary<Entity, string> m_CachedLabels;
+        /// <summary>ADR-owned NetNameData entities keyed by <see cref="AdrNetKind"/> (color metadata; not PrefabRef targets).</summary>
+        private Entity[] m_AdrKindNamePrefabs;
+        /// <summary>
+        /// Real AggregateNet prefab entity that has <see cref="NetNameData"/> + PrefabData (safe PrefabRef target).
+        /// Non-road ADR labels borrow this for material index; outline still follows stored <see cref="AdrNetKind"/>.
+        /// </summary>
+        private Entity m_SafeNameMaterialPrefab = Entity.Null;
+        /// <summary>True until first successful PrefabRef repair pass after load / system create.</summary>
+        private bool m_PrefabRefRepairPending = true;
         private int m_FaceColor;
         private int m_OutlineColor;
-        private static readonly Color AdrOutlineColor = new(0f, 0x44 / 255f, 0f, 1f);
         private bool m_Loaded = true;
         private bool m_TunnelSelectOn;
 
@@ -122,6 +134,28 @@ namespace BelzontAdr
                 }
             });
 
+            // Selection Temp Aggregate from AggregateNets without NetLabel (train/pathway) gets no Label*
+            // archetype — original ADR is Hidden, so labels vanish unless we Ensure them on the Temp.
+            m_TempAggregatesMissingLabelsQuery = GetEntityQuery(new EntityQueryDesc
+            {
+                All = new[]
+                {
+                    ComponentType.ReadOnly<Aggregate>(),
+                    ComponentType.ReadOnly<Temp>(),
+                    ComponentType.ReadOnly<AggregateElement>()
+                },
+                None = new[]
+                {
+                    ComponentType.ReadOnly<LabelMaterial>(),
+                    ComponentType.ReadOnly<Deleted>(),
+                    ComponentType.ReadOnly<ADRNameAggregate>()
+                }
+            });
+
+            m_AllAdrAggregatesQuery = GetEntityQuery(
+                ComponentType.ReadOnly<ADRNameAggregate>(),
+                ComponentType.Exclude<Deleted>());
+
             m_S1PlacementQuery = GetEntityQuery(
                 ComponentType.ReadOnly<Aggregate>(),
                 ComponentType.ReadOnly<LabelExtents>(),
@@ -145,6 +179,7 @@ namespace BelzontAdr
         [Preserve]
         protected override void OnDestroy()
         {
+            DestroyAdrKindNamePrefabs();
             DestroyLabelMaterials();
             if (GameManager.instance?.localizationManager != null)
             {
@@ -156,6 +191,9 @@ namespace BelzontAdr
         public void PreDeserialize(Context context)
         {
             ClearLabelMeshes();
+            DestroyAdrKindNamePrefabs();
+            m_SafeNameMaterialPrefab = Entity.Null;
+            m_PrefabRefRepairPending = true;
             m_CachedLabels?.Clear();
             m_Loaded = true;
         }
@@ -179,13 +217,23 @@ namespace BelzontAdr
         [Preserve]
         protected override void OnUpdate()
         {
-            EnsureAdrOwnersHaveLabelComponents();
-
             bool loaded = GetLoaded();
+            bool hadSafeNamePrefab = m_SafeNameMaterialPrefab != Entity.Null;
             bool needFullPrefabScan = m_LabelData == null || m_LabelData.Count == 0;
             if (needFullPrefabScan || !m_CreatedPrefabQuery.IsEmptyIgnoreFilter)
             {
                 InitializePrefabs(fullScan: needFullPrefabScan);
+            }
+
+            bool kindPrefabsCreated = EnsureAdrKindNamePrefabs();
+            EnsureAdrOwnersHaveLabelComponents();
+            EnsureTempSelectionAggregatesHaveLabelComponents();
+            bool safePrefabNewlyReady = !hadSafeNamePrefab && m_SafeNameMaterialPrefab != Entity.Null;
+            if ((kindPrefabsCreated || safePrefabNewlyReady || m_PrefabRefRepairPending)
+                && m_SafeNameMaterialPrefab != Entity.Null)
+            {
+                RefreshAdrOwnerNamePrefabRefs();
+                m_PrefabRefRepairPending = false;
             }
 
             if (m_LabelData == null || m_LabelData.Count == 0)
@@ -214,6 +262,19 @@ namespace BelzontAdr
             }
 
             Dependency = FillNameMeshes(handle);
+        }
+
+        /// <summary>
+        /// Real AggregateNet prefab entity with PrefabData + NetNameData (NetLabel archetype).
+        /// Used so selection Temp Aggregates for train/pathway get Label* components from prefab.
+        /// </summary>
+        internal bool TryGetSafeNameMaterialPrefab(out Entity prefab)
+        {
+            prefab = m_SafeNameMaterialPrefab;
+            return prefab != Entity.Null
+                && EntityManager.Exists(prefab)
+                && EntityManager.HasComponent<PrefabData>(prefab)
+                && EntityManager.HasComponent<NetNameData>(prefab);
         }
 
         internal int GetNameMaterialCount()
@@ -392,6 +453,8 @@ namespace BelzontAdr
                     m_NetNameData = GetComponentLookup<NetNameData>(true),
                     m_Chunks = chunks,
                     m_SubMeshCount = meshData.m_Materials.Count,
+                    m_FallbackColor = AdrNetKindUtil.AdrFaceColor32,
+                    m_FallbackSelectedColor = AdrNetKindUtil.AdrFaceColor32,
                     m_NameMeshData = meshData.m_MeshData
                 }.Schedule(JobHandle.CombineDependencies(outJobHandle, inputDeps));
                 chunks.Dispose(jobHandle2);
@@ -485,6 +548,34 @@ namespace BelzontAdr
             }
         }
 
+        /// <summary>
+        /// Hover/select hides the ADR original and draws labels on the Temp Aggregate.
+        /// Train/pathway AggregateNets lack <see cref="Game.Prefabs.NetLabel"/>, so Temp has no Label*
+        /// archetype — attach the same contract we use for ADR owners.
+        /// </summary>
+        private void EnsureTempSelectionAggregatesHaveLabelComponents()
+        {
+            if (m_TempAggregatesMissingLabelsQuery.IsEmptyIgnoreFilter)
+            {
+                return;
+            }
+
+            using NativeArray<Entity> entities = m_TempAggregatesMissingLabelsQuery.ToEntityArray(Allocator.Temp);
+            for (int i = 0; i < entities.Length; i++)
+            {
+                Entity tempAggregate = entities[i];
+                Entity prefabSource = Entity.Null;
+                if (EntityManager.TryGetComponent(tempAggregate, out Temp temp)
+                    && temp.m_Original != Entity.Null
+                    && EntityManager.Exists(temp.m_Original))
+                {
+                    prefabSource = temp.m_Original;
+                }
+
+                EnsureRoadNameLabelComponents(tempAggregate, prefabSource);
+            }
+        }
+
         private Entity ResolvePrefabSourceForAdr(Entity adrAggregate)
         {
             if (!EntityManager.TryGetBuffer(adrAggregate, true, out DynamicBuffer<ADRNameAggregateElement> elements)
@@ -505,7 +596,11 @@ namespace BelzontAdr
         }
 
         /// <summary>
-        /// Ensure ADR (or any) name-label owner has Label* contract + PrefabRef for NetNameData.
+        /// Ensure ADR (or any) name-label owner has Label* contract + PrefabRef for AggregateNet.
+        /// PrefabRef stays a real AggregateNet (<see cref="PrefabData"/>) for edit/highlight;
+        /// AggregateNets without <see cref="NetNameData"/> (train/pathway) still get a borrowed
+        /// <see cref="LabelMaterial"/> index from baked AggregateNet name materials.
+        /// ADR-owned kind NetNameData entities are color metadata only — never PrefabRef targets.
         /// </summary>
         public void EnsureRoadNameLabelComponents(Entity owner, Entity prefabSource)
         {
@@ -527,18 +622,13 @@ namespace BelzontAdr
                 EntityManager.AddComponentData(owner, default(LabelExtents));
             }
 
-            if (!EntityManager.HasComponent<PrefabRef>(owner)
-                && prefabSource != Entity.Null
-                && EntityManager.TryGetComponent(prefabSource, out PrefabRef sourcePrefab))
-            {
-                EntityManager.AddComponentData(owner, sourcePrefab);
-            }
+            EnsureAdrKindNamePrefabs();
+            ResolveOwnerNamePrefabRef(owner, prefabSource);
 
-            int materialIndex = 0;
-            if (EntityManager.TryGetComponent(owner, out PrefabRef prefabRef)
-                && EntityManager.TryGetComponent(prefabRef.m_Prefab, out NetNameData nameData))
+            if (!TryResolveLabelMaterialIndex(owner, out int materialIndex))
             {
-                materialIndex = nameData.m_MaterialIndex;
+                // No safe AggregateNet name material yet — skip LabelMaterial to avoid index-0 crashes.
+                return;
             }
 
             var labelMaterial = new LabelMaterial { m_Index = materialIndex };
@@ -557,6 +647,225 @@ namespace BelzontAdr
             }
         }
 
+        private bool TryResolveLabelMaterialIndex(Entity owner, out int materialIndex)
+        {
+            materialIndex = -1;
+            if (m_LabelData == null || m_LabelData.Count == 0)
+            {
+                return false;
+            }
+
+            // Temp selection Aggregate: copy LabelMaterial from ADR/S1 original when present.
+            if (EntityManager.TryGetComponent(owner, out Temp temp)
+                && temp.m_Original != Entity.Null
+                && EntityManager.Exists(temp.m_Original)
+                && EntityManager.HasComponent<LabelMaterial>(temp.m_Original))
+            {
+                int originalIndex = EntityManager.GetSharedComponent<LabelMaterial>(temp.m_Original).m_Index;
+                if (originalIndex >= 0
+                    && originalIndex < m_LabelData.Count
+                    && m_LabelData[originalIndex].m_OriginalMaterial != null)
+                {
+                    materialIndex = originalIndex;
+                    return true;
+                }
+            }
+
+            // Prefer NetNameData on the owner's PrefabRef when the AggregateNet has name labels (roads).
+            if (EntityManager.TryGetComponent(owner, out PrefabRef prefabRef)
+                && prefabRef.m_Prefab != Entity.Null
+                && EntityManager.TryGetComponent(prefabRef.m_Prefab, out NetNameData nameData)
+                && nameData.m_MaterialIndex >= 0
+                && nameData.m_MaterialIndex < m_LabelData.Count
+                && m_LabelData[nameData.m_MaterialIndex].m_OriginalMaterial != null)
+            {
+                materialIndex = nameData.m_MaterialIndex;
+                return true;
+            }
+
+            // Train/pathway AggregateNets lack NetNameData — borrow first baked AggregateNet name material.
+            for (int i = 0; i < m_LabelData.Count; i++)
+            {
+                if (m_LabelData[i].m_OriginalMaterial != null)
+                {
+                    materialIndex = i;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// PrefabRef must remain a real AggregateNet (<see cref="PrefabData"/>) for edit/highlight tooling.
+        /// Train/pathway AggregateNets often lack <see cref="NetNameData"/> — label material index comes from
+        /// <see cref="LabelMaterial"/> instead; never point PrefabRef at ADR synthetic NetNameData-only entities.
+        /// </summary>
+        private void ResolveOwnerNamePrefabRef(Entity owner, Entity prefabSource)
+        {
+            Entity desiredPrefab = Entity.Null;
+            if (prefabSource != Entity.Null
+                && EntityManager.TryGetComponent(prefabSource, out PrefabRef sourcePrefab)
+                && sourcePrefab.m_Prefab != Entity.Null
+                && EntityManager.Exists(sourcePrefab.m_Prefab)
+                && EntityManager.HasComponent<PrefabData>(sourcePrefab.m_Prefab))
+            {
+                desiredPrefab = sourcePrefab.m_Prefab;
+            }
+
+            if (!EntityManager.HasComponent<PrefabRef>(owner))
+            {
+                if (desiredPrefab != Entity.Null)
+                {
+                    EntityManager.AddComponentData(owner, new PrefabRef(desiredPrefab));
+                }
+
+                return;
+            }
+
+            PrefabRef existing = EntityManager.GetComponentData<PrefabRef>(owner);
+            bool existingIsSyntheticOrBroken = existing.m_Prefab == Entity.Null
+                || !EntityManager.Exists(existing.m_Prefab)
+                || !EntityManager.HasComponent<PrefabData>(existing.m_Prefab);
+
+            if (!existingIsSyntheticOrBroken)
+            {
+                return;
+            }
+
+            if (desiredPrefab != Entity.Null)
+            {
+                EntityManager.SetComponentData(owner, new PrefabRef(desiredPrefab));
+            }
+            else
+            {
+                // Drop PrefabRef that would crash PrefabSystem.GetPrefab / CreationDefinition.
+                EntityManager.RemoveComponent<PrefabRef>(owner);
+            }
+        }
+
+        private Entity GetAdrKindNamePrefab(AdrNetKind kind)
+        {
+            if (m_AdrKindNamePrefabs == null
+                || kind <= AdrNetKind.None
+                || (int)kind >= m_AdrKindNamePrefabs.Length)
+            {
+                return Entity.Null;
+            }
+
+            return m_AdrKindNamePrefabs[(int)kind];
+        }
+
+        /// <summary>
+        /// Create ADR-owned entities with <see cref="NetNameData"/> for non-road kinds (face-color metadata).
+        /// Never used as PrefabRef targets — they lack PrefabData and would hard-crash edit/highlight paths.
+        /// </summary>
+        /// <returns>True when prefabs were created this call.</returns>
+        private bool EnsureAdrKindNamePrefabs()
+        {
+            if (m_AdrKindNamePrefabs != null)
+            {
+                return false;
+            }
+
+            if (m_LabelData == null || m_LabelData.Count == 0)
+            {
+                return false;
+            }
+
+            int materialIndex = 0;
+            for (int i = 0; i < m_LabelData.Count; i++)
+            {
+                if (m_LabelData[i].m_OriginalMaterial != null)
+                {
+                    materialIndex = i;
+                    break;
+                }
+            }
+
+            if (m_LabelData[materialIndex].m_OriginalMaterial == null)
+            {
+                return false;
+            }
+
+            int kindCount = (int)AdrNetKind.Taxiway + 1;
+            m_AdrKindNamePrefabs = new Entity[kindCount];
+            for (int i = 0; i < kindCount; i++)
+            {
+                m_AdrKindNamePrefabs[i] = Entity.Null;
+            }
+
+            foreach (AdrNetKind kind in AdrNetKindUtil.NonRoadKindsWithAdrNamePrefab)
+            {
+                Entity prefab = EntityManager.CreateEntity();
+                EntityManager.AddComponentData(prefab, new NetNameData
+                {
+                    m_Color = AdrNetKindUtil.AdrFaceColor32,
+                    m_SelectedColor = AdrNetKindUtil.AdrFaceColor32,
+                    m_MaterialIndex = materialIndex
+                });
+                m_AdrKindNamePrefabs[(int)kind] = prefab;
+            }
+
+            return true;
+        }
+
+        private void RefreshAdrOwnerNamePrefabRefs()
+        {
+            if (m_AllAdrAggregatesQuery.IsEmptyIgnoreFilter)
+            {
+                return;
+            }
+
+            using NativeArray<Entity> entities = m_AllAdrAggregatesQuery.ToEntityArray(Allocator.Temp);
+            for (int i = 0; i < entities.Length; i++)
+            {
+                Entity owner = entities[i];
+                if (!EntityManager.HasBuffer<LabelVertex>(owner))
+                {
+                    continue;
+                }
+
+                ResolveOwnerNamePrefabRef(owner, ResolvePrefabSourceForAdr(owner));
+                if (TryResolveLabelMaterialIndex(owner, out int materialIndex))
+                {
+                    var labelMaterial = new LabelMaterial { m_Index = materialIndex };
+                    if (!EntityManager.HasComponent<LabelMaterial>(owner))
+                    {
+                        EntityManager.AddSharedComponent(owner, labelMaterial);
+                    }
+                    else
+                    {
+                        EntityManager.SetSharedComponent(owner, labelMaterial);
+                    }
+                }
+
+                if (!EntityManager.HasComponent<Updated>(owner))
+                {
+                    EntityManager.AddComponent<Updated>(owner);
+                }
+            }
+        }
+
+        private void DestroyAdrKindNamePrefabs()
+        {
+            if (m_AdrKindNamePrefabs == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < m_AdrKindNamePrefabs.Length; i++)
+            {
+                Entity prefab = m_AdrKindNamePrefabs[i];
+                if (prefab != Entity.Null && EntityManager.Exists(prefab))
+                {
+                    EntityManager.DestroyEntity(prefab);
+                }
+            }
+
+            m_AdrKindNamePrefabs = null;
+        }
+
         private void InitializePrefabs(bool fullScan)
         {
             EntityQuery query = fullScan ? m_AllNamePrefabQuery : m_CreatedPrefabQuery;
@@ -566,12 +875,14 @@ namespace BelzontAdr
             }
 
             using NativeArray<ArchetypeChunk> chunks = query.ToArchetypeChunkArray(Allocator.TempJob);
+            var entityType = GetEntityTypeHandle();
             var prefabDataType = GetComponentTypeHandle<PrefabData>(true);
             var netNameDataType = GetComponentTypeHandle<NetNameData>(false);
 
             for (int i = 0; i < chunks.Length; i++)
             {
                 ArchetypeChunk chunk = chunks[i];
+                NativeArray<Entity> entities = chunk.GetNativeArray(entityType);
                 NativeArray<PrefabData> prefabDatas = chunk.GetNativeArray(ref prefabDataType);
                 NativeArray<NetNameData> nameDatas = chunk.GetNativeArray(ref netNameDataType);
                 for (int j = 0; j < prefabDatas.Length; j++)
@@ -612,6 +923,12 @@ namespace BelzontAdr
                     NetNameData nameData = nameDatas[j];
                     nameData.m_MaterialIndex = materialIndex;
                     nameDatas[j] = nameData;
+
+                    // Cache a real AggregateNet prefab entity safe for PrefabRef (has PrefabData + NetNameData).
+                    if (m_SafeNameMaterialPrefab == Entity.Null)
+                    {
+                        m_SafeNameMaterialPrefab = entities[j];
+                    }
                 }
             }
         }
@@ -636,7 +953,10 @@ namespace BelzontAdr
                     MaterialData materialData = meshData.m_Materials[j];
                     if (!materialData.m_IsUnderground && materialData.m_Material != null)
                     {
-                        materialData.m_Material.SetColor(m_FaceColor, new Color(1f, 1f, 1f, undergroundOn ? 0.25f : 1f));
+                        ApplyAdrFaceColor(
+                            materialData.m_Material,
+                            materialData.m_AdrOutlineKind,
+                            undergroundOn ? 0.25f : 1f);
                         meshData.m_Materials[j] = materialData;
                     }
                 }
@@ -699,29 +1019,45 @@ namespace BelzontAdr
                 {
                     Entity entity = entities[j];
                     PrefabRef prefabRef = prefabRefs[j];
-                    if (!EntityManager.TryGetComponent(prefabRef.m_Prefab, out NetNameData nameData)
-                        || nameData.m_MaterialIndex < 0
-                        || nameData.m_MaterialIndex >= m_LabelData.Count)
+                    int materialIndex = sharedMaterial.m_Index;
+                    if (EntityManager.TryGetComponent(prefabRef.m_Prefab, out NetNameData nameData)
+                        && nameData.m_MaterialIndex >= 0
+                        && m_LabelData != null
+                        && nameData.m_MaterialIndex < m_LabelData.Count
+                        && m_LabelData[nameData.m_MaterialIndex].m_OriginalMaterial != null)
+                    {
+                        materialIndex = nameData.m_MaterialIndex;
+                    }
+                    else if (m_LabelData == null
+                             || materialIndex < 0
+                             || materialIndex >= m_LabelData.Count
+                             || m_LabelData[materialIndex].m_OriginalMaterial == null)
                     {
                         continue;
                     }
 
                     DynamicBuffer<LabelVertex> buffer = vertices[j];
-                    MeshData meshData = m_LabelData[nameData.m_MaterialIndex];
+                    MeshData meshData = m_LabelData[materialIndex];
+                    if (meshData.m_Materials == null)
+                    {
+                        buffer.Clear();
+                        continue;
+                    }
+
                     meshData.m_MeshDirty = true;
 
-                    if (nameData.m_MaterialIndex != sharedMaterial.m_Index)
+                    if (materialIndex != sharedMaterial.m_Index)
                     {
                         materialUpdates ??= new List<MaterialUpdate>();
                         materialUpdates.Add(new MaterialUpdate
                         {
                             m_Entity = entity,
-                            m_Material = nameData.m_MaterialIndex
+                            m_Material = materialIndex
                         });
                     }
 
                     string renderedLabelName;
-                    bool adrStyle = false;
+                    AdrNetKind outlineKind = AdrNetKind.None;
                     if (temps.Length != 0)
                     {
                         Temp temp = temps[j];
@@ -732,12 +1068,12 @@ namespace BelzontAdr
                             continue;
                         }
                         renderedLabelName = m_NameSystem.GetRenderedLabelName(temp.m_Original);
-                        adrStyle = EntityManager.HasComponent<ADRNameAggregate>(temp.m_Original);
+                        outlineKind = ResolveAdrOutlineKind(temp.m_Original);
                     }
                     else
                     {
                         renderedLabelName = m_NameSystem.GetRenderedLabelName(entity);
-                        adrStyle = EntityManager.HasComponent<ADRNameAggregate>(entity);
+                        outlineKind = ResolveAdrOutlineKind(entity);
                     }
 
                     if (m_CachedLabels != null)
@@ -784,7 +1120,7 @@ namespace BelzontAdr
                             MaterialData existing = meshData.m_Materials[m];
                             if (existing.m_Material == null
                                 || existing.m_Material.mainTexture != mainTexture
-                                || existing.m_IsAdrStyle != adrStyle)
+                                || existing.m_AdrOutlineKind != outlineKind)
                             {
                                 continue;
                             }
@@ -804,17 +1140,17 @@ namespace BelzontAdr
                             var surface = new MaterialData
                             {
                                 m_Material = new Material(meshData.m_OriginalMaterial),
-                                m_IsAdrStyle = adrStyle
+                                m_AdrOutlineKind = outlineKind
                             };
-                            surface.m_Material.SetColor(m_FaceColor, new Color(1f, 1f, 1f, undergroundOn ? 0.25f : 1f));
-                            if (adrStyle)
+                            ApplyAdrFaceColor(surface.m_Material, outlineKind, undergroundOn ? 0.25f : 1f);
+                            if (outlineKind != AdrNetKind.None)
                             {
-                                ApplyAdrOutline(surface.m_Material);
+                                ApplyAdrOutline(surface.m_Material, outlineKind);
                             }
                             m_OverlayRenderSystem.CopyFontAtlasParameters(meshInfo.material, surface.m_Material);
                             material.x = meshData.m_Materials.Count;
                             meshData.m_Materials.Add(surface);
-                            string styleTag = adrStyle ? "ADR" : "Vanilla";
+                            string styleTag = outlineKind != AdrNetKind.None ? $"ADR-{outlineKind}" : "Vanilla";
                             surface.m_Material.name = $"{styleTag} Aggregate names {material.x} ({meshData.m_OriginalMaterial.name})";
                         }
 
@@ -824,17 +1160,17 @@ namespace BelzontAdr
                             {
                                 m_Material = new Material(meshData.m_OriginalMaterial),
                                 m_IsUnderground = true,
-                                m_IsAdrStyle = adrStyle
+                                m_AdrOutlineKind = outlineKind
                             };
-                            underground.m_Material.SetColor(m_FaceColor, new Color(1f, 1f, 1f, 1f));
-                            if (adrStyle)
+                            ApplyAdrFaceColor(underground.m_Material, outlineKind, 1f);
+                            if (outlineKind != AdrNetKind.None)
                             {
-                                ApplyAdrOutline(underground.m_Material);
+                                ApplyAdrOutline(underground.m_Material, outlineKind);
                             }
                             m_OverlayRenderSystem.CopyFontAtlasParameters(meshInfo.material, underground.m_Material);
                             material.y = meshData.m_Materials.Count;
                             meshData.m_Materials.Add(underground);
-                            string styleTag = adrStyle ? "ADR" : "Vanilla";
+                            string styleTag = outlineKind != AdrNetKind.None ? $"ADR-{outlineKind}" : "Vanilla";
                             underground.m_Material.name = $"{styleTag} Aggregate underground names {material.y} ({meshData.m_OriginalMaterial.name})";
                         }
 
@@ -918,11 +1254,35 @@ namespace BelzontAdr
             }
         }
 
-        private void ApplyAdrOutline(Material material)
+        private AdrNetKind ResolveAdrOutlineKind(Entity labelOwnerOrOriginal)
         {
-            if (material != null && material.HasProperty(m_OutlineColor))
+            if (!EntityManager.TryGetComponent(labelOwnerOrOriginal, out ADRNameAggregate host))
             {
-                material.SetColor(m_OutlineColor, AdrOutlineColor);
+                return AdrNetKind.None;
+            }
+
+            return host.m_Kind != AdrNetKind.None ? host.m_Kind : AdrNetKind.Road;
+        }
+
+        private void ApplyAdrFaceColor(Material material, AdrNetKind outlineKind, float alphaScale)
+        {
+            if (material == null || !material.HasProperty(m_FaceColor))
+            {
+                return;
+            }
+
+            Color face = outlineKind != AdrNetKind.None
+                ? AdrNetKindUtil.AdrFaceColor
+                : Color.white;
+            face.a *= alphaScale;
+            material.SetColor(m_FaceColor, face);
+        }
+
+        private void ApplyAdrOutline(Material material, AdrNetKind kind)
+        {
+            if (material != null && material.HasProperty(m_OutlineColor) && kind != AdrNetKind.None)
+            {
+                material.SetColor(m_OutlineColor, AdrNetKindUtil.GetOutlineColor(kind));
             }
         }
 

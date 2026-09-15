@@ -49,10 +49,10 @@ namespace BelzontAdr
                         : EntityManager.AddBuffer<AggregateElement>(definition);
                     AdrNameAggregateMembershipHelper.FillAggregateElementFromAdr(EntityManager, original, dest);
 
-                    if (creation.m_Prefab == Entity.Null
-                        && EntityManager.TryGetComponent(original, out PrefabRef prefabRef))
+                    Entity prefabForTemp = ResolvePrefabForAdrSelectionTemp(original, creation.m_Prefab);
+                    if (prefabForTemp != Entity.Null && creation.m_Prefab != prefabForTemp)
                     {
-                        creation.m_Prefab = prefabRef.m_Prefab;
+                        creation.m_Prefab = prefabForTemp;
                         EntityManager.SetComponentData(definition, creation);
                     }
                 }
@@ -63,6 +63,48 @@ namespace BelzontAdr
                     AdrNameAggregateMembershipHelper.FilterAggregateElementToS1Remainder(EntityManager, buffer);
                 }
             }
+        }
+
+        /// <summary>
+        /// Temp Aggregate archetype only gets Label* when CreationDefinition.m_Prefab AggregateNet has NetLabel.
+        /// Train/pathway AggregateNets lack NetNameData — borrow a labeled AggregateNet so hover keeps labels
+        /// while the ADR original is Hidden.
+        /// </summary>
+        private Entity ResolvePrefabForAdrSelectionTemp(Entity adrOriginal, Entity currentPrefab)
+        {
+            Entity candidate = currentPrefab;
+            if ((candidate == Entity.Null || !EntityManager.Exists(candidate))
+                && EntityManager.TryGetComponent(adrOriginal, out PrefabRef prefabRef)
+                && prefabRef.m_Prefab != Entity.Null
+                && EntityManager.Exists(prefabRef.m_Prefab)
+                && EntityManager.HasComponent<PrefabData>(prefabRef.m_Prefab))
+            {
+                candidate = prefabRef.m_Prefab;
+            }
+
+            if (candidate != Entity.Null
+                && EntityManager.Exists(candidate)
+                && EntityManager.HasComponent<PrefabData>(candidate)
+                && EntityManager.HasComponent<NetNameData>(candidate))
+            {
+                return candidate;
+            }
+
+            var labelSystem = World.GetExistingSystemManaged<AdrRoadNameLabelMeshSystem>();
+            if (labelSystem != null && labelSystem.TryGetSafeNameMaterialPrefab(out Entity safePrefab))
+            {
+                return safePrefab;
+            }
+
+            // Prefer a PrefabData AggregateNet even without NetNameData over Null/synthetic (edit crash).
+            if (candidate != Entity.Null
+                && EntityManager.Exists(candidate)
+                && EntityManager.HasComponent<PrefabData>(candidate))
+            {
+                return candidate;
+            }
+
+            return Entity.Null;
         }
     }
 }

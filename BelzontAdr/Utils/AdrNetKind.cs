@@ -2,6 +2,7 @@ using Colossal.Entities;
 using Game.Net;
 using Game.Prefabs;
 using Unity.Entities;
+using UnityEngine;
 
 namespace BelzontAdr
 {
@@ -23,6 +24,40 @@ namespace BelzontAdr
 
     public static class AdrNetKindUtil
     {
+        /// <summary>Face / text color for ADR NetNameData and ADR-style material clones (#FFFFFFC0).</summary>
+        public static readonly Color32 AdrFaceColor32 = new(0xFF, 0xFF, 0xFF, 0xC0);
+
+        public static readonly Color AdrFaceColor = new(1f, 1f, 1f, 0xC0 / 255f);
+
+        /// <summary>
+        /// Outline colors for ADR-style name-label material clones (RefsLibrary 23).
+        /// <see cref="AdrNetKind.None"/> returns default (caller should not apply ADR outline).
+        /// </summary>
+        public static Color GetOutlineColor(AdrNetKind kind) => kind switch
+        {
+            AdrNetKind.Subway => HexOutline(0x00, 0x44, 0x00),
+            AdrNetKind.Road => HexOutline(0x33, 0x33, 0x33),
+            AdrNetKind.Pathway => HexOutline(0x66, 0x66, 0x66),
+            AdrNetKind.Train => HexOutline(0x44, 0x22, 0x00),
+            AdrNetKind.Tram => HexOutline(0x33, 0x00, 0x33),
+            AdrNetKind.Waterway => HexOutline(0x00, 0x22, 0x44),
+            AdrNetKind.Taxiway => HexOutline(0x33, 0x00, 0x1A),
+            _ => default
+        };
+
+        private static Color HexOutline(byte r, byte g, byte b) => new(r / 255f, g / 255f, b / 255f, 1f);
+
+        /// <summary>Non-road kinds that need ADR-owned NetNameData prefabs (Road uses vanilla AggregateNet).</summary>
+        public static readonly AdrNetKind[] NonRoadKindsWithAdrNamePrefab =
+        {
+            AdrNetKind.Pathway,
+            AdrNetKind.Train,
+            AdrNetKind.Tram,
+            AdrNetKind.Subway,
+            AdrNetKind.Waterway,
+            AdrNetKind.Taxiway
+        };
+
         /// <summary>
         /// Resolve kind from an edge's prefab <c>*Data</c>. Never gates on edge <see cref="Road"/>.
         /// Order: RoadData → PathwayData → TrackData → WaterwayData → TaxiwayData.
