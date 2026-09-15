@@ -1,4 +1,4 @@
-import { AdrBulkConvertResult, AdrCitywideSettings, DistrictListItem, DistrictRelativeService, NamingRulesService, SimpleNameEntry, nameToString, replaceArgs } from "adr";
+import { AdrBulkConvertResult, AdrBulkRevertResult, AdrCitywideSettings, DistrictListItem, DistrictRelativeService, NamingRulesService, SimpleNameEntry, nameToString, replaceArgs } from "adr";
 import { FormLine, LocElementType, VanillaWidgets } from "@klyte45/vuio-commons";
 import { DropdownItem } from "cs2/bindings";
 import { ConfirmationDialog, Portal } from "cs2/ui";
@@ -16,6 +16,8 @@ type Props = {
     districts: DistrictListItem[];
 };
 
+type BulkDialogMode = "convert" | "revert";
+
 /** Mirrors AdrNetKind ordinals used as bit positions in kindMask (None=0 unused). */
 const BULK_CONVERT_KINDS = [
     { kind: 1, key: "netKind.Road" },
@@ -29,11 +31,18 @@ const BULK_CONVERT_KINDS = [
 
 const kindBit = (kind: number) => 1 << kind;
 
-const emptyResult = (): AdrBulkConvertResult => ({
+const emptyConvertResult = (): AdrBulkConvertResult => ({
     AggregatesConverted: 0,
     AggregatesCreatedPartial: 0,
     SkippedAlreadyAdr: 0,
     SkippedNoMatch: 0,
+    Failed: 0,
+});
+
+const emptyRevertResult = (): AdrBulkRevertResult => ({
+    AggregatesRemoved: 0,
+    SkippedNoMatch: 0,
+    SkippedHighway: 0,
     Failed: 0,
 });
 
@@ -47,11 +56,13 @@ export const OverrideRoadsDistrictsTab = ({
     const VW = VanillaWidgets.instance;
     const StringDD = VW.DropdownField<string>();
     const [selectedDistrict, setSelectedDistrict] = useState<DistrictListItem | undefined>(undefined);
-    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [dialogMode, setDialogMode] = useState<BulkDialogMode | null>(null);
     const [busy, setBusy] = useState(false);
-    const [result, setResult] = useState<AdrBulkConvertResult | null>(null);
+    const [convertResult, setConvertResult] = useState<AdrBulkConvertResult | null>(null);
+    const [revertResult, setRevertResult] = useState<AdrBulkRevertResult | null>(null);
     // Default: Road on, others off.
     const [kindMask, setKindMask] = useState(() => kindBit(0));
+    const [includeHighways, setIncludeHighways] = useState(false);
 
     useEffect(() => {
         setSelectedDistrict((prev) => (prev ? districts.find((x) => x.Entity.Index == prev.Entity.Index) : undefined));
@@ -63,10 +74,19 @@ export const OverrideRoadsDistrictsTab = ({
     }));
 
     const anyKindChecked = useMemo(() => kindMask !== 0, [kindMask]);
+    const canRevert = useMemo(() => kindMask !== 0 || includeHighways, [kindMask, includeHighways]);
 
     const toggleKind = (kind: number) => {
         const bit = kindBit(kind);
         setKindMask((prev) => ((prev & bit) !== 0 ? prev & ~bit : prev | bit));
+    };
+
+    const openDialog = (mode: BulkDialogMode) => {
+        setConvertResult(null);
+        setRevertResult(null);
+        setKindMask(kindBit(0));
+        setIncludeHighways(false);
+        setDialogMode(mode);
     };
 
     const runConvert = async () => {
@@ -74,12 +94,26 @@ export const OverrideRoadsDistrictsTab = ({
         setBusy(true);
         try {
             const r = await NamingRulesService.convertAllToAdrAggregates(kindMask);
-            setResult(r ?? emptyResult());
+            setConvertResult(r ?? emptyConvertResult());
         } catch {
-            setResult({ ...emptyResult(), Failed: 1 });
+            setConvertResult({ ...emptyConvertResult(), Failed: 1 });
         } finally {
             setBusy(false);
-            setConfirmOpen(false);
+            setDialogMode(null);
+        }
+    };
+
+    const runRevert = async () => {
+        if (!canRevert || busy) return;
+        setBusy(true);
+        try {
+            const r = await NamingRulesService.revertAllFromAdrAggregates(kindMask, includeHighways);
+            setRevertResult(r ?? emptyRevertResult());
+        } catch {
+            setRevertResult({ ...emptyRevertResult(), Failed: 1 });
+        } finally {
+            setBusy(false);
+            setDialogMode(null);
         }
     };
 
@@ -110,17 +144,24 @@ export const OverrideRoadsDistrictsTab = ({
         </FormLine>
 
         <FormLine title={""}>
-            <button
-                type="button"
-                className="neutralBtn"
-                disabled={busy}
-                onClick={() => {
-                    setResult(null);
-                    setConfirmOpen(true);
-                }}
-            >
-                {translate("bulkConvert.button")}
-            </button>
+            <div className={`k45_btnHost ${styles.bulkActionRow}`}>
+                <button
+                    type="button"
+                    className="neutralBtn"
+                    disabled={busy}
+                    onClick={() => openDialog("convert")}
+                >
+                    {translate("bulkConvert.button")}
+                </button>
+                <button
+                    type="button"
+                    className="negativeBtn"
+                    disabled={busy}
+                    onClick={() => openDialog("revert")}
+                >
+                    {translate("bulkRevert.button")}
+                </button>
+            </div>
         </FormLine>
 
         <h2>{translate("overrideSettings.perDistrictRoadsFile")}</h2>
@@ -145,7 +186,7 @@ export const OverrideRoadsDistrictsTab = ({
             />
         )}
 
-        {confirmOpen && (
+        {dialogMode === "convert" && (
             <Portal>
                 {/* message must be text-only (FormattedText); interactive nodes go in children */}
                 <ConfirmationDialog
@@ -160,7 +201,7 @@ export const OverrideRoadsDistrictsTab = ({
                         }
                         void runConvert();
                     }}
-                    onCancel={() => setConfirmOpen(false)}
+                    onCancel={() => setDialogMode(null)}
                 >
                     <div className={`k45_btnHost ${styles.bulkConvertKindRow}`}>
                         {BULK_CONVERT_KINDS.map(({ kind, key }) => {
@@ -181,20 +222,79 @@ export const OverrideRoadsDistrictsTab = ({
             </Portal>
         )}
 
-        {result && (
+        {dialogMode === "revert" && (
+            <Portal>
+                <ConfirmationDialog
+                    title={translate("bulkRevert.confirmTitle")}
+                    message={translate("bulkRevert.confirmBody")}
+                    confirm={translate("bulkRevert.confirm")}
+                    cancel={translate("bulkRevert.cancel")}
+                    disableContinue={!canRevert || busy}
+                    onConfirm={() => {
+                        if (!canRevert) {
+                            return;
+                        }
+                        void runRevert();
+                    }}
+                    onCancel={() => setDialogMode(null)}
+                >
+                    <div className={`k45_btnHost ${styles.bulkConvertKindRow}`}>
+                        {BULK_CONVERT_KINDS.map(({ kind, key }) => {
+                            const on = (kindMask & kindBit(kind)) !== 0;
+                            return (
+                                <button
+                                    key={kind}
+                                    type="button"
+                                    className={on ? "positiveBtn" : "blackBtn"}
+                                    onClick={() => toggleKind(kind)}
+                                >
+                                    {translate(key)}
+                                </button>
+                            );
+                        })}
+                        <button
+                            type="button"
+                            className={includeHighways ? "positiveBtn" : "blackBtn"}
+                            onClick={() => setIncludeHighways((v) => !v)}
+                        >
+                            {translate("bulkRevert.highways")}
+                        </button>
+                    </div>
+                </ConfirmationDialog>
+            </Portal>
+        )}
+
+        {convertResult && (
             <Portal>
                 <ConfirmationDialog
                     title={translate("bulkConvert.resultTitle")}
                     message={replaceArgs(translate("bulkConvert.resultBody"), {
-                        converted: String(result.AggregatesConverted ?? 0),
-                        partial: String(result.AggregatesCreatedPartial ?? 0),
-                        alreadyAdr: String(result.SkippedAlreadyAdr ?? 0),
-                        noMatch: String(result.SkippedNoMatch ?? 0),
-                        failed: String(result.Failed ?? 0),
+                        converted: String(convertResult.AggregatesConverted ?? 0),
+                        partial: String(convertResult.AggregatesCreatedPartial ?? 0),
+                        alreadyAdr: String(convertResult.SkippedAlreadyAdr ?? 0),
+                        noMatch: String(convertResult.SkippedNoMatch ?? 0),
+                        failed: String(convertResult.Failed ?? 0),
                     })}
                     confirm={engine.translate("Common.OK")}
                     cancellable={false}
-                    onConfirm={() => setResult(null)}
+                    onConfirm={() => setConvertResult(null)}
+                />
+            </Portal>
+        )}
+
+        {revertResult && (
+            <Portal>
+                <ConfirmationDialog
+                    title={translate("bulkRevert.resultTitle")}
+                    message={replaceArgs(translate("bulkRevert.resultBody"), {
+                        removed: String(revertResult.AggregatesRemoved ?? 0),
+                        noMatch: String(revertResult.SkippedNoMatch ?? 0),
+                        highway: String(revertResult.SkippedHighway ?? 0),
+                        failed: String(revertResult.Failed ?? 0),
+                    })}
+                    confirm={engine.translate("Common.OK")}
+                    cancellable={false}
+                    onConfirm={() => setRevertResult(null)}
                 />
             </Portal>
         )}

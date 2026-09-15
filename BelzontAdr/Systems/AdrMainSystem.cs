@@ -68,6 +68,19 @@ namespace BelzontAdr
                 NotifyChanges();
                 return result;
             });
+            doBindLink("main.revertAllFromAdrAggregates", (int kindMask, bool includeHighways) =>
+            {
+                var membership = World.GetExistingSystemManaged<AdrNameAggregateMembershipSystem>();
+                if (membership == null)
+                {
+                    return new AdrBulkRevertResult();
+                }
+
+                AdrBulkRevertResult result = membership.RevertCitywideAdrAggregates(kindMask, includeHighways);
+                MarkRoadsDirty();
+                NotifyChanges();
+                return result;
+            });
             doBindLink("main.exploreToRoadPrefixRulesFileDefault", () => RemoteProcess.OpenFolder(DefaultRoadPrefixFilename));
             doBindLink("main.saveRoadPrefixRulesFileDefault", () => File.WriteAllText(DefaultRoadPrefixFilename, XmlUtils.DefaultXmlSerialize(CurrentCitySettings.roadPrefixSetting)));
             doBindLink("main.loadRoadPrefixRulesFileDefault", () =>

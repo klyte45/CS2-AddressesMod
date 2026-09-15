@@ -16,3 +16,11 @@
     gap: 8rem;
     margin-top: 12rem;
 }
+
+.bulkActionRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8rem;
+    width: 100%;
+    align-items: flex-end;
+}

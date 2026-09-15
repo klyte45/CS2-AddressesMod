@@ -274,6 +274,9 @@ export class NamingRulesService {
     static async convertAllToAdrAggregates(kindMask: number): Promise<AdrBulkConvertResult> {
         return await engine.call("k45::adr.main.convertAllToAdrAggregates", kindMask);
     }
+    static async revertAllFromAdrAggregates(kindMask: number, includeHighways: boolean): Promise<AdrBulkRevertResult> {
+        return await engine.call("k45::adr.main.revertAllFromAdrAggregates", kindMask, includeHighways);
+    }
 
     static async setMaxSurnames(x: number): Promise<string> { return await engine.call("k45::adr.main.setMaxSurnames", x); }
     static async setMaxGivenNames(x: number): Promise<string> { return await engine.call("k45::adr.main.setMaxGivenNames", x); }
@@ -357,6 +360,13 @@ export type AdrBulkConvertResult = {
     AggregatesCreatedPartial: number;
     SkippedAlreadyAdr: number;
     SkippedNoMatch: number;
+    Failed: number;
+};
+
+export type AdrBulkRevertResult = {
+    AggregatesRemoved: number;
+    SkippedNoMatch: number;
+    SkippedHighway: number;
     Failed: number;
 };
 

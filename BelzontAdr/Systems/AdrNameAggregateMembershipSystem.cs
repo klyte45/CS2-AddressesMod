@@ -33,6 +33,7 @@ namespace BelzontAdr
         private NameSystem m_nameSystem;
         private readonly Queue<Action> m_runOnUpdate = new();
         private EntityQuery m_VanillaAggregatesQuery;
+        private EntityQuery m_AdrAggregatesQuery;
 
         protected override void OnCreate()
         {
@@ -44,6 +45,10 @@ namespace BelzontAdr
                 ComponentType.ReadOnly<AggregateElement>(),
                 ComponentType.Exclude<Deleted>(),
                 ComponentType.Exclude<ADRNameAggregate>());
+            m_AdrAggregatesQuery = GetEntityQuery(
+                ComponentType.ReadOnly<ADRNameAggregate>(),
+                ComponentType.ReadOnly<ADRNameAggregateElement>(),
+                ComponentType.Exclude<Deleted>());
         }
 
         protected override void OnDestroy()
@@ -659,6 +664,98 @@ namespace BelzontAdr
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Citywide inverse of convert: destroy ADR name-aggregates whose stored/member kind is in
+        /// <paramref name="kindMask"/>. When <paramref name="includeHighways"/> is false, aggregates
+        /// with a non-default highway route are kept.
+        /// When Highways is selected but Road is not, Road is treated as in-filter only for aggregates
+        /// that have highway route data (highway-only remove).
+        /// </summary>
+        public AdrBulkRevertResult RevertCitywideAdrAggregates(int kindMask, bool includeHighways)
+        {
+            var result = new AdrBulkRevertResult();
+            if (kindMask == 0 && !includeHighways)
+            {
+                return result;
+            }
+
+            bool roadInMask = AdrNetKindUtil.IsKindInMask(AdrNetKind.Road, kindMask);
+
+            using var aggregates = m_AdrAggregatesQuery.ToEntityArray(Unity.Collections.Allocator.Temp);
+            for (int a = 0; a < aggregates.Length; a++)
+            {
+                Entity adr = aggregates[a];
+                if (!IsAdrNameAggregate(adr))
+                {
+                    continue;
+                }
+
+                if (!TryGetAdrAggregateKind(adr, out AdrNetKind kind))
+                {
+                    result.SkippedNoMatch++;
+                    continue;
+                }
+
+                bool hasHighway = EntityManager.TryGetComponent(adr, out ADRNameAggregateHighwayData highway)
+                    && highway.HasHighwayRoute;
+
+                // Highways-only (Road unchecked): destroy highway Road aggregates; leave plain roads.
+                bool highwayOnlyTarget = includeHighways
+                    && !roadInMask
+                    && kind == AdrNetKind.Road
+                    && hasHighway;
+
+                bool kindInMask = AdrNetKindUtil.IsKindInMask(kind, kindMask);
+                if (!kindInMask && !highwayOnlyTarget)
+                {
+                    result.SkippedNoMatch++;
+                    continue;
+                }
+
+                if (hasHighway && !includeHighways)
+                {
+                    result.SkippedHighway++;
+                    continue;
+                }
+
+                // Road in mask + Highways off already handled above.
+                // Road not in mask + Highways on + plain road: excluded by highwayOnlyTarget.
+                DestroyAggregate(adr);
+                result.AggregatesRemoved++;
+            }
+
+            return result;
+        }
+
+        private bool TryGetAdrAggregateKind(Entity adrAggregate, out AdrNetKind kind)
+        {
+            kind = AdrNetKind.None;
+            if (EntityManager.TryGetComponent(adrAggregate, out ADRNameAggregate host)
+                && host.m_Kind != AdrNetKind.None)
+            {
+                kind = host.m_Kind;
+                return true;
+            }
+
+            if (!EntityManager.TryGetBuffer(adrAggregate, true, out DynamicBuffer<ADRNameAggregateElement> elements)
+                || elements.Length == 0)
+            {
+                return false;
+            }
+
+            var edges = new List<Entity>(elements.Length);
+            for (int i = 0; i < elements.Length; i++)
+            {
+                Entity edge = elements[i].m_Edge;
+                if (edge != Entity.Null && EntityManager.Exists(edge))
+                {
+                    edges.Add(edge);
+                }
+            }
+
+            return TryResolveSharedNetKind(edges, out kind) && kind != AdrNetKind.None;
         }
 
         /// <summary>
