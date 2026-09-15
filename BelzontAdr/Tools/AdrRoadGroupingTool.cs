@@ -53,6 +53,29 @@ namespace BelzontAdr
         /// <summary>True when the live drag path passed destination/path validation.</summary>
         public bool IsDragDestinationValid => m_DragPathValid;
 
+        /// <summary>
+        /// Kind-join result for the live endpoint-drag validation (Ok when not dragging or path kind-ok).
+        /// Shared by overlay / tooltip systems — do not re-call <see cref="AdrNameAggregateMembershipSystem.EvaluateNetKindJoin"/>.
+        /// </summary>
+        public AdrNetKindJoinResult CurrentDragRejectReason => m_DragRejectReason;
+
+        /// <summary>
+        /// Kind-join result for the currently hovered non-member edge under a selected ADR aggregate.
+        /// Ok when there is no relevant hover reject (no selection, member hover, end-handle, empty hover, or dragging).
+        /// </summary>
+        public AdrNetKindJoinResult CurrentHoverJoinResult { get; private set; }
+
+        /// <summary>
+        /// True while endpoint-dragging when the live path failed for a non-kind reason
+        /// (unreachable / empty destination with a distinct hover node).
+        /// </summary>
+        public bool IsDragDestinationUnreachable =>
+            m_Dragging
+            && !m_DragPathValid
+            && m_DragRejectReason == AdrNetKindJoinResult.Ok
+            && m_DragHoverNode != Entity.Null
+            && m_DragHoverNode != m_DragStartNode;
+
         private ProxyAction m_ApplyAction;
         private ProxyAction m_CancelAction;
         private ProxyAction m_ToggleAction;
@@ -114,6 +137,7 @@ namespace BelzontAdr
             cancelAction.shouldBeEnabled = false;
             HoveredEdge = Entity.Null;
             HoveredDragHandle = Entity.Null;
+            CurrentHoverJoinResult = AdrNetKindJoinResult.Ok;
             ClearFixedMembership();
             ClearDrag();
             m_Controller.ClearSelection();
@@ -169,6 +193,8 @@ namespace BelzontAdr
             if (m_CancelAction.WasPressedThisFrame() || cancelAction.WasPressedThisFrame())
             {
                 HandleCancel();
+                Entity selectedAfterCancel = m_Controller.SelectedAggregation?.Value ?? Entity.Null;
+                RefreshHoverJoinResult(selectedAfterCancel);
                 return inputDeps;
             }
 
@@ -252,11 +278,13 @@ namespace BelzontAdr
                     FinishEndpointDrag(selected);
                 }
 
+                RefreshHoverJoinResult(selected);
                 return inputDeps;
             }
 
             if (overUi)
             {
+                RefreshHoverJoinResult(selected);
                 return inputDeps;
             }
 
@@ -270,6 +298,7 @@ namespace BelzontAdr
                     m_Controller.InvalidateSegmentCards();
                 }
 
+                RefreshHoverJoinResult(Entity.Null);
                 return inputDeps;
             }
 
@@ -284,11 +313,13 @@ namespace BelzontAdr
                     ApplyMembershipToggle(eligibleEdge, selected);
                 }
 
+                RefreshHoverJoinResult(selected);
                 return inputDeps;
             }
 
             if (!m_ApplyAction.WasPressedThisFrame())
             {
+                RefreshHoverJoinResult(selected);
                 return inputDeps;
             }
 
@@ -296,6 +327,7 @@ namespace BelzontAdr
             {
                 ClearPendingFixClick();
                 BeginEndpointDrag(selected, HoveredDragHandle);
+                RefreshHoverJoinResult(selected);
                 return inputDeps;
             }
 
@@ -307,7 +339,32 @@ namespace BelzontAdr
                 ToggleFixedMembership(eligibleEdge, selected);
             }
 
+            RefreshHoverJoinResult(selected);
             return inputDeps;
+        }
+
+        /// <summary>
+        /// Refresh <see cref="CurrentHoverJoinResult"/> from selection + hover.
+        /// While endpoint-dragging, hover kind reject is represented by <see cref="CurrentDragRejectReason"/> instead.
+        /// </summary>
+        private void RefreshHoverJoinResult(Entity selected)
+        {
+            CurrentHoverJoinResult = AdrNetKindJoinResult.Ok;
+            if (m_Dragging
+                || selected == Entity.Null
+                || !m_Membership.IsAdrNameAggregate(selected)
+                || HoveredDragHandle != Entity.Null)
+            {
+                return;
+            }
+
+            Entity hovered = HoveredEdge;
+            if (hovered == Entity.Null || IsMemberEdge(hovered, selected))
+            {
+                return;
+            }
+
+            CurrentHoverJoinResult = m_Membership.EvaluateNetKindJoin(selected, hovered);
         }
 
         private bool IsDoubleClickOn(Entity edge)

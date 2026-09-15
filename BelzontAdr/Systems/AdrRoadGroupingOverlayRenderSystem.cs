@@ -53,7 +53,6 @@ namespace BelzontAdr
         private AdrMainSystem m_AdrMainSystem;
         private AdrRoadGroupingTool m_Tool;
         private AdrRoadGroupingController m_Controller;
-        private AdrNameAggregateMembershipSystem m_Membership;
         private EntityQuery m_RouteConfigQuery;
 
         private Mesh m_Mesh;
@@ -106,7 +105,6 @@ namespace BelzontAdr
             m_AdrMainSystem = World.GetOrCreateSystemManaged<AdrMainSystem>();
             m_Tool = World.GetOrCreateSystemManaged<AdrRoadGroupingTool>();
             m_Controller = World.GetOrCreateSystemManaged<AdrRoadGroupingController>();
-            m_Membership = World.GetOrCreateSystemManaged<AdrNameAggregateMembershipSystem>();
             m_RouteConfigQuery = GetEntityQuery(ComponentType.ReadOnly<RouteConfigurationData>());
             m_BelongingSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
             m_RemainderSegments = new NativeList<SegmentData>(64, Allocator.Persistent);
@@ -407,7 +405,7 @@ namespace BelzontAdr
                     return;
                 }
 
-                m_PreviewDrawColor = m_Membership.EvaluateNetKindJoin(selected, hoveredEdge) == AdrNetKindJoinResult.Ok
+                m_PreviewDrawColor = m_Tool.CurrentHoverJoinResult == AdrNetKindJoinResult.Ok
                     ? HoverPreviewColor
                     : UnsupportedHoverColor;
             }
@@ -446,7 +444,7 @@ namespace BelzontAdr
                 return false;
             }
 
-            return m_Membership.EvaluateNetKindJoin(selected, edge) != AdrNetKindJoinResult.Ok;
+            return m_Tool.CurrentDragRejectReason != AdrNetKindJoinResult.Ok;
         }
 
         private void BuildRouteSegments(
