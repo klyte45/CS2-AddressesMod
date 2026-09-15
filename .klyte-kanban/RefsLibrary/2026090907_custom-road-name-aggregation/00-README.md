@@ -22,7 +22,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Label takeover sprint / task catalog ([18](18-label-takeover-sprint-roadmap.md)) | Creating board items until explicitly requested |
 | Highway reattach design + roadmap ([20](20-highway-reattach-on-adr-aggregates.md)–[21](21-highway-reattach-roadmap.md)) | Shipping HW-* product code until explicitly requested |
 | Net-kind typing + mix gate + per-kind NetNameData ([22](22-game-net-edge-kinds-and-aggregation.md)–[24](24-adr-net-kind-roadmap.md)) | Creating NET-* board tasks until explicitly requested; mutating vanilla AggregateNet assets |
-| Road Grouping tooltips draft ([25](25-road-grouping-tooltips-draft.md)) | Shipping tooltip UX until detailed + requested |
+| Road Grouping tooltips requirements ([25](25-road-grouping-tooltips.md)) | Shipping tooltip C# until TT-* board tasks pulled |
 | Citywide bulk ADR aggregation settings ([26](26-bulk-citywide-adr-aggregation.md)) | Shipping convert-all UI until board task pulled |
 | Net-kind playtest smoke notes ([27](27-adr-net-kind-playtest-smoke-notes.md)) | Replacing notes without product ask |
 
@@ -43,7 +43,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 | Initial UX | **Net-only Road Grouping tool** (world overlays + node controls). **SIP out of scope** for this implementation wave. Spec: [09](09-road-grouping-tool-spec.md)–[11](11-road-grouping-tool-roadmap.md); activation: [12](12-activation-change-map.md)–[13](13-activation-sprint-roadmap.md) |
 | Tool naming | Product/code: **Road Grouping** (`AdrRoadGrouping*`). Doc [08](08-association-tool-first-ux.md) keeps historical “association” filename |
 | Label extensions (shields / multi-recipe / look knobs) | **Feasibility** documented in [17](17-label-extensions-text-images-look.md); **product strategy deferred** to later research. WE sync = **copy/re-register only** (no live shared `Texture2D`) |
-| Pack depth | Analysis + design + tool specs + activation catalog + label research (14–17) + label sprint catalog (18) + highway reattach (20–21) + **net-kind (22–24)** + tooltips draft (25) + **bulk citywide ADR (26)** |
+| Pack depth | Analysis + design + tool specs + activation catalog + label research (14–17) + label sprint catalog (18) + highway reattach (20–21) + **net-kind (22–24)** + tooltips requirements (25) + **bulk citywide ADR (26)** |
 | Research method | kcs2m backend MCP for vanilla; in-repo C# for ADR; BelzontWE for tool scaffold / WE atlas APIs |
 | Net kind classifier | **Prefab `*Data` first** (`RoadData` / `TrackData` / …); `Game.Net.Road` **unreliable** (streets/avenues may lack it). Dual `Train\|Tram` → **Train**. See [22](22-game-net-edge-kinds-and-aggregation.md) |
 | ADR kind mix | Exact `AdrNetKind` match; street↔highway **allowed**; cross-kind **forbidden**. Per-kind ADR `NetNameData` (non-road) + outline-by-kind (face `#FFFFFFC0`; Subway `#004400`, Road `#333333`, …). Road seeds only for `RoadData`. See [23](23-adr-net-kind-gate-labels-seeds.md) / [24](24-adr-net-kind-roadmap.md) |
@@ -75,7 +75,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 22. [22-game-net-edge-kinds-and-aggregation.md](22-game-net-edge-kinds-and-aggregation.md) — Game.Net kinds, AggregateType, Road vs RoadData, NetNameData gap
 23. [23-adr-net-kind-gate-labels-seeds.md](23-adr-net-kind-gate-labels-seeds.md) — ADR kind gate, per-kind labels, road-only seeds
 24. [24-adr-net-kind-roadmap.md](24-adr-net-kind-roadmap.md) — NET-01…NET-06 catalog (NET-04 board **0086**; **0085** Z-overflowed)
-25. [25-road-grouping-tooltips-draft.md](25-road-grouping-tooltips-draft.md) — **draft** Road Grouping tooltips (errors + commands; expand later)
+25. [25-road-grouping-tooltips.md](25-road-grouping-tooltips.md) — **locked** Road Grouping tooltips (vanilla pipeline + TT-01…TT-06 coding catalog)
 26. [26-bulk-citywide-adr-aggregation.md](26-bulk-citywide-adr-aggregation.md) — citywide “convert applicable segments to ADR” settings UX + kind checkboxes
 27. [27-adr-net-kind-playtest-smoke-notes.md](27-adr-net-kind-playtest-smoke-notes.md) — NET-05 playtest matrix results (Sprint 015)
 
@@ -105,7 +105,7 @@ This pack is **documentation only** for research/design. Activation Kanban tasks
 - [x] Game.Net edge kinds + AggregateType + NetNameData gap documented ([22](22-game-net-edge-kinds-and-aggregation.md))
 - [x] ADR net-kind gate / labels / seeds designed ([23](23-adr-net-kind-gate-labels-seeds.md))
 - [x] Net-kind implementation catalog documented ([24](24-adr-net-kind-roadmap.md))
-- [x] Road Grouping tooltips draft stub ([25](25-road-grouping-tooltips-draft.md))
+- [x] Road Grouping tooltips requirements + coding catalog ([25](25-road-grouping-tooltips.md))
 - [x] Citywide bulk ADR aggregation settings UX documented ([26](26-bulk-citywide-adr-aggregation.md))
 - [x] Net-kind playtest smoke notes ([27](27-adr-net-kind-playtest-smoke-notes.md))
 

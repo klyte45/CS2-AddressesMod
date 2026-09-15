@@ -82,3 +82,4 @@ See activation **ACT-03a…ACT-06** in [13](13-activation-sprint-roadmap.md).
 - [12](12-activation-change-map.md) — activation change map
 - [13](13-activation-sprint-roadmap.md) — sprints + Kanban catalog
 - [05](05-research-gaps-and-next.md) — older gap list (points here / 12–13)
+- [25](25-road-grouping-tooltips.md) — locked tooltips requirements + TT-01…TT-06 coding catalog

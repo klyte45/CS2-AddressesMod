@@ -38,7 +38,7 @@ Written smoke evidence for the locked adr-net-kind design. **No new product feat
 | Item | Where |
 |------|--------|
 | Citywide bulk convert (kind checkboxes) | NET-06 **[0091]** / [26](26-bulk-citywide-adr-aggregation.md) |
-| Road Grouping tooltip polish | [25](25-road-grouping-tooltips-draft.md) (draft only) |
+| Road Grouping tooltip polish | [25](25-road-grouping-tooltips.md) (locked; TT-01…TT-06) |
 
 ## Success criteria map ([24](24-adr-net-kind-roadmap.md))
 
