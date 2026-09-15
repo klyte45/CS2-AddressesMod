@@ -437,7 +437,7 @@ namespace BelzontAdr
                 if (maxIterations-- == 0) break;
                 if (!entityManager.TryGetComponent<Aggregated>(nextItem, out var aggNextItem)) continue;
                 var hasAggRef = entityManager.TryGetComponent<ADREntityStationRef>(aggNextItem.m_Aggregate, out var aggregationStationRef);
-                if (!entityManager.HasComponent<Road>(nextItem) || (hasAggRef && aggregationStationRef.m_refStationBuilding != Entity.Null && aggregationStationRef.m_refStationBuilding != entity))
+                if (!AdrNetKindUtil.IsRoadEdge(entityManager, nextItem) || (hasAggRef && aggregationStationRef.m_refStationBuilding != Entity.Null && aggregationStationRef.m_refStationBuilding != entity))
                 {
                     if (roadsMapped.Add(nextItem) && entityManager.TryGetComponent(nextItem, out Edge edge))
                     {
@@ -497,8 +497,9 @@ namespace BelzontAdr
         /// <summary>
         /// Name priority for ADR aggregates (same as pre-ACT-01 Aggregate highway rules, ADR host only):
         /// 1. Custom name (SIP/tool) — wins over highway and nameset
-        /// 2. Non-default <see cref="ADRNameAggregateHighwayData.highwayDataId"/> → registry highway name
-        /// 3. Nameset + road-prefix rules
+        /// 2. Road kind + non-default <see cref="ADRNameAggregateHighwayData.highwayDataId"/> → registry highway name
+        /// 3. Road kind → nameset + road-prefix rules (prefab <see cref="RoadData"/> only; no TrackData fake)
+        /// 4. Non-road kinds → ADR locale default name per kind (<c>K45::ADR.main[netKind.*]</c>; vanilla AggregateNet has no usable translation)
         /// Vanilla Aggregate-only roads never enter the highway branch.
         /// </summary>
         private static bool GetAggregateName(out string format, out string name, Entity entity)
@@ -506,14 +507,6 @@ namespace BelzontAdr
             name = format = null;
             // Custom name: defer to NameSystem original path (callers use Original_GetName / GetName).
             if (m_nameSystem.TryGetCustomName(entity, out _)) return true;
-
-            // Highway registry name for ADR aggregates with a non-default highwayDataId.
-            if (TryGetAdrHighwayRegistryName(entity, out var hwData, out _))
-            {
-                format = hwData.name;
-                name = "";
-                return false;
-            }
 
             Entity refRoad;
             bool fullBridge = true;
@@ -550,16 +543,38 @@ namespace BelzontAdr
                 }
             }
 
+            if (!AdrNetKindUtil.TryResolveOwnerKind(entityManager, entity, refRoad, out AdrNetKind kind)
+                || kind == AdrNetKind.None)
+            {
+                return true;
+            }
+
+            if (kind != AdrNetKind.Road)
+            {
+                // Vanilla AggregateNet assets have no player-facing localization — use ADR kind defaults.
+                string localeId = AdrNetKindUtil.GetDefaultNameLocaleId(kind);
+                if (localeId == null)
+                {
+                    return true;
+                }
+
+                format = "{name}";
+                name = Name.LocalizedName(localeId).Translate();
+                return false;
+            }
+
+            // Highway registry name for ADR Road aggregates with a non-default highwayDataId.
+            if (TryGetAdrHighwayRegistryName(entity, out var hwData, out _))
+            {
+                format = hwData.name;
+                name = "";
+                return false;
+            }
+
             if (!adrMainSystem.GetRoadNameList(refRoad, out var roadsNamesList)) return true;
             if (!entityManager.TryGetComponent<PrefabRef>(refRoad, out var roadPrefab)) return true;
-            if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData))
-            {
-                if (entityManager.TryGetComponent<TrackData>(roadPrefab, out var trackData))
-                {
-                    roadData.m_Flags = (Game.Prefabs.RoadFlags)((int)trackData.m_TrackType << 16);//rail track
-                    roadData.m_SpeedLimit = trackData.m_SpeedLimit;
-                }
-            }
+            // Prefab RoadData only — do not fake TrackData into RoadData for road naming.
+            if (!entityManager.TryGetComponent<RoadData>(roadPrefab, out var roadData)) return true;
 
             var forwardCarLanes = 0;
             var roadWidthM = 0f;

@@ -144,5 +144,44 @@ namespace BelzontAdr
 
             return AdrNetKind.None;
         }
+
+        /// <summary>Locale id for the default display name of an aggregable kind (vanilla AggregateNet has no usable translation).</summary>
+        public static string GetDefaultNameLocaleId(AdrNetKind kind) => kind switch
+        {
+            AdrNetKind.Road => "K45::ADR.main[netKind.Road]",
+            AdrNetKind.Pathway => "K45::ADR.main[netKind.Pathway]",
+            AdrNetKind.Train => "K45::ADR.main[netKind.Train]",
+            AdrNetKind.Tram => "K45::ADR.main[netKind.Tram]",
+            AdrNetKind.Subway => "K45::ADR.main[netKind.Subway]",
+            AdrNetKind.Waterway => "K45::ADR.main[netKind.Waterway]",
+            AdrNetKind.Taxiway => "K45::ADR.main[netKind.Taxiway]",
+            _ => null
+        };
+
+        /// <summary>True when the edge classifies as <see cref="AdrNetKind.Road"/> via prefab <see cref="RoadData"/>.</summary>
+        public static bool IsRoadEdge(EntityManager entityManager, Entity edge)
+            => TryGetNetKind(entityManager, edge, out AdrNetKind kind) && kind == AdrNetKind.Road;
+
+        /// <summary>
+        /// Prefer stored <see cref="ADRNameAggregate.m_Kind"/>; otherwise classify <paramref name="refEdge"/>.
+        /// </summary>
+        public static bool TryResolveOwnerKind(
+            EntityManager entityManager,
+            Entity owner,
+            Entity refEdge,
+            out AdrNetKind kind)
+        {
+            kind = AdrNetKind.None;
+            if (owner != Entity.Null
+                && entityManager.Exists(owner)
+                && entityManager.TryGetComponent(owner, out ADRNameAggregate host)
+                && host.m_Kind != AdrNetKind.None)
+            {
+                kind = host.m_Kind;
+                return true;
+            }
+
+            return refEdge != Entity.Null && TryGetNetKind(entityManager, refEdge, out kind);
+        }
     }
 }

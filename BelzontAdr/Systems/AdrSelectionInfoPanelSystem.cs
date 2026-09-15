@@ -143,9 +143,9 @@ namespace BelzontAdr
                 {
                     targetEntityToName = e,
                 };
-                if (EntityManager.HasComponent<Road>(e))
+                if (AdrNetKindUtil.IsRoadEdge(EntityManager, e))
                 {
-                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have Aggregated and Road");
+                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have Aggregated and Road kind");
                     result.type = AdrEntityType.RoadAggregation;
                     result.entityValue = AdrRoadAddressNumbering.TryGetAdrAggregate(EntityManager, e, out var adrAggregate)
                         ? adrAggregate
@@ -153,7 +153,7 @@ namespace BelzontAdr
                 }
                 else
                 {
-                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have agg only");
+                    if (BasicIMod.TraceMode) LogUtils.DoTraceLog($"{e} have agg only (non-road kind)");
                 }
                 resultList.Add(result);
             }
@@ -202,10 +202,16 @@ namespace BelzontAdr
                 : mainSystem.FindReferenceRoad(e, out DynamicBuffer<AggregateElement> _, out refRoadAdr);
             if (foundRef)
             {
-                result.hasCustomNameList = mainSystem.GetRoadNameList(refRoadAdr, out var namesList);
-                if (result.hasCustomNameList)
+                bool isRoad = AdrNetKindUtil.TryResolveOwnerKind(EntityManager, e, refRoadAdr, out AdrNetKind kind)
+                    && kind == AdrNetKind.Road;
+                // Road nameset seed UX only for AdrNetKind.Road (prefab RoadData / stored kind).
+                if (isRoad)
                 {
-                    result.customNameListName = namesList.Name;
+                    result.hasCustomNameList = mainSystem.GetRoadNameList(refRoadAdr, out var namesList);
+                    if (result.hasCustomNameList)
+                    {
+                        result.customNameListName = namesList.Name;
+                    }
                 }
             }
             resultList.Add(result);
@@ -329,6 +335,20 @@ namespace BelzontAdr
         private void TryAppendHighwayAggregateOption(Entity selected, List<AdrEntityBase> resultList)
         {
             if (!TryResolveAdrHighwayHost(selected, out Entity adrAggregate))
+            {
+                return;
+            }
+
+            Entity refEdge = Entity.Null;
+            if (EntityManager.TryGetBuffer(adrAggregate, true, out DynamicBuffer<ADRNameAggregateElement> elements)
+                && elements.Length > 0)
+            {
+                refEdge = elements[0].m_Edge;
+            }
+
+            // Highway SIP/tool only for Road kind (NET-04).
+            if (!AdrNetKindUtil.TryResolveOwnerKind(EntityManager, adrAggregate, refEdge, out AdrNetKind kind)
+                || kind != AdrNetKind.Road)
             {
                 return;
             }
@@ -563,7 +583,7 @@ namespace BelzontAdr
                 {
                     if (roadsMapped.Contains(item.m_Edge)) continue;
                     roadsMapped.Add(item.m_Edge);
-                    if (!EntityManager.HasComponent<Road>(item.m_Edge)) continue;
+                    if (!AdrNetKindUtil.IsRoadEdge(EntityManager, item.m_Edge)) continue;
                     if (!EntityManager.TryGetComponent<Edge>(item.m_Edge, out var edgeItem)) continue;
                     if (edgeItem.m_Start != nextItem)
                     {
