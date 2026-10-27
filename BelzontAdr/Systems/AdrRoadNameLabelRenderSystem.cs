@@ -42,7 +42,7 @@ namespace BelzontAdr
 
         private void Render(ScriptableRenderContext context, List<Camera> cameras)
         {
-            if (m_RenderingSystem.hideOverlay)
+            if (m_RenderingSystem.hideOverlay || !Enabled)
             {
                 return;
             }

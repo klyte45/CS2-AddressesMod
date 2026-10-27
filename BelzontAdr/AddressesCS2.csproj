@@ -18,7 +18,7 @@
   <!--Mod data-->
   <PropertyGroup>
     <ModId>74182</ModId>
-    <Version>0.4.0.0</Version>
+    <Version>0.4.0.1</Version>
     <GameVersion>1.6.*</GameVersion>
     <Version Condition="'$(Configuration)'=='Debug'">65534.$([System.DateTime]::Now.ToString("yyyy.Mdd.HHmm"))</Version>
     <ThumbnailPath>Properties/Thumbnail.png</ThumbnailPath>
